@@ -8,6 +8,7 @@
   - [Step 5 - Container Security Operator](#step-5---container-security-operator)
   - [Step 6 - Deployment Validation Operator (DVO)](#step-6---deployment-validation-operator-dvo)
   - [Step 7 - Obtain cluster-admin](#step-7---obtain-cluster-admin)
+  - [Step 8 - Install Cert-manager operator](#step-8---install-cert-manager-operator)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)

@@ -234,7 +234,6 @@ Please create the request file [here](/data/app-interface/requests).
 - Management of Sentry users.
 - Management of Sentry teams.
 - Management of Sentry projects.
-- Management of openshift-acme deployments.
 - Management of OpenShift Namespaces.
 - Management of OpenShift Groups.
 - Management of OpenShift LimitRanges.
@@ -412,7 +411,7 @@ channels:
   slackUserGroup:
   - $ref: /teams/<teamname>/permissions/<teamname>-coreos-slack.yml
 
-  email: 
+  email:
   - <teamname>@redhat.com
 
   jiraBoard:
@@ -570,7 +569,7 @@ Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qon
 
 A namespace declaration can contain labels. These will be applied as kubernetes labels on the namespace resource. Note that
 * labels must conform to [Kubernetes Labels constraints](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set).
-* labels set by other means (eg an operator) will not be overriden. If a conflict exists, an error will be thrown. 
+* labels set by other means (eg an operator) will not be overriden. If a conflict exists, an error will be thrown.
 
 Notes:
 * If the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
@@ -750,20 +749,6 @@ If a key of a Secret or ConfigMap keys is a JSON, you can add the option `valida
 #### Validate AlertManager configuration in Secrets and ConfigMaps
 
 If a key of a Secret or ConfigMap keys is a JSON, you can add the option `validate_alertmanager_config` to the openshift resource definition in order to make sure it is valid alertmanager config. The integration will look into the `alertmanager.yaml` key of the secret to look for it unless `alertmanager_config_key` is specified.
-
-### Manage openshift-acme deployments via App-Interface
-
-This integration allows namespace owners to deploy openshift-acme to their namespaces.
-
-To deploy and manage an openshift-acme instance, a user must add the following to the [saas-openshift-acme](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) file:
-
-```yaml
-  - namespace:
-      $ref: /services/path/to/namespace/file.yaml
-    ref: master
-```
-
-use `ref` master for stage namespaces and a commit hash as exists in other `ref`s for production namespaces.
 
 ### Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)
 
@@ -1082,7 +1067,7 @@ records:
 # Simple record, flattened yaml (same line)
 - { name: my-record, type: A, records: [127.0.0.1, 127.0.0.2, 127.0.0.3] }
 
-# Simple record, indented yaml 
+# Simple record, indented yaml
 - name: my-record
   type: A
   records:
@@ -1173,7 +1158,7 @@ We currently support configuring Traffic Director services under the following t
 - `ttl`: The default TTL for the Traffic Director records
 - `records`: A list of `record` (currently only CNAMEs are supported)
   - One of the following:
-    - `hostname`: The hostname for the CNAME record 
+    - `hostname`: The hostname for the CNAME record
     - `cluster`:  A reference to a cluster file. The cluster's ELB hostname will then be used as the hostname for the record
   - `weight`: The weight for the record. Responses will be proportional to the weight of all other records
 
@@ -1187,7 +1172,7 @@ ttl: 30
 
 records:
 - cluster:
-    $ref: /openshift/app-sre-stage-01/cluster.yml 
+    $ref: /openshift/app-sre-stage-01/cluster.yml
   weight: 100
 - cluster:
     $ref: /openshift/appsres04ue2/cluster.yml
@@ -1600,16 +1585,16 @@ In order to add or update an S3 bucket, you need to add them to the `externalRes
 - `event_notifications`(Optional): a list of configurations to create S3 notification to SQS or SNS. It can contain the following fields:
   - `destination_type`: can be `sns` or `sqs`.
   - `destination`: can be either the name of the queue/topic or its arn.
-  - `event_type`: a list of events such as `s3:ObjectCreated:*`. 
+  - `event_type`: a list of events such as `s3:ObjectCreated:*`.
   - `filter_prefix`(Optional): Prefix filter for the target's name.
   - `filter_suffix`(Optional): Suffix filter for the target's name.
-  
-  Example of `event_notifications`: 
+
+  Example of `event_notifications`:
   ```
   event_notifications:
       - destination_type: sns
         destination: arn:aws:sns:us-east-1:123456789:test-sns-1
-        event_type: 
+        event_type:
           - s3:ObjectCreated:*
   ```
 - `sqs_identifier`(Deprecating soon, please use `event_notifications`): identifier of a existing sqs queue. It will create a s3 notifacation to that sqs queue. This field is optional.
@@ -1958,7 +1943,7 @@ In order to add or update an Autoscaling Group, you need to add them to the `ext
 - `cloudinit_configs` - List of multiple parts which adds a file to the generated cloud-init configuration.
   - `filename` - (Optional) A filename to report in the header for the part.
   - `content_type` - (Optional) A MIME-style content type to report in the header for the part.
-  - `content` - path relative to [resources](/resources) to a file with body content for the part. Supported `extracurlyjinja2` templates (will be replaced with correct values at run time) with following example delimiters: 
+  - `content` - path relative to [resources](/resources) to a file with body content for the part. Supported `extracurlyjinja2` templates (will be replaced with correct values at run time) with following example delimiters:
     - `{{{ aws_region }}}`
     - `{{{ aws_account_id }}}`
     - `{{{ key from variables }}}`
@@ -2303,7 +2288,7 @@ namespace:
 identifier: <RDS resource identifier (same as defined in the namespace)>
 output: <filesystem or stdout or encrypted>
 # Required if output is encrypted
-requestor: 
+requestor:
   $ref: <user-1.yml with public_gpg_key>
 schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
@@ -2321,7 +2306,7 @@ namespace:
 identifier: <RDS resource identifier (same as defined in the namespace)>
 output: <filesystem or stdout or encrypted>
 # Required if output is encrypted
-requestor: 
+requestor:
   $ref: <user-1.yml with public_gpg_key>
 schedule: < In UTC time - if defined the output resource will be a CronJob instead of a Job >
 queries:
@@ -2460,7 +2445,7 @@ $ oc rsh --shell=/bin/bash 2020-01-30-account-manager-registries-stage-cjh82 cat
 ```
 
 - `encrypted`: requires `view` access to the namespace. The pod created by the Job
-  will have the SQL query result encrypted with requestor's public_gpg_key and 
+  will have the SQL query result encrypted with requestor's public_gpg_key and
   printed to the stdout.
 
 ```bash
@@ -2646,7 +2631,7 @@ Please follow [this guide](/docs/app-sre/prometheus-rules-tests-in-app-interface
 
 ### How to offboard/delete a service
 
-This process can be done in two ways. 
+This process can be done in two ways.
 * Method one
   * Open the first MR in app-interface to delete each target in the saas file for your related service. See [Delete target from SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/FAQ.md#delete-target-from-saas-file) for a deeper explanation and example.
   * Once that MR is merged, you can open a second MR in app-interface to add the line `delete: true` within the namespace file.

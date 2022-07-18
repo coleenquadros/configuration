@@ -59,7 +59,7 @@ Access keys to the issuer or by the Metadata Server using IRSA, kube2iam or simi
     - Install `openshift-cert-routes` into `openshift-cert-manager` namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55)
       - 1st MR needs to be merged to ensure the namespace is created.
       - `openshift-cert-routes` operator needs to be deployed into the same namespace as `cert-manager`
-    - Install the HTTP-01 ClusterIssuer [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/app-sre-stage-02/namespaces/openshift-cert-manager.yml)
+    - Install the `HTTP-01` ClusterIssuer [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/app-sre-stage-02/namespaces/openshift-cert-manager.yml)
       - This is a Cluster resource. Bound to this namespace in A-I for coherence.
 
 ### Private Clusters (Not reachable from Internet)
@@ -75,7 +75,7 @@ Access keys to the issuer or by the Metadata Server using IRSA, kube2iam or simi
     - Follow the same name structure of the example (identifier and output_resource_name)
     - This step can be made within the 2nd MR, but it's preferable to split these tasks.
 
-4. 4th MR: Create the DNS-01 `ClusterIssuer` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/appsres03ue1/namespaces/openshift-cert-manager.yml#L65-L76)
+4. 4th MR: Create the `DNS-01` `ClusterIssuer` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/appsres03ue1/namespaces/openshift-cert-manager.yml#L65-L76)
     - the resource-template reads the Secrets from vault (Secrets populated by the previous MR)
     - the 2nd resource is a configuration required by Route53 to only use recursive name-servers. This validation is made by the operator. Before creating the ACME order
       it checks that the `host` exists in the DNS provider.
