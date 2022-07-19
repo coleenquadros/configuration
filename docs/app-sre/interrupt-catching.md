@@ -27,6 +27,10 @@ It is important to evaluate the actual impact to the service when these reports 
 
 The majority of changes to resources managed by app-interface need to be approved by an AppSRE engineer. The IC engineer is responsible for handling these reviews during their shift. There is a separate guide for more details on [reviewing app-interface MRs](/docs/app-sre/sop/app-interface-review-process.md).
 
+Useful dashboards:
+[Merge queue](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/app-interface-merge-queue.md)
+[Review queue](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/app-interface-review-queue.md)
+
 #### 4a. Review ASIC tickets
 
 The IC engineer should review any open [ASIC](https://issues.redhat.com/projects/ASIC/issues/) tickets and attempt to resolve them, or at least start the investigation and post and findings to the ticket.
