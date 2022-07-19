@@ -59,6 +59,7 @@ Access keys to the issuer or by the Metadata Server using IRSA, kube2iam or simi
     - Install `openshift-cert-routes` into `openshift-cert-manager` namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55)
       - 1st MR needs to be merged to ensure the namespace is created.
       - `openshift-cert-routes` operator needs to be deployed into the same namespace as `cert-manager`
+      - the `openshift-cert-manager` namespace file manifest in app-interface must be created manually within this MR, the operator just creates the namespace.
     - Install the `HTTP-01` ClusterIssuer [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/app-sre-stage-02/namespaces/openshift-cert-manager.yml)
       - This is a Cluster resource. Bound to this namespace in A-I for coherence.
 
