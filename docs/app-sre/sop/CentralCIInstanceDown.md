@@ -1,4 +1,4 @@
-# Central CI Instance Down alert runbook
+# Central CI Instance(ci.ext and ci.int) Down alert runbook
 
 ## Severity: Critical
 
@@ -14,16 +14,15 @@ The [InstanceDown](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ans
 
 ## Access required
 
-- [OpenStack Console](/docs/app-sre/sop/openstack-ci-int.md)
 - [SSH access to instances](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/ansible#ssh-setup)
+- AWS console access for app-sre account
 
-## Steps
+## Steps 
 
-1. Check outage-list for any outages related to PSI Openstack Cloud D
-  * If the time fits an outage (planned or not), the alert can be silenced (we should create silences in advance for planned outages)
-1. Check the OpenStack console to see if the instance happens to be down
-1. SSH to the instance and dig in
-
+1. Check AWS console instance monitoring for relevant metrics.
+1. SSH to the instance.
+    1. Check if node_exporter service is running or not `systemctl status node_exporter`.
+    1. Do any additional digging as required.
 ## Escalations
 
 - [PnT DevOps](/docs/app-sre/AAA.md#pnt-devops)
