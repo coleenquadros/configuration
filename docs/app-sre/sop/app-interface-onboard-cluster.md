@@ -1,13 +1,14 @@
 <!-- TOC -->
 
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
-  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1---cluster-creation-and-initial-access-for-dedicated-admins)
-  - [Step 2 - Bot access and App SRE project template](#step-2---bot-access-and-app-sre-project-template)
-  - [Step 3 - Observability](#step-3---observability)
-  - [Step 4 - Operator Lifecycle Manager](#step-4---operator-lifecycle-manager)
-  - [Step 5 - Container Security Operator](#step-5---container-security-operator)
-  - [Step 6 - Deployment Validation Operator (DVO)](#step-6---deployment-validation-operator-dvo)
-  - [Step 7 - Obtain cluster-admin](#step-7---obtain-cluster-admin)
+  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1-cluster-creation-and-initial-access-for-dedicated-admins)
+  - [Step 2 - Bot access and App SRE project template](#step-2-bot-access-and-app-sre-project-template)
+  - [Step 3 - Observability](#step-3-observability)
+  - [Step 4 - Operator Lifecycle Manager](#step-4-operator-lifecycle-manager)
+  - [Step 5 - Container Security Operator](#step-5-container-security-operator)
+  - [Step 6 - Deployment Validation Operator (DVO)](#step-6-deployment-validation-operator-dvo)
+  - [Step 7 - Obtain cluster-admin](#step-7-obtain-cluster-admin)
+  - [Step 8 - Install Cert-manager operator](#step-8-install-cert-manager-operator)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -102,7 +103,7 @@ This step should be performed in a single merge request.
       conditions:
         soakDays: N # number of days a version should run on other clusters with similar workloads before this cluster is upgraded to it
 
-    network: # cidr list for each cluster can be found here: https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/clusters-network.md 
+    network: # cidr list for each cluster can be found here: https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/clusters-network.md
       # For OVN, use OVNKUbernetes
       type: OpenShiftSDN
       vpc: (desired machine CIDR. ex: 10.123.0.0/16)
@@ -344,8 +345,6 @@ At this point you should be able to access the cluster via the console / `oc` cl
     * Creates an `app-sre-observability-per-cluster` namespace file for that specific cluster. [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-prod-01/namespaces/app-sre-observability-per-cluster.yml)
     * Adds the new `app-sre-observability-per-cluster` namespace to list of namespaces in [observability-access-elevated.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/observability-access-elevated.yml) under `access`, to allow users with elevated observability access to access all the prometheus.
     * Adds the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-nginx-proxy.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-nginx-proxy.yaml) to deploy nginx-proxy.
-    * If the cluster is not private, it adds the `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-openshift-acme.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) to deploy openshift-acme.
-        * Note: A private cluster can not use openshift-acme since it is not exposed to the public internet. Routes should still work, but the certificate will be invalid.
 
   **Double check the changes introduced, the destination file could have been modified with manual changes**
 
@@ -428,6 +427,10 @@ hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <
       field: token
 
 1. Remove yourself from the cluster-admin group via OCM.
+
+## Step 8 - Install Cert-manager operator
+
+1. Follow the installation instructions in this [Runbook](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/runbook/cert-manager.md)
 
 # Additional configurations
 

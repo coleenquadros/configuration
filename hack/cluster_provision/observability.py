@@ -59,10 +59,6 @@ NGINX_SAAS_FILE = (
     "{data_dir}/services/observability/cicd/saas/"
     "saas-nginx-proxy.yaml"
 )
-ACME_SAAS_FILE = (
-    "{data_dir}/services/app-sre/cicd/ci-int/"
-    "saas-openshift-acme.yaml"
-)
 
 # GRAFANA
 GRAFANA_DATASOURCES_PATH = (
@@ -316,8 +312,6 @@ def configure_appsre_observability_ns(data_dir: str, cluster: str) -> None:
     role_path = APPSRE_OBSERVABILITY_NS_ROLE.format(data_dir=data_dir)
     _add_entry_to_role_access(role_path, entry)
     _add_appsre_observability_ns_to_nginx_saas(data_dir, cluster)
-    if not _cluster_is_private(data_dir, cluster):
-        _add_appsre_observability_ns_to_acme_saas(data_dir, cluster)
 
 
 def _add_appsre_observability_ns_to_nginx_saas(
@@ -338,21 +332,6 @@ def _add_appsre_observability_ns_to_nginx_saas(
 
     saas_path = NGINX_SAAS_FILE.format(data_dir=data_dir)
     _add_target_to_resource_template(saas_path, "nginx-proxy", entry)
-
-
-def _add_appsre_observability_ns_to_acme_saas(
-        data_dir: str, cluster: str) -> None:
-    entry = {
-        "namespace": {
-            "$ref": (
-                f"/openshift/{cluster}/namespaces/"
-                "app-sre-observability-per-cluster.yml"
-            )
-        },
-        "ref": "master"
-    }
-    saas_path = ACME_SAAS_FILE.format(data_dir=data_dir)
-    _add_target_to_resource_template(saas_path, "openshift-acme", entry)
 
 
 def _get_grafana_json_datasources(file_path: str):
