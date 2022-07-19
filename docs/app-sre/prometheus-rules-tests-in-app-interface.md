@@ -2,12 +2,7 @@
 
 ## Table of contents
 
-* [Introduction](#introduction)
-* [The test runner](#the-test-runner)
-* [When to write tests](#when-to-write-tests)
-* [Notes on writing tests](#notes-on-writing-tests)
-* [Running prometheus tests locally](#running-prometheus-tests-locally)
-* [Further documentation](#further-documentation)
+[TOC]
 
 ## Introduction
 
@@ -42,66 +37,73 @@ Prometheus rules that won't be handled by app-sre will always benefit from tests
 
 ## Running prometheus tests locally
 
-While writing tests, sometimes it is convenient to be able to run tests locally to avoid waiting for them to be run in Jenkins.  You can use the script [`run-prometheus-test.py`](/hack/run-prometheus-test.py) for this matter. Do not try to run things via `promtool` directly as paths in the files do not correspond exactly to app-interface repository.
+While writing tests, sometimes it is convenient to be able to run tests locally to avoid waiting for them to be run in Jenkins.  You can use the qontract-cli `run-prometheus-test` command for this matter. Do not try to run things via `promtool` directly as paths in the files do not correspond exactly to app-interface repository.
 
 ```
-./hack/run-prometheus-test.py -h
-usage: run-prometheus-test.py [-h] [-v VARS_FILE] [-p] [-k] test_file
+Usage: qontract-cli run-prometheus-test [OPTIONS] PATH CLUSTER
 
-positional arguments:
-  test_file             Prometheus test file
+  Run prometheus tests in PATH loading associated rules from CLUSTER.
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -v VARS_FILE, --vars-file VARS_FILE
-                        File with variables in yaml format
-  -p, --pretty-print    Pretty print prometheus test errors
-  -k, --keep-temp-files
-                        Pretty print prometheus test errors
+Options:
+  -n, --namespace TEXT            Cluster namespace where the rules are
+                                  deployed. It defaults to openshift-customer-
+                                  monitoring.
+
+  -s, --secret-reader [config|vault]
+                                  Location to read secrets.
+  --help                          Show this message and exit.
 ```
 
-In app-interface, [openshiftResouces](/README.md#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml) can be straight yamls containing the openshift resources or jinja templates with variables that will be expanded with the `variables` set in the namespace file. If your prometheus rule file is a jinja template, your test will need to be a template too. When running the tests locally, we'll need to pass manually the variables that are usually passed via the namespace file definition.
+### Requirements
 
-## Requirements
+#### qontract-reconcile
 
-You need `promtool` installed. You can download it from https://github.com/prometheus/prometheus/releases
-
-You need pyyaml and jinja2 modules in Python
-
-## Example 1: non-templated rule file
-
-From app-interface root:
+In order to use this tool, the easiest option is to clone the `qontract-reconcile` repository. You will need Python 3.9.
 
 ```
-$ ./hack/run-prometheus-test.py resources/observability/prometheusrules/app-sre-contract.prometheusrulestests.yaml
-Checking /var/folders/dx/y5_klhc1187gnzzmyb4pswb40000gn/T/tmpnp8xcg66
-  SUCCESS: 2 rules found
-
-Unit Testing:  /var/folders/dx/y5_klhc1187gnzzmyb4pswb40000gn/T/tmp2ahrj8x0
-  SUCCESS
+$ git clone https://github.com/app-sre/qontract-reconcile
+$ cd qontract-reconcile
+$ python -m venv venv && source venv/bin/activate && pip install -e .
 ```
 
-# Example 2: templated rule file
+If you need to have multiple Python versions installed locally, you can use projects such as [pyenv](https://github.com/pyenv/pyenv).
 
-If we want to test a file such as [`hive-production-capacity.prometheusrules-test.yaml`](resources/observability/prometheusrules/hive-production-capacity.prometheusrules-test.yaml) that is templated, you will need to pass the variables from the resource file in a separate yaml. We first create a `variables.yaml` file that contains the jinja2 variables:
+#### promtool
 
-```
-variables:
-  appsre_env: production
-  max_clusters_per_shard: 500
-  grafana_datasource: app-sre-prod-01-prometheus
-```
+and `promtool` version 2.33.3. You can find as part of the Prometheus [distribution](https://github.com/prometheus/prometheus/releases/tag/v2.33.3).
 
-and then you can run your tests
+#### configuration file
+
+Prior to running the commands you will need to create the following `config.promtool.toml` file:
 
 ```
-$ ./hack/run-prometheus-test.py -v variables.yaml resources/observability/prometheusrules/hive-production-capacity.prometheusrules-test.yaml
-Checking /var/folders/dx/y5_klhc1187gnzzmyb4pswb40000gn/T/tmpi58b5vwn
-  SUCCESS: 3 rules found
-
-Unit Testing:  /var/folders/dx/y5_klhc1187gnzzmyb4pswb40000gn/T/tmpwmuo68tq
-  SUCCESS
+[graphql]
+server = "http://localhost:4000/graphql"
 ```
+
+### Example
+
+* From `app-interface` root start a local server that will load the repository data:
+
+  ```
+  make server
+  ```
+
+* In a different terminal, from the directory where you have cloned `qontract-reconcile`:
+
+  ```
+  (venv) $ qontract-cli --config config.promtool.toml run-prometheus-test -s config \
+    resources/observability/prometheusrules/app-interface-production.prometheusrulestests.yaml  \
+    app-sre-prod-01
+  Unit Testing:  /var/folders/dx/y5_klhc1187gnzzmyb4pswb40000gn/T/tmp7kj8agy1
+    SUCCESS
+  ```
+
+**IMPORTANT**: The local server loads the graph based on the state of the repository when the server is started. Thus, you must *restart* the server to make it reflect any local edits to the tests or rules files. In order to do it, just hit Ctrl-C in the terminal where you're runnning the local server and start it again via `make server`.
+
+### A note on secrets
+
+The previous example assumes that any potential secret will be searched locally in the `config.promtool.toml`. In case that a local secret is needed to be configured, you will receive an error message about it. Please read [this doc](/docs/app-sre/alert-to-receiver.md#secrets-reader) in order to know how to add the relevant bits to your configuration.
 
 ## Further documentation
 
