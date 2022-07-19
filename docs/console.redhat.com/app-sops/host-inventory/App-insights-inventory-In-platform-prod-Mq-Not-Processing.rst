@@ -28,14 +28,14 @@ Access required
 Steps
 -----
 
--  Check the [grafana dashboard](https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&refresh=5m) and verify that inventory is receiving messages over kafka by checking the "incoming message rate (ingress)" section.
+-  Check the [grafana dashboard](https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&refresh=5m) and verify that inventory is receiving messages over Kafka by checking the "incoming message rate (ingress)" section.
     -  If the incoming message rate is 0, then there is an issue somewhere up the pipeline before Inventory. This could be an issue with:
         -   [Kafka/platform-mq](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/strimzi/app.yml)
         -   [Entitlements](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/entitlements/app.yml)
 -  Check the grafana dashboard and verify that the "ingress consumer lag (ingress)" is not consistently increasing.
-    -  If the lag is not decreasing over time, it could be an indication that the kafka deployment is unhealthy.
--  Verify that platform's Kafka deployment is healthy.
-    -  If not, fixing the kafka deployment issue should resolve this alert.
+    -  If the lag is not decreasing over time, it could be an indication that the Kafka deployment is unhealthy.
+-  Verify that platform's Kafka deployment is healthy via the [Kafka Grafana Dashboard](https://grafana.app-sre.devshift.net/d/oxMpso4Wz/is-kafka-down?orgId=1).
+    -  If not, fixing the Kafka deployment issue should resolve this alert.
 -  Log into the console for the host-inventory-prod namespace in the prod cluster and verify that the pods in the insights-inventory MQ deployments are up and running without error:
     -   [host-inventory-mq-p1](https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/deployments/host-inventory-mq-p1)
     -   [host-inventory-mq-p1](https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/deployments/host-inventory-mq-pmin)
