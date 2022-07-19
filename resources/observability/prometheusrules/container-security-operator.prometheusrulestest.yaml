@@ -1,0 +1,22 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+rule_files:
+  - /observability/prometheusrules/container-security-operator.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: kube_deployment_status_replicas_available{deployment="container-security-operator"}
+        values: 0x30
+    alert_rules_test:
+      - eval_time: 30m
+        alertname: ContainerSecurityOperatorPodCount
+        exp_alerts:
+          - exp_labels:
+              alertname: ContainerSecurityOperatorPodCount
+              severity: high
+              service: container-security-operator
+            exp_annotations:
+              message: "Deployment issue with Container Security Operator. No actionable SOP as of now"
