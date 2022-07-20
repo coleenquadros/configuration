@@ -123,15 +123,15 @@ There are cases where a DVO validation fails, while there are good reasons for t
 
 Follow this [documentation](https://github.com/app-sre/deployment-validation-operator#disabling-checks) to disable DVO checks for specific workloads.
 
-Specific checks can be disabled for an app by adding the metric name as a label (with any value). For example:
-    ```yaml
-    ---
-    $schema: /app-sre/app-1.yml
+Specific checks can be disabled for an entire app as defined in app-interface by adding the metric name as a label, with a reason for disabling the check as the value. For example:
+```yaml
+---
+$schema: /app-sre/app-1.yml
 
 
-    labels:
-        deployment_validation_operator_no_anti_affinity: skip
-    ```
+labels:
+    deployment_validation_operator_no_anti_affinity: "this app cannot be set to anti affinity rules because X and Y"
+```
 
 ## Reporting
 
