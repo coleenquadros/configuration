@@ -47,6 +47,7 @@ To run the vault-manager integration manually, perform the following steps:
 # prepare vault environment variables
 export VAULT_ADDR=https://vault.devshift.net
 export TOKEN=<YOUR_TOKEN>
+export DISABLE_IDENTITY=true
 vault login -method=github token=$TOKEN
 
 gql_data=$(vault kv get -format=json app-sre/creds/app-interface/production/basic-auth)
