@@ -1,5 +1,18 @@
 # Unleash Deployment
 
+- [Tenant Request](#tenant-request)
+- [Architecture](#architecture)
+- [Naming Conventions](#naming-conventions)
+- [Github Configuration](#github-configuration)
+- [Github Org/Team](#github-orgteam)
+- [Namespace](#namespace)
+- [Configuration Secret](#configuration-secret)
+- [Client Access Token Secret](#client-access-token-secret)
+- [Database](#database)
+- [Deployment](#deployment)
+- [Examples](#examples)
+
+## Tenant Request
 Tenants will request an instance of Unleash following the
 [steps here](https://gitlab.cee.redhat.com/service/dev-guidelines/-/blob/master/content/en/docs/AppSRE/Advanced/feature-toggles.md).
 
@@ -11,9 +24,9 @@ Interface.
 Unleash is deployed as a regular Service/Deployment to the `unleash` Namespace
 in the OpenShift Cluster. It consumes three Secrets:
 
-- [Configuration Secret](#configuration-secret)
-- [Database Access Secret](#database)
-- [Client Access Token Secret](#client-access-token-secret)
+* [Configuration Secret](#configuration-secret)
+* [Database Access Secret](#database)
+* [Client Access Token Secret](#client-access-token-secret)
 
 ![](images/arch.png)
 
@@ -135,7 +148,7 @@ with the following data:
   registration (see the [Github Configuration](#github-configuration) section
   for details).
 - `GH_CLIENT_SECRET`: The Github client secret, acquired from the OAuth
-  application registration (see the 
+  application registration (see the
   [Github Configuration](#github-configuration) section for details).
 - `GH_CALLBACK_URL`: The Unleash callback page -
   `https://<unleash-instance-domain>/api/auth/callback`
@@ -207,28 +220,10 @@ externalResources:
     output_resource_name: <application-name>-unleash-rds
 ```
 
-## Route
-
-Expose the Unleash instance with an OpenShift Route and add the `route`
-resource to the `unleash` Namespace:
-
-```yaml
-openshiftResources:
-...
-- provider: route
-  path: /<cluster>/unleash/<application-name>.route.yaml
-```
-
-The `host` value of the `Route` spec shall be
-`<application-name>.unleash.devshift.net`. You have to arrange to get that
-sub-domain created.
-[Example](https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/app-sre/unleash/app-interface.route.yaml).
-
 ## Deployment
 
-To deploy the new instance to the `unleash` Namespace, add a target to the
-`resourceTemplates` section in the
-[Unleash SaaS file](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/unleash/cicd/saas.yaml):
+To deploy the new instance to the `unleash` Namespace, create a new Saas file, and add this `resourceTemplates` section.
+[Exmaple Unleash SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/unleash/cicd/saas-ocm.yaml):
 
 ```yaml
 resourceTemplates:
@@ -236,8 +231,6 @@ resourceTemplates:
   url: https://github.com/app-sre/unleash
   path: /openshift/unleash.yaml
   targets:
-  ...
-  ...
   - namespace:
       $ref: /services/unleash/namespaces/<application-name>-unleash.yml
     ref: <commit-hash>
@@ -248,10 +241,11 @@ resourceTemplates:
       tokenSecret: <application-name>-unleash-token
       org: <github-org>
       team: <github-team>
-
+      read_only_team: <permission-name>
+      host: <full_qualified_host_name>
 ```
 
-That will create the Unleash Deployment and Service in the Namespace using the
+That will create the Unleash Deployment, Route, and Service in the Namespace using the
 Unleash version pin-pointed by the `<commit-hash>`.
 
 Parameters:
@@ -269,21 +263,19 @@ Parameters:
 - `team`: The Github Team that the Web UI users have to be member of in order
   to access this Unleash instance, as defined in the
   [Github Org/Team](#github-org/Team) section.
+- `read_only_team`: Optional - Name reference to a `/access/permission-1.yml` object.
+  [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/unleash/permissions/ocm-read-only.yml)
+- `full_qualified_host_name`: The `host` value of the `Route` spec shall be
+  `<application-name>.unleash.devshift.net`. You have to arrange to get that
+  sub-domain created.
+[Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/unleash/cicd/saas-ocm.yaml).
 
 
-## Examples:
+## Examples
 
 Jira ticket requesting Unleash instances:
 
 [https://issues.redhat.com/browse/APPSRE-1801](https://issues.redhat.com/browse/APPSRE-1801)
-
-App Interface commit deploying Unleash to an existing `unleash` Namespace:
-
-[https://gitlab.cee.redhat.com/service/app-interface/commit/d00d1af](https://gitlab.cee.redhat.com/service/app-interface/commit/d00d1af)
-
-App Interface commit deploying Unleash to an new `unleash` Namespace:
-
-[https://gitlab.cee.redhat.com/service/app-interface/commit/a3ba360](https://gitlab.cee.redhat.com/service/app-interface/commit/a3ba360)
 
 Message to requester after deployment:
 
@@ -300,3 +292,7 @@ Namespace.
 The Web UI / REST API endpoint is:
 https://<application>.unleash.devshift.net/
 ```
+
+Full featured Unleash instance
+
+[https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/unleash/cicd/saas-ocm.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/unleash/cicd/saas-ocm.yaml)
