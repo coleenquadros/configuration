@@ -386,6 +386,8 @@ To create the CSO operator configs, run the following command:
 hack/cluster_provision.py [--datadir=data directory] create-cso-cluster-config <cluster-name>
 ```
 
+Note: The prometheus rule for monitoring CSO deployment is already added through [template](https://gitlab.cee.redhat.com/service/app-interface/blob/master/hack/cluster_provision/templates/openshift-customer-monitoring.CLUSTERNAME.tpl).
+
 ## Step 6 - Deployment Validation Operator (DVO)
 
 The Deployment Validation Operator inspects workloads in a cluster and evaluates them against know best practices.  It generates metric information about which workloads in which namespaces do not meet specific guidelines.  This information is presented in tenant dashboards and in monthly reports.
