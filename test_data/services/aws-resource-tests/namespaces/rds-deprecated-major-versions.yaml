@@ -1,0 +1,37 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: rds-deprecated-major-versions
+description: Test rds-deprecated-major-versions alerts
+
+cluster:
+  $ref: /openshift/aws-resources/cluster.yml
+
+app:
+  $ref: /services/aws-resource-tests/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/test.yml
+
+managedExternalResources: true
+
+openshiftResources:
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/app-sre-observability/rds-deprecated-major-versions.prometheusrules.yaml.j2
+  variables:
+    accounts_with_aws_resource_exporter:
+    - rds-deprecated-major-versions
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/rds-deprecated-major-versions/account.yml
+  resources:
+  - provider: rds
+    identifier: rds-instance-id
+    defaults: /terraform/resources/app-sre-stage/staging/rds-2-cloudwatch-enabled.yml
+    overrides:
+      engine_version: '10.7'

@@ -1,0 +1,41 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/rds-deprecated-major-versions-test.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 1m
+  input_series:
+  # Deprecated major RDS versions - PostgreSQL
+  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_deprecated_10_7", engine="postgres", engine_version="10.7"}
+    values: 1x120
+  # Valid major RDS versions - PostgreSQL
+  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_valid_11_1", engine="postgres", engine_version="11.1"}
+    values: 1x120
+  # Metric data for tests related to missing metrics (ex. AWS API is throttled, so there are gaps in metrics)
+  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_missing_metrics_greater_than_hour", engine="postgres", engine_version="10.7"}
+    values: 1x50
+  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_missing_metrics_less_than_hour", engine="postgres", engine_version="10.7"}
+    values: 1x70
+
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: TEST-RDSDeprecatedMajorVersionCheck
+    exp_alerts:
+      - exp_labels:
+          dbinstance_identifier: TEST_deprecated_10_7
+          severity: info
+          engine: postgres
+          engine_version: 10.7
+          service: app-sre-observability
+        exp_annotations: {}
+      - exp_labels:
+          dbinstance_identifier: TEST_missing_metrics_less_than_hour
+          severity: info
+          engine: postgres
+          engine_version: 10.7
+          service: app-sre-observability
+        exp_annotations: {}
