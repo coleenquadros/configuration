@@ -264,6 +264,10 @@ One or more dependency services is experiencing issues or has been downgraded.
 - Getting support cases
 - Closing a support case
 
+### Subscription labels
+- Consumption based billing for addons
+- Subscription data propagating to subwatch
+
 ### Access required:
 - Console access to the cluster that runs account-manager (app-sre)
 - Edit access to the uhc namespaces:
