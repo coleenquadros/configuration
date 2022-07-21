@@ -14,17 +14,7 @@ Each unleash deployment has the following components:
 
 ### Routes
 
-Unleash endpoints usually follow this endpoint convention: `https://<application-name>.unleash.devshift.net`, see within various unleash namespace files like [this one](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/unleash/namespaces/app-sre-prod-01.yml):
-
-Example:
-```
-- provider: resource-template
-  type: jinja2
-  path: /services/unleash/unleash.route.yaml
-  variables:
-    identifier: app-interface
-    host: app-interface.unleash.devshift.net
-```
+Unleash endpoints usually follow this endpoint convention: `https://<application-name>.unleash.devshift.net`, and are setup via `host` parameter in saas file (e.g.  [this one](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/unleash/cicd/saas-app-interface.yaml#L49)).
 
 ### Dependencies
 
