@@ -26,9 +26,9 @@ All DVO tickets can be found under the [AppSRE tenants DVO issues](https://issue
 
 ## Implementation
 
-This is the [implementation](./resources/services/deployment-validation-operator/prometheusrules.yaml.j2) of dynamically generated DVO alerts.
+Those [prometheusrules*.yaml.j2](./resources/services/deployment-validation-operator/prometheusrules-latest_tag.yaml.j2) files, e.g. [deployment-validation-operator-latest-tag](./resources/services/deployment-validation-operator/prometheusrules-latest_tag.yaml.j2) are used to generated DVO alerts.
 
-This file roughly translates to:
+Those files roughly translates to:
 ```
 for each cluster:
     for each namespace:
