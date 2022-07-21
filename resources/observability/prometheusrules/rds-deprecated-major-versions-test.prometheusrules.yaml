@@ -1,0 +1,27 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: rds-deprecated-major-versions-test
+spec:
+  groups:
+  - name: rds-deprecated-major-version-checks
+    rules:
+    # This alert will be for testing purposes only and will never actually trigger due to the dbinstance_identifier check.
+    # When making changes be sure to:
+    #
+    # 1. Update the expr below and make sure that the tests still pass
+    # 2. Update the expression in rds-deprecated-major-versions.prometheusrules.yaml.j2 - updating dbinstance_identifier value below with the tfr.identifier variable
+    #
+    - alert: TEST-RDSDeprecatedMajorVersionCheck
+      # This expression uses a regex that matches any major engine_versions that is deprecated as documented here: https://gitlab.cee.redhat.com/service/app-interface#approved-rds-versions
+      expr: |
+        last_over_time(aws_resources_exporter_rds_engineversion{dbinstance_identifier=~"TEST_.+",engine="postgres", engine_version=~"^(10|)\\..*"}[1h])
+      for: 10m
+      labels:
+        service: app-sre-observability
+        severity: info

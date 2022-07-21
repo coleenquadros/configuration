@@ -10,10 +10,6 @@ tests:
 - interval: 1m
   input_series:
   # Unapproved RDS versions - PostgreSQL
-  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_unapproved_10_1", engine="postgres", engine_version="10.7"}
-    values: 1x120
-  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_unapproved_10_2", engine="postgres", engine_version="10.15"}
-    values: 1x120
   - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_unapproved_11_1", engine="postgres", engine_version="11.7"}
     values: 1x120
   - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_unapproved_11_2", engine="postgres", engine_version="11.11"}
@@ -23,10 +19,6 @@ tests:
   - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_unapproved_13_1", engine="postgres", engine_version="13.1"}
     values: 1x120
   # Approved RDS versions - PostgreSQL
-  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_approved_10_1", engine="postgres", engine_version="10.17"}
-    values: 1x120
-  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_approved_10_2", engine="postgres", engine_version="10.20"}
-    values: 1x120
   - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_approved_11_1", engine="postgres", engine_version="11.12"}
     values: 1x120
   - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_approved_11_2", engine="postgres", engine_version="11.20"}
@@ -72,29 +64,15 @@ tests:
   - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_approved_mysql_80_3", engine="mysql", engine_version="8.0.40"}
     values: 1x120
   # Metric data for tests related to missing metrics (ex. AWS API is throttled, so there are gaps in metrics)
-  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_missing_metrics_greater_than_hour", engine="postgres", engine_version="10.7"}
+  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_missing_metrics_greater_than_hour", engine="postgres", engine_version="11.7"}
     values: 1x50
-  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_missing_metrics_less_than_hour", engine="postgres", engine_version="10.7"}
+  - series: aws_resources_exporter_rds_engineversion{dbinstance_identifier="TEST_missing_metrics_less_than_hour", engine="postgres", engine_version="11.7"}
     values: 1x70
 
   alert_rule_test:
   - eval_time: 2h
     alertname: TEST-RDSCompliantEngineVersionCheck
     exp_alerts:
-      - exp_labels:
-          dbinstance_identifier: TEST_unapproved_10_1
-          severity: info
-          engine: postgres
-          engine_version: 10.7
-          service: app-sre-observability
-        exp_annotations: {}
-      - exp_labels:
-          dbinstance_identifier: TEST_unapproved_10_2
-          severity: info
-          engine: postgres
-          engine_version: 10.15
-          service: app-sre-observability
-        exp_annotations: {}
       - exp_labels:
           dbinstance_identifier: TEST_unapproved_11_1
           severity: info
@@ -162,6 +140,6 @@ tests:
           dbinstance_identifier: TEST_missing_metrics_less_than_hour
           severity: info
           engine: postgres
-          engine_version: 10.7
+          engine_version: 11.7
           service: app-sre-observability
         exp_annotations: {}
