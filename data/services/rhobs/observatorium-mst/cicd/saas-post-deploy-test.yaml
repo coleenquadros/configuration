@@ -18,6 +18,7 @@ managedResourceTypes:
 publishJobLogs: true
 imagePatterns:
 - quay.io/app-sre/rhobs-e2e
+- quay.io/app-sre/ubi8-ubi-minimal
 
 authentication:
   image:
@@ -60,3 +61,23 @@ resourceTemplates:
       auto: true
       subscribe:
       - observatorium-mst-metrics-stage-deploy-success-channel
+- name: rhobs-e2e-tests-observatorium-mst-logs
+  url: https://github.com/rhobs/configuration
+  path: /tests/integration_tests/post-deploy-logs-job-template.yaml
+  targets:
+  - namespace:
+      $ref: /services/rhobs/observatorium-mst/namespaces/observatorium-mst-stage.yml
+    ref: 433f40435c66a677dce7a8e5901b1a5703e31b7e
+    parameters:
+      ENDPOINT_TYPE: logs
+      INIT_CONTAINTER_IMAGE: quay.io/app-sre/ubi8-ubi-minimal
+      INIT_CONTAINER_IMAGE_TAG: 8.6-854
+      IMAGE: quay.io/app-sre/rhobs-e2e
+      SUFFIX: observatorium-mst-logs-tests
+      CREDENTIALS_SECRET: rhobs-tenant-mst-staging
+      API_URL: https://observatorium-mst.api.stage.openshift.com
+      METRIC_LABELS: name="observatorium-mst-logs-tests"
+    promotion:
+      auto: true
+      subscribe:
+      - observatorium-mst-logs-stage-deploy-success-channel
