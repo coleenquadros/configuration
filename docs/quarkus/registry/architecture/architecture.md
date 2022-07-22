@@ -60,9 +60,14 @@ The application should return information about the released Quarkus platforms a
 
 - The app requires a PostgreSQL Database (RDS) to function. The service should return an Internal Server error response if the Database is not available
 
+## Business Continuity Plan
+
+The data provided by the application is stored in the PostgreSQL Database (RDS) and is updated based on the data in https://github.com/quarkusio/quarkus-extension-catalog-redhat repository (when a new Red Hat Build of Quarkus release is out).
+In case there is a database failure (data corruption?), the publishing process can be executed again to restore the expected data in the Database. See [this section about publishing](https://github.com/quarkusio/quarkus-extension-catalog-redhat#publishing) for more information.
+
 ## Load Testing 
 
-- In Progress
+- N/A
 
 ## Capacity
 
