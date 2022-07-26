@@ -1,0 +1,51 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  platform: insights
+  service: provisioning
+
+name: provisioning
+description: provisioning app on the Insights Platform
+
+app:
+  $ref: /services/insights/provisioning/app.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: envision-team
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+- ConfigMap
+- ClowdApp
+- ClowdJobInvocation
+- Frontend
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+resourceTemplates:
+- name: provisioning-backend
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RHEnVision/provisioning-backend
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
