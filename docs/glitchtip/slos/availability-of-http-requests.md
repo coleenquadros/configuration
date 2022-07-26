@@ -14,12 +14,12 @@ As a web service, GlitchTip's most interesting event from a monitoring perspecti
 
 The following is the explanation of the SLI query.
 
-    sum(rate(django_http_responses_total_by_status_total{job="glitchtip-web",status!~"5.+"}[1d])) by (job)
-    / sum(rate(django_http_requests_total_by_method_total{job="glitchtip-web"}[1d])) by (job)
+	sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage", code!="5xx"}[1d])) by (exported_namespace) /
+	sum(rate(haproxy_backend_connections_total{backend=~".*https.*", exported_namespace="glitchtip-stage"}[1d])) by (exported_namespace)
 
 
-* `django_http_responses_total_by_status_total` - Queries the total number of HTTP responses by HTTP status
-* `django_http_requests_total_by_method_total` - Queries the total number of HTTP requests by method
+* `haproxy_backend_http_responses_total` - Queries the total number of HTTP responses by response code.
+* `haproxy_backend_connections_total` - Queries the total number of HTTP connections by exported namespace.
 * The `rate` function ensures missing metrics are extrapolated properly.
 * The `sum` function aggregates all the responses/requests by job.
 * The whole query queries the derived ratio of total number of HTTP responses that were successful and the total number of HTTP requests regardless of status.
