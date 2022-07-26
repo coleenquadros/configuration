@@ -19,17 +19,17 @@ spec:
     # This can happen if there's no traffic from the router or envoy.
     - record: status_class_5xx:http_requests_total:rate5m
       expr: |
-        sum(rate(haproxy_backend_http_responses_total{route="accounts-mgmt",exported_namespace="uhc-{{{environment}}}",code="5xx"}[5m])) OR on() vector(0)
+        (sum(rate(haproxy_backend_http_responses_total{route="accounts-mgmt",exported_namespace="uhc-{{{environment}}}",code="5xx"}[5m])) OR on() vector(0))
         +
-        sum(rate(envoy_cluster_upstream_rq{envoy_cluster_name="accounts_mgmt",envoy_response_code=~"^5..",namespace="uhc-{{{environment}}}"}[5m])) OR on() vector(0)
+        (sum(rate(envoy_cluster_upstream_rq{envoy_cluster_name="accounts_mgmt",envoy_response_code=~"^5..",namespace="uhc-{{{environment}}}"}[5m])) OR on() vector(0))
       labels:
         service: uhc-acct-mngr
         namespace: uhc-{{{environment}}}
     - record: all:http_requests_total:rate5m
       expr: |
-        sum(rate(haproxy_backend_http_responses_total{route="accounts-mgmt",exported_namespace="uhc-{{{environment}}}"}[5m])) OR on() vector(0)
+        (sum(rate(haproxy_backend_http_responses_total{route="accounts-mgmt",exported_namespace="uhc-{{{environment}}}"}[5m])) OR on() vector(0))
         +
-        sum(rate(envoy_cluster_upstream_rq{envoy_cluster_name="accounts_mgmt",namespace="uhc-{{{environment}}}"}[5m])) OR on() vector(0)
+        (sum(rate(envoy_cluster_upstream_rq{envoy_cluster_name="accounts_mgmt",namespace="uhc-{{{environment}}}"}[5m])) OR on() vector(0))
       labels:
         service: uhc-acct-mngr
         namespace: uhc-{{{environment}}}
