@@ -55,13 +55,20 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
     # policies-engine commit hash that determines the clowdapp.yaml version
-    ref: e0eb2bdb5a0a768175b43bdd830c3f789bfaaf95
+    ref: master
     parameters:
       CLOUDWATCH_ENABLED: true
       EXTERNAL_LOGGING_LEVEL: DEBUG
       MIN_REPLICAS: 3
       SENTRY_ENABLED: true
       USE_ORG_ID: true
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-policies-engine-gh-build-master
+    promotion:
+      publish:
+      - policies-engine-stage-deploy-success-channel
 
   # prod
   - namespace:
@@ -114,7 +121,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
     # policies-ui-backend commit hash that determines the clowdapp.yaml version
-    ref: ed7fc16922b2c8c7c1740c30ff75d924c2f816d4
+    ref: master
     parameters:
       FLOORIST_SUSPEND: 'true'
       FLOORIST_IMAGE_TAG: fe12542 # 2022-06-03
@@ -124,6 +131,13 @@ resourceTemplates:
       MIN_REPLICAS: 3
       SENTRY_ENABLED: true
       USE_ORG_ID: true
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-policies-ui-backend-gh-build-master
+    promotion:
+      publish:
+      - policies-ui-backend-stage-deploy-success-channel
 
   # prod
   - namespace:
