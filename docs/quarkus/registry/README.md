@@ -2,7 +2,7 @@
 
 
 
-The Quarkus Extension Registry project is hosted in [GitHub](https://github.com/quarkusio/registry.quarkus.redhat.com).
+The Quarkus Extension Registry project is hosted in [GitLab](https://gitlab.cee.redhat.com/quarkus/registry.quarkus.redhat.com).
 
 ## Architectural Summary
 
