@@ -3,7 +3,7 @@
 # Summary
 
 Vault production instance is going to be migrated from a public cluster
-(appsre-prod-01) to a cluster inside the VPN (appsrep05ue1) to enforce
+(app-sre-prod-01) to a cluster inside the VPN (appsrep05ue1) to enforce
 security on the product.
 
 # Details
@@ -21,14 +21,6 @@ just once being updated\>
 
 **SREs assisting**: N/A
 
-# Banner text
-
-*Below, provide the name that will be used to refer to this maintenance
-activity, and also, the description of activity that will appear on
-status.redhat.com (and possibly elsewhere, like pendo). Note what
-features/systems will be impacted, and in what way (total downtime,
-read-only mode, etc).*
-
 # Prerequisite Checklist
 
 -   Complete this runbook
@@ -40,6 +32,8 @@ read-only mode, etc).*
 -   Move all integrations to internal cluster appsrep05ue1 - [APPSRE-6044](https://issues.redhat.com/browse/APPSRE-6044)
 
 -   Allow connectivity between internal cluster and RDS (infra repo) - [APPSRE-6050](https://issues.redhat.com/browse/APPSRE-6050)
+
+-   Move certificates from digicert to cert manager
 
 -   **Pre-submit all MRs in advance so they can be reviewed**
 
@@ -57,9 +51,11 @@ This maintenance operation will include the following activities:
 
 -   **Deploy Vault Workloads on appsrep05ue1**
 
--   **Disable all integrations depending on vault** **but terraform-aws-route53**
+-   **Disable all integrations** **but terraform-aws-route53**
 
 -   **Change DNS from app-sre-prod-01 to appsrep05ue1**
+
+-   **Disable terraform-aws-route53 integration**
 
 -   **Downscale deployment on app-sre-prod-01 and scale appsrep05ue1 deployment**
 
@@ -73,11 +69,13 @@ This maintenance operation will include the following activities:
 
 The following list **must be done in order**:
 
-- [ ]   Move all integrations running on app-sre-prod-01 to appsrep05ue1
+- [ ] Move all integrations running on app-sre-prod-01 to appsrep05ue1
 
 - [ ] Enable RDS access for appsrep05ue1 to appsre aws account
 
 - [ ] Deploy a vault-prod namespace to appsrep05ue1
+
+- [ ] Move certificates from Digicert to cert manager
 
 - [ ] Prepare MR to add a new target to saasfile to deploy vault into appsrep05ue1
 
@@ -85,7 +83,6 @@ The following list **must be done in order**:
 
 - [ ] **Send** **reminder email** about the upcoming planned maintenance
 
-#  
 
 # Runbook Steps (TBD)
 
@@ -144,6 +141,8 @@ Re-enable all integrations.
 
 ***Description***
 
+Change the TTL for vault.devshift.net to 5s to reduce the DNS propagation time and reduce the possible downtime to minimum. For this, there will be an MR ready, merge it and wait for the changes to apply before proceding with the DNS change.
+
 A MR will be prepared to change the DNS zone of vault.devshift.net from
 the current cluster app-sre-prod-01 to appsrep05ue1. Merge it and wait
 for the changes to take place. This will make Vault being unacessible
@@ -152,6 +151,7 @@ fire.
 
 ***Success Criteria***
 
+-   valut.devshift.net TTL is set to 5s before the DNS change
 -   DNS for vault.devshift.net is pointing to appsrep05ue1 cluster
 
 ***Rollback***
@@ -167,7 +167,23 @@ To rollback the change:
 
 -   Generate a new bundle and reconcile the changes following [this SOP](https://gitlab.cee.redhat.com/service/app-interface/-/blob/188a67166607734d51fa2a9b79d48f30cf42405f/docs/app-sre/sop/app-interface-manual-deployment.md)
 
-## Downscale app-sre-prod-01 deployment and scale appsrep05ue1 
+-   Revert the TTL change for vault.devshift.net record
+
+## Disable terraform-aws-route53 integration
+
+***Description***
+
+After DNS change is done and terraform-aws-route53 has applied the changes, disable the integrations through unleash
+
+***Success Criteria***
+
+-   terraform-aws-route53 integration is disabled along with the rest of integrations.
+
+***Rollback***
+
+Re-enable terraform-aws-route53 integration.
+
+## Downscale app-sre-prod-01 deployment and scale appsrep05ue1
 
 ***Description***
 
