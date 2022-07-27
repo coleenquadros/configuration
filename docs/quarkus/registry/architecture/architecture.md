@@ -73,7 +73,7 @@ In case there is a database failure (data corruption?), the publishing process c
 
 ### CPU
 
-- 0.5 - 1 CPU per pod
+- 0.4 - 1 CPU per pod
 
 ### Memory
 
