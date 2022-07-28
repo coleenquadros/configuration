@@ -1217,7 +1217,7 @@ Note: If terminal cannot find `gpg` after install, your executable may be named 
 $ gpg --full-generate-key
 ```
 4. A series of prompts directs you through the process. Press the Enter key to assign a default value if desired.
-      1. The first prompt asks you to select what kind of key you prefer. Select `RSA and RSA (default)`.  An RSA/RSA key allows you not only to sign communications, but also to encrypt files.
+      1. The first prompt asks you to select what kind of key you prefer. Select `RSA and RSA`. An RSA/RSA key allows you not only to sign communications, but also to encrypt files.
       2. Choose the key size: `4096`.
       3. Choose when the key will expire. You may set this to  `0 = key does not expire`.
       4. Before the gpg application asks for signature information, the following prompt appears: `Is this correct (y/N)?`. Review and enter `y`.
