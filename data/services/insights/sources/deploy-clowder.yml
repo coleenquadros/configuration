@@ -50,7 +50,8 @@ resourceTemplates:
       name: RedHatInsights-sources-api-go-gh-build-main
     parameters:
       SOURCES_ENV: stage
-      AVAILABILITY_MIN_REPLICAS: 1
+      MIN_REPLICAS: 0
+      AVAILABILITY_MIN_REPLICAS: 0
       KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-stage.svc.cluster.local
       KOKU_SOURCES_API_PORT: "10000"
       CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-stage.svc.cluster.local
@@ -87,6 +88,11 @@ resourceTemplates:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: RedHatInsights-sources-monitor-go-gh-build-main
     parameters:
+      # Since this Pod is scheduled via Cron, we set it to run on the last day
+      # of this year, to avoid firing any pods. It doesn't have direct database
+      # access, it just calls other pods, but just in case...
+      SCHEDULE_AVAILABLE: "0 0 31 12 5"
+      SCHEDULE_UNAVAILABLE: "0 0 31 12 5"
       SOURCES_HOST: sources-api-svc
   - namespace:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
@@ -108,7 +114,7 @@ resourceTemplates:
       name: RedHatInsights-sources-superkey-worker-gh-build-master
     parameters:
       LOG_LEVEL: INFO
-      MIN_REPLICAS: 1
+      MIN_REPLICAS: 0
       MEMORY_LIMIT: 150Mi
       AWS_WAIT_TIME: "20"
   - namespace:
@@ -133,6 +139,7 @@ resourceTemplates:
       $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
     ref: 1845313ddfa6b4092957794542fa4f2480fd066c
     parameters:
+      MIN_REPLICAS: 0
       RECEPTOR_CONTROLLER_SECRET_NAME: sources-psk
       RECEPTOR_CONTROLLER_SECRET_KEY_PSK: client-psk
       UPDATE_SOURCES_VIA_API: '1'
