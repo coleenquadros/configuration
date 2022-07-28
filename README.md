@@ -1572,6 +1572,32 @@ If the policy does not exist for the AWS account, add it.
 
 Additional details can be found in AWS [documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.access-control.html).
 
+##### Subscribe to RDS event notifications
+
+Currently we support email To subscribe to RDS event notifications such as scheduling or starting of a maintenance, there are two steps invovled:
+**Step 1** Define a SNS topic along side with your RDS instance defination. Currently we only support `email` as the subscriptions' protocol.
+```
+ - provider: sns 
+    identifier: test-sns-1 
+    subscriptions:
+    - protocol: email
+      endpoint: janedoe@redhat.com
+```
+**Step 2** Define `event_notifications` for your rds instance using the SNS topic identifier you use above as `destination`:
+```
+ - provider: rds
+    identifier: * 
+    defaults: *.yml
+    output_resource_name: * 
+    event_notifications:
+    - destination: test-sns-1
+      source_type: db_instance
+      event_categories: 
+        - deletion
+        - failover
+        - maintenance
+```
+
 #### Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)
 
 S3 buckets can be entirely self-serviced via App-Interface.
