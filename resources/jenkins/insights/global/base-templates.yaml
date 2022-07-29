@@ -1,6 +1,24 @@
 - base_templates:
     name: insights-base-templates
 
+    insights_default_admin_list_cfg: &insights_default_admin_list_cfg
+        admin-list:
+        - dependabot[bot]
+        - renovate[bot]
+
+    insights_default_ghprb_triggers_cfg: &insights_default_ghprb_triggers_cfg
+        cron: '* * * * *'
+        github-hooks: '{github_hooks}'
+        permit-all: false
+        trigger-phrase: '(?ms).*^(\[test\]|\/retest|\/lgtm|\/lgtm cancel|\/hold|\/hold cancel|\/ok-to-test)\s*$.*'
+        org-list:
+        - '{gh_org}'
+        allow-whitelist-orgs-as-admins: true
+        status-context: '{status_context}'
+        white-list-target-branches:
+        - '{white_list_target_branches}'
+        cancel-builds-on-update: true
+
     insights_gh_pr_check: &insights_gh_pr_check
         publishers:
         - junit:
@@ -29,18 +47,16 @@
             wipe-workspace: true
         triggers:
             - github-pull-request:
-                cron: '* * * * *'
-                github-hooks: '{github_hooks}'
-                permit-all: false
-                trigger-phrase: '(?ms).*^(\[test\]|\/retest|\/lgtm|\/lgtm cancel|\/hold|\/hold cancel|\/ok-to-test)\s*$.*'
-                org-list:
-                - '{gh_org}'
-                allow-whitelist-orgs-as-admins: true
-                admin-list:
-                - dependabot[bot]
-                - renovate[bot]
-                status-context: '{status_context}'
-                white-list-target-branches:
-                - '{white_list_target_branches}'
-                cancel-builds-on-update: true
+                <<: *insights_default_ghprb_triggers_cfg
+                <<: *insights_default_admin_list_cfg
         <<: *pr_check_template
+
+    hms_gh_pr_check: &hms_gh_pr_check
+        <<: *insights_gh_pr_check
+        triggers:
+            - github-pull-request:
+                <<: *insights_default_ghprb_triggers_cfg
+                admin-list:
+                - mshriver
+                - jlsherrill
+                - ezr-ondrej
