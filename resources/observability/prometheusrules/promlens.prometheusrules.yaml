@@ -1,0 +1,22 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  creationTimestamp: null
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: promlens-alertrules
+spec:
+  groups:
+  - name: promlens
+    rules:
+    # Promlens license will expire in 70 days
+    - alert: PromlensLicenseExpiringSoon
+      expr: "promlens_license_valid_until_timestamp_seconds-time()<60*60*24*70"
+      labels:
+        severity: medium
+        service: promlens
+      annotations:
+        message: "Promlens license will expire within the next 70 days <!subteam^S02E3CN2A9E>"
