@@ -389,3 +389,17 @@ In order to provide generic db access for tenant‘s service, we provide [gabi](
 In case you have lost access to a gabi instance for your service (an `Unauthorized` message) - the reason is likely the instance expiration. Submit a MR to extend the expiration date.
 
 More information: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/gabi-instances-request.md
+
+### What kind of tickets will be addressed by jira auto resolve feature?
+
+AppSRE has automations that allows us to analyze various metadata from kubernetes manifests, app-interface as well as cloud resources in AWS such as RDS etc. We review this data to ensure it follows AppSRE best practices and create jira tickets in our tenant boards to address the gaps if any.
+
+You may see tickets such as following created in your jira board. This list is not comprehensive and will change over time. 
+- https://issues.redhat.com/browse/APPSRE-5026
+- https://issues.redhat.com/browse/APPSRE-4887
+
+Easy way to identify such tickets in Jira is to check for `JIRALERT{<HASH>}` in the labels.
+
+ ***Only tickets created with this label will be resolved automatically once underlying cause has been addressed.***
+
+More information on how to enroll in this feature https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/register-your-service/#creating-an-escalation-policy, look for `issueResolveState` in jira board example.
