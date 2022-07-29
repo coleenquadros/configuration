@@ -266,6 +266,27 @@
     <<: *insights_gh_pr_check
 
 - job-template:
+    id: 'hms-gh-pr-check'
+    name: '{gh_org}-{gh_repo}-pr-check'
+    branch: "master"
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *insightsdroid_github
+        - *quay_api_token
+        - *hac_keycloak_secret
+        - *ibutsu
+    <<: *hms_gh_pr_check
+
+- job-template:
     id: 'insights-deploy-ephemeral'
     description: 'To 1) reserve and deploy an Insight app to ephemeral cluster 2) release namespaces the user has reserved. For additional documentation and usage instructions please see: https://docs.google.com/document/d/1f6D1ZwE40QuyoqsfuXpqPlCqOVwssGNEwr-iGDOYvVY/'
     name: '{name}-ephemeral'
