@@ -23,11 +23,11 @@ slos:
     window: 28d
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/receptor/SLO.md
   expr: |
-    1-(
-      sum(api_3scale_gateway_api_status{exported_service="receptor-controller", status!="5xx"})
-      /
-      sum(api_3scale_gateway_api_status{exported_service="receptor-controller"})
-    )
+    sum(rate(
+      api_3scale_gateway_api_status{exported_service="receptor-controller", status!="5xx"}[{{window}}]
+    )) / sum(rate(
+      api_3scale_gateway_api_status{exported_service="receptor-controller"}[{{window}}]
+    ))
   prometheusRules: /resources/insights-prod/receptor-prod/receptor.prometheusrules.yml
 
 - name: API requests result in successful (non-5xx) response
@@ -40,11 +40,11 @@ slos:
     window: 28d
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/receptor/SLO.md
   expr: |
-    1-(
-      sum(receptor_contoller_http_status_code_counter{service="receptor-controller", status_code!~"5.*"})
-      /
-      sum(receptor_contoller_http_status_code_counter{service="receptor-controller"})
-    )
+    sum(rate(
+      receptor_contoller_http_status_code_counter{service="receptor-controller", status_code!~"5.*"}[{{window}}]
+    )) / sum(rate(
+      receptor_contoller_http_status_code_counter{service="receptor-controller"}[{{window}}]
+    ))
   prometheusRules: /resources/insights-prod/receptor-prod/receptor.prometheusrules.yml
 
 - name: Successful response message delivery
@@ -57,9 +57,9 @@ slos:
     window: 28d
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/receptor/SLO.md
   expr: |
-    1-(
-      sum(receptor_controller_kafka_response_writer_success_count)
-      /
-      sum(receptor_controller_payload_message_sizes_count)
-    )
+    sum(rate(
+      sum(receptor_controller_kafka_response_writer_success_count)[{{window}}]
+    )) / sum(rate(
+      sum(receptor_controller_payload_message_sizes_count)[{{window}}]
+    ))
   prometheusRules: /resources/insights-prod/receptor-prod/receptor.prometheusrules.yml
