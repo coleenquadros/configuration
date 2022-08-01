@@ -1,0 +1,65 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/eventing-prod/eventing-prometheusrules.yaml
+
+evaluation_interval: 5m
+
+tests:
+
+# Tests EventingAlertKafkaLag
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_topic_sum_lag{group="eventing-splunk"}
+    values: 0 0 0 1001 1001 1001 1001 1001 1001 1001 1001 1001 1001 1001 1001
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: EventingAlertKafkaLag
+    exp_alerts:
+
+  # Test the alert for EventingAlertKafkaLag case
+  - eval_time: 15m
+    alertname: EventingAlertKafkaLag
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/eventing/eventing-integrations'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/eventing-prod/deployments'
+        message: 'eventing lag > 1000, current lag: the oldest message in the queue is 1001ms old'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/eventing/EventingAlertKafkaLag.md'
+      exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: eventing
+
+# Tests EventingAlertHandledSuccess
+- interval: 1m
+  input_series:
+  - series: CamelExchangeEventNotifier_seconds_count{namespace="eventing-prod",endpointName="direct://return",eventType="ExchangeSentEvent"}
+    values: 0 0 20 0 0 0 0 0 0 0
+  - series: CamelExchangeEventNotifier_seconds_count{namespace="eventing-prod",endpointName="direct://handler",eventType="ExchangeSentEvent"}
+    values: 0 100 100 100 100 100 100 100 100 100
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: EventingAlertHandledSuccess
+    exp_alerts:
+
+  # Test the alert for EventingAlertHandledSuccess case
+  - eval_time: 9m
+    alertname: EventingAlertHandledSuccess
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/eventing/eventing-integrations'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/eventing-prod/deployments'
+        message: 'eventing success rate for events handled is 20 when the goal is 90%'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/eventing/EventingAlertHandledSuccess.md'
+      exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: eventing
