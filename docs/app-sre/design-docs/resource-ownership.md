@@ -1,4 +1,4 @@
-# Design document - app-interface resource ownership
+# Design document - app-interface resource/data ownership
 
 ## Author / Date
 
@@ -12,8 +12,7 @@ The [granular permission model initiative](../initiatives/fine-grained-permissio
 
 ## Goal
 
-* Declare general resource ownership on role level so resources ownership can be granted to users by granting the role.
-* Define all resource ownerships within one schema element to prevent field explosion within the `/access/role-1.yml` schema.
+* Declare general resource and datafile ownership on role level so ownership can be granted to users by granting the role
 
 ## Out of scope
 
@@ -21,25 +20,32 @@ The actual declaration of change types (what can be changed in a self service ma
 
 ## Proposal
 
-Enhance the `/access/role-1.yml` schema to allow the declaration of owned resources within a list `owned_resources`. The items of this list will be objects with one field `resource`, which is a reference to a datafile. Defining this as an objects enables extensibility, e.g. the types of changes granted on such a resource can be defined in an future field `change_type`.
+Enhance the `/access/role-1.yml` schema to allow the declaration of owned datafiles and resources within `owned_datafiles` and `owned_resources`. The items of these list will be objects grouping datafiles or resourcefiles respectively. This way, each group can be enhanced in the future by adding additional attributes to refine the ownership relation, e.g. assigning a `change_type` to a group of datafiles or resources.
 
 ```yaml
 ---
 $schema: /access/role-1.yml
 ...
+ownded_datafiles:
+- datafiles:
+  - $ref: a datafile
+  ...
+  [change_type: ...] # not part of this design doc, just mentioned as a heads up
 owned_resources:
-- resource:
-    $ref: a resource
-  change_type:  # not part of this design doc, just mentioned as a heads up
-    $ref: a change type
+- resources:
+  - /path/to/a/resource
+  ...
+  [change_type: ...] # not part of this design doc, just mentioned as a heads up
 ```
 
-On the jsonschema side, `owned_resources.resource` is a `crossref` with a `$schemaRef` enum that will allow us to restrict the datafile types that can be referenced and will be enforced during bundle validation. The result is a list of mixed typed datafile references.
+## Datafiles
 
-On the GraphQL side, mixed types within a list need to be implemented with `interfaces`. We will dynamically add an interface `PathObject_v1` to all datafile types at `qontract-server` runtime and introduce an `interfaceResolve.strategy = schema` which resolves resource references based on their `$schema`.
+On the jsonschema side, `owned_datafiles.datafiles` is a list of `crossref` with a `$schemaRef` enum that will allow us to restrict the datafile types that can be referenced and will be enforced during bundle validation. The result is a list of mixed typed datafile references.
+
+On the GraphQL side, mixed types within a list need to be implemented with `interfaces`. We will dynamically add an interface `DatafileObject_v1` to all datafile types at `qontract-server` runtime and introduce an `interfaceResolve.strategy = schema` which resolves resource references based on their `$schema`.
 
 ```yaml
-- name: PathObject_v1
+- name: DatafileObject_v1
   isInterface: true
   interfaceResolve:
     strategy: schema
@@ -48,27 +54,39 @@ On the GraphQL side, mixed types within a list need to be implemented with `inte
   - { name: schema, type: string, isRequired: true }
 ```
 
-The `Role_v1` can then reference a list of `PathObjects_v1`.
+A role declaration with owned datafiles and resources will look like this:
 
 ```yaml
-- name: Role_v1
-  datafile: /access/role-1.yml
-  fields:
+---
+$schema: /access/role-1.yml
+...
+owned_datafiles:
+- description: AppSRE services
+  datafiles:
+  - $ref: /services/github-mirror/cicd/deploy.yaml
+  - $ref: /services/github-mirror/cicd/test.yaml
   ...
-  - { name: owned_resources, type: PathObject_v1, isList: true, isInterface: true }
+owned_resources:
+- description: some configmaps
+  resources:
+  - /app-sre/app-interface-production/qontract-api.configmap.yaml
   ...
 ```
 
-This makes the owned resources queryable like this
+This makes the owned resources and datafiles queryable like this
 
 ```
 {
   roles_v1 {
-    owned_resources {
-      resource {
+    owned_datafiles {
+      description
+      datafiles {
         path
-        schema
       }
+    }
+    owned_resources {
+      description
+      resources
     }
   }
 }
@@ -78,19 +96,19 @@ Since this interface is fully integrated into the apollo type system at runtime,
 
 ```
 {
-  roles_v1(path: "/teams/app-sre/roles/app-sre.yml") {
-    name
-    ownedresources {
-      resource {
+  roles_v1 {
+    owned_datafiles {
+      description
+      datafiles {
         path
-        schema
         ... on SaasFile_v2 {
           name
         }
-        ... on App_v1 {
-          onboardingStatus
-        }
       }
+    }
+    owned_resources {
+      description
+      resources
     }
   }
 }
@@ -98,5 +116,5 @@ Since this interface is fully integrated into the apollo type system at runtime,
 
 ## Milestones
 
-* Milestone 1 - Implement dynamic `PathObject_v1` interface assignment in `qontract-server` and perform respective change in `qontract-schema`.
+* Milestone 1 - Implement dynamic `DatafileObject_v1` interface assignment in `qontract-server` and perform respective change in `qontract-schema`.
 * Milestone 2 - Start using `owned_resources` for the `saas-file-owners` integration and deprecate `owned_saas_files`
