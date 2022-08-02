@@ -1,0 +1,163 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudwatch-exporter-config-osio
+  annotations:
+    qontract.recycle: "true"
+data:
+  config.yml: |
+    ---
+    region: us-east-1
+    metrics:
+    # AWS RDS Metrics
+    - aws_namespace: AWS/RDS
+      aws_metric_name: CPUUtilization
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average, Maximum, Minimum]
+      delay_seconds: {{ rds_delay_seconds | default('600') }}
+    - aws_namespace: AWS/RDS
+      aws_metric_name: DatabaseConnections
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average, Sum]
+      delay_seconds: {{ rds_delay_seconds | default('600') }}
+    - aws_namespace: AWS/RDS
+      aws_metric_name: FreeableMemory
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average, Sum]
+      delay_seconds: {{ rds_delay_seconds | default('600') }}
+    - aws_namespace: AWS/RDS
+      aws_metric_name: FreeStorageSpace
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average, Sum]
+      delay_seconds: {{ rds_delay_seconds | default('600') }}
+    # - aws_namespace: AWS/RDS
+    #   aws_metric_name: NetworkReceiveThroughput
+    #   aws_dimensions: [DBInstanceIdentifier]
+    #   aws_statistics: [Average, Sum]
+    #   delay_seconds: {{ rds_delay_seconds | default('600') }}
+    # - aws_namespace: AWS/RDS
+    #   aws_metric_name: NetworkTransmitThroughput
+    #   aws_dimensions: [DBInstanceIdentifier]
+    #   aws_statistics: [Average, Sum]
+    #   delay_seconds: {{ rds_delay_seconds | default('600') }}
+    # - aws_namespace: AWS/RDS
+    #   aws_metric_name: NetworkReceiveThroughput
+    #   aws_dimensions: [DBInstanceIdentifier]
+    #   aws_statistics: [Average, Sum]
+    #   delay_seconds: {{ rds_delay_seconds | default('600') }}
+    - aws_namespace: AWS/RDS
+      aws_metric_name: ReadLatency
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average, Sum]
+      delay_seconds: {{ rds_delay_seconds | default('600') }}
+    # - aws_namespace: AWS/RDS
+    #   aws_metric_name: ReadThroughput
+    #   aws_dimensions: [DBInstanceIdentifier]
+    #   aws_statistics: [Average, Sum]
+    #   delay_seconds: {{ rds_delay_seconds | default('600') }}
+    # - aws_namespace: AWS/RDS
+    #   aws_metric_name: WriteIOPS
+    #   aws_dimensions: [DBInstanceIdentifier]
+    #   aws_statistics: [Average, Sum]
+    #   delay_seconds: {{ rds_delay_seconds | default('600') }}
+    - aws_namespace: AWS/RDS
+      aws_metric_name: WriteLatency
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average, Sum]
+      delay_seconds: {{ rds_delay_seconds | default('600') }}
+    - aws_namespace: AWS/RDS
+      aws_metric_name: ReadIOPS
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average]
+      delay_seconds: {{ rds_delay_seconds | default('600') }}
+    - aws_namespace: AWS/RDS
+      aws_metric_name: WriteIOPS
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average]
+      delay_seconds: {{ rds_delay_seconds | default('600') }}
+    # - aws_namespace: AWS/RDS
+    #   aws_metric_name: WriteThroughput
+    #   aws_dimensions: [DBInstanceIdentifier]
+    #   aws_statistics: [Average, Sum]
+    #   delay_seconds: {{ rds_delay_seconds | default('600') }}
+    # - aws_namespace: AWS/RDS
+    #   aws_metric_name: AllocatedStorage
+    #   aws_dimensions: [DBInstanceIdentifier]
+    #   aws_statistics: [Average, Sum]
+    #   delay_seconds: {{ rds_delay_seconds | default('600') }}
+    - aws_namespace: AWS/RDS
+      aws_metric_name: BurstBalance
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average]
+      delay_seconds: {{ rds_delay_seconds | default('600') }}
+
+    # AWS S3 Metrics
+    ### Daily storage metrics, updated daily, available on all S3 buckets by default ###
+    - aws_namespace: "AWS/S3"
+      aws_dimensions: [BucketName, StorageType]
+      aws_metric_name: BucketSizeBytes
+      aws_statistics: [Average]
+      range_seconds: 172800
+      period_seconds: 86400
+      set_timestamp: false
+    - aws_namespace: "AWS/S3"
+      aws_dimensions: [BucketName, StorageType]
+      aws_metric_name: NumberOfObjects
+      aws_statistics: [Average]
+      range_seconds: 172800
+      period_seconds: 86400
+      set_timestamp: false
+    ### Request metrics, updated every minute, need opt-in in CloudWatch and costs $$$ ###
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: AllRequests
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: GetRequests
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: PutRequests
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: DeleteRequests
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: PostRequests
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: HeadRequests
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: ListRequests
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: BytesDownloaded
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: BytesUploaded
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: 4xxErrors
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: 5xxErrors
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: FirstByteLatency
+    #   aws_statistics: [Sum]
+    # - aws_namespace: "AWS/S3"
+    #   aws_dimensions: [BucketName, StorageType]
+    #   aws_metric_name: TotalRequestLatency
+    #   aws_statistics: [Sum]
