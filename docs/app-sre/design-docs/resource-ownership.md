@@ -1,4 +1,4 @@
-# Design document - app-interface resource/data ownership
+# Design document - app-interface resource/datafile ownership
 
 ## Author / Date
 
@@ -26,21 +26,22 @@ Enhance the `/access/role-1.yml` schema to allow the declaration of owned datafi
 ---
 $schema: /access/role-1.yml
 ...
-ownded_datafiles:
-- datafiles:
+self_service:
+- description: some saas files we need to take care of
+  datafiles:
   - $ref: a datafile
   ...
   [change_type: ...] # not part of this design doc, just mentioned as a heads up
-owned_resources:
-- resources:
-  - /path/to/a/resource
+- description: a configmap we need to change regularly
+  resources:
+  - /path/to/a/configmap.yml
   ...
   [change_type: ...] # not part of this design doc, just mentioned as a heads up
 ```
 
 ## Datafiles
 
-On the jsonschema side, `owned_datafiles.datafiles` is a list of `crossref` with a `$schemaRef` enum that will allow us to restrict the datafile types that can be referenced and will be enforced during bundle validation. The result is a list of mixed typed datafile references.
+On the jsonschema side, `self_service.datafiles` is a list of `crossref` with a `$schemaRef` enum that will allow us to restrict the datafile types that can be referenced and will be enforced during bundle validation. The result is a list of mixed typed datafile references.
 
 On the GraphQL side, mixed types within a list need to be implemented with `interfaces`. We will dynamically add an interface `DatafileObject_v1` to all datafile types at `qontract-server` runtime and introduce an `interfaceResolve.strategy = schema` which resolves resource references based on their `$schema`.
 
@@ -60,17 +61,16 @@ A role declaration with owned datafiles and resources will look like this:
 ---
 $schema: /access/role-1.yml
 ...
-owned_datafiles:
+self_service:
 - description: AppSRE services
   datafiles:
   - $ref: /services/github-mirror/cicd/deploy.yaml
   - $ref: /services/github-mirror/cicd/test.yaml
-  ...
-owned_resources:
+  change_type: ...
 - description: some configmaps
   resources:
   - /app-sre/app-interface-production/qontract-api.configmap.yaml
-  ...
+  change_type: ...
 ```
 
 This makes the owned resources and datafiles queryable like this
@@ -78,14 +78,11 @@ This makes the owned resources and datafiles queryable like this
 ```
 {
   roles_v1 {
-    owned_datafiles {
+    self_service {
       description
       datafiles {
         path
       }
-    }
-    owned_resources {
-      description
       resources
     }
   }
@@ -97,7 +94,7 @@ Since this interface is fully integrated into the apollo type system at runtime,
 ```
 {
   roles_v1 {
-    owned_datafiles {
+    self_service {
       description
       datafiles {
         path
@@ -105,9 +102,6 @@ Since this interface is fully integrated into the apollo type system at runtime,
           name
         }
       }
-    }
-    owned_resources {
-      description
       resources
     }
   }
@@ -117,4 +111,4 @@ Since this interface is fully integrated into the apollo type system at runtime,
 ## Milestones
 
 * Milestone 1 - Implement dynamic `DatafileObject_v1` interface assignment in `qontract-server` and perform respective change in `qontract-schema`.
-* Milestone 2 - Start using `owned_resources` for the `saas-file-owners` integration and deprecate `owned_saas_files`
+* Milestone 2 - Start using `self_service` for the `saas-file-owners` integration and remove `owned_saas_files`
