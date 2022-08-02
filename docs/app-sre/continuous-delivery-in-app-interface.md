@@ -223,6 +223,7 @@ Each user with this role can approve MRs by adding a `/lgtm` comment in the MR i
 - the MR only changes one or more of the following fields in a saas file:
     - `ref`
     - `parameters`
+    - `secretParameters`
     - `upstream`
     - `disable`
     - `deployResources`
