@@ -71,6 +71,12 @@ externalResources:
     $ref: /aws/app-sre-stage/account.yml
   resources:
   ### AppInterface
+  - provider: sns 
+    identifier: unleash-rds-notification
+    defaults: /terraform/resources/unleash/sns-stage-1.yml
+    subscriptions:
+    - protocol: email
+      endpoint: yihuang@redhat.com
   - provider: rds
     identifier: app-interface-unleash-stage
     defaults: /terraform/resources/unleash/rds-stage-1.yml
@@ -78,6 +84,15 @@ externalResources:
       snapshot_identifier: unleash-a-i-stage-app-sre-stage
       apply_immediately: true
     output_resource_name: app-interface-stage-unleash-rds
+    event_notifications:
+    - destination: unleash-rds-notification
+      source_type: db-instance
+      event_categories: 
+        - availability
+        - deletion
+        - failover
+        - maintenance
+        - backup
 - provider: aws
   provisioner:
     $ref: /aws/app-sre/account.yml
