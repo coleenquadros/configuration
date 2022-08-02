@@ -36,8 +36,8 @@ This means the changes are limited to saas file. And that usually does not need 
 Insights MRs should be assigned to the MR and approved as follows:
 
 - `OnBoarded` services - AppSRE
-- `BestEffort` services - @chambrid or @psavage (ping @crc-ic to get both)
-- FedRAMP - @klape
+- `BestEffort` services - assign to a member of @crc-ic (or ping the group for review)
+- `FedRAMP` - should be removed from app-interface in https://issues.redhat.com/browse/RHCLOUD-20392
 
 **Note:** the reviewers above are able to add lgtm labels in GitLab
 
