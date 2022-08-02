@@ -69,6 +69,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * `path` - path to secret in Vault containing credentials (should contain `config.json`, `user` and `token` keys)
         * `field` - should be `all`.
 * `parameters` - (optional) parameters for `oc process` to be used in all resource templates in this saas file.
+* `allowedSecretParameterPaths` - (optional, required for `secretParameters`) a list of paths in vault which are allowed for usage in `secretParameters`.
 * `secretParameters` - (optional) a list of parameters from secrets in Vault for `oc process` to be used in all resource templates in this saas file.
     * `name` - name of parameter
     * `secret` - a description of a secret in Vault to get parameter value from.
@@ -222,6 +223,7 @@ Each user with this role can approve MRs by adding a `/lgtm` comment in the MR i
 - the MR only changes one or more of the following fields in a saas file:
     - `ref`
     - `parameters`
+    - `secretParameters`
     - `upstream`
     - `disable`
     - `deployResources`
