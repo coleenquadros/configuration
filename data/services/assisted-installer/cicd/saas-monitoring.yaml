@@ -20,8 +20,12 @@ slack:
 
 managedResourceTypes:
 - ServiceMonitor
+- ConfigMap
+- Deployment
+- Service
 
-imagePatterns: []
+imagePatterns:
+- quay.io/prometheuscommunity/postgres-exporter
 
 resourceTemplates:
 - name: assisted-service
@@ -52,3 +56,13 @@ resourceTemplates:
     ref: main
     parameters:
       NAMESPACE: assisted-installer-production
+- name: assisted-service-postgres-exporter
+  url: https://github.com/openshift/assisted-service
+  path: /openshift/template-monitoring-postgres.yaml
+  targets:
+  - namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
+    ref: master
+  - namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
+    ref: master
