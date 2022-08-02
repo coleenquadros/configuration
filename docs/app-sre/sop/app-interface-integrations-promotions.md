@@ -18,12 +18,22 @@ App-interface integrations are being executed in multiple locations in multiple 
    Make sure to not use `mawk` (Ubuntu default), as it does not support explicit number of occurrences,
    e.g., `[a-f0-9]{7}`.
 1. Validate output of each integration in `app-interface JSON validation` within MR build. If there are any output logs they should be well explained by the change introduced.
-1. Team members should deploy their own changes to production shortly after
-   merging. In some cases, there might be changes queued up from multiple team
+1. Team members must deploy their own changes to all production environments
+   the member has access to shortly after merging. As a general rule, if
+   there's any reason that prevents you from deploying your changes at the
+   end of your working day, you must revert your changes.
+1. Every promotion MR has a link to qontract-reconcile repository that
+   allows a visualization of the changes that will be deployed.
+   In some cases, there might be changes queued up from multiple team
    members. **If your promotion will include changes from other team
    members, it is a courtesy to notify those team members.** Acknowledgements
    from team members will not block the promotion because merging a change
    indicates that it is production-ready.
+1. Take a look to the build logs to understand what the change is doing,
+   especially if there are other changes to be merged apart from yours. If
+   you don't feel comfortable deploying changes of others and the person
+   responsible for the change is not online, feel free to revert the change
+   so that it is deployed by the change author.
 1. Add a **lgtm** label to the MR via the GitLab website. The change will
    be merged as per the standard
    [continuous delivery process](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md). Newer team members should have the MR reviewed by at least one other team member for the first few times they promote qontract-reconcile (and until they are comfortable with the process).
