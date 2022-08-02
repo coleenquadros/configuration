@@ -36,7 +36,7 @@ This means the changes are limited to saas file. And that usually does not need 
 Insights MRs should be assigned to the MR and approved as follows:
 
 - `OnBoarded` services - AppSRE
-- `BestEffort` services - @chambrid, @bturner, @psavage or @lburnett
+- `BestEffort` services - @chambrid or @psavage (ping @crc-ic to get both)
 - FedRAMP - @klape
 
 **Note:** the reviewers above are able to add lgtm labels in GitLab
