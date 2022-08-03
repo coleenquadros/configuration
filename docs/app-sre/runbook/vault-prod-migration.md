@@ -61,7 +61,7 @@ This maintenance operation will include the following activities:
 
 -   **Downscale deployment on app-sre-prod-01 and scale appsrep05ue1 deployment**
 
--   **Test vault & vault-secrets integration**
+-   **Test vault & vault-secrets integration + CI Int/Ext**
 
 -   **Re-enable all integrations**
 
@@ -211,7 +211,7 @@ start re-enabling the integrations.
 
 -   Scale to 3 replicas the deployment on app-sre-prod-01
 
-## Test Vault manually and vault-secrets integration
+## Test Vault manually and vault-secrets integration + CI Int/Ext
 
 ***Description***
 
@@ -219,9 +219,13 @@ Test that Vault is working fine both from the integration perspective
 and manually using it from the CLI / UI a script to test the creation,
 reading and deletion of secrets is available on this gitlab gist (TBD)
 
+Also test that CI Int and CI Ext can properly communicate with Vault
+after the migration to ensure that everything is working properly.
+
 ***Success Criteria***
 
 -   Vault works both via integrations and manually
+-   CI int/ext work as expected
 
 ***Rollback***
 
