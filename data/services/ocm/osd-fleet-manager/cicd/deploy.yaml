@@ -79,3 +79,45 @@ resourceTemplates:
             compute_autoscale_max_replicas: 9
             network_type: OVNKubernetes
             private: false
+  - namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-osd-fleet-manager-gl-build-main
+    parameters:
+      ENVIRONMENT: stage
+      OCM_URL: ${OCM_BASE_URL}
+      # TODO scale to 3 replicas once deployed successfully
+      REPLICAS: 1
+      OIDCS3_BUCKET_NAME: oidc-bucket-stage
+      SUPPORTED_CLOUD_PROVIDERS: |-
+        - name: aws
+          # TODO enable a region once deployed successfully
+          regions: []
+      CLUSTER_TEMPLATES: |-2
+          # HyperShift Service Cluster
+          hs-sc:
+            name_prefix: "hs-stage-sc-"
+            openshift_version: ""
+            multi_az: true
+            ccs: true
+            compute_machine_type: m5.xlarge
+            compute_autoscale: false
+            compute_nodes: 3
+            network_type: OVNKubernetes
+            private: false
+
+          # HyperShift Management Cluster
+          hs-mc:
+            name_prefix: "hs-stage-mc-"
+            openshift_version: ""
+            multi_az: true
+            ccs: true
+            compute_machine_type: m5.xlarge
+            compute_autoscale: true
+            compute_autoscale_min_replicas: 3
+            compute_autoscale_max_replicas: 9
+            network_type: OVNKubernetes
+            private: false
