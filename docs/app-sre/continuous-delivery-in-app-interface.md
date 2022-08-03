@@ -148,9 +148,7 @@ In addition to the supplied parameters, there are additional parameters which ar
 
 Every saas file contains a list of resources to deploy, and each resource contains a list of targets to deploy to.  Each target is a namespace, and each such namespace is associated to an environment.
 
-For v1 SaaS files, A Jenkins job will be automatically created for each saas file and for each environment.  Each job executes an app-interface integration called `openshift-saas-deploy` for the specific saas file and environment.  The output will be similar to output you see in other app-interface integrations.
-
-For v2 SaaS files, A generic Tekton Pipeline will be automatically created in the pipelines namespace ([bootstrap tekton](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#bootstrap)). A Tekton PipelineRun will be created (deployment will be triggered) for each saas file and for each environment.  Each run executes an app-interface integration called `openshift-saas-deploy` for the specific saas file and environment.  The output will be similar to output you see in other app-interface integrations.
+A generic Tekton Pipeline will be automatically created in the pipelines namespace ([bootstrap tekton](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#bootstrap)). A Tekton PipelineRun will be created (deployment will be triggered) for each saas file and for each environment.  Each run executes an app-interface integration called `openshift-saas-deploy` for the specific saas file and environment.  The output will be similar to output you see in other app-interface integrations.
 
 ## What triggered a deployment?
 
