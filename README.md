@@ -1575,15 +1575,17 @@ Additional details can be found in AWS [documentation](https://docs.aws.amazon.c
 ##### Subscribe to RDS event notifications
 
 Currently we support email To subscribe to RDS event notifications such as scheduling or starting of a maintenance, there are two steps invovled:
-**Step 1** Define a SNS topic along side with your RDS instance defination. Currently we only support `email` as the subscriptions' protocol.
+
+**Step 1.** Define a SNS topic along side with your RDS instance defination. Currently we only support `email` as the subscriptions' protocol.
 ```
  - provider: sns 
     identifier: test-sns-1 
+    defaults: *.yml
     subscriptions:
     - protocol: email
       endpoint: janedoe@redhat.com
 ```
-**Step 2** Define `event_notifications` for your rds instance using the SNS topic identifier you use above as `destination`:
+**Step 2.** Define `event_notifications` for your rds instance using the SNS topic identifier you use above as `destination`:
 ```
  - provider: rds
     identifier: * 
@@ -1597,6 +1599,8 @@ Currently we support email To subscribe to RDS event notifications such as sched
         - failover
         - maintenance
 ```
+Note that the default file for SNS doesn't need to have value but need to be present. The identifier should be the name of the SNS topic instead of its ARN.
+You can use this [MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/44428/diffs#fd3473d3c2ca1a88f2a9df55aa89ce7027ab5af1) as example. 
 
 #### Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)
 
