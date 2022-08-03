@@ -145,6 +145,7 @@ This step should be performed in a single merge request.
     * Note: The `id`, `consoleUrl`, `serverUrl`, `external_id` and `elbFQDN` will be added automatically at a later stage. Don't worry about them.
     * Note: Network - https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/clusters-network.md
       * vpc: Define a new one (e.g. 10.X.0.0/16) that isn't already in use
+        * **DO NOT USE anything within 10.30.0.0/16** as this is used by Red Hat IT's internal resources on AWS (which will cause conflicts if the cluster is peered with ci-int)
       * service: 172.30.0.0/16 can be used
       * pod: 10.128.0.0/14 can be used
 
@@ -461,6 +462,8 @@ App-interface has network information for all v4 clusters it is managing. Thus, 
 There is a convenience utility to fetch this data: `qontract-cli get clusters-network`.
 
 The value of the NETWORK.VPC must be unique (find an unused /24 network), however, the NETWORK.SERVICE and NETWORK.POD can be reused (`10.120.0.0/16` and `10.128.0.0/14` respectively).
+
+**DO NOT USE anything within 10.30.0.0/16** as this is used by Red Hat IT's internal resources on AWS (which will cause conflicts if the cluster is peered with ci-int)
 
 Note that the host prefix must be set to /23.
 
