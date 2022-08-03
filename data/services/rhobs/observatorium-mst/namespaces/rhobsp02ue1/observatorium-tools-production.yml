@@ -1,0 +1,47 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: observatorium-tools-production
+description: production namespace for Observatorium Managed Service Tenants' observability infrastructure
+
+cluster:
+  $ref: /openshift/rhobsp02ue1/cluster.yml
+
+app:
+  $ref: /services/rhobs/observatorium-mst/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.rhobsp02ue1.yml
+# TODO(@matej-g): These 2 entries below should not be needed as there will be
+# no cross-namespace federation on rhobsp02ue1 and any other infra that is shared on Telemeter
+# between namespaces (e.g jaeger collector or parca) will be on rhobsp02ue1 cluster.
+# Remove these entries after confirmation.
+# - $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
+# - $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
+
+managedRoles: true
+
+# TODO: Add all resources - Routes, Secrets, Cluster Role etc.
+managedResourceTypes:
+- Role
+- RoleBinding
+- ServiceAccount
+# - Secret
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+- $ref: /services/rhobs/shared-resources/observatorium-allow-port-forward.yml
+
+openshiftResources:
+# Serviceaccount for Observatorium platform, Cluster role to access OSD tenant namespace
+- provider: resource
+  path: /app-sre/observatorium-mst-production/observatorium-tools.serviceaccount.yaml
+# NOTICE: This resource is deployed through the observatorium-mst-cluster-scope-production namespace file,
+# until https://issues.redhat.com/browse/APPSRE-2935 is fixed.
+# - provider: resource
+#   path: /app-sre/observatorium-mst-production/observatorium-mst.clusterrole.yml
