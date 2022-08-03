@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fleet-manager-envoy-config
+  annotations:
+    qontract.recycle: "true"
+data:
+  main.yaml: |
+    # Mostly empty for now (bootstrapping phase).
+    # See resources/services/managed-services/production/kas-fleet-manager-envoy.configmap.yaml
+    # for an inspiration.
+
+    # The administration endpoint uses a Unix socket instead of TCP in order
+    # to avoid exposing it outside of the pod. Requests for metrics and
+    # probes will go via an HTTP listener that only accepts requests for the
+    # /metrics and /ready paths.
+    admin:
+      access_log_path: /dev/null
+      address:
+        pipe:
+          path: /sockets/admin.socket
