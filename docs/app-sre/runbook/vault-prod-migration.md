@@ -35,6 +35,8 @@ just once being updated\>
 
 -   Move certificates from digicert to cert manager
 
+-   Migrate Tekton pipelines to internal cluster - [APPSRE-6096](https://issues.redhat.com/browse/APPSRE-6096)
+
 -   **Pre-submit all MRs in advance so they can be reviewed**
 
 # Timeline
@@ -76,6 +78,8 @@ The following list **must be done in order**:
 - [ ] Deploy a vault-prod namespace to appsrep05ue1
 
 - [ ] Move certificates from Digicert to cert manager
+
+- [ ] Migrate Tekton pipelines to internal cluster
 
 - [ ] Prepare MR to add a new target to saasfile to deploy vault into appsrep05ue1
 
