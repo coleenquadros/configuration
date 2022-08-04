@@ -144,6 +144,12 @@ externalResources:
   provisioner:
     $ref: /aws/insights-stage/account.yml
   resources:
+  - provider: sns 
+    identifier: cost-stage-rds-notification
+    defaults: /terraform/resources/insights/stage/sns-stage-1.yml
+    subscriptions:
+    - protocol: email
+      endpoint: cost-mgmt@redhat.com
   - provider: rds
     identifier: koku-stage
     defaults: /terraform/resources/insights/stage/rds/postgres13-rds-cost-management-stage-1.yml
@@ -152,6 +158,15 @@ externalResources:
       name: "koku"
     output_resource_name: koku-db
     enhanced_monitoring: true
+    event_notifications:
+    - destination: cost-stage-rds-notification
+      source_type: db-instance
+      event_categories: 
+        - availability
+        - deletion
+        - failover
+        - maintenance
+        - backup
     parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-cost-management-stage.yml
     annotations:
       clowder/database: "koku"

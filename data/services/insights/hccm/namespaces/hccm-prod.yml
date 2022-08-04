@@ -145,6 +145,12 @@ externalResources:
     defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
     output_resource_name: cloudwatch
     es_identifier: kibana-elasticsearch
+  - provider: sns 
+    identifier: cost-prod-rds-notification
+    defaults: /terraform/resources/insights/production/sns-prod-1.yml
+    subscriptions:
+    - protocol: email
+      endpoint: cost-mgmt@redhat.com
   - provider: rds
     identifier: cost-management-prod
     # RDS Instance Settings
@@ -155,6 +161,15 @@ externalResources:
     enhanced_monitoring: true
     output_resource_name: koku-db
     output_resource_db_name: koku
+    event_notifications:
+    - destination: cost-prod-rds-notification
+      source_type: db-instance
+      event_categories: 
+        - availability
+        - deletion
+        - failover
+        - maintenance
+        - backup
     # PostgreSQL Parameter Group
     parameter_group: /terraform/resources/insights/production/rds/postgres-curr-parameter-group-cost-management-prod.yml
     annotations:
