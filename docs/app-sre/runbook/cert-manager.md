@@ -131,6 +131,74 @@ metadata:
 
 - Remove openshift-acme deployment from the namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/88ca619f5363bc43f730fa5d34c6e50418d33f28/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml#L72-L75)
 
+## Multiple Path-based Routes with the same Host
+
+When multiple secured `Routes` use the same `host`, openshift router uses the same certificate for all of them. In these cases, cert-manager annotations need to be set in one of the routes only.
+
+- [More info](https://coreos.slack.com/archives/CCH60A77E/p1658931732003599)
+- [Example](https://gitlab.cee.redhat.com/service/app-interface/-/tree/d005987304a30f981d76f5e042d12097b25d3d83/resources/app-sre-stage/telemeter-stage)
+
+
+## Troubleshooting
+
+If a certificate is not getting issued or updated, you'll need to check the `cert-manager` objects in the same namespace where the `Route` is deployed.
+
+Example:
+
+```bash
+❯ oc get CertificateRequest
+NAME                                 APPROVED   DENIED   READY   ISSUER                  REQUESTOR                                                                    AGE
+code-quarkus-redhat-api-d-zpvmh      True                False   letsencrypt-prod-http   system:serviceaccount:openshift-cert-manager:cert-manager-openshift-routes   22h
+
+❯ oc describe CertificateRequest code-quarkus-redhat-api-d-zpvmh
+Name:         code-quarkus-redhat-api-d-zpvmh
+Namespace:    code-quarkus-redhat-stage
+[...]
+Status:
+  Conditions:
+    Last Transition Time:  2022-08-03T08:28:19Z
+    Message:               Certificate request has been approved by cert-manager.io
+    Reason:                cert-manager.io
+    Status:                True
+    Type:                  Approved
+    Last Transition Time:  2022-08-03T08:28:19Z
+    Message:               Waiting on certificate issuance from order code-quarkus-redhat-stage/code-quarkus-redhat-api-d-zpvmh-1483473006: "processing"
+    Reason:                Pending
+    Status:                False
+    Type:                  Ready
+Events:                    <none>
+
+
+❯ oc describe Order code-quarkus-redhat-api-d-zpvmh-1483473006
+Name:         code-quarkus-redhat-api-d-zpvmh-1483473006
+Namespace:    code-quarkus-redhat-stage
+Labels:       <none>
+[...]
+Status:
+  Authorizations:
+    Challenges:
+      Token:        IfimfssUcnPMykdQpQfTcpKlQooTzBiooJEfYUcnnAA
+      Type:         http-01
+      URL:          https://acme-v02.api.letsencrypt.org/acme/chall-v3/137792422206/ovRWqQ
+      Token:        IfimfssUcnPMykdQpQfTcpKlQooTzBiooJEfYUcnnAA
+      Type:         dns-01
+      URL:          https://acme-v02.api.letsencrypt.org/acme/chall-v3/137792422206/XLIimg
+      Token:        IfimfssUcnPMykdQpQfTcpKlQooTzBiooJEfYUcnnAA
+      Type:         tls-alpn-01
+      URL:          https://acme-v02.api.letsencrypt.org/acme/chall-v3/137792422206/a3SgZg
+    Identifier:     code.quarkus.stage.redhat.com
+    Initial State:  pending
+    URL:            https://acme-v02.api.letsencrypt.org/acme/authz-v3/137792422206
+    Wildcard:       false
+  Finalize URL:     https://acme-v02.api.letsencrypt.org/acme/finalize/610586596/112686765626
+  State:            processing
+  URL:              https://acme-v02.api.letsencrypt.org/acme/order/610586596/112686765626
+Events:             <none>
+```
+
+In this case the problem was that some path-based routes were annotated with the cert-manager annotations multiple times and they were sharing the same
+host. If a `CertificateRequest` is not progressing or it has errors, you can delete it to retry the certificate issuance.
+
 ## Additional Information
 
 - [cert-manager](https://cert-manager.io/)
