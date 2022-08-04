@@ -1,0 +1,512 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /observability/prometheusrules/acs-fleet-manager-stage.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      # 0m  - 20m Pod not absent
+      # 20m - 40m Pod absent
+      - series: 'up{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage"}'
+        values: '1+0x20 0+0x20' # 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: ACS Fleet Manager down - stage
+        exp_alerts:
+      - eval_time: 40m
+        alertname: ACS Fleet Manager down - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager down - stage
+              service: acs-fleet-manager
+              severity: high
+              namespace: acs-fleet-manager-stage
+            exp_annotations:
+              message: "No instances found for ACS Fleet Manager on stage. ACS Fleet Manager is down."
+              dashboard: "https://grafana.stage.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-down"
+
+  # SLO Availability
+  - interval: 1m
+    input_series:
+      - series: haproxy_backend_http_responses_total:burnrate5m{route="acs-fleet-manager",exported_namespace="acs-fleet-manager-stage"}
+        values: '1.34+0.0x10' #(13.44*(1-0.90))=1.34 for 2 min
+      - series: haproxy_backend_http_responses_total:burnrate1h{route="acs-fleet-manager",exported_namespace="acs-fleet-manager-stage"}
+        values: '1.34+0.0x10'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: ACS Fleet Manager returning 5xx error budget burn 5m to 1h - stage
+        exp_alerts: [ ]
+      - eval_time: 2m
+        alertname: ACS Fleet Manager returning 5xx error budget burn 5m to 1h - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager returning 5xx error budget burn 5m to 1h - stage
+              exported_namespace: acs-fleet-manager-stage
+              route: acs-fleet-manager
+              service: acs-fleet-manager
+              severity: medium
+            exp_annotations:
+              message: "High error budget burn of returning 5xx error codes for acs-fleet-manager-stage (current value: 1.34)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-availability"
+
+  - interval: 1m
+    input_series:
+      - series: haproxy_backend_http_responses_total:burnrate30m{route="acs-fleet-manager",exported_namespace="acs-fleet-manager-stage"}
+        values: '0.56+0.0x15' #(5.60 * (1-0.90000)) for 15 min
+      - series: haproxy_backend_http_responses_total:burnrate6h{route="acs-fleet-manager",exported_namespace="acs-fleet-manager-stage"}
+        values: '0.56+0.0x15'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: ACS Fleet Manager returning 5xx error budget burn 30m to 6h - stage
+        exp_alerts: [ ]
+      - eval_time: 10m
+        alertname: ACS Fleet Manager returning 5xx error budget burn 30m to 6h - stage
+        exp_alerts: [ ]
+      - eval_time: 15m
+        alertname: ACS Fleet Manager returning 5xx error budget burn 30m to 6h - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager returning 5xx error budget burn 30m to 6h - stage
+              exported_namespace: acs-fleet-manager-stage
+              route: acs-fleet-manager
+              service: acs-fleet-manager
+              severity: medium
+            exp_annotations:
+              message: "High error budget burn of returning 5xx error codes for acs-fleet-manager-stage (current value: 0.56)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-availability"
+  - interval: 1m
+    input_series:
+      - series: haproxy_backend_http_responses_total:burnrate2h{route="acs-fleet-manager",exported_namespace="acs-fleet-manager-stage"}
+        values: '0.28+0.0x60' #(2.80 * (1-0.90000))=.28 for 1h
+      - series: haproxy_backend_http_responses_total:burnrate1d{route="acs-fleet-manager",exported_namespace="acs-fleet-manager-stage"}
+        values: '0.28+0.0x60'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: ACS Fleet Manager returning 5xx error budget burn 2h to 1d - stage
+        exp_alerts: [ ]
+      - eval_time: 40m
+        alertname: ACS Fleet Manager returning 5xx error budget burn 2h to 1d - stage
+        exp_alerts: [ ]
+      - eval_time: 60m
+        alertname: ACS Fleet Manager returning 5xx error budget burn 2h to 1d - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager returning 5xx error budget burn 2h to 1d - stage
+              exported_namespace: acs-fleet-manager-stage
+              route: acs-fleet-manager
+              service: acs-fleet-manager
+              severity: medium
+            exp_annotations:
+              message: "High error budget burn of returning 5xx error codes for acs-fleet-manager-stage (current value: 0.28)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-availability"
+
+  - interval: 1m
+    input_series:
+      - series: haproxy_backend_http_responses_total:burnrate6h{route="acs-fleet-manager",exported_namespace="acs-fleet-manager-stage"}
+        values: '0.11+0.0x190' #(1.00 * (1-0.90000)=.1 for 3h
+      - series: haproxy_backend_http_responses_total:burnrate3d{route="acs-fleet-manager",exported_namespace="acs-fleet-manager-stage"}
+        values: '0.11+0.0x190'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: ACS Fleet Manager returning 5xx error budget burn 6h to 3d - stage
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: ACS Fleet Manager returning 5xx error budget burn 6h to 3d - stage
+        exp_alerts: [ ]
+      - eval_time: 180m
+        alertname: ACS Fleet Manager returning 5xx error budget burn 6h to 3d - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager returning 5xx error budget burn 6h to 3d - stage
+              exported_namespace: acs-fleet-manager-stage
+              route: acs-fleet-manager
+              service: acs-fleet-manager
+              severity: medium
+            exp_annotations:
+              message: "High error budget burn of returning 5xx error codes for acs-fleet-manager-stage (current value: 0.11)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-availability"
+
+  # SLO API Latency p90 < 100ms            
+  - interval: 1m
+    input_series:
+      # 0m  - 30m   all good
+      # 30m - 60m   50% of requests degraded to 1le bucket
+      # 60m - 90m   70% of requests degraded to 1le bucket
+      - series: 'api_inbound_request_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="0.1",code="200"}'
+        values: '0+1x30   31+5x30   181+3x60'
+      - series: 'api_inbound_request_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="1",code="200"}'
+        values: '0+1x30   31+5x30   181+7x60'
+      - series: 'api_inbound_request_duration_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage"}'
+        values: '0+1x30   31+10x30  331+10x60'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: ACS Fleet Manager Latency p90 < 100ms 30m to 6h budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 60m
+        alertname: ACS Fleet Manager Latency p90 < 100ms 30m to 6h budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: ACS Fleet Manager Latency p90 < 100ms 30m to 6h budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Latency p90 < 100ms 30m to 6h budget burn - stage
+              job: fleet-manager-metrics
+              latency: 0.1
+              namespace: acs-fleet-manager-stage
+              quantile: 90
+              service: acs-fleet-manager
+              severity: high
+            exp_annotations:
+              message: "High 1h/6h requests latency budget burn for ACS Fleet Manager API p90 (current value: 609.3m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-latency"
+  - interval: 1m
+    input_series:
+      # 0m    - 60m   all good
+      # 60m   - 120m  10% of requests degraded to 1le bucket
+      # 120m  - 150m  30% of requests degraded to 1le bucket
+      - series: 'api_inbound_request_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="0.1",code="200"}'
+        values: '0+1x60   61+9x60   601+7x30'
+      - series: 'api_inbound_request_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="1",code="200"}'
+        values: '0+1x60   61+1x60   121+3x30'
+      - series: 'api_inbound_request_duration_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage"}'
+        values: '0+1x60   61+10x60  661+10x30'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: ACS Fleet Manager Latency p90 < 100ms 6h to 3d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: ACS Fleet Manager Latency p90 < 100ms 6h to 3d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 150m
+        alertname: ACS Fleet Manager Latency p90 < 100ms 6h to 3d budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Latency p90 < 100ms 6h to 3d budget burn - stage
+              job: fleet-manager-metrics
+              latency: 0.1
+              namespace: acs-fleet-manager-stage
+              quantile: 90
+              service: acs-fleet-manager
+              severity: high
+            exp_annotations:
+              message: "High 1d/3d requests latency budget burn for ACS Fleet Manager API p90 (current value: 151.5m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-latency"
+
+  # SLO API Latency p99 < 1s
+  - interval: 1m
+    input_series:
+      # 0m  - 30m   all good
+      # 30m - 60m   5% of requests degraded to 2le bucket
+      # 60m - 90m   10% of requests degraded to 2le bucket
+      - series: 'api_inbound_request_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="1",code="200"}'
+        values: '0+1x30   31+19x30  601+18x30'
+      - series: 'api_inbound_request_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="2",code="200"}'
+        values: '0+1x30   31+1x30   61+2x30'
+      - series: 'api_inbound_request_duration_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage"}'
+        values: '0+1x30   31+20x30  631+20x30'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: ACS Fleet Manager Latency p99 < 1s 30m to 6h budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 60m
+        alertname: ACS Fleet Manager Latency p99 < 1s 30m to 6h budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 90m
+        alertname: ACS Fleet Manager Latency p99 < 1s 30m to 6h budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Latency p99 < 1s 30m to 6h budget burn - stage
+              job: fleet-manager-metrics
+              latency: 1
+              namespace: acs-fleet-manager-stage
+              quantile: 99
+              service: acs-fleet-manager
+              severity: high
+            exp_annotations:
+              message: "High 6h requests latency budget burn for ACS Fleet Manager API p99 (current value: 71.73m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-latency"
+  - interval: 1m
+    input_series:
+      # 0m    - 60m   all good
+      # 60m   - 120m  1% of requests degraded to 2le bucket
+      # 120m  - 150m  3% of requests degraded to 2le bucket
+      - series: 'api_inbound_request_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="1",code="200"}'
+        values: '0+1x60   61+99x60    6001+97x30'
+      - series: 'api_inbound_request_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="2",code="200"}'
+        values: '0+1x60   61+1x60     121+3x30'
+      - series: 'api_inbound_request_duration_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage"}'
+        values: '0+1x60   61+100x60   6061+100x30'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: ACS Fleet Manager Latency p99 < 1s 6h to 3d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: ACS Fleet Manager Latency p99 < 1s 6h to 3d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 150m
+        alertname: ACS Fleet Manager Latency p99 < 1s 6h to 3d budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Latency p99 < 1s 6h to 3d budget burn - stage
+              job: fleet-manager-metrics
+              latency: 1
+              namespace: acs-fleet-manager-stage
+              quantile: 99
+              service: acs-fleet-manager
+              severity: high
+            exp_annotations:
+              message: "High 1d/3d requests latency budget burn for ACS Fleet Manager API p99 (current value: 16.09m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-latency"
+
+  # SLO Correctness (Create) p95
+  - interval: 1m
+    input_series:
+      # 0m  - 30m  all good
+      # 30m - 60m  5% failed requests
+      # 60m - 90m  50% failed requests
+      - series: 'fleet_manager_dinosaur_operations_success_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="create"}'
+        values: '0+1x30   31+19x30    601+10x60'
+      - series: 'fleet_manager_dinosaur_operations_total_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="create"}'
+        values: '0+1x30   31+20x30    631+20x60'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: ACS Fleet Manager Central Creation 30m to 6h budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 60m
+        alertname: ACS Fleet Manager Central Creation 30m to 6h budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: ACS Fleet Manager Central Creation 30m to 6h budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Central Creation 30m to 6h budget burn - stage
+              namespace: acs-fleet-manager-stage
+              operation: create
+              service: acs-fleet-manager
+              severity: info
+            exp_annotations:
+              message: "High 6h error budget burn for ACS Fleet Manager create Central operations (current value: 500m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-central-provisioning-correctness"
+  - interval: 1m
+    input_series:
+      # 0m    - 60m   all good
+      # 60m   - 120m  5% error rate
+      # 120m  - 250m  30% error rate
+      - series: 'fleet_manager_dinosaur_operations_success_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="create"}'
+        values: '0+1x60   61+95x60    5941+70x130'
+      - series: 'fleet_manager_dinosaur_operations_total_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="create"}'
+        values: '0+1x60   61+100x60   6061+100x130'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: ACS Fleet Manager Central Creation 2h to 1d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: ACS Fleet Manager Central Creation 2h to 1d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 250m
+        alertname: ACS Fleet Manager Central Creation 2h to 1d budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Central Creation 2h to 1d budget burn - stage
+              namespace: acs-fleet-manager-stage
+              operation: create
+              service: acs-fleet-manager
+              severity: info
+            exp_annotations:
+              message: "High 1d error budget burn for ACS Fleet Manager create Central operations (current value: 300m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-central-provisioning-correctness"
+  - interval: 1m
+    input_series:
+      # 0m    - 180m  all good
+      # 180m  - 420m  10% error rate
+      - series: 'fleet_manager_dinosaur_operations_success_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="create"}'
+        values: '0+1x180  181+90x240'
+      - series: 'fleet_manager_dinosaur_operations_total_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="create"}'
+        values: '0+1x180  181+100x240'
+    alert_rule_test:
+      - eval_time: 3h
+        alertname: ACS Fleet Manager Central Creation 6h to 3d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 7h
+        alertname: ACS Fleet Manager Central Creation 6h to 3d budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Central Creation 6h to 3d budget burn - stage
+              namespace: acs-fleet-manager-stage
+              operation: create
+              service: acs-fleet-manager
+              severity: info
+            exp_annotations:
+              message: "High 3d error budget burn for ACS Fleet Manager create Central operations (current value: 99.49m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-central-provisioning-correctness"
+
+  # SLO Correctness (Delete) p95
+  - interval: 1m
+    input_series:
+      # 0m  - 30m  all good
+      # 30m - 60m  5% failed requests
+      # 60m - 90m  50% failed requests
+      - series: 'fleet_manager_dinosaur_operations_success_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="delete"}'
+        values: '0+1x30   31+19x30    601+10x60'
+      - series: 'fleet_manager_dinosaur_operations_total_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="delete"}'
+        values: '0+1x30   31+20x30    631+20x60'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: ACS Fleet Manager Central Deletion 30m to 6h budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 60m
+        alertname: ACS Fleet Manager Central Deletion 30m to 6h budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: ACS Fleet Manager Central Deletion 30m to 6h budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Central Deletion 30m to 6h budget burn - stage
+              namespace: acs-fleet-manager-stage
+              operation: delete
+              service: acs-fleet-manager
+              severity: high
+            exp_annotations:
+              message: "High 6h error budget burn for ACS Fleet Manager delete Central operations (current value: 500m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-central-deletion-correctness"
+  - interval: 1m
+    input_series:
+      # 0m    - 60m   all good
+      # 60m   - 120m  5% error rate
+      # 120m  - 250m  30% error rate
+      - series: 'fleet_manager_dinosaur_operations_success_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="delete"}'
+        values: '0+1x60   61+95x60    5941+70x130'
+      - series: 'fleet_manager_dinosaur_operations_total_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="delete"}'
+        values: '0+1x60   61+100x60   6061+100x130'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: ACS Fleet Manager Central Deletion 2h to 1d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: ACS Fleet Manager Central Deletion 2h to 1d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 250m
+        alertname: ACS Fleet Manager Central Deletion 2h to 1d budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Central Deletion 2h to 1d budget burn - stage
+              namespace: acs-fleet-manager-stage
+              operation: delete
+              service: acs-fleet-manager
+              severity: high
+            exp_annotations:
+              message: "High 1d error budget burn for ACS Fleet Manager delete Central operations (current value: 300m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-central-deletion-correctness"
+  - interval: 1m
+    input_series:
+      # 0m    - 180m  all good
+      # 180m  - 420m  10% error rate
+      - series: 'fleet_manager_dinosaur_operations_success_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="delete"}'
+        values: '0+1x180  181+90x240'
+      - series: 'fleet_manager_dinosaur_operations_total_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",operation="delete"}'
+        values: '0+1x180  181+100x240'
+    alert_rule_test:
+      - eval_time: 3h
+        alertname: ACS Fleet Manager Central Deletion 6h to 3d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 7h
+        alertname: ACS Fleet Manager Central Deletion 6h to 3d budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Central Deletion 6h to 3d budget burn - stage
+              namespace: acs-fleet-manager-stage
+              operation: delete
+              service: acs-fleet-manager
+              severity: high
+            exp_annotations:
+              message: "High 3d error budget burn for ACS Fleet Manager delete Central operations (current value: 99.49m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-central-deletion-correctness"
+
+  # SLO Creation latency p90 < 60m
+  - interval: 1m
+    input_series:
+      # 0m  - 30m   all good
+      # 30m - 90m   10% of requests degraded to 1200le bucket
+      # 90m - 120m  70% of requests degraded to 1200le bucket
+      - series: 'fleet_manager_worker_dinosaur_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="3600",jobType="dinosaur_create"}'
+        values: '0+1x30   31+1x30   181+3x60'
+      - series: 'fleet_manager_worker_dinosaur_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="7200",jobType="dinosaur_create"}'
+        values: '0+1x30   31+9x30   181+7x60'
+      - series: 'fleet_manager_worker_dinosaur_duration_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",jobType="dinosaur_create"}'
+        values: '0+1x30   31+10x30  331+10x60'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: ACS Fleet Manager Central Creation Latency 30m to 6h budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 90m
+        alertname: ACS Fleet Manager Central Creation Latency 30m to 6h budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: ACS Fleet Manager Central Creation Latency 30m to 6h budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Central Creation Latency 30m to 6h budget burn - stage
+              job: fleet-manager-metrics
+              jobType: dinosaur_create
+              latency: 3600
+              namespace: acs-fleet-manager-stage
+              quantile: 90
+              service: acs-fleet-manager
+              severity: high
+            exp_annotations:
+              message: "High 6h Central creation p90 latency budget burn for ACS Fleet Manager (current value: 609.3m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-central-provisioning-latency"
+  - interval: 1m
+    input_series:
+      # 0m    - 60m   all good
+      # 60m   - 120m  10% of requests degraded to 1200le bucket
+      # 120m  - 150m  30% of requests degraded to 1200le bucket
+      - series: 'fleet_manager_worker_dinosaur_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="3600",jobType="dinosaur_create"}'
+        values: '0+1x60   61+9x60   601+7x30'
+      - series: 'fleet_manager_worker_dinosaur_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",le="7200",jobType="dinosaur_create"}'
+        values: '0+1x60   61+1x60   121+3x30'
+      - series: 'fleet_manager_worker_dinosaur_duration_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-stage",jobType="dinosaur_create"}'
+        values: '0+1x60   61+10x60  661+10x30'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: ACS Fleet Manager Central Creation Latency 1d or 3d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: ACS Fleet Manager Central Creation Latency 1d or 3d budget burn - stage
+        exp_alerts: [ ]
+      - eval_time: 150m
+        alertname: ACS Fleet Manager Central Creation Latency 1d or 3d budget burn - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager Central Creation Latency 1d or 3d budget burn - stage
+              job: fleet-manager-metrics
+              jobType: dinosaur_create
+              latency: 3600
+              namespace: acs-fleet-manager-stage
+              quantile: 90
+              service: acs-fleet-manager
+              severity: high
+            exp_annotations:
+              message: "High 1d/3d Central creation p90 latency budget burn for ACS Fleet Manager (current value: 151.5m)"
+              dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-central-provisioning-latency"
