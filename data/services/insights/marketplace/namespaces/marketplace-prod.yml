@@ -73,6 +73,12 @@ externalResources:
     defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
     output_resource_name: cloudwatch
     es_identifier: kibana-elasticsearch
+  - provider: sns 
+    identifier: mkt-prod-rds-notification
+    defaults: /terraform/resources/insights/production/sns-prod-1.yml
+    subscriptions:
+    - protocol: email
+      endpoint: chambridredhat.com
   - provider: rds
     identifier: marketplace-prod
     defaults: /terraform/resources/insights/production/rds/rds-marketplace-prod.yml
@@ -84,3 +90,12 @@ externalResources:
     output_resource_db_name: postgres
     parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-marketplace-prod.yml
     reset_password: Force_reset_of_RDS_password
+    event_notifications:
+    - destination: mkt-prod-rds-notification
+      source_type: db-instance
+      event_categories: 
+        - availability
+        - deletion
+        - failover
+        - maintenance
+        - backup
