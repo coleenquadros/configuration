@@ -23,16 +23,16 @@ spec:
         message: 'The current free storage space of DB instance {{ $labels.dbinstance_identifier }} is under 1 GB.'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
         dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20app-sre&var-region=default&var-dbinstanceidentifier=web-rca-stage&from=now-7d&to=now"
-    - alert: RDSOutOfStorageSoon
+    - alert: RDSHighCPUUtilization
       expr: |
-        predict_linear(rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="web-rca-stage"}[1h], 3600 * 24 * 14) > 100
-      for: 1h
+        count_over_time((aws_rds_cpuutilization_average{dbinstance_identifier="web-rca-stage"} >= 70)[15m:]) > 5
+      for: 1m
       labels:
         severity: info
         service: web-rca
         env: stage
       annotations:
         link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=web-rca-stage;is-cluster=false;tab=monitoring"
-        message: "DB instance {{ $labels.exported_instance }} is about to run out of storage within 2 weeks."
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
-        dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca"
+        message: "Average CPU utilization for {{ $labels.dbinstance_identifier }} has exceeded 70% 5 times in the last 15 minutes."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/web-rca/aws/aws-rds-resources.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20app-sre&var-region=default&var-dbinstanceidentifier=web-rca-stage&from=now-7d&to=now"
