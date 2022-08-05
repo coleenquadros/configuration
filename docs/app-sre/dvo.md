@@ -115,7 +115,7 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=unset-memory-
 
 ### Exceluded metrics
 
-Some metrics are excluded for various reasons. The complete list can be found in the DVO [ConfigMap](./resources/app-sre/deployment-validation-operator/dvo.configmap.yaml).
+Some metrics are excluded for various reasons. The complete list can be found in the DVO [ConfigMap](./resources/services/deployment-validation-operator/dvo.configmap.yaml).
 
 ## Disable DVO checks
 
