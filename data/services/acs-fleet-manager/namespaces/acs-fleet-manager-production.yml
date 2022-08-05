@@ -25,5 +25,21 @@ openshiftResources:
 - provider: resource
   path: /services/acs-fleet-manager/production/fleet-manager-envoy.configmap.yaml
 
+managedExternalResources: true
+
+externalResources:
+  - provider: aws
+    provisioner:
+      $ref: /aws/app-sre/account.yml
+    resources:
+      - provider: rds
+        identifier: acs-fleet-manager-production
+        defaults: /terraform/resources/acs-fleet-manager/production/rds-pg14.yml
+        output_resource_name: acs-fleet-manager-rds
+        ca_cert:
+          path: app-interface/global/rds-ca-cert
+          field: us-east-1
+          version: 2
+
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
