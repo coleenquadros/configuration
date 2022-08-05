@@ -1,0 +1,99 @@
+---
+$schema: /openshift/cluster-1.yml
+labels:
+  service: hacbs
+name: hacbss01ue1-2
+description: hacbss01ue1-2 cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+auth:
+  service: github-org-team
+  org: app-sre
+  team: hacbss01ue1-2-cluster
+ocm:
+  $ref: /dependencies/ocm/production.yml
+managedGroups:
+- dedicated-admins
+
+spec:
+  product: osd
+  provider: aws
+  region: us-east-1
+  channel: fast
+  version: 4.10.25
+  initial_version: 4.10.25-fast
+  multi_az: false
+  nodes: 4
+  instance_type: m5.xlarge
+  storage: 600
+  load_balancers: 0
+  private: true
+  disable_user_workload_monitoring: true
+upgradePolicy: # optional, specify an upgrade schedule
+  workloads: [hacbs] # workloads running in this cluster
+  schedule: 0 10 * * 4
+  conditions:
+    soakDays: 0
+network:
+  type: OpenShiftSDN
+  vpc: 10.202.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+automationToken:
+  path: app-sre/creds/kube-configs/hacbss01ue1-2
+  field: token
+# clusterAdminAutomationToken:
+#   path: app-sre/creds/kube-configs/hacbss01ue1-cluster-admin
+#   field: token
+addons: # enable log forwarding to the cluster's AWS account
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
+internal: false
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+awsInfrastructureManagementAccounts:
+- account:
+    $ref: /aws/app-sre-stage/account.yml
+  accessLevel: network-mgmt
+  default: true
+# - account:
+#     $ref: /aws/app-sre/account.yml
+#   accessLevel: network-mgmt
+# peering:
+#   connections:
+#   - provider: account-vpc
+#     name: hacbss01ue1_app-sre
+#     vpc:
+#       $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
+#     manageRoutes: true
+#   - provider: account-vpc-mesh
+#     name: hacbss01ue1_app-sre-ci-int
+#     account:
+#       $ref: /aws/app-sre/account.yml
+#     tags:
+#       Name: ci.int
+#     manageRoutes: true
+#     delete: true
+#   - provider: cluster-vpc-requester
+#     name: hacbss01ue1_app-sre-prod-01
+#     cluster:
+#       $ref: /openshift/app-sre-prod-01/cluster.yml
+#     manageRoutes: true
+#   - provider: cluster-vpc-requester
+#     name: hacbss01ue1_appsrep05ue1
+#     cluster:
+#       $ref: /openshift/appsrep05ue1/cluster.yml
+#     manageRoutes: true
+# jumpHost:
+#   $ref: /openshift/bastion.ci.ext.devshift.net.jumphost.yml
+# managedClusterRoles: true
+# observabilityNamespace:
+#   $ref: /services/observability/namespaces/openshift-customer-monitoring.hacbss01ue1.yml
