@@ -23,7 +23,7 @@ Describe types of changes as `app-interface` data and bind it to roles and dataf
 
 We introduce a schema `/app-interface/change-type-1.yml` that describes document change selection on a datafile schema. Change types can be defined not only on datafiles but also on structured resource files that follow a schema.
 
-Following the `provider-pattern`, multiple mechanisms to detect valid change can be implemented. `jsonpath` will be the first supported selection mechanism. Others like graphql queries, Rego expression etc. can be added if required.
+Following the [provider-pattern](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-interface/qontract-reconcile-patterns.md#the-provider-pattern), multiple mechanisms to detect valid change can be implemented. `jsonpath` will be the first supported selection mechanism. Others like graphql queries, Rego expression etc. can be added if required.
 
 This is a schema change proposal that covers the `jsonpath` selection mechanism.
 
