@@ -19,6 +19,11 @@ These SOPs cover database major and minor engine upgrades:
 
 See [this doc](/docs/aws/sop/rds-os-upgrade.md) for applying mandatory OS upgrades in RDS, typically associated with security updates. 
 
+### Instance aleady exists error
+
+See this [SOP](/docs/aws/sop/rds-instance-already-exists-after-newly-created.md) to handle instance already exists errors on
+newly created RDS instances.
+
 ## Troubleshooting
 
 ### General Resources
