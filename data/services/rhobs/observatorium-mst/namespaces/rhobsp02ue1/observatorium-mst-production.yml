@@ -17,12 +17,7 @@ environment:
 
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.rhobsp02ue1.yml
-# TODO(@matej-g): These 2 entries below should not be needed as there will be
-# no cross-namespace federation on rhobsp02ue1 and any other infra that is shared on Telemeter
-# between namespaces (e.g jaeger collector or parca) will be on rhobsp02ue1 cluster.
-# Remove these entries after confirmation.
-# - $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
-# - $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
+- $ref: /services/rhobs/observatorium-mst/namespaces/rhobsp02ue1/observatorium-tools-production.yml
 
 managedRoles: true
 
@@ -31,7 +26,7 @@ managedResourceTypes:
 - Role
 - RoleBinding
 - ServiceAccount
-# - Secret
+- Secret
 
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
@@ -45,6 +40,27 @@ openshiftResources:
 # until https://issues.redhat.com/browse/APPSRE-2935 is fixed.
 # - provider: resource
 #   path: /app-sre/observatorium-mst-production/observatorium-mst.clusterrole.yml
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/rhobsp02ue1-mst-thanos-objectstorage
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/rhobsp02ue1-mst-rules-objstore-objectstorage
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/observatorium-api-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/query-frontend-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/compact-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/query-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/alertmanager-proxy
+  version: 1
 
 managedExternalResources: true
 
