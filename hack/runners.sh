@@ -9,6 +9,9 @@ run_int() {
   [ -n "$STATE" ] && APP_INTERFACE_STATE_ENV="-e APP_INTERFACE_STATE_BUCKET=$app_interface_state_bucket -e APP_INTERFACE_STATE_BUCKET_ACCOUNT=$app_interface_state_bucket_account"
   [ -n "$NO_GQL_SHA_URL" ] && NO_GQL_SHA_URL_FLAG="--no-gql-sha-url"
   [ -n "$NO_VALIDATE" ] && NO_VALIDATE="--no-validate-schemas"
+  if [ -n "$EARLY_EXIT" ] && [ -n "$MASTER_BUNDLE_SHA256" ]; then
+    EARLY_EXIT_ENV="-e EARLY_EXIT_COMPARE_SHA=$MASTER_BUNDLE_SHA256"
+  fi
 
   echo "INTEGRATION $INTEGRATION_NAME" >&2
 
@@ -24,6 +27,7 @@ run_int() {
     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     $GITLAB_PR_SUBMITTER_QUEUE_URL_ENV \
     $APP_INTERFACE_STATE_ENV \
+    $EARLY_EXIT_ENV \
     -e RECONCILE_IMAGE_TAG=$RECONCILE_IMAGE_TAG \
     -w / \
     --memory 5g \
@@ -234,6 +238,25 @@ upload_s3() {
     wait_response \
         "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE_URL}/sha256" \
         "$SHA256"
+}
+
+
+download_s3() {
+    GIT_COMMIT=$1
+    OUTPUT_FILE=$2
+    S3_PATH="s3://${AWS_S3_BUCKET}/bundle-archive/${GIT_COMMIT}.json"
+    echo "wait 30s for ${S3_PATH} to exist"
+    timeout 30 aws s3api wait object-exists --bucket ${AWS_S3_BUCKET} --key bundle-archive/${GIT_COMMIT}.json
+    if [ $? -ne 0 ]; then
+      echo "master bundle ${S3_PATH} does not exit"
+      return 1
+    fi
+    aws s3 cp --quiet ${S3_PATH} ${OUTPUT_FILE}
+    if [ $? -ne 0 ]; then
+      echo "failed to download bundle ${S3_PATH}"
+      return 2
+    fi
+    return 0
 }
 
 update_pushgateway() {
