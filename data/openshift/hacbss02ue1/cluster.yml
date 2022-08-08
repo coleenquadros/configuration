@@ -1,0 +1,68 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: hacbs
+
+name: hacbss02ue1
+description: hacbss02ue1 cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: hacbss02ue1-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  product: osd
+  provider: aws
+  region: us-east-1
+  channel: fast
+  version: 4.10.25
+  initial_version: 4.10.25-fast
+  multi_az: false
+  nodes: 4
+  instance_type: m5.xlarge
+  storage: 600
+  load_balancers: 0
+  private: true
+  disable_user_workload_monitoring: true
+upgradePolicy: # optional, specify an upgrade schedule
+  workloads: [hacbs] # workloads running in this cluster
+  schedule: 0 10 * * 4
+  conditions:
+    soakDays: 0
+network:
+  type: OVNKubernetes
+  vpc: 10.202.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+automationToken:
+  path: app-sre/creds/kube-configs/hacbss02ue1
+  field: token
+addons: # enable log forwarding to the cluster's AWS account
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
+internal: false
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+awsInfrastructureManagementAccounts:
+- account:
+    $ref: /aws/app-sre-stage/account.yml
+  accessLevel: network-mgmt
+  default: true
