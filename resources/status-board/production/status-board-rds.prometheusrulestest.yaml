@@ -30,27 +30,32 @@ tests:
         message: 'The current free storage space of DB instance status-board-production is under 1 GB.'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
         dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20app-sre&var-region=default&var-dbinstanceidentifier=status-board-production&from=now-7d&to=now"
+
 # RDSHighCPUUtilization
 - interval: 1m
   input_series:
   - series: aws_rds_cpuutilization_average{dbinstance_identifier="status-board-production"}
     values: '25+0x15' # 25 for 15 minutes
-  - series: aws_rds_cpuutilization_average{dbinstance_identifier="status-board-production"}
-    values: '60 60 80 60 80 60 60 80 60 60 80 60 60 60 60' # >= 70 4 times in 15 minutes
   alert_rule_test:
   - eval_time: 15m
     alertname: RDSHighCPUUtilization
     exp_alerts:
+
+  # RDSHighCPUUtilization
+- interval: 1m
+  input_series:
+    - series: aws_rds_cpuutilization_average{dbinstance_identifier="status-board-production"}
+      values: '60 60 80 60 80 60 60 80 60 60 80 60 60 60 60' # >= 70 4 times in 15 minutes
+  alert_rule_test:
+    - eval_time: 15m
+      alertname: RDSHighCPUUtilization
+      exp_alerts:
 
 # RDSHighCPUUtilization
 - interval: 1m
   input_series:
   - series: aws_rds_cpuutilization_average{dbinstance_identifier="status-board-production"}
     values: '75+0x15' # 75 for 15 minutes
-  - series: aws_rds_cpuutilization_average{dbinstance_identifier="status-board-production"}
-    values: '60+0x5 70+0x5 10+0x5' # 60 for 5 minutes, 70 for 5 minutes, 10 for 5 minutes
-  - series: aws_rds_cpuutilization_average{dbinstance_identifier="status-board-production"}
-    values: '80 60 80 60 60 80 60 60 80 60 80 60 80 60 60' # >= 70 6 times in 15 minutes
   alert_rule_test:
   - eval_time: 15m
     alertname: RDSHighCPUUtilization
@@ -65,4 +70,44 @@ tests:
           message: "Average CPU utilization for status-board-production has exceeded 70% 5 times in the last 15 minutes."
           runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/status-board/aws/aws-rds-resources.md"
           dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20app-sre&var-region=default&var-dbinstanceidentifier=status-board-production&from=now-7d&to=now"
+
+  # RDSHighCPUUtilization
+- interval: 1m
+  input_series:
+    - series: aws_rds_cpuutilization_average{dbinstance_identifier="status-board-production"}
+      values: '60+0x5 70+0x5 10+0x5' # 60 for 5 minutes, 70 for 5 minutes, 10 for 5 minutes
+  alert_rule_test:
+    - eval_time: 15m
+      alertname: RDSHighCPUUtilization
+      exp_alerts:
+        - exp_labels:
+            severity: info
+            service: status-board
+            env: production
+            dbinstance_identifier: status-board-production
+          exp_annotations:
+            link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=status-board-production;is-cluster=false;tab=monitoring"
+            message: "Average CPU utilization for status-board-production has exceeded 70% 5 times in the last 15 minutes."
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/status-board/aws/aws-rds-resources.md"
+            dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20app-sre&var-region=default&var-dbinstanceidentifier=status-board-production&from=now-7d&to=now"
+
+  # RDSHighCPUUtilization
+- interval: 1m
+  input_series:
+    - series: aws_rds_cpuutilization_average{dbinstance_identifier="status-board-production"}
+      values: '80 60 80 60 60 80 60 60 80 60 80 60 80 60 60' # >= 70 6 times in 15 minutes
+  alert_rule_test:
+    - eval_time: 15m
+      alertname: RDSHighCPUUtilization
+      exp_alerts:
+        - exp_labels:
+            severity: info
+            service: status-board
+            env: production
+            dbinstance_identifier: status-board-production
+          exp_annotations:
+            link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=status-board-production;is-cluster=false;tab=monitoring"
+            message: "Average CPU utilization for status-board-production has exceeded 70% 5 times in the last 15 minutes."
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/status-board/aws/aws-rds-resources.md"
+            dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20app-sre&var-region=default&var-dbinstanceidentifier=status-board-production&from=now-7d&to=now"
 
