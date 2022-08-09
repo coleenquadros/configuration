@@ -1,0 +1,23 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-prod-http
+  labels:
+    app: observatorium-thanos-compact
+  name: observatorium-mst-thanos-compact
+spec:
+  host: observatorium-mst-thanos-compact.rhobsp02ue1.api.openshift.com
+  port:
+    targetPort: https
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: reencrypt
+  to:
+    kind: Service
+    name: observatorium-thanos-compact
+    weight: 100
+  wildcardPolicy: None
