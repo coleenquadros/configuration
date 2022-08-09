@@ -1,3 +1,5 @@
+[toc]
+
 # When an AWS Access Key is Exposed
 
 Since the chance of malicious behavior happening increases very fast as every moment passes when a key is exposed on the internet, the action of deactivating/deleting the leaked key should be one of the first things that happens. However, even though the below steps are numbered by priority, it is not mandatory that they are performed in the exact sequence, for example, feel free to involve InfoSec or create a Google Meet and/or a Google Chat space before you check unsanctioned resources.
@@ -28,3 +30,43 @@ Contact Alexey Shvarev <ashvarev@redhat.com>, Guillaume Pont <gpont@redhat.com> 
 For further information, please reference:
  * [Service Delivery Organizational Guideline](https://source.redhat.com/groups/public/openshiftplatformsre/wiki/security_osdv4_security_practices)
  * [AppSRE Generic Incident Process](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/incident-process.md)
+
+# Digging through CloudTrail events using AWS CLI
+
+It may be more user friendly to sift through CloudTrail Events using terminal utilities such as grep, awk, jq
+
+Here are some readymade commands to help find what we're looking for
+
+```shell
+# Login to AWS or use the --profile option to use local credentials
+
+# Extract all events between --start-time and --end-time as json
+# Timestamps can be of various formats, but YYYY-MM-DD HH:MM:SSZ works and specifies UTC
+# We also filter by Access Key ID (option --lookup-attributes can be omitted or changed as desired)
+# Output will be written to trail.json
+aws --profile some-account --region us-east-1 cloudtrail lookup-events \
+  --start-time "2022-08-09 15:30:00Z" \
+  --end-time "2022-08-09 15:35:00Z" \
+  --lookup-attributes AttributeKey=AccessKeyId,AttributeValue=AWS_ACCESS_KEY \
+  --output json \
+  | tee trail.json
+
+# How many events did we extract?
+$ jq '.Events | length' trail.json
+5825
+
+# Filter interesting fields
+$ jq -r '.Events[].CloudTrailEvent | fromjson | [.eventTime, .userIdentity.accessKeyId, .eventSource, .eventName, .sourceIPAddress, .userAgent] | @tsv' trail.json
+
+# Find all unique IP addresses (and count them)
+$ jq -r '.Events[].CloudTrailEvent | fromjson | .sourceIPAddress' trail.json | sort | uniq -c | sort -nr
+
+# Find all events for a specific IP
+$ jq -r '.Events[].CloudTrailEvent | fromjson | select(.sourceIPAddress == "10.113.158.42") | [.eventTime, .userIdentity.accessKeyId, .eventSource, .eventName, .sourceIPAddress, .userAgent] | @tsv' trail.json
+
+# Find all unique userAgents
+$ jq -r '.Events[].CloudTrailEvent | fromjson | .userAgent' trail.json | sort | uniq -c | sort -nr
+
+# Find specific AWS events (ex: ListBuckets)
+$ jq -r '.Events[].CloudTrailEvent | fromjson | select(.eventName == "ListBuckets") | [.eventTime, .userIdentity.accessKeyId, .eventSource, .eventName, .sourceIPAddress, .userAgent] | @tsv' trail.json
+```
