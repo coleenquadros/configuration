@@ -1,0 +1,25 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/balance: source
+    haproxy.router.openshift.io/timeout: 5m
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-prod-http
+  labels:
+    app: observatorium-api
+    useAdditionalRouter: "true"
+  name: observatorium-mst-api
+spec:
+  host: observatorium-mst.rhobsp02ue1.api.openshift.com
+  port:
+    targetPort: public
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: observatorium-observatorium-mst-api
+    weight: 100
+  wildcardPolicy: None
