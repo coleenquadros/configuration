@@ -179,6 +179,17 @@ spec:
         service: srep
         severity: critical
         team: srep
+    - alert: AWSAccountOperator AccountClaim Pending - production - {{{shard_name}}}
+      annotations:
+        message: "AWS Account Operator AccountClaim pending for over 10 minutes."
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/aws/aws-account-troubleshooting.md"
+        dashboard: "https://grafana.app-sre.devshift.net/explore?orgId=1&left=%7B%22datasource%22:%22{{{datasource}}}%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22sum(rate(aws_account_operator_account_claim_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22%2BInf%5C%22%7D%5B10m%5D))%20%3E%20sum(rate(aws_account_operator_account_claim_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22600%5C%22%7D%5B10m%5D))%20or%20sum(rate(aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22%2BInf%5C%22%7D%5B10m%5D))%20%3E%20sum(rate(aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22600%5C%22%7D%5B10m%5D))%22%7D%5D,%22range%22:%7B%22from%22:%22now-1h%22,%22to%22:%22now%22%7D%7D"
+      expr: |
+        sum(rate(aws_account_operator_account_claim_pending_duration_seconds_bucket{name="aws-account-operator",le="+Inf"}[10m])) > sum(rate(aws_account_operator_account_claim_pending_duration_seconds_bucket{name="aws-account-operator",le="600"}[10m])) or sum(rate(aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket{name="aws-account-operator",le="+Inf"}[10m])) > sum(rate(aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket{name="aws-account-operator",le="600"}[10m]))
+      labels:
+        service: srep
+        severity: critical
+        team: srep
     - alert: AWSAccountOperator Target Down - production - {{{shard_name}}}
       annotations:
         message: "No targets found for AWS Account Operator on hive-{{{shard_name}}}"
