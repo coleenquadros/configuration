@@ -132,3 +132,31 @@ spec:
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloudigrade-prod/deployments"
         message: "cloudigrade: pod restart has occurred more than 10x/10 minutes for the last 10 minutes in prod environment."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-pod-restarting.md"
+
+    - alert: cloudigrade-prod-too-many-unread-sqs-messages
+      expr: sum(avg by (queue_name) (cloudigrade_sqs_queue_length{namespace="cloudigrade-prod",queue_name!~"_dlq$"})) > 1000
+      for: 15m
+      labels:
+        severity: warning
+        service: insights
+        env: prod
+        app_team: cloudigrade
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&var-datasource=crcp01ue1-prometheus&var-namespace=cloudigrade-prod"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloudigrade-prod/deployments/cloudigrade-worker"
+        message: "cloudigrade: more than 1000 unread SQS messages."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-too-many-unread-sqs-messages.md"
+
+    - alert: cloudigrade-prod-too-many-queued-celery-tasks
+      expr: sum(avg by (queue_name) (cloudigrade_celery_queue_length{namespace="cloudigrade-prod"})) > 2000
+      for: 15m
+      labels:
+        severity: warning
+        service: insights
+        env: prod
+        app_team: cloudigrade
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&var-datasource=crcp01ue1-prometheus&var-namespace=cloudigrade-prod"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloudigrade-prod/deployments/cloudigrade-worker"
+        message: "cloudigrade: more than 2000 queued Celery tasks."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-too-many-queued-celery-tasks.md"

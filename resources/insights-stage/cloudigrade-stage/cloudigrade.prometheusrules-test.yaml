@@ -328,3 +328,99 @@ tests:
       - eval_time: 45m
         alertname: cloudigrade-stage-frequent-pod-restarting
         exp_alerts: []
+
+  # cloudigrade-stage-too-many-unread-sqs-messages
+  - interval: 1m
+    input_series:
+    # 0m  - 9m    100 messages
+    # 10m - 19m  5000 messages  <-- query would start to trigger in here
+    # 20m - 29m  5000 messages  <-- we should see alerts start in here
+    # 30m - 39m  5000 messages  <-- we should see alerts continue through here
+    # 40m - 49m   100 messages  <-- we should see alerts stop in here
+    - series: 'cloudigrade_sqs_queue_length{namespace="cloudigrade-stage", queue_name="my-terrible-queue"}'
+      values: "100+0x9 5000+0x9 5000+0x9 5000+0x9 100+0x9 100+0x9"
+
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: cloudigrade-stage-too-many-unread-sqs-messages
+        exp_alerts: []
+      - eval_time: 24m
+        alertname: cloudigrade-stage-too-many-unread-sqs-messages
+        exp_alerts: []
+      - eval_time: 25m
+        alertname: cloudigrade-stage-too-many-unread-sqs-messages
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              service: insights
+              env: stage
+              app_team: cloudigrade
+            exp_annotations:
+              dashboard: "https://grafana.stage.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&var-datasource=crcs02ue1-prometheus&var-namespace=cloudigrade-stage"
+              link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/cloudigrade-stage/deployments/cloudigrade-worker"
+              message: "cloudigrade: more than 1000 unread SQS messages."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-too-many-unread-sqs-messages.md"
+      - eval_time: 39m
+        alertname: cloudigrade-stage-too-many-unread-sqs-messages
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              service: insights
+              env: stage
+              app_team: cloudigrade
+            exp_annotations:
+              dashboard: "https://grafana.stage.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&var-datasource=crcs02ue1-prometheus&var-namespace=cloudigrade-stage"
+              link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/cloudigrade-stage/deployments/cloudigrade-worker"
+              message: "cloudigrade: more than 1000 unread SQS messages."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-too-many-unread-sqs-messages.md"
+      - eval_time: 40m
+        alertname: cloudigrade-stage-too-many-unread-sqs-messages
+        exp_alerts: []
+
+  # cloudigrade-stage-too-many-queued-celery-tasks
+  - interval: 1m
+    input_series:
+    # 0m  - 9m    100 messages
+    # 10m - 19m  5000 messages  <-- query would start to trigger in here
+    # 20m - 29m  5000 messages  <-- we should see alerts start in here
+    # 30m - 39m  5000 messages  <-- we should see alerts continue through here
+    # 40m - 49m   100 messages  <-- we should see alerts stop in here
+    - series: 'cloudigrade_celery_queue_length{namespace="cloudigrade-stage", queue_name="my-terrible-queue"}'
+      values: "100+0x9 5000+0x9 5000+0x9 5000+0x9 100+0x9 100+0x9"
+
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: cloudigrade-stage-too-many-queued-celery-tasks
+        exp_alerts: []
+      - eval_time: 24m
+        alertname: cloudigrade-stage-too-many-queued-celery-tasks
+        exp_alerts: []
+      - eval_time: 25m
+        alertname: cloudigrade-stage-too-many-queued-celery-tasks
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              service: insights
+              env: stage
+              app_team: cloudigrade
+            exp_annotations:
+              dashboard: "https://grafana.stage.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&var-datasource=crcs02ue1-prometheus&var-namespace=cloudigrade-stage"
+              link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/cloudigrade-stage/deployments/cloudigrade-worker"
+              message: "cloudigrade: more than 2000 queued Celery tasks."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-too-many-queued-celery-tasks.md"
+      - eval_time: 39m
+        alertname: cloudigrade-stage-too-many-queued-celery-tasks
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              service: insights
+              env: stage
+              app_team: cloudigrade
+            exp_annotations:
+              dashboard: "https://grafana.stage.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&var-datasource=crcs02ue1-prometheus&var-namespace=cloudigrade-stage"
+              link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/cloudigrade-stage/deployments/cloudigrade-worker"
+              message: "cloudigrade: more than 2000 queued Celery tasks."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-too-many-queued-celery-tasks.md"
+      - eval_time: 40m
+        alertname: cloudigrade-stage-too-many-queued-celery-tasks
+        exp_alerts: []
