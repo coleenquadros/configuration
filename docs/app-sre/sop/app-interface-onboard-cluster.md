@@ -104,8 +104,8 @@ This step should be performed in a single merge request.
         soakDays: N # number of days a version should run on other clusters with similar workloads before this cluster is upgraded to it
 
     network: # cidr list for each cluster can be found here: https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/clusters-network.md
-      # For OVN, use OVNKUbernetes
-      type: OpenShiftSDN
+      # For openshift-sdn, use OpenShiftSDN
+      type: OVNKUbernetes
       vpc: (desired machine CIDR. ex: 10.123.0.0/16)
       service: (desired service CIDR. ex: 172.30.0.0/16)
       pod: (desired pod CIDR. ex: 10.128.0.0/14)
