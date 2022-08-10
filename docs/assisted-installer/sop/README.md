@@ -187,3 +187,30 @@ We should find out what causes this and ultimately fix the root cause.
 ### Steps
 - Check why pod is hanging
 - If unable to understand the reason within a reasonable time, restart the pod
+
+## Assisted Installer Events ingestion reduced
+
+### Severity: Info
+
+### Impact
+Usage statistics stop updating
+
+### Summary
+Due to unknown issue(s), we are not saving enough data to elasticsearch.
+We must find out why this is happening
+
+### Access required
+
+- Access to the cluster that runs the assisted-events-scrape Pod
+- View access to the namespaces:
+  - assisted-installer
+- Access to elasticsearch instance https://kibana-assisted.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/_dashboards/app
+
+### Steps
+- check if document ratio between elasticsearch and DB is close to 0
+- if close to 0
+  - check if event-scrape hang
+  - check if elasticsearch is having issues
+- if not close to 0, check why we are not ingesting as many events
+  - many events that are not being imported (deleted clusters?)
+  - issues with some type of documents in elasticsearch/scraper logic?
