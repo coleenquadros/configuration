@@ -1,7 +1,9 @@
+{% set account = query('/queries/aws-account-supported-deployment-regions.graphql', name=account_name)[0] %}
+{% set default_region = account.resourcesDefaultRegion %}
 {% if override_supported_regions is defined %}
 {% set supported_regions = override_supported_regions %}
 {% else %}
-{% set supported_regions = query('/queries/aws-account-supported-deployment-regions.graphql', name=account)[0].supportedDeploymentRegions %}
+{% set supported_regions = account.supportedDeploymentRegions %}
 {% endif %}
 ---
 apiVersion: v1
@@ -24,5 +26,5 @@ data:
       timeout: 30s
     route53:
       enabled: {{ route53 | lower }}
-      regions: {{ supported_regions if route53 else [] }}
+      region: {{ default_region }}
       timeout: 60s
