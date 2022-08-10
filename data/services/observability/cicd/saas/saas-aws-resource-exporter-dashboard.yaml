@@ -1,0 +1,39 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-aws-resource-exporter-dashboard
+description: saas-aws-resource-exporter grafana dashboard
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.app-sre-prod-01.yaml
+
+app:
+  $ref: /services/observability/app.yml
+  
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- ConfigMap
+
+imagePatterns:
+- quay.io/app-sre
+
+resourceTemplates:
+# Grafana dashboards
+- name: aws-resource-exporter-grafana-dashboards
+  url: https://github.com/app-sre/aws-resource-exporter
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: ffe2c710b3a472c53c3d437c4d10037ce789352e
