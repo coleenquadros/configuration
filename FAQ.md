@@ -110,6 +110,7 @@ Grafana dashboards are discovered automatically if you follow this [guide](https
 - Make sure the uuid in the dashboard json is unique, especially if you copy and paste the dashboard from another one. In doubt just use a uuid.
 
 If still missing, ask AppSRE to check logs of the Discovery and Grafana containers.
+Maybe the Grafana pods need to be restarted by AppSRE - [see SOP](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/grafana-dashboard-not-synching.md).
 
 ### Tagging options in app-interface
 
