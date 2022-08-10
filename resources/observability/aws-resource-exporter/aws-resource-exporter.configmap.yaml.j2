@@ -1,0 +1,25 @@
+{% if override_supported_regions is defined %}
+{% set supported_regions = override_supported_regions %}
+{% else %}
+{% set supported_regions = query('/queries/aws-account-supported-deployment-regions.graphql', name=account)[0].supportedDeploymentRegions %}
+{% endif %}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    qontract.recycle: "true"
+  labels:
+    app: aws-resource-exporter
+  name: {{ name }}
+data:
+  aws-resource-exporter-config.yaml: |
+    rds:
+      regions: {{ supported_regions if rds else [] }}
+      timeout: 30s
+    vpc:
+      regions: {{ supported_regions if vpc else [] }}
+      timeout: 30s
+    route53:
+      regions: {{ supported_regions if route53 else [] }}
+      timeout: 60s
