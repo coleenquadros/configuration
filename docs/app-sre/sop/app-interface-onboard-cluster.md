@@ -319,6 +319,10 @@ At this point you should be able to access the cluster via the console / `oc` cl
     - resource: Project
       resourceNames:
         - cluster
+    - resource: ClusterRoleBinding
+      resourceNames:
+      - dedicated-readers
+      - self-provisioners
 
     openshiftResources:
     - provider: resource
