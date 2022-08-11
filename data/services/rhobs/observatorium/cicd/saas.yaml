@@ -44,7 +44,6 @@ managedResourceTypes:
 - PrometheusRule # Adding everything that exists. This will be moved to a separate saas file.
 
 imagePatterns:
-- quay.io/conprof/conprof
 - quay.io/observatorium
 - quay.io/app-sre
 - quay.io/openshift/origin-oauth-proxy
@@ -175,27 +174,6 @@ resourceTemplates:
       JAEGER_CPU_LIMITS: '2'
       JAEGER_MEMORY_LIMITS: '8Gi'
       SERVICE_ACCOUNT_NAME: observatorium
-- name: conprof
-  path: /resources/services/conprof-template.yaml
-  url: https://github.com/rhobs/configuration
-  parameters:
-    IMAGE: quay.io/conprof/conprof
-  targets:
-  - namespace:
-      $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
-    ref: 3830f23a4af9f3ce972413c05d2047a95951c001
-    parameters:
-      NAMESPACE: observatorium-production
-      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-production
-      OBSERVATORIUM_MST_NAMESPACE: observatorium-mst-production
-      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-mst-production
-      IMAGE_TAG: 'master-2021-02-24-33f5514'
-      CONPROF_REPLICAS: '1'
-      CONPROF_CPU_REQUEST: '1'
-      CONPROF_MEMORY_REQUEST: '8Gi'
-      CONPROF_CPU_LIMITS: '2'
-      CONPROF_MEMORY_LIMITS: '16Gi'
-      SERVICE_ACCOUNT_NAME: observatorium
 - name: parca
   path: /resources/services/parca-template.yaml
   url: https://github.com/rhobs/configuration
@@ -219,7 +197,7 @@ resourceTemplates:
       PARCA_MEMORY_LIMITS: '50Gi'
   - namespace:
       $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
-    ref: 06996fc0a5ed7b9d55cda35e5edbeb90e1921e9f
+    ref: 3a0f87be669ba0387859590d4cc9c5a1cbc19930
     parameters:
       NAMESPACE: observatorium-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-stage
@@ -229,3 +207,16 @@ resourceTemplates:
       SERVICE_ACCOUNT_NAME: observatorium
       IMAGE: quay.io/observatorium/parca
       IMAGE_TAG: 'v0.12.0'
+  - namespace:
+      $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
+    ref: 3a0f87be669ba0387859590d4cc9c5a1cbc19930
+    parameters:
+      NAMESPACE: observatorium-production
+      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-production
+      OBSERVATORIUM_MST_NAMESPACE: observatorium-mst-production
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-mst-production
+      TELEMETER_NAMESPACE: telemeter-production
+      SERVICE_ACCOUNT_NAME: observatorium
+      IMAGE: quay.io/observatorium/parca
+      IMAGE_TAG: 'v0.12.0'
+

@@ -44,7 +44,6 @@ managedResourceTypes:
 - PrometheusRule # Adding everything that exists. This will be moved to a separate saas file.
 
 imagePatterns:
-- quay.io/conprof/conprof
 - quay.io/thanos/thanos
 - quay.io/cortexproject/cortex # TODO(kakkoyun): Remove in a dedicated MR. We don't use Cortex/Query Frontend anymore.
 - quay.io/observatorium
@@ -612,27 +611,6 @@ resourceTemplates:
       LOKI_PVC_REQUEST: '10Gi'
       LOKI_INGESTER_PVC_REQUEST: '150Gi'
       SERVICE_ACCOUNT_NAME: observatorium-mst
-- name: conprof-observatorium-mst-rbac
-  path: /resources/services/conprof-observatorium-mst-rbac-template.yaml
-  url: https://github.com/rhobs/configuration
-  targets:
-  - namespace:
-      $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
-    ref: 2cb8cf57e2d7b94fc577288913cc9e77de49b8f2
-    delete: true
-    parameters:
-      IMAGE_TAG: 'master-2021-02-24-33f5514'
-      NAMESPACE: observatorium-stage
-      OBSERVATORIUM_MST_NAMESPACE: observatorium-mst-stage
-      SERVICE_ACCOUNT_NAME: observatorium
-  - namespace:
-      $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
-    ref: 1061b0dd76abb156caa69b52db2ce38055842e31
-    parameters:
-      IMAGE_TAG: 'master-2021-02-24-33f5514'
-      NAMESPACE: observatorium-production
-      OBSERVATORIUM_MST_NAMESPACE: observatorium-mst-production
-      SERVICE_ACCOUNT_NAME: observatorium
 - name: parca-observatorium-remote-ns-rbac
   path: /resources/services/parca-observatorium-remote-ns-rbac-template.yaml
   url: https://github.com/rhobs/configuration
@@ -645,3 +623,15 @@ resourceTemplates:
       NAMESPACE: observatorium-stage
       REMOTE_NAMESPACE: observatorium-mst-stage
       SERVICE_ACCOUNT_NAME: observatorium
+- name: parca-observatorium-remote-ns-rbac
+  path: /resources/services/parca-observatorium-remote-ns-rbac-template.yaml
+  url: https://github.com/rhobs/configuration
+  targets:
+    - namespace:
+        $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
+      ref: 871e9441b43ee078476e90d716a7516f973957f7
+      parameters:
+        IMAGE_TAG: 'v0.1.0' # This is irrelevant but required for the template
+        NAMESPACE: observatorium-production
+        REMOTE_NAMESPACE: observatorium-mst-production
+        SERVICE_ACCOUNT_NAME: observatorium
