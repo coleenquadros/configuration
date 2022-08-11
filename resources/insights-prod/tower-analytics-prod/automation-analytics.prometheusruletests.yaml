@@ -1,0 +1,51 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /insights-prod/tower-analytics-prod/automation-analytics.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'api_3scale_gateway_api_status{exported_service="tower-analytics", status="5xx"}'
+        values: "0+0x5 0+1x5"
+      - series: 'api_3scale_gateway_api_status{exported_service="tower-analytics"}'
+        values: "100+1x10"
+      - series: 'api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="tower-analytics"}'
+        values: "100+10x5 150+1x5"
+      - series: 'api_3scale_gateway_api_time_bucket{le="+Inf", exported_service="tower-analytics"}'
+        values: "100+10x10"
+
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: AutomationAnalyticsProdAvailabilitySLO
+        exp_alerts:
+      - eval_time: 10m
+        alertname: AutomationAnalyticsProdAvailabilitySLO
+        exp_alerts:
+          - exp_labels:
+              severity: high
+              service: insights
+              env: prod
+              app_team: automation-analytics
+            exp_annotations:
+              dashboard: "https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=tower-analytics&refresh=1m&from=now-28d&to=now"
+              link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
+              message: "Insights Automation Analytics Alert. Threshold for availability has dropped below SLO"
+      - eval_time: 5m
+        alertname: AutomationAnalyticsProdLatencySLO
+        exp_alerts:
+      - eval_time: 10m
+        alertname: AutomationAnalyticsProdLatencySLO
+        exp_alerts:
+          - exp_labels:
+              severity: high
+              service: insights
+              env: prod
+              app_team: automation-analytics
+            exp_annotations:
+              dashboard: "https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=tower-analytics&refresh=1m&from=now-28d&to=now"
+              link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
+              message: "Insights Automation Analytics Alert. Threshold for latency has dropped below SLO"
