@@ -229,7 +229,20 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     ```shell
     oc -n dedicated-admin create sa app-sre-bot
-    oc -n dedicated-admin sa get-token app-sre-bot
+
+    # since 4.11, token secrets are not automatically generated anymore
+    #oc -n dedicated-admin sa get-token app-sre-bot
+    
+    echo "apiVersion: v1
+    kind: Secret
+    metadata:
+      annotations:
+        kubernetes.io/service-account.name: app-sre-bot
+      name: app-sre-bot
+      namespace: dedicated-admin
+    type: kubernetes.io/service-account-token" | oc create -f -
+
+    oc get secret -n dedicated-admin app-sre-bot -o jsonpath={.data.token} | base64 --decode
     ```
 
 1. Add the `app-sre-bot` credentials to [vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs). qontract-reconcile integrations errors indicating that the token wasn't found will clear once the credentials are in the vault.
