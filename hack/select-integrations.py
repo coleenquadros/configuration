@@ -121,7 +121,7 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False,
             cmd += "SQS_GATEWAY=true "
         if pr.get('no_validate_schemas'):
             cmd += "NO_VALIDATE=true "
-        if pr.get('early_exit'):
+        if not select_all and pr.get('early_exit'):
             cmd += "EARLY_EXIT=true "
 
         if int_name == "vault-manager":
