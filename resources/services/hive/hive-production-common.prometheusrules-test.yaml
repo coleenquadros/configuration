@@ -220,6 +220,28 @@ tests:
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/aws/aws-account-troubleshooting.md"
         dashboard: "https://grafana.app-sre.devshift.net/explore?orgId=1&left=%7B%22datasource%22:%22{{{shard_name}}}-prometheus%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22sum(rate(aws_account_operator_account_claim_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22%2BInf%5C%22%7D%5B10m%5D))%20%3E%20sum(rate(aws_account_operator_account_claim_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22600%5C%22%7D%5B10m%5D))%20or%20sum(rate(aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22%2BInf%5C%22%7D%5B10m%5D))%20%3E%20sum(rate(aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22600%5C%22%7D%5B10m%5D))%22%7D%5D,%22range%22:%7B%22from%22:%22now-1h%22,%22to%22:%22now%22%7D%7D"
 
+- interval: 1m
+  input_series:
+    - series: aws_account_operator_account_claim_pending_duration_seconds_bucket{name="aws-account-operator",le="+Inf"}
+      values: 1+0x10 2+0x10 3+0x10
+    - series: aws_account_operator_account_claim_pending_duration_seconds_bucket{name="aws-account-operator",le="600"}
+      values: 1+0x10 2+0x20
+  alert_rule_test:
+    - eval_time: 10m
+      alertname: AWSAccountOperator AccountClaim Pending - production - {{{shard_name}}}
+      exp_alerts:
+    - eval_time: 30m
+      alertname: AWSAccountOperator AccountClaim Pending - production - {{{shard_name}}}
+      exp_alerts:
+        - exp_labels:
+            severity: critical
+            team: srep
+            service: srep
+          exp_annotations:
+            message: "AWS Account Operator AccountClaim pending for over 10 minutes."
+            runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/aws/aws-account-troubleshooting.md"
+            dashboard: "https://grafana.app-sre.devshift.net/explore?orgId=1&left=%7B%22datasource%22:%22{{{shard_name}}}-prometheus%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22sum(rate(aws_account_operator_account_claim_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22%2BInf%5C%22%7D%5B10m%5D))%20%3E%20sum(rate(aws_account_operator_account_claim_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22600%5C%22%7D%5B10m%5D))%20or%20sum(rate(aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22%2BInf%5C%22%7D%5B10m%5D))%20%3E%20sum(rate(aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22600%5C%22%7D%5B10m%5D))%22%7D%5D,%22range%22:%7B%22from%22:%22now-1h%22,%22to%22:%22now%22%7D%7D"
+
 # test that a pending ccs account claim alerts after 10 minutes
 - interval: 1m
   input_series:
@@ -229,6 +251,28 @@ tests:
       values: 0+0x1 1+0x14
   alert_rule_test:
     - eval_time: 11m
+      alertname: AWSAccountOperator AccountClaim Pending - production - {{{shard_name}}}
+      exp_alerts:
+        - exp_labels:
+            severity: critical
+            team: srep
+            service: srep
+          exp_annotations:
+            message: "AWS Account Operator AccountClaim pending for over 10 minutes."
+            runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/aws/aws-account-troubleshooting.md"
+            dashboard: "https://grafana.app-sre.devshift.net/explore?orgId=1&left=%7B%22datasource%22:%22{{{shard_name}}}-prometheus%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22sum(rate(aws_account_operator_account_claim_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22%2BInf%5C%22%7D%5B10m%5D))%20%3E%20sum(rate(aws_account_operator_account_claim_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22600%5C%22%7D%5B10m%5D))%20or%20sum(rate(aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22%2BInf%5C%22%7D%5B10m%5D))%20%3E%20sum(rate(aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket%7Bname%3D%5C%22aws-account-operator%5C%22,le%3D%5C%22600%5C%22%7D%5B10m%5D))%22%7D%5D,%22range%22:%7B%22from%22:%22now-1h%22,%22to%22:%22now%22%7D%7D"
+
+- interval: 1m
+  input_series:
+    - series: aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket{name="aws-account-operator",le="+Inf"}
+      values: 1+0x10 2+0x10 3+0x10
+    - series: aws_account_operator_account_claim_ccs_pending_duration_seconds_bucket{name="aws-account-operator",le="600"}
+      values: 1+0x10 2+0x20
+  alert_rule_test:
+    - eval_time: 10m
+      alertname: AWSAccountOperator AccountClaim Pending - production - {{{shard_name}}}
+      exp_alerts:
+    - eval_time: 30m
       alertname: AWSAccountOperator AccountClaim Pending - production - {{{shard_name}}}
       exp_alerts:
         - exp_labels:
