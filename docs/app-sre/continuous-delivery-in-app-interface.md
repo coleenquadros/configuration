@@ -11,6 +11,9 @@ A deployment process for a service is defined using a SaaS file. In a SaaS file,
 
 In this context, deploying a resource template will usually consist in processing the Openshift template  via `oc process` and deploy it via `oc apply`. There is a way to deploy raw Openshift manifests, look below for the `provider` option.
 
+Note, that we do not impose a fixed structure for SaaS files. How many components get deployed by a single SaaS file is up for the tenant to decide. When designging a SaaS file it is important to understand that deployments happen per SaaS file, per environment.
+For more information on Environments: [Products, Environments, Namespaces and Apps](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-interface/api/entities-and-relations.md#products-environments-namespaces-and-apps)
+
 ### Suggested flow
 
 You would usually define the main branch as the ref to be deployed to stage, and a specific commit SHA as the ref to be deployed to production. This means that a template's location is defined once, and deployed to multiple targets.
