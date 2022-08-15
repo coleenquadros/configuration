@@ -48,9 +48,9 @@ spec:
       annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
-        message: "High error rate for Cincinnati graph-builder scrapes"
+        message: "High error rate for Cincinnati graph-builder scrapes (pod: {{ $labels.pod }})"
         link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
-      expr: rate(cincinnati_gb_graph_upstream_errors_total{job="cincinnati-graph-builder",namespace="cincinnati-stage"}[15m]) != 0
+      expr: rate(cincinnati_gb_graph_upstream_errors_total{job="cincinnati-graph-builder",namespace="cincinnati-stage",pod=~"cincinnati.+"}[15m]) > 0.0015
       for: 15m
       labels:
         service: cincinnati
@@ -61,7 +61,8 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
         message: "Cincinnati graph-builder has a stale graph. Graph not updated since: {{ $value | humanizeDuration }}"
         link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
-      expr: (time()-cincinnati_gb_graph_last_successful_refresh_timestamp{job="cincinnati-graph-builder",namespace="cincinnati-production"}) >= 3600
+      expr: (time()-cincinnati_gb_graph_last_successful_refresh_timestamp{job="cincinnati-graph-builder",namespace="cincinnati-production"}) >= 2400
+      for: 20m
       labels:
         service: cincinnati
         severity: warning
@@ -84,7 +85,7 @@ spec:
         message: "Cincinnati policy-engine is receiving an high error rate from upstream graph-builder"
         link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
       expr: rate(cincinnati_pe_http_upstream_errors_total{job="cincinnati-policy-engine",namespace="cincinnati-stage"}[5m]) != 0
-      for: 10m
+      for: 5m
       labels:
         service: cincinnati
         severity: high
@@ -94,8 +95,8 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
         message: "High error rate (kind {{ $labels.kind  }}) for Cincinnati policy-engine graph endpoint"
         link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
-      expr: rate(cincinnati_pe_v1_graph_response_errors_total{job="cincinnati-policy-engine",namespace="cincinnati-stage"}[5m]) != 0
-      for: 10m
+      expr: rate(cincinnati_pe_graph_response_errors_total{job="cincinnati-policy-engine",namespace="cincinnati-stage"}[5m]) != 0
+      for: 5m
       labels:
         service: cincinnati
         severity: high
