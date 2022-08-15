@@ -9,7 +9,7 @@ description: Manage AWS Resources using Terraform
 upstream: https://github.com/app-sre/qontract-reconcile
 
 pr_check:
-  cmd: terraform-resources --external --no-use-jump-host
+  cmd: terraform-resources
 
 managed:
 - namespace:
@@ -22,8 +22,11 @@ managed:
       limits:
         memory: 1200Mi
         cpu: 600m
-    extraArgs: --internal --vault-output-path app-sre/integrations-output
+    extraArgs: --vault-output-path app-sre/integrations-output
     internalCertificates: true
+    logs:
+      slack: true
+    state: true
 - namespace:
     $ref: /services/app-interface/namespaces/app-interface-production-int.yml
   spec:
@@ -34,8 +37,11 @@ managed:
       limits:
         memory: 1200Mi
         cpu: 600m
-    extraArgs: --vault-output-path app-sre/integrations-output --no-use-jump-host
+    extraArgs: --vault-output-path app-sre/integrations-output
     internalCertificates: true
+    logs:
+      slack: true
+    state: true
     shardingStrategy: per-aws-account
 
 schemas:
