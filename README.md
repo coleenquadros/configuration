@@ -1594,13 +1594,22 @@ Note that the default file need to be present but no value necessary. Currently 
     output_resource_name: * 
     event_notifications:
     - destination: test-sns-1
-      source_type: db_instance
+      source_type: db-instance
       event_categories: 
         - deletion
         - failover
         - maintenance
 ```
-Note that `destination` should be the name of the SNS topic instead of its ARN.
+Note that `destination` should be the name of the SNS topic instead of its ARN. For `source_type`, following six options are supported:
+```
+db-instance
+db-security-group
+db-parameter-group
+db-snapshot
+db-cluster
+db-cluster-snapshot
+```
+See this [AWS document](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Events.overview.html) for more information about what type of events you can subscribe to.
 You can use this [MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/44428/diffs#fd3473d3c2ca1a88f2a9df55aa89ce7027ab5af1) as example. Once your MR is merged, the emails listed in your SNS defination should receive an  email from AWS requesting subscription confirmation.
 
 #### Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)
