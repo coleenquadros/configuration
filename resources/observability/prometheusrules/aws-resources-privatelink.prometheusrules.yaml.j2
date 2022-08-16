@@ -1,0 +1,90 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: aws-resources-privatelink
+spec:
+  groups:
+  - name: privatelink.aws-resource-exporters.rules
+    rules:
+      - alert: VpcsPerRegionQuotaExhaustion # Current quota: 20
+        expr: |
+          (aws_resources_exporter_vpc_vpcsperregion_usage{job="{{{ job_stage }}}"} / aws_resources_exporter_vpc_vpcsperregion_quota{job="{{{ job_stage }}}"}) >= 0.9
+        for: 10m
+        labels:
+          service: privatelink-monitoring
+          severity: high
+        annotations:
+          runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/aws/aws-support-case.md#request-a-quotalimit-increase"
+          summary: VPCs per region are nearing service quota
+          message: "Number of VPCs in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used."
+      - alert: SubnetsPerVpcQuotaExhaustion # Current quota: 800
+        expr: |
+          (aws_resources_exporter_vpc_subnetspervpc_usage{vpcid=~".+", job="{{{ job_stage }}}"} / on(aws_region, service, job) group_left aws_resources_exporter_vpc_subnetspervpc_quota{job="{{{ job_stage }}}"}) >= 0.9
+        for: 10m
+        labels:
+          service: privatelink-monitoring
+          severity: high
+        annotations:
+          runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/aws/aws-support-case.md#request-a-quotalimit-increase"
+          summary: Subnets per vpc are nearing service quota
+          message: "Number of subnets in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used."
+      - alert: RoutesPerRoutetableQuotaExhaustion # Current quota: 1000
+        expr: (aws_resources_exporter_vpc_routesperroutetable_usage{vpcid=~".+", routetableid=~".+"} / on(aws_region, service, job) group_left aws_resources_exporter_vpc_routesperroutetable_quota{}) >= 0.9
+        for: 10m
+        labels:
+          service: privatelink-monitoring
+          severity: high
+        annotations:
+          runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/aws/aws-support-case.md#request-a-quotalimit-increase"
+          summary: Routes per routetable are nearing service quota
+          message: "Number of routes in routetable {{ $labels.routetableid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used."
+      - alert: InterfaceVpcEndpointsQuotaExhausion # Current quota: 450
+        expr: |
+          (aws_resources_exporter_vpc_interfacevpcendpointspervpc_usage{vpcid=~".+", job="{{{ job_stage }}}"} / on (aws_region, service, job) group_left aws_resources_exporter_vpc_interfacevpcendpointspervpc_quota{job="{{{ job_stage }}}"}) >= 0.9
+        for: 10m
+        labels:
+          service: privatelink-monitoring
+          severity: high
+        annotations:
+          runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/aws/aws-support-case.md#request-a-quotalimit-increase"
+          summary: Interface VPC endpoints per VPC are nearing service quota
+          message: "Interface VPC endpoints per VPC in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used."
+      # This has very high quota but very low usage
+      - alert: RoutetablesPerVpcQuotaExhaustion # Current quota: 800
+        expr: |
+          (aws_resources_exporter_vpc_routetablespervpc_usage{vpcid=~".+", job="{{{ job_stage }}}"} / on (aws_region, service, job) group_left aws_resources_exporter_vpc_routetablespervpc_quota{job="{{{ job_stage }}}"}) >= 0.9
+        for: 10m
+        labels:
+          service: privatelink-monitoring
+          severity: high
+        annotations:
+          runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/aws/aws-support-case.md#request-a-quotalimit-increase"
+          summary: Routetables per VPC are nearing service quota
+          message: "Routestables per VPC in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used."
+      - alert: Ipv4BlocksPerVpcQuotaExhaustion # Current quota: 20
+        expr: |
+          (aws_resources_exporter_vpc_ipv4blockspervpc_usage{vpcid=~".+", job="{{{ job_stage }}}"} / on (aws_region, service, job) group_left aws_resources_exporter_vpc_ipv4blockspervpc_quota{job="{{{ job_stage }}}"}) >= 0.9
+        for: 10m
+        labels:
+          service: privatelink-monitoring
+          severity: high
+        annotations:
+          runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/aws/aws-support-case.md#request-a-quotalimit-increase"
+          summary: Ipv4 blocks per VPC are nearing service quota
+          message: "IPv4 blocks per VPC in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used."
+      - alert: RecordsPerHostedZoneQuotaExhaustion # Current quota: 10000
+        expr: |
+          (aws_resources_exporter_route53_recordsperhostedzone_total{job="{{{ job_stage }}}"} / on(hostedzoneid) group_left aws_resources_exporter_route53_recordsperhostedzone_quota{job="{{{ job_stage }}}"}) >= 0.9
+        for: 10m
+        labels:
+          service: privatelink-monitoring
+          severity: high
+        annotations:
+          runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/aws/aws-support-case.md#request-a-quotalimit-increase"
+          summary: Records per hosted zone are nearing service quota
+          message: "Records in hosted zone {{ $labels.hostedzonename }} ({{ $labels.hostedzoneid }}) are nearly exhausting their quota: currently {{ $value | humanizePercentage }} used."
