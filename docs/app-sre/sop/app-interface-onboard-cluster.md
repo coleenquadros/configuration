@@ -439,7 +439,18 @@ hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <
   $ oc new-project app-sre
   $ oc -n app-sre create sa app-sre-cluster-admin-bot
   $ oc adm policy add-cluster-role-to-user cluster-admin -z app-sre-cluster-admin-bot
-  $ oc -n app-sre sa get-token app-sre-cluster-admin-bot
+  # since 4.11, token secrets are not automatically generated anymore
+  #$ oc -n app-sre sa get-token app-sre-cluster-admin-bot
+  
+  $ echo "apiVersion: v1
+  kind: Secret
+  metadata:
+    annotations:
+      kubernetes.io/service-account.name: app-sre-cluster-admin-bot
+    name: app-sre-cluster-admin-bot
+  type: kubernetes.io/service-account-token" | oc create -f - -n app-sre
+
+  oc get secret -n dedicated-admin app-sre-cluster-admin-bot -o jsonpath={.data.token} | base64 --decode
   ```
 
 1. Add the `app-sre-cluster-admin-bot` credentials to vault at https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs
