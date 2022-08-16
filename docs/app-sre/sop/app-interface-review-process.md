@@ -58,23 +58,3 @@ In general when anyone ask for access to tenant's resource, even if it's in lowe
 Access to Telemeter is approved by the telemetry-sme list: telemetry-sme <telemetry-sme@redhat.com> 
 
 The best way to request access is to email that list, point at the MR and ask for approval.
-
-### Insights cluster access
-
-The following folks can be asked to review MR when in doubt:
-
-```
-- @klape
-- @bturner
-- @mafriedm
-```
-
-### Managed services access
-
-Access to Managed Services should be approved by one of the following:
-
-```
-- @weil
-- @stobin
-- @dbizzarr
-```
