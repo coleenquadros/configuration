@@ -27,7 +27,9 @@ Create an integration to replicate the content of one or multiple app-role polic
 
 ## Proposal
 
-Enhance the Vault instance file schema with a new section called `replication`. This section will be placed in the source Vault instance and will define the target for the replication and which contents should be copied using a approle polices list.
+Enhance the Vault instance file schema with a new section called `replication`. This section will be placed in the source Vault instance and will define the provider and the target for the replication and which contents should be copied.
+
+For this specific use case, we will implement the base of the integration and using the [provider pattern](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-interface/qontract-reconcile-patterns.md#the-provider-pattern) Jenkins Provider, that will replicate all secrets needed by an specific instance of Jenkins.
 
 ```yaml
 ---
@@ -44,14 +46,31 @@ address: "https://vault.ext.devshift.net"
 replication:
 - instance:
     $ref: /services/vault.devshift.net/config/instances/secondary-ext-vault.yml
-  policies:
-  - $ref: /services/vault.devshift.net/config/policies/app-sre-ci-ext-approle-policy.yml
+  paths:
+  - provider: jenkins
+    instance:
+      $ref: /dependencies/ci-ext/ci-ext.yml
 ```
 
-This schema change will be picked up by an integration responsible for replicating the content between the two Vault instances.
+This schema change will be picked up by an integration responsible for extracting the list of secrets that needs to be replicated from the Jenkins job deifintions, and replicating the content between the two Vault instances.
 
-We will use part of the existing vault implementation adding the capabilites to list secrets from a given path in order to replicate the contents between two different instances.
+As we will have the complete list of secrets, for now we won't be needing any changes on the current vault client implementation.
 
+## Future implementations
+
+As part of future use cases for this integration, it can be extended to replicate entire approle policy secrets using the provider pattern. The schema will be something similar to:
+
+```yaml
+replication:
+- instance:
+    $ref: /services/vault.devshift.net/config/instances/secondary-ext-vault.yml
+  paths:
+  - provider: jenkins
+    instance:
+      $ref: /dependencies/ci-ext/ci-ext.yml
+  - provider: policy
+      $ref: /services/vault.devshift.net/config/policies/app-sre-ci-ext-approle-policy.yml
+```
 ## Alternatives considered
 
 - VPC Peerings between ci-ext and appsrep05ue1
