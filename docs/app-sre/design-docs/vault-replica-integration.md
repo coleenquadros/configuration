@@ -27,7 +27,7 @@ Create an integration to replicate the content of one or multiple app-role polic
 
 ## Proposal
 
-Enhance the AWS account file schema with a new section called `replication`. This section will be placed in the target Vault instance and will define the source for the replication and which contents should be copied using a approle polices list.
+Enhance the Vault instance file schema with a new section called `replication`. This section will be placed in the source Vault instance and will define the target for the replication and which contents should be copied using a approle polices list.
 
 ```yaml
 ---
@@ -36,14 +36,14 @@ $schema: /vault-config/instance-1.yml
 labels:
   service: vault.devshift.net
 
-name: "vault-ext-devshift-net"
-description: "Secondary ci-ext App SRE Vault instance"
+name: "vault-devshift-net"
+description: "App SRE Vault instance"
 
 address: "https://vault.ext.devshift.net"
 
 replication:
 - instance:
-    $ref: /services/vault.devshift.net/config/instances/devshift-net.yml
+    $ref: /services/vault.devshift.net/config/instances/secondary-ext-vault.yml
   policies:
   - $ref: /services/vault.devshift.net/config/policies/app-sre-ci-ext-approle-policy.yml
 ```
