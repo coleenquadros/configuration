@@ -31,6 +31,9 @@ Useful dashboards:
 [Merge queue](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/app-interface-merge-queue.md)
 [Review queue](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/app-interface-review-queue.md)
 
+Be aware, that some requested changes might actually require a new onboarding process.
+We have a [checklist](/docs/app-sre/re-onboarding-checklist.md) to help drive the decision.
+
 #### 4a. Review ASIC tickets
 
 The IC engineer should review any open [ASIC](https://issues.redhat.com/projects/ASIC/issues/) tickets and attempt to resolve them, or at least start the investigation and post and findings to the ticket.
