@@ -110,3 +110,17 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/c91dcda039618ded/cloud-connector?orgId=1&var-datasource=crcp01ue1-prometheus"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments"
         message: '{{ $labels.namespace }} Connection Count Reporter Failed | {{ $labels.pod }} failed to run'
+
+
+    - alert: CloudConnectorIngressKafkaConsumerLag
+      expr: sum(avg_over_time(kafka_consumergroup_group_lag{group="cloud-connector-rhc-message-consumer", topic="platform.cloud-connector.rhc-message-ingress"} [10m])) by (topic) > 1000
+      for: 95m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/FRmd1NeWk1/cloud-connector?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments"
+        message: '{{ $labels.topic }} Cloud Connector Ingress Kafka Consumer Lag is high'
