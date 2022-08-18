@@ -42,6 +42,7 @@ Insights MRs should be assigned to the MR and approved as follows:
 **Note:** the reviewers above are able to add lgtm labels in GitLab
 
 ### Status Page Component
+
 If a status page component is newly introduced by an MR, check if the `displayName` references only an existing component on the status page.
 If that is the case, the app-interface managed component will take ownership of the existing component on the page. Check the `app-1.yml` that
 references the `status-page-component-1.yml` and verify that this is legit.
@@ -58,3 +59,9 @@ In general when anyone ask for access to tenant's resource, even if it's in lowe
 Access to Telemeter is approved by the telemetry-sme list: telemetry-sme <telemetry-sme@redhat.com> 
 
 The best way to request access is to email that list, point at the MR and ask for approval.
+
+### Re-Onboarding Requirements
+
+Some requested changes might actually require a new onboarding process.
+We have a [checklist](/docs/app-sre/re-onboarding-checklist.md) to help drive the decision.
+
