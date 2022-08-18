@@ -32,6 +32,7 @@ managedResourceTypes:
 - ClowdJobInvocation
 - Service
 - ConfigMap
+- Job
 
 imagePatterns:
 - quay.io/cloudservices
@@ -129,3 +130,13 @@ resourceTemplates:
         $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
       disable: true  # do not create an app-sre deploy job for ephemeral namespace
       ref: internal  # populated by bonfire
+  - name: automation-hub-job
+    path: /openshift/clowder/run-job.yaml
+    url: https://github.com/ansible/galaxy_ng
+    targets:
+    - namespace:
+        $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
+      ref: 565b297d1814c0c395a270a3559a38e332e6b862
+      parameters:
+        ARGS: django-admin maintain-pe-group
+        RERUN: 0
