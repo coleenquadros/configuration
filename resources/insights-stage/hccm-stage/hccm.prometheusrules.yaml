@@ -262,7 +262,21 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-pod-restarts-In-hccm.rst"
 
     - alert: App-cost-upload-lag-In-hccm
-      expr: sum(kafka_consumergroup_group_lag{topic="platform.upload.announce", group="hccm-group"}) by (group) > 100
+      expr: sum(kafka_consumergroup_group_lag{topic="platform.upload.announce", group="hccm-group"}) by (group) > 10000
+      for: 60m
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/8wCTC5Tmz/strimzi-kafka?orgId=1&var-namespace=platform-mq-stage&var-strimzi_cluster_name=platform-mq&var-kafka_broker=All&var-kafka_topic=platform.upload.announce&var-kafka_partition=All&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Kafka lag for cost management uploads in hccm topic exceeded 10000 in stage environment for 1 hour."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-upload-lag-In-hccm.rst"
+
+    - alert: App-cost-upload-lag-In-hccm
+      expr: (sum by(group) (delta(kafka_consumergroup_group_lag{group="hccm-group",topic="platform.upload.announce"}[1m]))) > 0
       for: 10m
       labels:
         severity: warning
@@ -272,7 +286,7 @@ spec:
       annotations:
         dashboard: "https://grafana.stage.devshift.net/d/8wCTC5Tmz/strimzi-kafka?orgId=1&var-namespace=platform-mq-stage&var-strimzi_cluster_name=platform-mq&var-kafka_broker=All&var-kafka_topic=platform.upload.announce&var-kafka_partition=All&var-datasource=crcs02ue1-prometheus"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Kafka lag for cost management uploads in hccm topic exceeded 100 in stage environment."
+        message: "Kafka lag for cost management uploads has not decreased in stage environment for 10 minutes."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-upload-lag-In-hccm.rst"
 
     - alert: App-cost-sources-lag-In-hccm
