@@ -101,22 +101,6 @@ resourceTemplates:
       MEMORY_LIMITS: 4Gi
       HEARTBEAT_SUSPEND: 'true'
       HEARTBEAT_SCHEDULE: '@daily'
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-xjoin-search-gh-build-master
-    parameters:
-      NUM_REPLICAS: 2
-      MEMORY_REQUESTS: 512Mi
-      MEMORY_LIMITS: 512Mi
-      CPU_REQUESTS: 499m
-      CPU_LIMITS: 1
-      INGRESS_HOST: ingress-service.ingress-stage.svc
-      HEARTBEAT_SUSPEND: 'false'
-      HEARTBEAT_SCHEDULE: '@daily'
 
 - name: xjoin-search
   path: /deploy/ephemeral.yaml
@@ -156,34 +140,6 @@ resourceTemplates:
     parameters:
       PV_SIZE: 20Gi
       NUM_REPLICAS: '0'
-
-- name: xjoin-kafka-connect-strimzi
-  path: /deploy/kafka-connect-fedramp-xjoin.yml
-  url: https://github.com/RedHatInsights/xjoin-kafka-connect
-  parameters:
-    VERSION: '2.7.0'
-    KAFKA_BOOTSTRAP_PORT: '9093'
-    GROUP_ID: xjoin
-    STORAGE_TOPIC_PREFIX: xjoin
-    NAME_PREFIX: xjoin-connect
-    KAFKA_USER: kafka-xjoin
-    LOG_LEVEL: INFO
-  targets:
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: RedHatInsights-xjoin-kafka-connect-gh-build-master
-    parameters:
-      CPU_LIMITS: 3
-      XMX: 4G
-      XMS: 4G
-      CPU_REQUESTS: 249m
-      NUM_REPLICAS: '5'
-      MEMORY_REQUESTS: 6Gi
-      MEMORY_LIMITS: 10Gi
 
 - name: xjoin-kafka-connect-strimzi
   path: /deploy/kafka-connect.yml
