@@ -114,7 +114,7 @@ With that tenants have more flexibility in how to use AMI tags in app-interface.
 
 ## Alternatives considered
 
-Tenants have to use different `tag_name`s for their AMI images, which may leads to a [more complicated setup]((https://github.com/osbuild/osbuild-composer/pull/2718/files#diff-3242a92a6c9ef4106d1ef5de8428854390640de462247209c2a8fb3f8d3fbf91R75)) on their site.
+Tenants have to use different `tag_name`s for their AMI images, which may leads to a [more complicated setup](https://github.com/osbuild/osbuild-composer/pull/2718/files#diff-3242a92a6c9ef4106d1ef5de8428854390640de462247209c2a8fb3f8d3fbf91R75) on their site.
 
 ## References
 
