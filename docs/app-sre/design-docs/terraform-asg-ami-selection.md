@@ -72,7 +72,7 @@ Enhance the `image` schema section to be a list of different tag types.
 
 Current implementation of a `tag_name`, `url` and `ref`.
 
-`type = simple`
+`type = static`
 
 Simple possibility to specify a user-defined key/value pair.
 
@@ -97,7 +97,7 @@ externalResources:
         type: git
       - tag_name: arch
         value: x86_64
-        type: simple
+        type: static
   - provider: asg
     identifier: rhel-aarch64
     ...
@@ -108,7 +108,7 @@ externalResources:
         type: git
       - tag_name: arch
         value: aarch64
-        type: simple
+        type: static
 ```
 
 With that tenants have more flexibility in how to use AMI tags in app-interface.
