@@ -94,6 +94,7 @@ externalResources:
       - tag_name: commit
         url: http://github.com/...
         ref: aabbccddeeff...
+        type: git
       - tag_name: arch
         value: x86_64
         type: simple
