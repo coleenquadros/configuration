@@ -4,6 +4,7 @@
 
 - [SOP : OpenShift Cincinnati](#sop--openshift-cincinnati)
     - [Verify it's working](#verify-its-working)
+    - [Base functionality testing](#base-functionality-testing) 
     - [Reporting analysis](#reporting-analysis)
     - [Reverting broken versions](#reverting-broken-versions)
     - [GBUpstreamScrapesHalted](#gbupstreamscrapeshalted)
@@ -22,6 +23,18 @@
 
 - At least one `cincinnati` pod is marked as UP in Prometheus.
 - Additional details on expected behaviour are available in the Cincinnati production deployment doc: https://docs.google.com/document/d/1oT9wueEB01god-gICg0DsGFJzuA-E-TPn88ViWTMr-A/edit
+
+---
+
+## Base functionality testing
+- Check if cincinnati is responding using `curl -s 'https://api.openshift.com/api/upgrades_info/graph?channel=candidate-4.11'`. The response should be an update graph.\
+  The update graph follows the following schema `{"version": 1, "nodes": [], "edges":[], "conditionalEdges":[]}`.\
+  Here is an extracted snippet from a possible response: 
+  ```
+  ... {"from":"4.10.0-rc.7","to":"4.10.9"},{"from":"4.10.0-fc.3","to":"4.10.4"}],"risks":[{"url":"https://bugzilla.redhat.com/show_bug.cgi?id=2076312#c9","name":"CephParallelFsync","message":"This update would introduce a CephFS kernel driver regression, exposing a kernel panic when workloads make parallel ceph_fsync calls to the same file.  The update also introduces many bug fixes as described in the errata, so weigh those against the risk of Ceph kernel panics when deciding whether to update or wait for an OpenShift release that also fixes the Ceph regression.","matchingRules":[{"type":"PromQL","promql":{"promql":"topk(1,\n  label_replace(group(ceph_health_status), \"ceph\", \"yes\", \"\", \"\")\n  or\n  label_replace(0 * group(cluster_version), \"ceph\", \"no\", \"\", \"\")\n)\n"}}]}]}]}
+  ```
+- Check if latency is within permissible limits with [prod-prometheus] query 
+  [`component:latency:p90_rate5m{job="cincinnati-policy-engine",service="cincinnati",component="cincinnati-policy-engine"}`](https://prometheus.appsrep06ue2.devshift.net/graph?g0.expr=component%3Alatency%3Ap90_rate5m%7Bjob%3D%22cincinnati-policy-engine%22%2Cservice%3D%22cincinnati%22%2Ccomponent%3D%22cincinnati-policy-engine%22%7D&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=1h)
 
 ---
 
@@ -204,3 +217,4 @@ Team email: aos-team-ota@redhat.com
 [saas-cincinnati]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/cincinnati/cicd/ci-int/saas.yaml
 [saas-cincinnati-bump]: https://gitlab.cee.redhat.com/service/app-interface/-/commits/master/data/services/cincinnati/cicd/ci-int/saas.yaml
 [saas-cincinnati-repo]: https://gitlab.cee.redhat.com/service/saas-cincinnati
+[prod-prometheus]: https://prometheus.appsrep06ue2.devshift.net/graph
