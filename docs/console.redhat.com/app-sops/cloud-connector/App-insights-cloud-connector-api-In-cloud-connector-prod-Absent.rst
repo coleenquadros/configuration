@@ -28,7 +28,7 @@ Access required
 Steps
 -----
 
--  Log into the console / namespace and verify if pods are up / stuck / etc 
+-  Log into the console / namespace and verify if pods are up / stuck / etc
 -  Check logs / events for pods in the cloud-connector namespace
     - Check the logs for a ``Failed to connect to MQTT broker`` error message or an ``Unable to connect to MQTT broker`` error message
 -  Check if there were any recent changes to the CR's in the namespace
