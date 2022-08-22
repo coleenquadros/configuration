@@ -249,3 +249,78 @@ spec:
       labels:
         service: uhc-acct-mngr
         severity: medium
+
+    #
+    # Anomaly Detection recording rules for **subscriptions** duration
+    # See https://gitlab.com/gitlab-com/runbooks/-/blob/master/thanos-rules/service_ops_anomaly_detection.yml
+    # and https://about.gitlab.com/blog/2019/07/23/anomaly-detection-using-prometheus/
+    #
+    # Aggregating metrics
+    - record: subscriptions_request_duration_sum:rate5m
+      expr: | 
+        (sum(rate(api_inbound_request_duration_sum{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/api/accounts_mgmt/v1/subscriptions",method="GET",code="200"}[5m])) OR on() vector(0))
+        /
+        (sum(rate(api_inbound_request_duration_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/api/accounts_mgmt/v1/subscriptions",method="GET",code="200"}[5m])) OR on() vector(0))
+    # Long-term average value for the series
+    - record: subscriptions_request_duration_sum:rate5m:avg_over_time_1w
+      expr: avg_over_time(subscriptions_request_duration_sum:rate5m[1w])
+    # Long-term standard deviation for the series
+    - record: subscriptions_request_duration_sum:rate5m:stddev_over_time_1w
+      expr: stddev_over_time(subscriptions_request_duration_sum:rate5m[1w])
+    # Z-score for aggregation
+    - record: subscriptions_request_duration_sum:z_score
+      expr: |
+        (
+          subscriptions_request_duration_sum:rate5m -
+          subscriptions_request_duration_sum:rate5m:avg_over_time_1w
+        ) /
+        subscriptions_request_duration_sum:rate5m:stddev_over_time_1w
+    # Z-Score based prediction
+    - record: subscriptions_request_duration_sum:z_score_prediction
+      expr: sum(subscriptions_request_duration_sum:z_score)         
+        without(code, method, namespace, path)
+    # TODO Z-Score based alert
+    # - alert: Z-Score based Duration of requests for Subscriptions are outside of expected range - {{{environment}}}
+    #   expr: abs(subscriptions_request_duration_sum:z_score_prediction) > 3
+    #   for: 10m
+    #   labels:
+    #     service: uhc-acct-mngr
+    #     severity: warning
+    #   annotations:
+    #     message: "{{ $labels }} UHC Account Manager in namespace {{{ environment }}}: Z-Score based Duration of requests for Subscriptions are outside of expected operating parameters"
+    #     runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+
+    # Seasonality, Multiple prediction
+    - record: subscriptions_request_duration_sum:rate5m_prediction
+      expr: |
+        quantile(0.5,
+          label_replace(
+            avg_over_time(subscriptions_request_duration_sum:rate5m[4h] offset 166h)
+            + subscriptions_request_duration_sum:rate5m:avg_over_time_1w - subscriptions_request_duration_sum:rate5m:avg_over_time_1w offset 1w
+            , "offset", "1w", "", "")
+          or
+          label_replace(
+            avg_over_time(subscriptions_request_duration_sum:rate5m[4h] offset 334h)
+            + subscriptions_request_duration_sum:rate5m:avg_over_time_1w - subscriptions_request_duration_sum:rate5m:avg_over_time_1w offset 2w
+            , "offset", "2w", "", "")
+          or
+          label_replace(
+            avg_over_time(subscriptions_request_duration_sum:rate5m[4h] offset 502h)
+            + subscriptions_request_duration_sum:rate5m:avg_over_time_1w - subscriptions_request_duration_sum:rate5m:avg_over_time_1w offset 3w
+            , "offset", "3w", "", "")
+        )
+        without (offset)
+    # TODO Seasonality based alert
+    # - alert: Seasonality based Duration of requests for Subscriptions are outside of expected range - {{{environment}}}
+    #   expr: >
+    #     abs(
+    #       (subscriptions_request_duration_sum:rate5m - subscriptions_request_duration_sum:rate5m_prediction) /
+    #       subscriptions_request_duration_sum:rate5m:stddev_over_time_1w
+    #     ) > 2
+    #   for: 10m
+    #   labels:
+    #     service: uhc-acct-mngr
+    #     severity: warning
+    #   annotations:
+    #     message: "UHC Account Manager in namespace {{{ environment }}}: Seasonality based Duration of requests for Subscriptions are outside of expected operating parameters"
+    #     runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
