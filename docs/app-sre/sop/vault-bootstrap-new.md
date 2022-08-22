@@ -41,6 +41,8 @@ podman run --rm -it --name certstrap -v $(pwd):/workdir:Z -w /workdir squareup/c
 
 Now you are are able to deploy vault, do it for checking obvious typos/missing secrets/settings, Vault won't be able to run yet
 
+**Note!** If this Vault instance is being deployed to a public cluster, do not deploy a Route for accessing it yet. Instead, utilize [port forwarding](https://docs.openshift.com/container-platform/3.11/dev_guide/port_forwarding.html) to complete step 7. The Route can be provisioned once step 7 is completed.
+
 **Note!** You need temporarily remove Readyness and Liveness probes from DeploymeConfig as them expect vault to be fully configured and then will crashloop PODs
 
 7. Go to Vault web-UI, create 5/2 keys and root token, download it and save securily
