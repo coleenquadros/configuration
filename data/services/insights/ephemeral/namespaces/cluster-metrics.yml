@@ -1,0 +1,44 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights-ephemeral
+
+name: cluster-metrics
+description: Namespace for ephemeral cluster metrics
+
+cluster:
+  $ref: /openshift/insights/c-rh-c-eph/cluster.yml
+
+app:
+  $ref: /services/insights/ephemeral/app.yml
+
+environment:
+  $ref: /products/insights/environments/ephemeral.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- Role
+- RoleBinding
+# - ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-common/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+# allows labelling of namespaces
+- provider: resource
+  path: /insights-ephemeral/namespace-editor.rolebinding.yaml
+- provider: resource
+  path: /insights-ephemeral/namespace-editor.role.yaml
