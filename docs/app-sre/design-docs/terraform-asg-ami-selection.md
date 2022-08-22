@@ -68,11 +68,11 @@ Everything else :)
 
 Enhance the `image` schema section to be a list of different tag types.
 
-`type = git`
+`provider = git`
 
 Current implementation of a `tag_name`, `url` and `ref`.
 
-`type = static`
+`provider = static`
 
 Simple possibility to specify a user-defined key/value pair.
 
@@ -94,10 +94,10 @@ externalResources:
       - tag_name: commit
         url: http://github.com/...
         ref: aabbccddeeff...
-        type: git
+        provider: git
       - tag_name: arch
         value: x86_64
-        type: static
+        provider: static
   - provider: asg
     identifier: rhel-aarch64
     ...
@@ -105,10 +105,10 @@ externalResources:
       - tag_name: commit
         url: http://github.com/...
         ref: aabbccddeeff...
-        type: git
+        provider: git
       - tag_name: arch
         value: aarch64
-        type: static
+        provider: static
 ```
 
 With that tenants have more flexibility in how to use AMI tags in app-interface.
