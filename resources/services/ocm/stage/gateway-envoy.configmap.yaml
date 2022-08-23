@@ -552,8 +552,21 @@ data:
                       auto_host_rewrite: true
                       timeout: 30s
 
-                  # Route for the `assisted-install` service:
-                  - name: assisted-install
+                  # Routes for the `assisted-install` service. Note that we
+                  # have two separate routes: one for POST requests that we
+                  # don't want to retry, and another one for the rest of the
+                  # request that we do want to retry.
+                  - name: assisted-install-post
+                    match:
+                      prefix: /api/assisted-install
+                      headers:
+                      - name: :method
+                        exact_match: POST
+                    route:
+                      cluster: assisted-install
+                      auto_host_rewrite: true
+                      timeout: 180s
+                  - name: assisted-install-other
                     match:
                       prefix: /api/assisted-install
                     route:
