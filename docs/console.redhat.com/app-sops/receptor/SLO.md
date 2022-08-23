@@ -20,4 +20,4 @@ The following categories will correspond to the SLIs and SLOs below.
 
 ## Dashboards
 
-https://grafana.app-sre.devshift.net/d/FRmd1NeWk1/receptor-controller?orgId=1
+https://grafana.app-sre.devshift.net/d/FRmd1NeWk1/receptor-controller?orgId=1&var-datasource=crcp01ue1-prometheus
