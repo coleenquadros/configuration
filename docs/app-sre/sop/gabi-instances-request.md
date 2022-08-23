@@ -70,6 +70,8 @@ sharedResources:
 - $ref: /services/app-sre/shared-resources/splunk-creds.yml
 ```
 
+This step should be the first MR to enable the credential to the next steps.
+
 ### Step 2: SaaS File
 
 Gabi will be deployed via [saas file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/cicd/saas-gabi.yaml).
