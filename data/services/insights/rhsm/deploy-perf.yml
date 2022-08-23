@@ -53,7 +53,11 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: b1981b9f6fcf6e44eb2c83eeb3c11a6be8403d35
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-egress-gh-build-main
     parameters:
       ENVIRONMENT: performance_data
 - name: swatch-product-allowlist
@@ -62,14 +66,18 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: 4af806610bb8e8d527cb39f3bb655c4dca751cec
+    ref: main
 - name: rhsm-subscriptions-api
   path: /templates/rhsm-subscriptions-api.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: 9ac86d9361b1bc6bf3fbbfec485822dea62da14b
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       SERVER_MAX_HTTP_HEADER_SIZE: '47000'
       RHSM_RBAC_HOST: ${RBAC_HOST}
@@ -80,29 +88,54 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: 9ac86d9361b1bc6bf3fbbfec485822dea62da14b
+    delete: true
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       USER_HOST: user.stage.api.redhat.com
       SUBSCRIPTION_SYNC_ENABLED: true
+      DEVTEST_SUBSCRIPTION_EDITING_ENABLED: true
+      DEVTEST_EVENT_EDITING_ENABLED: true
       PRODUCT_URL: https://product.stage.api.redhat.com/svcrest/product/v3
       SUBSCRIPTION_URL: https://subscription.stage.api.redhat.com/svcrest/subscription/v5
+      KAFKA_MESSAGE_THREADS: 6
+      CPU_REQUEST: 1000m
+      CPU_LIMIT: 1500m
+      USER_MAX_ATTEMPTS: 1
+      SPRING_ACTIVEMQ_BROKER_URL: ssl://umb.stage.api.redhat.com:61616
+      UMB_SERVICE_ACCOUNT_NAME: nonprod-insightsrhsm
 - name: rhsm-subscriptions-scheduler
   path: /templates/rhsm-subscriptions-scheduler.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: 9ac86d9361b1bc6bf3fbbfec485822dea62da14b
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       SUBSCRIPTION_SYNC_ENABLED: true
       OPENSHIFT_ENABLED_ACCOUNT_PROMQL: "group(min_over_time(subscription_labels{ebs_account != '', billing_model='marketplace'}[1h])) by (ebs_account)"
+      METRICS_CRON_LOGGING_LEVEL: DEBUG
+      DB_CHANGELOG_CLEANUP_SCHEDULE: 15 18 19 08 *
+      DB_CHANGELOG_CLEANUP_SUSPEND: false
 - name: metrics-worker
   path: /templates/metrics-worker.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: 9ac86d9361b1bc6bf3fbbfec485822dea62da14b
+    ref: main
+    delete: true
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       HAWTIO_BASE_PATH: /app/rhsm-metrics/hawtio
       SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
@@ -113,8 +146,15 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: 9ac86d9361b1bc6bf3fbbfec485822dea62da14b
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main 
     parameters:
+      HAWTIO_BASE_PATH: /app/rhsm-subscriptions/hawtio
+      DEVTEST_SUBSCRIPTION_EDITING_ENABLED: true
+      DEVTEST_EVENT_EDITING_ENABLED: true
       ENABLE_ACCOUNT_RESET: false
       CLOUDIGRADE_ENABLED: false
       CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-perf.svc.cluster.local
@@ -131,24 +171,20 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: 9ac86d9361b1bc6bf3fbbfec485822dea62da14b
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       MEMORY_REQUEST: 1000Mi
       PINHEAD_URL: https://systems.stage.api.redhat.com/v1
       RHSM_URL: https://api.rhsm.stage.redhat.com/v1
-- name: swatch-billing-provider-rh-marketplace
-  path: /templates/swatch-billing-provider-rh-marketplace.yml
-  url: https://github.com/RedHatInsights/rhsm-subscriptions
-  targets:
-  - namespace:
-      $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: 9ac86d9361b1bc6bf3fbbfec485822dea62da14b
-    parameters:
-      RH_MARKETPLACE_MANUAL_SUBMISSION_ENABLED: 'true'
-      RH_MARKETPLACE_MAX_ATTEMPTS: 2
-      SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
-      SUBSCRIPTION_URL: https://subscription.stage.api.redhat.com/svcrest/subscription/v5
-      USER_HOST: user.stage.api.redhat.com
+      CURL_CRON_IMAGE: quay.io/app-sre/ubi8-ubi-minimal
+      CURL_CRON_IMAGE_TAG: 8.6-854
+      RHSM_SYSTEM_CONDUIT_SERVICE_HOST: rhsm-conduit.rhsm-stage.svc.cluster.local
+      RHSM_SYSTEM_CONDUIT_SERVICE_PORT: 8000
+      TOLERATE_MISSING_ACCOUNT_NUMBER: true
 - name: auto-registration-listener
   path: /deploy/listener.yml
   url: https://gitlab.cee.redhat.com/rhsm/automatic-registration
