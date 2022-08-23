@@ -335,6 +335,7 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /observability/jiralert/jiralert-config.secret.yaml
+  enable_query_support: true
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-production/jiralert
   version: 1
@@ -355,6 +356,7 @@ openshiftResources:
 ### account: app-sre
 - provider: resource-template
   path: /observability/aws-resource-exporter/aws-resource-exporter.configmap.yaml.j2
+  enable_query_support: true
   variables:
     name: aws-resource-exporter-app-sre
     account_name: app-sre
@@ -365,6 +367,7 @@ openshiftResources:
 ### account: osio
 - provider: resource-template
   path: /observability/aws-resource-exporter/aws-resource-exporter.configmap.yaml.j2
+  enable_query_support: true
   variables:
     name: aws-resource-exporter-osio
     account_name: osio
@@ -375,6 +378,7 @@ openshiftResources:
 ### account: quayio-prod
 - provider: resource-template
   path: /observability/aws-resource-exporter/aws-resource-exporter.configmap.yaml.j2
+  enable_query_support: true
   variables:
     name: aws-resource-exporter-quayio
     account_name: quayio-prod
@@ -385,6 +389,7 @@ openshiftResources:
 ### account: insights-prod
 - provider: resource-template
   path: /observability/aws-resource-exporter/aws-resource-exporter.configmap.yaml.j2
+  enable_query_support: true
   variables:
     name: aws-resource-exporter-crc
     account_name: insights-prod
@@ -395,6 +400,7 @@ openshiftResources:
 ### account: ocm-quay
 - provider: resource-template
   path: /observability/aws-resource-exporter/aws-resource-exporter.configmap.yaml.j2
+  enable_query_support: true
   variables:
     name: aws-resource-exporter-ocm-quay
     account_name: ocm-quay
@@ -1038,6 +1044,25 @@ externalResources:
     aws_infrastructure_access:
       cluster:
         $ref: /openshift/telemeter-prod-01/cluster.yml
+      access_level: read-only
+  ## rhobsp02eu1 cloudwatch access
+  - provider: aws-iam-service-account
+    identifier: rhobsp02ue1-cloudwatch-access
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*"
+        }]
+      }
+    output_resource_name: rhobsp02ue1-cloudwatch-access
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/rhobsp02ue1/cluster.yml
       access_level: read-only
   ## aws cloudwatch access for grafana
   - provider: aws-iam-service-account

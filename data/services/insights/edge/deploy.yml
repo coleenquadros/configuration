@@ -1,24 +1,18 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: edge
   platform: insights
-
 name: edge
 description: edge app on the Insights Platform
-
 app:
   $ref: /services/insights/edge/app.yml
-
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
-
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: edge-cicd-events
-
 managedResourceTypes:
 - ClowdApp
 
@@ -30,10 +24,8 @@ authentication:
     path: insights/quay/cloudservices-push
     field: all
     version: 3
-
 parameters:
   S3_AWS_REGION: us-east-1
-
 resourceTemplates:
 - name: edge-api
   path: /deploy/clowdapp.yaml
@@ -41,8 +33,8 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true  # do not create an app-sre deploy job for ephemeral namespace
-    ref: internal  # populated by bonfire
+    disable: true
+    ref: internal
     parameters:
       MIN_REPLICAS: 1
   - namespace:
@@ -66,7 +58,7 @@ resourceTemplates:
       - edge-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/edge/namespaces/edge-prod.yml
-    ref: e81d78a52bb05ed74c687e07d95a8487e9527949
+    ref: 1e327e08dbaa65da8938d3498bdb8037007bca4e
     parameters:
       LOG_LEVEL: DEBUG
       MIN_REPLICAS: 6
@@ -78,6 +70,16 @@ resourceTemplates:
       INVENTORYURL: http://${HOST_INVENTORY_HOST}:${HOST_INVENTORY_PORT}
       PLAYBOOKDISPATCHERURL: http://${PLAYBOOK_DISPATCHER_HOST}:${PLAYBOOK_DISPATCHER_PORT}
       EDGEAPIBASEURL: https://console.redhat.com
+    promotion:
+      auto: true
+      subscribe:
+      - edge-stage-deploy-success-channel
+      promotion_data:
+      - channel: edge-stage-deploy-success-channel
+        data:
+        - parent_saas: edge
+          target_config_hash: 36e25f6f9d88c04b
+          type: parent_saas_config
   - namespace:
       $ref: /services/insights/edge/namespaces/perf-edge-perf.yml
     ref: main

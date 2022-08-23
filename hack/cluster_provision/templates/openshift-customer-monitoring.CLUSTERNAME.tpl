@@ -39,6 +39,7 @@ openshiftResources:
   type: extracurlyjinja2
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
   validate_alertmanager_config: true
+  enable_query_support: true
   # Replace PHASE with app-sre for production and app-sre-staging for staging
   variables:
     jiralert_host: jiralert.{phase}.devshift.net
@@ -56,6 +57,7 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /observability/prometheusrules/kube-metrics-pod-crashlooping.prometheusrules.yaml.j2
+  enable_query_support: true
 ### OCM metrics
 - provider: resource
   path: /observability/prometheusrules/ocm-metrics.prometheusrules.yaml
