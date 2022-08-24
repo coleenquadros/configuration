@@ -12,6 +12,16 @@ A runbook is a compilation of information that is useful for running a service i
 
 ## OpenShift
 * [Ingress Routers](/docs/app-sre/runbook/openshift-ingress-routers.md)
+* [Cert Manager Operator](/docs/app-sre/runbook/cert-manager.md)
 
 ## AWS
 * [RDS (Relational Database Service)](/docs/aws/runbook/aws-rds.md)
+
+## GitLab
+* [GitLab Escalation](/docs/app-sre/runbook/gitlab-escalation.md)
+
+## Jenkins
+* [General Runbook](/docs/app-sre/runbook/jenkins.md)
+* [CI-EXT Load Balancing](/docs/app-sre/runbook/jenkins-ci.ext-waf_alb.md)
+* [OS Upgrades](/docs/app-sre/runbook/jenkins-os-upgrade-workflow.md)
+* [Weekly Maintenance](/docs/app-sre/runbook/jenkins-weekly-maintenance.md)
