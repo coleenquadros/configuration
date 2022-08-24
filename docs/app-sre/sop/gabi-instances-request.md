@@ -86,7 +86,7 @@ Tenant must add new target namespaces with the following content:
       HOST: <endpoint of gabi, suggest using gabi_instance_name.cluster_name.cluster_id.p1.openshiftapps.com>
       NAMESPACE: <target namespace name>
       AWS_RDS_SECRET_NAME: <secret of rds creds, >
-      USERS_CONFIGMAP_NAME: <as the same as gabi instance name>
+      GABI_INSTANCE: <as the same as gabi instance name>
       DB_DRIVER: <pgx or mysql, default is pgx (postgres)>
 ```
 
@@ -114,7 +114,7 @@ metadata:
   name: gabi-openshift-oauth-delegate
 subjects:
   - kind: ServiceAccount
-    name: gabi
+    name: <as the same as GABI_INSTANCE name>
     namespace: <YOUR NAMESPACE HERE>
 roleRef:
   kind: ClusterRole

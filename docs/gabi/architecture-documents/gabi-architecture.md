@@ -28,7 +28,7 @@ Example:
       HOST: gabi-dashdotdb-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
       NAMESPACE: dashdot
       AWS_RDS_SECRET_NAME: dashdotdb-rds
-      USERS_CONFIGMAP_NAME: gabi-dashdotdb
+      GABI_INSTANCE: gabi-dashdotdb
 ```
 
 ### Dependencies
