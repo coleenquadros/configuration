@@ -21,7 +21,7 @@ The idea to mantain the access between ci-ext and the vault secrets needed is to
 
 ## Goals
 
-Create an integration to replicate the content of one or multiple app-role policies between different Vault instances.
+Create an integration to replicate the content from a vault instance to another one, implementing a provider for jenkins, that will copy all secrets needed by a given Jenkins instance.
 
 ## Non-objectives
 
@@ -29,7 +29,7 @@ Create an integration to replicate the content of one or multiple app-role polic
 
 Enhance the Vault instance file schema with a new section called `replication`. This section will be placed in the source Vault instance and will define the provider and the target for the replication and which contents should be copied.
 
-For this specific use case, we will implement the base of the integration and using the [provider pattern](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-interface/qontract-reconcile-patterns.md#the-provider-pattern) Jenkins Provider, that will replicate all secrets needed by an specific instance of Jenkins.
+For this specific use case, we will implement the base of the integration and using the [provider pattern](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-interface/qontract-reconcile-patterns.md#the-provider-pattern) Jenkins Provider, that will replicate all secrets needed by an specific instance of Jenkins that match a given policy paths.
 
 ```yaml
 ---
@@ -41,7 +41,7 @@ labels:
 name: "vault-devshift-net"
 description: "App SRE Vault instance"
 
-address: "https://vault.ext.devshift.net"
+address: "https://vault.devshift.net"
 
 replication:
 - instance:
@@ -50,6 +50,8 @@ replication:
   - provider: jenkins
     instance:
       $ref: /dependencies/ci-ext/ci-ext.yml
+    policy:
+      $ref: /services/vault.devshift.net/config/policies/app-sre-ci-ext-approle-policy.yml
 ```
 
 This schema change will be picked up by an integration responsible for extracting the list of secrets that needs to be replicated from the Jenkins job deifintions, and replicating the content between the two Vault instances.
