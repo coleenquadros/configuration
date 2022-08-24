@@ -190,6 +190,13 @@ spec:
       labels:
         service: uhc-acct-mngr
         severity: {{{severity_pod_restart}}}
+    - alert: OCM Alert Pod OOMKilled - {{{environment}}}
+      expr: sum by (namespace, container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled",namespace="uhc-{{{environment}}}",pod=~"uhc-acct-mngr-.*"}) == 1
+      annotations:
+        message: 'Observed pod ({{ $labels.pod }}) in namespace {{ $labels.namespace }} OOMKilled ({{ $value }})'
+      labels:
+        service: uhc-acct-mngr
+        severity: {{{severity_pod_restart}}}
     - alert: OCM Alert Pod Restarting too many times - {{{environment}}}
       expr: sum(increase(kube_pod_container_status_restarts_total{namespace="uhc-{{{environment}}}",pod=~"uhc-acct-mngr-.*"}[5m])) by (pod,namespace) > 1
       annotations:
