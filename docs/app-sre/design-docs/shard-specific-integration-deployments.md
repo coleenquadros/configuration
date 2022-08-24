@@ -22,6 +22,11 @@ As of now there is no way of rolling out changes for i.e. only certain AWS accou
 
 Enable staged rollouts of qontract-reconcile integrations, shard by shard. 
 
+## Non-Goals
+
+* Automate staged rollout
+* Solve integration to schema versioning issue, thus schema related changes could break this rollout approach
+
 ## Proposal
 
 The proposed solution is to have shard specific overrides for things like the image tag. This would enable us to rollout changes on a per account basis, since i.e. terraform-resources is sharded by AWS accounts.
@@ -75,5 +80,4 @@ This does not change the way we merge to qontract-reconcile. In this example `st
 
 ## Future work
 
-* This change opens the door for additional shard specific overrides. An example could varying resource settings for shards. 
-* Automate staged rollout
+This change opens the door for additional shard specific overrides. An example could varying resource settings for shards. 
