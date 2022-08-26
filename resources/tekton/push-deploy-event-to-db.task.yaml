@@ -1,0 +1,54 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: push-deploy-event-to-db
+spec:
+  params:
+    - name: env_name
+      type: string
+    - name: app_name
+      type: string
+    - name: task_status
+      type: string
+  steps:
+    - env:
+        - name: PGHOST
+          valueFrom:
+            secretKeyRef:
+              name: deploy-events-db
+              key: db.host
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: deploy-events-db
+              key: db.user
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: deploy-events-db
+              key: db.password
+        - name: PGPORT
+          valueFrom:
+            secretKeyRef:
+              name: deploy-events-db
+              key: db.port
+        - name: PGDATABASE
+          valueFrom:
+            secretKeyRef:
+              name: deploy-events-db
+              key: db.name
+      image: 'registry.redhat.io/rhel8/postgresql-12:1-107'
+      name: push-deploy-event-to-db
+      resources:
+        limits:
+          cpu: 20m
+          memory: 30Mi
+        requests:
+          cpu: 20m
+          memory: 30Mi
+      script: >-
+        #!/usr/bin/env bash
+        current_time=$(date +'%Y-%m-%d %H:%M:%S')
+        echo "Storing deploy event for app: $(params.app_name), env: $(params.env_name), status: $(params.task_status), time: $current_time"
+        psql -c "insert into deployments values('$current_time', '$(params.task_status)', '$(params.app_name)', '$(params.env_name)')"
+
