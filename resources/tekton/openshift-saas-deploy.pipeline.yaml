@@ -72,3 +72,21 @@ spec:
       value: "$(params.tkn_cluster_console_url)"
     - name: tkn_namespace_name
       value: "$(params.tkn_namespace_name)"
+  - name: push-deploy-event-to-db
+    params:
+      - name: env_name
+        value: $(params.env_name)
+      - name: app_name
+        value: $(params.saas_file_name)
+      - name: task_status
+        value: $(tasks.openshift-saas-deploy.status)
+    taskRef:
+      kind: Task
+      name: push-deploy-event-to-db
+    when:
+      - input: $(params.env_name)
+        operator: in
+        values:
+          # Only push deploy events to DB for jobs that ran for the environments listed below
+          - insights-stage
+          #- insights-production
