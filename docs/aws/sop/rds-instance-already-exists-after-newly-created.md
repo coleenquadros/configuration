@@ -13,7 +13,7 @@ Thus, any subsequent reconcile attempt will try to create the DB again, which wi
 We must import the new database into the terraform state
 
 1. Disable terraform-resources integration in [unleash](https://app-interface.unleash.devshift.net)
-1. Get a working config.tf via qr: `--dry-run terraform-resources --account-name <rds-aws-account> --print-to-file=/tmp/rdsfix/state.json`.
+1. Get a working config.tf via qr: `--dry-run terraform-resources --account-name <rds-aws-account> --print-to-file=/tmp/rdsfix/state.tf.json`.
 1. `terraform init`
 1. `terraform plan` -> verify the plan is indeed trying to create the already existing db
 1. `terraform import aws_db_instance.<rds-instance-name> <rds-instance-name>`
