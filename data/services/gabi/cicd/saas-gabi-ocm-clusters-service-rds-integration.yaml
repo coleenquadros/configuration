@@ -1,0 +1,56 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: gabi
+
+name: ocm-clusters-service-rds-integration
+description: 'SaaS tracking file for OCM clusters service rds Gabi integration'
+
+app:
+  $ref: /services/gabi/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+deployResources:
+  requests:
+    cpu: 1000m
+    memory: 4Gi
+  limits:
+    cpu: 1000m
+    memory: 4Gi
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+- Route
+- ServiceAccount
+
+imagePatterns:
+- quay.io/app-sre/gabi
+- quay.io/openshift/origin-oauth-proxy
+
+resourceTemplates:
+- name: gabi-no-cluster-resources
+  url: https://github.com/app-sre/gabi
+  path: /openshift/gabi-no-cluster-resources.template.yaml
+  parameters:
+    SPLUNK_SECRET_NAME: splunk-creds
+    SPLUNK_INDEX: rh_app_sre
+    OAUTH_PROXY_IMAGE_TAG: "4.10.0"
+  targets:
+  # stage
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage.yml
+    ref: 9e52fd6a2c7cf39ffd8c46bbf99f987c72e66a70
+    parameters:
+      HOST: gabi-ocm-clusters-service-rds-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      NAMESPACE: uhc-stage
+      AWS_RDS_SECRET_NAME: uhc-clusters-service-rds-readonly
+      GABI_INSTANCE: gabi-ocm-clusters-service-rds
