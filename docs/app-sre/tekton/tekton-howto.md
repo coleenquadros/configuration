@@ -55,7 +55,7 @@ Perform the following actions in a single MR:
 
     * this file should be placed under `data/services/<service_name>/namespaces`.
     * copy the file as is and change only the service_name and the cluster:
-        * use `appsre05ue1` for internal workloads (behind RH VPN, has access to gitlab). this will replace ci-int.
+        * use `appsrep05ue1` for internal workloads (behind RH VPN, has access to gitlab). this will replace ci-int.
         * use `app-sre-prod-01` for external workloads. this will replace ci-ext.
 
 2. Create a Pipelines Provider to reference the pipelines namespace:
