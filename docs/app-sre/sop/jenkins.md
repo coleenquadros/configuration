@@ -187,6 +187,28 @@ TODO
 
 TODO
 
+## JenkinsCleanupFailure
+
+### Impact:
+
+Variable
+
+### Summary:
+
+Jenkins Job that cleans workers via ansible failed
+
+### Access required:
+
+Admin access to jenkins is required to troubleshoot this alert
+
+### Steps:
+
+First check build log for job, looking for eliminting obvious credental, DNS errors etc
+
+If still not resolves, it's usually stucked container hanging for some time (hours or even days)
+
+Find host that caused failure and try to cleanup manually, as described in [SOP](jenkins-vda-storage.md)
+
 ---
 
 # Restarting Jenkins
