@@ -1,0 +1,209 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: prod-insights-sources-monthly-report
+namespace:
+  $ref: /services/insights/sources/namespaces/sources-prod.yml
+identifier: sources-prod
+output: stdout
+# Run on the 1st of every month
+# schedule: "0 0 1 * *"
+queries:
+###########################################################################################
+## The queries we run on each block are:                                                 ##
+##                                                                                       ##
+## 1. Count all the sources which use the "account authorization" configuration method.  ##
+## 2. Count all the sources which use the "manual configuration" configuration method.   ##
+## 3. Count all the sources from the database.                                           ##
+## 4. Group sources per source type, and count them.                                     ##
+## 5. Group the sources per application type, and count them.                            ##
+## 6. Group the applications per application type, and count them.                       ##
+##                                                                                       ##
+## As per management's request, the IBM and Red Hat related sources and applications are ##
+## filtered.                                                                             ##
+###########################################################################################
+#
+## Queries for the sources and applications which are in any availability status ##
+###################################################################################
+  - |
+    SELECT
+        count("src".*) AS "number_sources_account_auth"
+    FROM
+        "sources" AS "src"
+    INNER JOIN
+        "source_types" AS "stypes" ON "stypes"."id" = "src"."id"
+    WHERE
+        "src"."app_creation_workflow" = 'account_authorization'
+    AND
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    ;
+  - |
+    SELECT
+      count("src".*) AS "number_sources_manual_config"
+    FROM
+        "sources" AS "src"
+    INNER JOIN
+        "source_types" AS "stypes" ON "stypes"."id" = "src"."id"
+    WHERE
+        "src"."app_creation_workflow" = 'manual_configuration'
+    AND
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    ;
+  - |
+    SELECT
+      count("src".*) AS "number_sources_all"
+    FROM
+      "sources" AS "src"
+    INNER JOIN
+      "source_types" AS "stypes" ON "stypes"."id" = "src"."source_type_id"
+    WHERE
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    ;
+  - |
+    SELECT
+      "stypes"."product_name" AS "source_type", count("src".*) AS "number_sources_all"
+    FROM
+      "sources" AS "src"
+    INNER JOIN
+     "source_types" AS "stypes" ON "stypes"."id" = "src"."source_type_id"
+    WHERE
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    GROUP BY
+      "stypes"."product_name"
+    ORDER BY
+      "stypes"."product_name" ASC
+    ;
+  - |
+    SELECT
+      "appTypes"."display_name" AS "application_type", count(distinct "apps"."source_id") AS "number_sources_all"
+    FROM
+      "applications" AS "apps"
+    INNER JOIN
+      "application_types" AS "appTypes" ON "appTypes"."id" = "apps"."application_type_id"
+    INNER JOIN
+      "sources" AS "src" ON "src"."id" = "apps"."source_id"
+    INNER JOIN
+      "source_types" AS "stypes" ON "stypes"."id" = "src"."source_type_id"
+    WHERE
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    GROUP BY
+      "appTypes"."display_name"
+    ORDER BY
+      "appTypes"."display_name" ASC
+    ;
+  - |
+    SELECT
+      "appTypes"."display_name" AS "application_type", count("apps".*) AS "number_applications_all"
+    FROM
+      "applications" AS "apps"
+    INNER JOIN
+      "application_types" AS "appTypes" ON "appTypes"."id" = "apps"."application_type_id"
+    INNER JOIN
+      "sources" AS "src" ON "src"."id" = "apps"."source_id"
+    INNER JOIN
+      "source_types" AS "stypes" ON "stypes"."id" = "src"."source_type_id"
+    WHERE
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    GROUP BY
+      "appTypes"."display_name"
+    ORDER BY
+      "appTypes"."display_name" ASC
+    ;
+## Queries for the sources and applications which are on the "available" availability status ##
+###############################################################################################
+  - |
+    SELECT
+        count("src".*) AS "number_sources_account_auth"
+    FROM
+        "sources" AS "src"
+    INNER JOIN
+        "source_types" AS "stypes" ON "stypes"."id" = "src"."id"
+    WHERE
+        "src"."app_creation_workflow" = 'account_authorization'
+    AND
+        "src"."availability_status" = 'available'
+    AND
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    ;
+  - |
+    SELECT
+      count("src".*) AS "number_sources_manual_config"
+    FROM
+        "sources" AS "src"
+    INNER JOIN
+        "source_types" AS "stypes" ON "stypes"."id" = "src"."id"
+    WHERE
+        "src"."app_creation_workflow" = 'manual_configuration'
+    AND
+        "src"."availability_status" = 'available'
+    AND
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    ;
+  - |
+    SELECT
+      count("src".*) AS "number_sources_available"
+    FROM
+      "sources" AS "src"
+    INNER JOIN
+      "source_types" AS "stypes" ON "stypes"."id" = "src"."source_type_id"
+    WHERE
+      "src"."availability_status" = 'available'
+    AND
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    ;
+  - |
+    SELECT
+      "stypes"."product_name" AS "source_type", count("src".*) AS "number_sources_available"
+    FROM
+      "sources" AS "src"
+    INNER JOIN
+      "source_types" AS "stypes" ON "stypes"."id" = "src"."source_type_id"
+    WHERE
+      "src"."availability_status" = 'available'
+    AND
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    GROUP BY
+      "stypes"."product_name"
+    ORDER BY
+      "stypes"."product_name" ASC
+    ;
+  - |
+    SELECT
+      "appTypes"."display_name" AS "application_type", count(distinct "apps"."source_id") AS "number_sources_available"
+    FROM
+      "applications" AS "apps"
+    INNER JOIN
+      "application_types" AS "appTypes" ON "appTypes"."id" = "apps"."application_type_id"
+    INNER JOIN
+      "sources" AS "src" ON "src"."id" = "apps"."source_id"
+    INNER JOIN
+      "source_types" AS "stypes" ON "stypes"."id" = "src"."source_type_id"
+    WHERE
+      "src"."availability_status" = 'available'
+    AND
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    GROUP BY
+      "appTypes"."display_name"
+    ORDER BY
+      "appTypes"."display_name" ASC
+    ;
+  - |
+    SELECT
+      "appTypes"."display_name" AS "application_type", count("apps".*) AS "number_applications_available"
+    FROM
+      "applications" AS "apps"
+    INNER JOIN
+      "application_types" AS "appTypes" ON "appTypes"."id" = "apps"."application_type_id"
+    INNER JOIN
+      "sources" AS "src" ON "src"."id" = "apps"."source_id"
+    INNER JOIN
+      "source_types" AS "stypes" ON "stypes"."id" = "src"."source_type_id"
+    WHERE
+      "apps"."availability_status" = 'available'
+    AND
+      LOWER("stypes"."vendor") NOT IN ('ibm', 'red hat')
+    GROUP BY
+      "appTypes"."display_name"
+    ORDER BY
+      "appTypes"."display_name" ASC
+    ;
