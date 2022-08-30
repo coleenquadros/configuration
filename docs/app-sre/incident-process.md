@@ -173,7 +173,7 @@ This section aims to give some ideas of possible generic underlying causes.
 * RDS should be ruled out as the cause. It is recommended to look at the database through the AWS Console. In particular: CPU and memory load, IOPS and burst quota. When in doubt, AWS Performance Insights can be enabled to obtain further data about the database, including long running issues. Note that rebooting the database is not recommended by default.
 * In case the service is under load, consider adding more replicas to handle it. It is important to support that theory with data, usually obtained from Grafana.
 
-[RCA Template]: https://docs.google.com/document/d/16UeNvT5Mfbf0wLCl8rpTcLCwbBNHQBge_fDnmHFCnS0/edit
+[RCA Template]: https://docs.google.com/document/d/1GT7F-Bd839oXC07JTjQbwJ1WpBJCXW4BQWjAJaDsiKw/edit
 [zti]: https://meet.google.com/zti-gkvy-pvn
 [APPSRE board]: https://issues.redhat.com/projects/APPSRE/
 [Updating status.quay.io]: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/quay/statuspage.md
