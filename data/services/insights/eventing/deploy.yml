@@ -25,6 +25,7 @@ managedResourceTypes:
 
 imagePatterns:
 - quay.io/cloudservices/eventing-integrations-splunk
+- quay.io/cloudservices/eventing-integrations
 
 authentication:
   image:
@@ -50,6 +51,27 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/eventing/namespaces/eventing-prod.yml
     ref: 03ea8a4de086f9b6ebc8342413938a6b38708213
+
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MAX_REPLICAS: 1
+      MIN_REPLICAS: 1
+- name: eventing-integrations
+  path: /clowdapp.yaml
+  url: https://github.com/RedHatInsights/eventing-integrations
+  parameters:
+    MIN_REPLICAS: 3
+  targets:
+  - namespace:
+      $ref: /services/insights/eventing/namespaces/stage-eventing-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-eventing-integrations-gh-build-main
 
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
