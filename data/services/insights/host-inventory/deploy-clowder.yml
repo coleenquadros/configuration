@@ -62,7 +62,7 @@ resourceTemplates:
       ENV_NAME: "env-stage"
 
 - name: host-inventory
-  path: /deployment.yaml
+  path: /deploy/clowdapp.yml
   url: https://github.com/RedHatInsights/insights-host-inventory
   parameters:
     CLOWDER_ENABLED: 'true'
@@ -75,8 +75,6 @@ resourceTemplates:
     DEDUP_MEMORY_LIMIT: 2Gi
     MEMORY_REQUEST_REAPER: 256Mi
     MEMORY_LIMIT_REAPER: 512Mi
-    BULK_QUERY_SOURCE: xjoin
-    BULK_QUERY_SOURCE_BETA: xjoin 
     URLLIB3_LOG_LEVEL: DEBUG
   targets:
   - namespace:
@@ -118,7 +116,6 @@ resourceTemplates:
       FLOORIST_SCHEDULE: '20 0 * * *'
       GUNICORN_WORKERS: 4
       GUNICORN_THREADS: 8
-      SYNCHRONIZER_RUN_NUMBER: 3
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
     ref: 851ce7133212328864545503b60e3dbc04fc78ef
@@ -138,8 +135,6 @@ resourceTemplates:
       MEMORY_REQUEST_FLOO: 2Gi
       GUNICORN_WORKERS: 4
       GUNICORN_THREADS: 8
-      POPULATOR_RUN_NUMBER: 2
-      SYNCHRONIZER_RUN_NUMBER: 5
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -153,9 +148,28 @@ resourceTemplates:
       REPLICAS_SP: 1
       REPLICAS_PMIN: 1
       REPLICAS_SVC: 1
-      BULK_QUERY_SOURCE: xjoin
-      BULK_QUERY_SOURCE_BETA: xjoin
       BYPASS_RBAC: 'true'
       BYPASS_TENANT_TRANSLATION: 'true'
       XJOIN_SEARCH_HOST: xjoin-search
       XJOIN_SEARCH_PORT: 4000
+
+- name: host-inventory-cji
+  path: /deploy/cji.yml
+  url: https://github.com/RedHatInsights/insights-host-inventory
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-host-inventory-gh-build-master
+    parameters:
+      POPULATOR_RUN_NUMBER: 1
+      SYNCHRONIZER_RUN_NUMBER: 3
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+    ref: 851ce7133212328864545503b60e3dbc04fc78ef
+    parameters:
+      POPULATOR_RUN_NUMBER: 2
+      SYNCHRONIZER_RUN_NUMBER: 5
