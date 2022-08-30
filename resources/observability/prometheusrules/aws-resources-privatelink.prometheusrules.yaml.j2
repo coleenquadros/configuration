@@ -13,7 +13,7 @@ spec:
     rules:
       - alert: VpcsPerRegionQuotaExhaustion # Current quota: 20
         expr: |
-          (aws_resources_exporter_vpc_vpcsperregion_usage{job="{{{ job_stage }}}"} / aws_resources_exporter_vpc_vpcsperregion_quota{job="{{{ job_stage }}}"}) >= 0.9
+          sum(aws_resources_exporter_vpc_vpcsperregion_usage{job="{{{ job_stage }}}"}) by (aws_region) / sum(aws_resources_exporter_vpc_vpcsperregion_quota{job="{{{ job_stage }}}"}) by (aws_region) >= 0.9
         for: 10m
         labels:
           service: privatelink-monitoring
@@ -24,7 +24,7 @@ spec:
           message: "Number of VPCs in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used."
       - alert: SubnetsPerVpcQuotaExhaustion # Current quota: 800
         expr: |
-          (aws_resources_exporter_vpc_subnetspervpc_usage{job="{{{ job_stage }}}"} / on(aws_region) group_left aws_resources_exporter_vpc_subnetspervpc_quota{job="{{{ job_stage }}}"}) >= 0.9
+          sum(aws_resources_exporter_vpc_subnetspervpc_usage{job="{{{ job_stage }}}"}) by (vpcid, aws_region) / on(aws_region) group_left sum(aws_resources_exporter_vpc_subnetspervpc_quota{job="{{{ job_stage }}}"}) by (aws_region) >= 0.9
         for: 10m
         labels:
           service: privatelink-monitoring
@@ -34,7 +34,7 @@ spec:
           summary: Subnets per vpc are nearing service quota
           message: "Number of subnets in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used."
       - alert: RoutesPerRoutetableQuotaExhaustion # Current quota: 1000
-        expr: (aws_resources_exporter_vpc_routesperroutetable_usage{job="{{{ job_stage }}}"} / on(aws_region) group_left aws_resources_exporter_vpc_routesperroutetable_quota{job="{{{ job_stage }}}"}) >= 0.9
+        expr: sum(aws_resources_exporter_vpc_routesperroutetable_usage{job="{{{ job_stage }}}"}) by (routetableid, aws_region) / on(aws_region) group_left sum(aws_resources_exporter_vpc_routesperroutetable_quota{job="{{{ job_stage }}}"}) by (aws_region) >= 0.9
         for: 10m
         labels:
           service: privatelink-monitoring
@@ -45,7 +45,7 @@ spec:
           message: "Number of routes in routetable {{ $labels.routetableid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used."
       - alert: InterfaceVpcEndpointsQuotaExhausion # Current quota: 450
         expr: |
-          (aws_resources_exporter_vpc_interfacevpcendpointspervpc_usage{job="{{{ job_stage }}}"} / on (aws_region) group_left aws_resources_exporter_vpc_interfacevpcendpointspervpc_quota{job="{{{ job_stage }}}"}) >= 0.9
+          sum(aws_resources_exporter_vpc_interfacevpcendpointspervpc_usage{job="{{{ job_stage }}}"}) by (vpcid, aws_region) / on (aws_region) group_left sum(aws_resources_exporter_vpc_interfacevpcendpointspervpc_quota{job="{{{ job_stage }}}"}) by (aws_region) >= 0.9
         for: 10m
         labels:
           service: privatelink-monitoring
@@ -57,7 +57,7 @@ spec:
       # This has very high quota but very low usage
       - alert: RoutetablesPerVpcQuotaExhaustion # Current quota: 800
         expr: |
-          (aws_resources_exporter_vpc_routetablespervpc_usage{job="{{{ job_stage }}}"} / on (aws_region) group_left aws_resources_exporter_vpc_routetablespervpc_quota{job="{{{ job_stage }}}"}) >= 0.9
+          sum(aws_resources_exporter_vpc_routetablespervpc_usage{job="{{{ job_stage }}}"}) by (vpcid, aws_region) / on (aws_region) group_left sum(aws_resources_exporter_vpc_routetablespervpc_quota{job="{{{ job_stage }}}"}) by (aws_region) >= 0.9
         for: 10m
         labels:
           service: privatelink-monitoring
@@ -68,7 +68,7 @@ spec:
           message: "Routestables per VPC in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used."
       - alert: Ipv4BlocksPerVpcQuotaExhaustion # Current quota: 20
         expr: |
-          (aws_resources_exporter_vpc_ipv4blockspervpc_usage{job="{{{ job_stage }}}"} / on (aws_region) group_left aws_resources_exporter_vpc_ipv4blockspervpc_quota{job="{{{ job_stage }}}"}) >= 0.9
+          sum(aws_resources_exporter_vpc_ipv4blockspervpc_usage{job="{{{ job_stage }}}"}) by (vpcid, aws_region) / on (aws_region) group_left sum(aws_resources_exporter_vpc_ipv4blockspervpc_quota{job="{{{ job_stage }}}"}) by (aws_region) >= 0.9
         for: 10m
         labels:
           service: privatelink-monitoring
@@ -79,7 +79,7 @@ spec:
           message: "IPv4 blocks per VPC in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used."
       - alert: RecordsPerHostedZoneQuotaExhaustion # Current quota: 10000
         expr: |
-          (aws_resources_exporter_route53_recordsperhostedzone_total{job="{{{ job_stage }}}"} / aws_resources_exporter_route53_recordsperhostedzone_quota{job="{{{ job_stage }}}"}) >= 0.9
+          sum(aws_resources_exporter_route53_recordsperhostedzone_total{job="{{{ job_stage }}}"}) by (hostedzoneid, hostedzonename) / sum(aws_resources_exporter_route53_recordsperhostedzone_quota{job="{{{ job_stage }}}"}) by (hostedzoneid, hostedzonename) >= 0.9
         for: 10m
         labels:
           service: privatelink-monitoring
