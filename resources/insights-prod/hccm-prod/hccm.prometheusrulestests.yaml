@@ -399,3 +399,54 @@ tests:
         message: "Cost management job failures occuring in prod environment."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-job-failures-In-hccm.rst"
 
+
+# Cost-RDS-free-space-low
+- interval: 1h
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="cost-management-prod"}
+    values: 0+0.5x96
+  alert_rule_test:
+  - eval_time: 4d
+    alertname: Cost-RDS-free-space-low
+    exp_alerts:
+    - exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: costmanagement
+        exported_instance: cost-management-prod
+        mount_point: /rdsdbdata
+      exp_annotations:
+        link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=cost-management-prod;is-cluster=false;tab=monitoring"
+        message: "DB instance cost-management-prod is about to run out of storage within 2 weeks."
+
+# Cost-RDS-free-space-very-low
+- interval: 1h
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="cost-management-prod"}
+    values: 0+6x6
+  alert_rule_test:
+  - eval_time: 6h
+    alertname: Cost-RDS-free-space-very-low
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: costmanagement
+        exported_instance: cost-management-prod
+        mount_point: /rdsdbdata
+      exp_annotations:
+        link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=cost-management-prod;is-cluster=false;tab=monitoring"
+        message: "DB instance cost-management-prod is about to run out of storage within 1 DAY."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/hccm/RDS-free-space-very-low.rst"
+
+# Neither alert should fire
+- interval: 10m
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="cost-management-prod"}
+    values: 0+.01x24
+  alert_rule_test:
+  - eval_time: 4h
+    alertname: Cost-RDS-free-space-low
+    exp_alerts: []
