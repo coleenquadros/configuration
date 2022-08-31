@@ -1,0 +1,33 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2022-08-31-prod-get-sources
+namespace:
+  $ref: /services/insights/sources/namespaces/sources-prod.yml
+identifier: sources-prod
+output: stdout
+query: |
+  SELECT
+    "src"."id",
+    "src"."app_creation_workflow",
+    "src"."availability_status",
+    "src"."source_type_id",
+    "stypes"."name" AS "source_type_name",
+    "stypes"."product_name" AS "source_type_product_name",
+    "stypes"."vendor" AS "source_type_vendor",
+    "src"."tenant_id",
+    "ten"."external_tenant" AS "tenant_external_tenant",
+    "ten"."org_id" AS "tenant_org_id",
+    "src"."last_checked_at",
+    "src"."last_available_at",
+    "src"."created_at",
+    "src"."updated_at"
+  FROM
+    "sources" AS "src"
+  INNER JOIN
+    "source_types" AS "stypes" ON "stypes"."id" = "src"."source_type_id"
+  INNER JOIN
+    "tenants" AS "ten" ON "ten"."id" = "src"."tenant_id"
+  ORDER BY
+    "id" ASC
+  ;
