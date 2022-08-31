@@ -1,0 +1,57 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: content-sources
+
+name: content-sources-stage
+description: Content Sources on the Stage cluster under app-interface management
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/content-sources/content-sources-quota.yml
+
+app:
+  $ref: /services/insights/content-sources/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/content-sources/stage/certs
+  version: 1
+
+sharedResources:
+  - $ref: /services/insights/shared-resources/metrics-export-stage.yml
+  - $ref: /services/app-sre/shared-resources/splunk-creds.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: content-sources-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-1.yml
+    overrides:
+      apply_immediately: true
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-content-sources-stage.yml
+    output_resource_name: content-sources-db
+    enhanced_monitoring: true
