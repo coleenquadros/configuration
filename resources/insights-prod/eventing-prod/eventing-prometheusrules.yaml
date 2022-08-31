@@ -39,3 +39,16 @@ spec:
         service: insights
         env: prod
         app_team: eventing
+
+    - alert: EventingAlertHandledSuccessWeekly
+      expr: sum(increase(CamelExchangeEventNotifier_seconds_count{namespace=~"eventing-.+",endpointName="direct://return",eventType="ExchangeSentEvent"}[28d]))/sum(increase(CamelExchangeEventNotifier_seconds_count{namespace=~"eventing-.+",endpointName="direct://handler",eventType="ExchangeSentEvent"}[7d]))*100 < 95
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/eventing/eventing-integrations'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/eventing-prod/deployments'
+        message: 'Early warning: Eventing weekly handing success rate dropped to {{ $value }}% (monthly SLO target is 90%)'
+        kibana_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(columns:!(log.level,message,'@log_stream'),filters:!(),index:'02f4d4f0-f78a-11ec-9793-6dba3b81e02f',interval:auto,query:(language:kuery,query:'@log_group:%2522eventing-prod%2522'),sort:!())"
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: eventing
