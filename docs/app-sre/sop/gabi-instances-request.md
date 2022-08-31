@@ -59,20 +59,7 @@ The maximum expiration date of gabi instance shall not exceed 90 days form the d
 
 ## Deploy Gabi Instances
 
-### Step 1: Splunk Access
-
-Gabi uses splunk for audit logs, so it needs a [splunk-creds](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/shared-resources/splunk-creds.yml). 
-
-Tenant need to add it to target namespaces as a shared resource with the following content:
-
-```yaml
-sharedResources:
-- $ref: /services/app-sre/shared-resources/splunk-creds.yml
-```
-
-This step should be the first MR to enable the credential to the next steps.
-
-### Step 2: SaaS File
+### Step 1: SaaS File
 
 Gabi will be deployed via [saas file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/cicd/saas-gabi.yaml).
 
@@ -90,7 +77,7 @@ Tenant must add new target namespaces with the following content:
       DB_DRIVER: <pgx or mysql, default is pgx (postgres)>
 ```
 
-### Step 3: Cluster-Scoped Gabi Namespace
+### Step 2: Cluster-Scoped Gabi Namespace
 
 Additionally, ensure a gabi-cluster-resource namespace exists for the cluster(s) your namespace(s) you're deploying in [this directory](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/namespaces). 
 
@@ -98,7 +85,7 @@ If such a file already exists, you can move to the next step. Otherwise, if such
 
 To create such a file, copy one of the existing file (e.g. [this](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/namespaces/gabi-app-sre-stage-01-cluster-scope.yml)), and rename the file and replace instances of the cluster-name in the file content.
 
-### Step 4: Cluster-Scoped Resources
+### Step 3: Cluster-Scoped Resources
 
 Navigate [here](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/resources/app-sre/gabi).
 
@@ -129,7 +116,7 @@ If files for your cluster(s) already exist, add a new list item to the `subjects
     namespace: <YOUR NAMESPACE HERE>
 ```
 
-### Step 5: Update OpenShift-Config
+### Step 4: Update OpenShift-Config
 
 For each cluster you're deploying Gabi to, you will want to ensure that in each cluster's `openshift-config` namespace, that it is managing `dedicated-readers` and `self-provisioners` ([Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/82de8d62d081e98e1b5816a97f232bf050216b82/data/openshift/app-sre-stage-01/namespaces/openshift-config.yaml#L36-39)). If it doesn't already exist there, add the following YAML array item to resource `managedResourceNames`:
 ```
