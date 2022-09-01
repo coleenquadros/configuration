@@ -1,0 +1,62 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: quayio
+
+name: saas-opensearch-dashboards-proxy
+description: saas-opensearch-dashboards-proxy
+
+app:
+  $ref: /services/quayio/app.yml
+
+pipelinesProvider:
+  $ref: /services/quayio/pipelines/tekton.quayio-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: oncall-quay
+
+allowedSecretParameterPaths:
+- app-sre/integrations-output/terraform-resources
+
+managedResourceTypes:
+- ConfigMap
+- Deployment
+- Service
+- Route
+- ServiceAccount
+- ClusterRole
+- ClusterRoleBinding
+
+imagePatterns:
+- quay.io/app-sre
+- quay.io/openshift
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: opensearch-dashboards-proxy
+  path: /templates/opensearch-dashboards-proxy.yaml
+  url: https://github.com/quay/opensearch-dashboards
+  parameters:
+    WORKER_CONNECTIONS: 1024
+    SERVER_NAMES_HASH_BUCKET_SIZE: 128
+    PROXY_READ_TIMEOUT: 900s
+    PROXY_SEND_TIMEOUT: 900s
+    REPLICAS: 3
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/opensearch-dashboards.quays02ue1.yaml
+    ref: main
+    parameters:
+      HOST: opensearch-dashboards.apps.quays02ue1.s6d1.p1.openshiftapps.com
+    secretParameters:
+    - name: ES_ENDPOINT
+      secret:
+        path: app-sre/integrations-output/terraform-resources/quays02ue1/quay/quayio-stage-elasticsearch
+        field: endpoint
