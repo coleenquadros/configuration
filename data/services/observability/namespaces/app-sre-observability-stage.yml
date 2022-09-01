@@ -386,7 +386,17 @@ openshiftResources:
     route53_timeout: 300s
     route53_interval: 300s
     ec2: true
-
+### account: osd-privatelink-stage
+- provider: resource-template
+  path: /observability/aws-resource-exporter/aws-resource-exporter.configmap.yaml.j2
+  enable_query_support: true
+  variables:
+    name: aws-resource-exporter-osd-privatelink-stage
+    account_name: osd-privatelink-stage
+    rds: false
+    vpc: true
+    route53: true
+    ec2: true
 
 managedExternalResources: true
 
@@ -470,3 +480,15 @@ externalResources:
     - ServiceQuotasReadOnlyAccess
     - AmazonRoute53ReadOnlyAccess
     output_resource_name: aws-resource-exporter-osd-privatelink-int
+- provider: aws
+  provisioner:
+    $ref: /aws/osd-privatelink-stage/account.yml
+  resources:
+    - provider: aws-iam-service-account
+      identifier: aws-resource-exporter
+      policies:
+        - AmazonRDSReadOnlyAccess
+        - AmazonVPCReadOnlyAccess
+        - ServiceQuotasReadOnlyAccess
+        - AmazonRoute53ReadOnlyAccess
+      output_resource_name: aws-resource-exporter-osd-privatelink-stage
