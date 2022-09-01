@@ -1,0 +1,42 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels: {}
+
+name: saas-ms-rhdas-dashboards
+description: SaaS tracking file for ms-rhdas-dashboards
+
+app:
+  $ref: /services/addons/app.yml
+
+pipelinesProvider:
+  $ref: /services/addons/pipelines/tekton.mt-pipelines.appsrep05ue1.yaml
+
+slack:
+  output: events
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-mt-sre-info
+
+managedResourceTypes:
+- ConfigMap
+
+imagePatterns: []
+
+resourceTemplates:
+- name: addon-ms-rhdas-dashboards-stage
+  url: https://gitlab.cee.redhat.com/service/managed-tenants-slos
+  path: /RHDAS/dashboards/stage/
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: main
+- name: addon-ms-rhdas-dashboards-production
+  url: https://gitlab.cee.redhat.com/service/managed-tenants-slos
+  path: /RHDAS/dashboards/production/
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: ad38f6555e0ee7060f53442e809cc84a90c791f2
