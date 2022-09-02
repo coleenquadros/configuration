@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: vault-client
+  template:
+    metadata:
+      labels:
+        application: vault-client
+    spec:
+      serviceAccountName: vault-client
+      containers:
+      - name: vault-client
+        image: quay.io/zenlab/curl
+        command:
+        - /bin/sh
+        - -c
+        - 'while true; do curl "{{ vault_url }}"; sleep 1; done'
+        resources:
+          requests:
+            memory: 64Mi
+            cpu: 200m
+          limits:
+            memory: 64Mi
