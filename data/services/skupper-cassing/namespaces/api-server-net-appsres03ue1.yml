@@ -17,9 +17,20 @@ app:
 environment:
   $ref: /products/app-sre/environments/stage.yml
 
-openshiftResources: []
-# - provider: api-server-proxy-secret
-#   path: app-interface/status-board/production/runtime
-#   version: 1
-# - provider: route
-#   path: /status-board/production/status-board.route.yaml
+managedResourceTypes:
+- ConfigMap
+- ServiceAccount
+- Role
+- RoleBinding
+- Deployment
+
+sharedResources:
+- $ref: /services/skupper-cassing/shared-resources/skupper.yml
+
+openshiftResources:
+- provider: resource-template
+  type: jinja2
+  path: /skupper-cassing/skupper/site-config.yml
+  variables:
+    edge: "true"
+    ingress: "none"
