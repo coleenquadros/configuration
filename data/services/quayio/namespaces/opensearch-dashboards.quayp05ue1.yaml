@@ -29,6 +29,38 @@ externalResources:
     identifier: quay-prod-logentry-snapshot
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: quay-prod-logentry-snapshot
+  - provider: aws-iam-role
+    identifier: opensearch-snapshot-role
+    assume_role:
+      Service:
+      - es.amazonaws.com
+    inline_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": [
+              "s3:ListBucket"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+              "arn:aws:s3:::quay-prod-logentry-snapshot"
+            ]
+          },
+          {
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+              "arn:aws:s3:::quay-prod-logentry-snapshot/*"
+            ]
+          }
+        ]
+      }
+    output_resource_name: opensearch-snapshot-role
   - provider: elasticsearch
     identifier: quayio-prod-elasticsearch
     defaults: /terraform/resources/quayio-production/elasticsearch-1.yml
