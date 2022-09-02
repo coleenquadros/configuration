@@ -95,12 +95,20 @@ openshiftResources:
 ### App SRE prometheus PVC metrics
 - provider: resource
   path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
-### AWS resource exporter privatelink alerts
+### AWS resource exporter privatelink-int alerts
 - provider: resource-template
   type: extracurlyjinja2
   path: /observability/prometheusrules/aws-resources-privatelink.prometheusrules.yaml.j2
   variables:
     job_stage: aws-resource-exporter-osd-privatelink-int
+    environment: int
+### AWS resource exporter privatelink-stage alerts
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheusrules/aws-resources-privatelink.prometheusrules.yaml.j2
+  variables:
+    job_stage: aws-resource-exporter-osd-privatelink-stage
+    environment: stage
 
 ################## Add  any cluster-specific content below this line ##################
 
@@ -588,6 +596,12 @@ openshiftResources:
   variables:
     namespace: app-sre-observability-stage
     name: aws-resource-exporter-osd-privatelink-int
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/aws-resource-exporter.servicemonitor.yaml
+  variables:
+    namespace: app-sre-observability-stage
+    name: aws-resource-exporter-osd-privatelink-stage
 
 ### Qontract-reconcile
 - provider: resource-template
