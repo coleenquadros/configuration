@@ -27,7 +27,7 @@ The following is the explanation of the SLI query:
 
 ## SLO Rationale
 
-TODO: We will update this section as soon as the results in our testing (e.g. performance, acceptance) become available. We are going to use the results of these tests to decide on an SLO target. For now we use less than or equal to 500 milliseconds as we believe it is the most conservative threshold as of this stage.
+The target response time for 90 percent of the requests should be less than or equal to 500[ms]. This can be changed once this latency SLO has been observed with performance in production over a longer period of time.
 
 ## Alerts
 

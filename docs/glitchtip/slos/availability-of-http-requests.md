@@ -26,7 +26,9 @@ The following is the explanation of the SLI query.
 
 ## SLO Rationale
 
-TODO: We will update this section as soon as the results in our testing (e.g. performance, acceptance) become available. We are going to use the results of these tests to decide on an SLO target. For now we use greater than or equal to 95% as we believe it is the most conservative threshold as of this stage.
+Glitchtip is expected to be available 90% of the time. This is based on the [load tests](../sops/load-testing.md) performed on staging.
+This is a low bar estimation and can be re-evaluated once the service is running in production and performance tests are done for a longer
+period of time.
 
 ## Alerts
 
