@@ -2117,17 +2117,7 @@ Slack User groups can be self-serviced via App-Interface.
 
 To manage a User group via App-Interface:
 
-1. **Create the slack group manually in CoreOS slack. There are two ways to do this:**
-
-  - Edit and use a pre-existing placeholder group
-    - There might be a few pre-created placeholder slack groups ready to be converted to new managed slack groups that can be renamed
-    - The placeholder groups should be in the format - `@app-sre-placeholder-<n>-team` (where n={0, 1, 2...})
-    - Edit the `group details` of one of the placeholder groups by changing the name and handle appropriately
-    - If there is no placeholder slack group to use, email the slack admins as mentioned below
-  - Request a slack group to be created
-    - Follow the instructions in [this mojo document](https://mojo.redhat.com/docs/DOC-1217849#jive_content_id_Requesting_a_Slack_user_group) to self service the creation of a slack user group.
-
-2. **Add a `permission` file with the following details:**
+1. **Add a `permission` file with the following details:**
 
 - `name`: name for the permission
 - `description`: description of the User group (currently not automated)
@@ -2144,10 +2134,10 @@ To manage a User group via App-Interface:
 - `schedule`: a reference to a file representing a schedule.
 - `channels`: a list of channels to add to the User group
 
-3. **Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).**
+2. **Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).**
 **Note:** Skip this step if the user group is not populated based on app-interface. i.e. if it is populated based on an external source of truth, such as an OWNERS file or PagerDuty.
 
-4. **Add the group in the `managedUsergroups` section of the** [coreos slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/coreos.yml) **dependency file**
+3. **Add the group in the `managedUsergroups` section of the** [coreos slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/coreos.yml) **dependency file**
 
 Examples:
 * An example for the `app-sre-team` User group permission can be found [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml)
@@ -2160,7 +2150,7 @@ Examples:
 * An example for a schedule can be found [here](/data/teams/app-sre/schedules/app-sre-onboarding-ic.yml).
 
 Notes:
-* Please make sure that the slack user group exists in slack before creating the merge request, otherwise the automated build job will fail.
+* The slack user group will be automatically created if it does not exist in slack before creating the merge request.
 * In order to be able to use the `pagerduty` attribute of a `permission`, the relevant users (ones from that PagerDuty schedule) should have the following attributes in their user files:
   * `slack_username` - if it is different from `org_username`
   * `pagerduty_username` - if it is different from `org_username`
