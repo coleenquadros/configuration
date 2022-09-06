@@ -46,15 +46,15 @@ spec:
         requests:
           cpu: 20m
           memory: 30Mi
-      script: >-
+      script: |
         #!/usr/bin/env bash
-        current_time=$(date +'%Y-%m-%d %H:%M:%S')
-
+        echo "Pushing deploy event to DB"
+        task_status="NULL"
         if [ "$(params.task_status)" = "Succeeded" ]; then
           task_status="true"
         elif [ "$(params.task_status)" = "Failed" ]; then
           task_status="false"
         fi
-        echo "Storing deploy event for app: $(params.app_name), env: $(params.env_name), status: $task_status, time: $current_time"
-        psql -c "insert into deployments values('$current_time', '$task_status', '$(params.app_name)', '$(params.env_name)')"
+        echo "Storing deploy event for app: $(params.app_name), env: $(params.env_name), status: $task_status, time: $(date -u)"
+        psql -c "insert into deployments(deployment_time, succeeded, app_name, env_name) values(now(), $task_status, '$(params.app_name)', '$(params.env_name)')"
 
