@@ -1,0 +1,35 @@
+---
+# Documentation can be found here: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/monitoring.md#alerting-with-alertmanager
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: c-rh-c-eph-cluster-alertrules
+spec:
+  groups:
+  - name: c-rh-c-eph-cluster-cpu.rules
+    rules:
+    - alert: Node Memory Utilization is higher than normal
+      annotations:
+        message: "Node memory utilization is over 70%"
+        dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
+      expr: |
+        (instance:node_memory_utilisation:ratio{instance=~"$nodes"}) >= 0.7
+      for: 10m
+      labels:
+        service: "Ephemeral Cluster Metrics"
+        severity: medium
+        env: ephemeral
+    - alert: High Node Memory Utilization
+      annotations:
+        message: "Node memory utilization is over 90%"
+        dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
+      expr: |
+        (instance:node_memory_utilisation:ratio{instance=~"$nodes"}) >= 0.9
+      for: 10m
+      labels:
+        service: "Ephemeral Cluster Metrics"
+        severity: medium
+        env: ephemeral
