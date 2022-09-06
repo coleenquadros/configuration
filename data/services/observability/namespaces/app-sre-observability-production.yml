@@ -411,7 +411,17 @@ openshiftResources:
     vpc: false
     route53: false
     ec2: false
-
+### account: osd-privatelink-prod
+- provider: resource-template
+  path: /observability/aws-resource-exporter/aws-resource-exporter.configmap.yaml.j2
+  enable_query_support: true
+  variables:
+    name: aws-resource-exporter-osd-privatelink-prod
+    account_name: osd-privatelink-prod
+    rds: false
+    vpc: true
+    route53: true
+    ec2: true
 
 managedExternalResources: true
 
@@ -1172,3 +1182,16 @@ externalResources:
     policies:
     - AmazonRDSReadOnlyAccess
     output_resource_name: aws-resource-exporter-quay
+- provider: aws
+  provisioner:
+    $ref: /aws/osd-privatelink-prod/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: aws-resource-exporter
+    policies:
+    - AmazonRDSReadOnlyAccess
+    - AmazonVPCReadOnlyAccess
+    - ServiceQuotasReadOnlyAccess
+    - AmazonRoute53ReadOnlyAccess
+    - AmazonEC2ReadOnlyAccess
+    output_resource_name: aws-resource-exporter-osd-privatelink-prod
