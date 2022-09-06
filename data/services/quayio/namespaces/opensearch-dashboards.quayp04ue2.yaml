@@ -1,0 +1,35 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: quayio
+
+name: opensearch-dashboards
+description: prod namespace for opensearch-dashboards
+
+cluster:
+  $ref: /openshift/quayp04ue2/cluster.yml
+
+app:
+  $ref: /services/quayio/app.yml
+
+environment:
+  $ref: /products/quay/environments/production.yml
+
+managedRoles: true
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/quayio-prod/account.yml
+  resources:
+  - provider: elasticsearch
+    region: us-east-2
+    identifier: quayio-prod-es-backup
+    defaults: /terraform/resources/quayio-production/elasticsearch-2.yml
+    output_resource_name: quayio-prod-elasticsearch
