@@ -17,9 +17,14 @@ app:
 environment:
   $ref: /products/app-sre/environments/stage.yml
 
-openshiftResources: []
-# - provider: api-server-user-secret
-#   path: app-interface/status-board/production/runtime
-#   version: 1
-# - provider: route
-#   path: /status-board/production/status-board.route.yaml
+sharedResources:
+- $ref: /services/skupper-cassing/shared-resources/test-client.yml
+
+openshiftResources:
+- provider: resource-template
+  path: /skupper-cassing/test-client/deployment.yml
+  variables:
+    test_urls:
+    - http://api-server-appsres03ue1.skupper-fake-api-server-net.svc.cluster.local:8080
+    - http://api-server-app-sre-stage-01.skupper-fake-api-server-net.svc.cluster.local:8080
+    - http://api-server-app-sre-stage-02.skupper-fake-api-server-net.svc.cluster.local:8080
