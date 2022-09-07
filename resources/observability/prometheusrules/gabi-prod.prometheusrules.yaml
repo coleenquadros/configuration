@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: gabi-prod
+spec:
+  groups:
+  - name: gabi-prod
+    rules:
+    - alert: GabiPodDown-{{{cluster}}}
+      annotations:
+        message: "Gabi pod down in cluster {{{cluster}}}"
+        # Link to the standard operating procedure for the component
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/gabi/docs/README.md"
+        # Link to the component's dashboard, pre-selecting the variables is preferred, for example:
+        dashboard: "https://grafana.stage.devshift.net/d/rdYb2UZkZ/gabi-performance-overview"
+      expr: |
+        (count(kube_pod_status_ready{namespace=~".+", pod=~"gabi-.+", condition=~"false|unknown"} == 1)) != 0
+      # Time for which prometheus waits before actually sending out a notification while the rule about is true
+      for: 15m
+      # Any additional labels that you want to apply for grouping
+      # both the `service` and `severity` labels are mandatory
+      labels:
+        service: gabi
+        severity: info
+        cluster: {{{cluster}}}
