@@ -226,12 +226,14 @@ At this point you should be able to access the cluster via the console / `oc` cl
 1. Add the `app-sre-bot` ServiceAccount
 
     ```shell
-    oc -n dedicated-admin create sa app-sre-bot
+    $oc -n dedicated-admin create sa app-sre-bot
 
-    # since 4.11, token secrets are not automatically generated anymore
-    #oc -n dedicated-admin sa get-token app-sre-bot
+    # Since 4.11, token secrets are not automatically generated anymore.
+    # If your cluster has an OpenShift version prior to 4.11, use:
+    #$oc -n dedicated-admin sa get-token app-sre-bot
+    # Otherwise, use:
     
-    echo "apiVersion: v1
+    $echo "apiVersion: v1
     kind: Secret
     metadata:
       annotations:
@@ -240,7 +242,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
       namespace: dedicated-admin
     type: kubernetes.io/service-account-token" | oc create -f -
 
-    oc get secret -n dedicated-admin app-sre-bot -o jsonpath={.data.token} | base64 --decode
+    $oc get secret -n dedicated-admin app-sre-bot -o jsonpath={.data.token} | base64 --decode
     ```
 
 1. Add the `app-sre-bot` credentials to [vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs). qontract-reconcile integrations errors indicating that the token wasn't found will clear once the credentials are in the vault.
@@ -437,8 +439,10 @@ hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <
   $ oc new-project app-sre
   $ oc -n app-sre create sa app-sre-cluster-admin-bot
   $ oc adm policy add-cluster-role-to-user cluster-admin -z app-sre-cluster-admin-bot
-  # since 4.11, token secrets are not automatically generated anymore
+  # Since 4.11, token secrets are not automatically generated anymore.
+  # If your cluster has an OpenShift version prior to 4.11 use:
   #$ oc -n app-sre sa get-token app-sre-cluster-admin-bot
+  # Otherwise use:
   
   $ echo "apiVersion: v1
   kind: Secret
@@ -448,7 +452,7 @@ hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <
     name: app-sre-cluster-admin-bot
   type: kubernetes.io/service-account-token" | oc create -f - -n app-sre
 
-  oc get secret -n dedicated-admin app-sre-cluster-admin-bot -o jsonpath={.data.token} | base64 --decode
+  $oc get secret -n app-sre app-sre-cluster-admin-bot -o jsonpath={.data.token} | base64 --decode
   ```
 
 1. Add the `app-sre-cluster-admin-bot` credentials to vault at https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs
