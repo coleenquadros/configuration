@@ -353,3 +353,7 @@ The process for Service Onboarding is documented [here](https://gitlab.cee.redha
 ### SRE Checkpoints
 
 All Services will receive an SRE Checkpoint periodically. Each SRE Checkpoint will take 1 day, and each AppSRE engineer will conduct one per sprint. [Further information](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/process/sre_checkpoints.md).
+
+## Maintenance Windows
+
+Maintenance window activity guidance is documented [here](/docs/app-sre/maintenance-windows.md).
