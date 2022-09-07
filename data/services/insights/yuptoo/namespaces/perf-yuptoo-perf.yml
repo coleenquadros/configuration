@@ -1,0 +1,47 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: yuptoo
+
+name: yuptoo-perf
+description: Insights yuptoo-perf on the perf cluster.
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/insights/yuptoo/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+networkPoliciesAllow: []
+
+managedRoles: true
+
+managedResourceTypes: []
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: yuptoo-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
