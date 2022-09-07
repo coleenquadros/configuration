@@ -1,6 +1,33 @@
 #  GlitchTip Service Load-Based Tests
 
 
+# Prerequisities
+- Please review glitchtip [API Documentation](https://app.glitchtip.com/docs)
+- Python 3.8
+- Docker
+- To run the load tests, we need to have the service running somewhere. we can run the tests against the staging environment.
+
+# Running the tests
+### Step 1
+Clone the [glitchtip tests](https://gitlab.cee.redhat.com/cssre/glitchtip-tests) repository.
+### Step 2
+Setup `.env` file in the root of the source code directory and add it to `.gitignore` file
+
+### Step 3
+- Generate a Glitchtip API token, login to the glitchtip instance in the appropriate organization
+- Click `Create New Token` button and give you `Auth Token` a name and apply the appropriate permissions
+![auth-token-generation](./images/auth_token.png)
+- Get the `SENTRY_KEY` from appropriate organization, in the Client Keys(DSN)
+![sentry_key](./images/sentry_key.png)
+
+### Step 4
+```
+# .env file
+GT_API_TOKEN="<API TOKEN>"
+SENTRY_KEY="<SENTRY-KEY>"
+```
+### Step 5
+- run the `run-browsing-load1.sh`, `run-fibonacci-load.sh` based on required load testing profile.
 # Overview
 
 This document describes the strategy, execution, and results of GlitchtTip service (GT) load-based tests. These tests help infer the performance of GT by inducing custom load profiles.
