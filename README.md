@@ -2018,6 +2018,12 @@ In order to add a DNS zone, you need to add them to the `externalResources` sect
 - `name`: name of the resource to create (example: `dns.example.com`)
 - `output_resource_name`: name of Kubernetes Secret to be created.
 
+Once the changes are merged, the DNS zone will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `aws_access_key_id` - The access key ID.
+- `aws_secret_access_key` - The secret access key.
+
 #### Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)
 
 Please follow the dev-guidelines: https://service.pages.redhat.com/dev-guidelines/docs/appsre/advanced/manage-application-load-balancer
