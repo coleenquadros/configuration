@@ -145,7 +145,8 @@ https://skupper-skupper-fake-api-server-net.apps.appsres04ue2.n4k3.p1.openshifta
 ## Limitations/Bugs/Notes
 
 * A namespace can be part of exactly one skupper site. No overlapping skupper networks
-  ![](https://skupper.io/docs/overview/_images/five-clusters.svg)
+
+![](https://skupper.io/docs/overview/_images/five-clusters.svg)
 * Service names must be unique in a Skupper network!
 * `console-ingress: route` -> no Skupper console route
 * Setting `ingress: route` site-controller creates route w/o restart
