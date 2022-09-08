@@ -24,51 +24,22 @@ deployResources:
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: sd-app-sre-info
+  channel: dev-null
 
 managedResourceTypes:
 - ConfigMap
-- ServiceAccount
-- Role
-- RoleBinding
-- DeploymentConfig
-- Service
 
-imagePatterns:
-- quay.io/app-sre
-- quay.io/pusher
-- quay.io/oauth2-proxy
+imagePatterns: []
 
 authentication:
   # required for insights private repositories
   code:
     path: app-sre/creds/github-app-sre-bot
     field: openshift-saas-deploy
-  # required for private images
-  image:
-    path: app-sre/quay/app-sre-pull
-    field: all
 
 deprecated: true
 
 resourceTemplates:
-- name: grafana
-  path: /openshift/grafana.template.yaml
-  url: https://gitlab.cee.redhat.com/service/app-sre-observability
-  targets:
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
-    ref: master
-    parameters:
-      REPLICAS: 1
-      IMAGE_TAG: '9.0.3'
-      DASHBOARD_DISCOVERY_IMAGE_TAG: '1.15.4'
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 3e8cbcdb977a14ce15773e4739697f49b378edc0
-    parameters:
-      REPLICAS: 3
-      IMAGE_TAG: '9.0.3'
 # tenant dashboards
 - name: observatorium-logs-dashboards
   url: https://github.com/rhobs/configuration
