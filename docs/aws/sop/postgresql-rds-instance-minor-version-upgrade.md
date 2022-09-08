@@ -6,7 +6,7 @@ This document covers minor version upgrades to PostgreSQL RDS instances. These u
 
 1. **There isn't a direct rollback procedure for minor version upgrades.** RDS will take a snapshot before the upgrade begins. To revert to the old version, a new RDS instance can be created from this snapshot ([docs](/README.md#restoring-rds-databases-from-backups)).
 2. **RDS downtime is not minimized during minor version upgrades with Multi-AZ**. This is because RDS stops Postgres on both the primary and standby during minor version upgrades. This may result in more downtime than what is expected from other similar operations like OS or instance upgrades that upgrade the standby first and then fail over to the primary.
-3. RDS requires that read replicas be upgraded before the primary database (otherwise known as the `replica_source` in app-interface). This is covered in the sections below, but it is good to be aware of this limitation.
+3. **RDS requires that read replicas be upgraded before the primary database** (otherwise known as the `replica_source` in app-interface). This is covered in the sections below, but it is good to be aware of this limitation.
 
 ## Minor version upgrade process
 
@@ -18,8 +18,8 @@ This is the process for tenants to follow in order to upgrade the minor version 
 
 ---
 
-1. Start by checking if there are any read replicas for the database (look for any `replica_source` settings with the database you're upgrading). If there aren't any replicas, proceed to step 2. If there are replica(s), the MR mentioned below can be created with the changes for both the replica and primary. You cannot apply the change to only the primary due to the previously mentioned limitations.
-2. Find the RDS instances (primary and any replicas) in the app-interface `namespace-1.yml` file. Change the `engine_version` to the new minor version by setting it under `overrides`, or changing the default `engine_version` in the `defaults` file.
+1. Start by checking if there are any read replicas for the database (look for any `replica_source` settings with the database you're upgrading). If there are any replicas, you will need to execute the remaining steps in separate MRs, starting with upgrading the replicas first.
+2. Find the RDS instances (primary or replicas) in the app-interface `namespace-1.yml` file. Change the `engine_version` to the new minor version by setting it under `overrides`, or changing the default `engine_version` in the `defaults` file.
    * **IMPORTANT:** if changing a defaults file, you will upgrade every database that uses that defaults file, so take care in changing this setting. You can grep for the defaults filename to see where it is used and confirm that only the expected databases will be changed in the MR dry-run build.
 3. This step will determine when the change will happen, whether it should be applied immediately, or during the next maintenance window.
    * **Production databases:** database upgrades typically need to occur during specific maintenance windows for production databases. RDS has a feature that will start database maintenance activities during [specific maintenance windows](/README.md#maintenance-windows-for-rds-instances). It is strongly suggested that tenants leverage this mechanism by omitting the `apply_immediately` option. 
@@ -31,7 +31,7 @@ This is the process for tenants to follow in order to upgrade the minor version 
 ---
 
 **Note:**
-* You may see `DBUpgradeDependencyFailure` errors from the Terraform integration if upgrading the primary and replicas at the same time. This is expected because Terraform [doesn't gracefully handle RDS replica upgrades at this time](https://github.com/hashicorp/terraform-provider-aws/issues/22107). The errors should clear as soon as the replicas are upgraded. 
+* You may see `DBUpgradeDependencyFailure` errors from the Terraform integration. This happens either because you have attempted to upgrade a primary database before its replicas or because you are attempting to upgrade both at the same time. Terraform [doesn't gracefully handle simultaneously upgrading RDS primary & replica upgrades at this time](https://github.com/hashicorp/terraform-provider-aws/issues/22107).
 * You may also see `InvalidParameterValue` with a message indicating that a change is already in progress. This should only happen if `apply_immediately` is `false`. This should clear once the upgrade is complete.
 
 ---
