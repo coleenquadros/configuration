@@ -299,6 +299,14 @@ resourceTemplates:
 
 More information: [Continuous Delivery in App-interface](/docs/app-sre/continuous-delivery-in-app-interface.md)
 
+### Migrate resource templates between SaaS files
+
+In order to migrate a resource template to a different SaaS file, the source SaaS file should be marked as deprecated (`deprecated: true`).
+
+More information: [SaaS file structure](/docs/app-sre/continuous-delivery-in-app-interface.md#structure).
+
+Example: [saaas-grafana](https://gitlab.cee.redhat.com/service/app-interface/-/blob/abbfd8e7975e57a4cf04dce83ca0ef5f1298472e/data/services/observability/cicd/saas/saas-grafana.yaml#L40)
+
 ### Jenkins is going to shutdown
 
 Problem:
