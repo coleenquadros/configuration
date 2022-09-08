@@ -159,3 +159,22 @@ resourceTemplates:
     ref: 879c53415361b6cd6084010df9172802d3faa378
     parameters:
       ENV_NAME: "env-stage"
+- name: sources-floorist
+  path: /deploy/floorist.yaml
+  url: https://github.com/RedHatInsights/sources-api-go
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # tells app-sre to not actually run the deploy job for this target
+    ref: internal # altered by bonfire
+  - namespace:
+      $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-sources-api-go-gh-build-main
+    parameters:
+      FLOORIST_DB_SECRET_NAME: sources-db
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage
+      FLOORIST_SUSPEND: "false"
