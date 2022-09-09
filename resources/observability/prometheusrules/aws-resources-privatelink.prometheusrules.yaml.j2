@@ -11,7 +11,7 @@ spec:
   groups:
   - name: privatelink.aws-resource-exporters.rules
     rules:
-      {{%- set account_uid = query("/queries/aws-account-uid.graphql", name="osd-privatelink-" + environment )[0].uid %}}
+      {{%- for account in query('/queries/aws-account-uid.graphql', name='osd-privatelink-' + environment ) %}}
       - alert: VpcsPerRegionQuotaExhaustion # Current quota: 20
         expr: |
           sum(aws_resources_exporter_vpc_vpcsperregion_usage{job="{{{ job_stage }}}"}) by (aws_region) /
@@ -23,7 +23,7 @@ spec:
         annotations:
           runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
           summary: VPCs per region are nearing service quota
-          message: "Number of VPCs in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account_uid }}})"
+          message: "Number of VPCs in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account.uid }}})"
       - alert: SubnetsPerVpcQuotaExhaustion # Current quota: 800
         expr: |
           sum(aws_resources_exporter_vpc_subnetspervpc_usage{job="{{{ job_stage }}}"}) by (vpcid, aws_region) /
@@ -36,7 +36,7 @@ spec:
         annotations:
           runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
           summary: Subnets per vpc are nearing service quota
-          message: "Number of subnets in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account_uid }}})"
+          message: "Number of subnets in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account.uid }}})"
       - alert: RoutesPerRoutetableQuotaExhaustion # Current quota: 1000
         expr: |
           sum(aws_resources_exporter_vpc_routesperroutetable_usage{job="{{{ job_stage }}}"}) by (routetableid, aws_region) /
@@ -49,7 +49,7 @@ spec:
         annotations:
           runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
           summary: Routes per routetable are nearing service quota
-          message: "Number of routes in routetable {{ $labels.routetableid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account_uid }}})"
+          message: "Number of routes in routetable {{ $labels.routetableid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account.uid }}})"
       - alert: InterfaceVpcEndpointsQuotaExhausion # Current quota: 450
         expr: |
           sum(aws_resources_exporter_vpc_interfacevpcendpointspervpc_usage{job="{{{ job_stage }}}"}) by (aws_region) /
@@ -61,7 +61,7 @@ spec:
         annotations:
           runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
           summary: Interface VPC endpoints per VPC are nearing service quota
-          message: "Interface VPC endpoints per VPC in {{ $labels.aws_region }} are nearly exhausting their quota: currently {{ $value | humanizePercentage }} of all available endpoints used. (Account: {{{ account_uid }}})"
+          message: "Interface VPC endpoints per VPC in {{ $labels.aws_region }} are nearly exhausting their quota: currently {{ $value | humanizePercentage }} of all available endpoints used. (Account: {{{ account.uid }}})"
       # This has very high quota but very low usage
       - alert: RoutetablesPerVpcQuotaExhaustion # Current quota: 800
         expr: |
@@ -74,7 +74,7 @@ spec:
         annotations:
           runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
           summary: Routetables per VPC are nearing service quota
-          message: "Routestables per VPC in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account_uid }}})"
+          message: "Routestables per VPC in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account.uid }}})"
       - alert: Ipv4BlocksPerVpcQuotaExhaustion # Current quota: 20
         expr: |
           sum(aws_resources_exporter_vpc_ipv4blockspervpc_usage{job="{{{ job_stage }}}"}) by (vpcid, aws_region) /
@@ -87,7 +87,7 @@ spec:
         annotations:
           runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
           summary: Ipv4 blocks per VPC are nearing service quota
-          message: "IPv4 blocks per VPC in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account_uid }}})"
+          message: "IPv4 blocks per VPC in vpc {{ $labels.vpcid }} in {{ $labels.aws_region }} is nearly exhausting its quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account.uid }}})"
       - alert: RecordsPerHostedZoneQuotaExhaustion # Current quota: 10000
         expr: |
           sum(aws_resources_exporter_route53_recordsperhostedzone_total{job="{{{ job_stage }}}"}) by (hostedzoneid, hostedzonename) /
@@ -99,4 +99,5 @@ spec:
         annotations:
           runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
           summary: Records per hosted zone are nearing service quota
-          message: "Records in hosted zone {{ $labels.hostedzonename }} ({{ $labels.hostedzoneid }}) are nearly exhausting their quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account_uid }}})"
+          message: "Records in hosted zone {{ $labels.hostedzonename }} ({{ $labels.hostedzoneid }}) are nearly exhausting their quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account.uid }}})"
+      {{%- endfor %}}

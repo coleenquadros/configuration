@@ -1,4 +1,3 @@
-{{% set account_uid = query("/queries/aws-account-uid.graphql", name="osd-privatelink-" + environment )[0].uid -%}}
 ---
 $schema: /app-interface/prometheus-rule-test-1.yml
 
@@ -8,6 +7,7 @@ rule_files:
 evaluation_interval: 10m
 
 tests:
+{{%- for account in query("/queries/aws-account-uid.graphql", name="osd-privatelink-" + environment ) %}}
 - interval: 10m
   input_series:
   - series: aws_resources_exporter_vpc_vpcsperregion_quota{job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
@@ -30,7 +30,7 @@ tests:
         service: privatelink-monitoring
         severity: high
       exp_annotations:
-        message: "Number of VPCs in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account_uid }}})"
+        message: "Number of VPCs in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: VPCs per region are nearing service quota
 
@@ -43,7 +43,7 @@ tests:
         service: privatelink-monitoring
         severity: high
       exp_annotations:
-        message: "Number of VPCs in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account_uid }}})"
+        message: "Number of VPCs in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: VPCs per region are nearing service quota
 
@@ -70,7 +70,7 @@ tests:
         severity: high
         vpcid: 1
       exp_annotations:
-        message: "Number of subnets in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account_uid }}})"
+        message: "Number of subnets in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Subnets per vpc are nearing service quota
 
@@ -84,7 +84,7 @@ tests:
         severity: high
         vpcid: 1
       exp_annotations:
-        message: "Number of subnets in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account_uid }}})"
+        message: "Number of subnets in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Subnets per vpc are nearing service quota
 
@@ -111,7 +111,7 @@ tests:
         severity: high
         routetableid: 1
       exp_annotations:
-        message: "Number of routes in routetable 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account_uid }}})"
+        message: "Number of routes in routetable 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Routes per routetable are nearing service quota
 
@@ -125,7 +125,7 @@ tests:
         severity: high
         routetableid: 1
       exp_annotations:
-        message: "Number of routes in routetable 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account_uid }}})"
+        message: "Number of routes in routetable 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Routes per routetable are nearing service quota
 
@@ -151,7 +151,7 @@ tests:
         service: privatelink-monitoring
         severity: high
       exp_annotations:
-        message: "Interface VPC endpoints per VPC in us-east-1 are nearly exhausting their quota: currently 90% of all available endpoints used. (Account: {{{ account_uid }}})"
+        message: "Interface VPC endpoints per VPC in us-east-1 are nearly exhausting their quota: currently 90% of all available endpoints used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Interface VPC endpoints per VPC are nearing service quota
 
@@ -164,7 +164,7 @@ tests:
         service: privatelink-monitoring
         severity: high
       exp_annotations:
-        message: "Interface VPC endpoints per VPC in us-east-1 are nearly exhausting their quota: currently 100% of all available endpoints used. (Account: {{{ account_uid }}})"
+        message: "Interface VPC endpoints per VPC in us-east-1 are nearly exhausting their quota: currently 100% of all available endpoints used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Interface VPC endpoints per VPC are nearing service quota
 
@@ -191,7 +191,7 @@ tests:
         severity: high
         vpcid: 1
       exp_annotations:
-        message: "Routestables per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account_uid }}})"
+        message: "Routestables per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Routetables per VPC are nearing service quota
 
@@ -205,7 +205,7 @@ tests:
         severity: high
         vpcid: 1
       exp_annotations:
-        message: "Routestables per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account_uid }}})"
+        message: "Routestables per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Routetables per VPC are nearing service quota
 
@@ -234,7 +234,7 @@ tests:
       exp_annotations:
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Ipv4 blocks per VPC are nearing service quota
-        message: "IPv4 blocks per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account_uid }}})"
+        message: "IPv4 blocks per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account.uid }}})"
 
   - eval_time: 40m
     alertname: Ipv4BlocksPerVpcQuotaExhaustion
@@ -248,7 +248,7 @@ tests:
       exp_annotations:
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Ipv4 blocks per VPC are nearing service quota
-        message: "IPv4 blocks per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account_uid }}})"
+        message: "IPv4 blocks per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account.uid }}})"
 
 - interval: 10m
   input_series:
@@ -275,7 +275,7 @@ tests:
       exp_annotations:
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Records per hosted zone are nearing service quota
-        message: "Records in hosted zone myhostedzone (1) are nearly exhausting their quota: currently 90% used. (Account: {{{ account_uid }}})"
+        message: "Records in hosted zone myhostedzone (1) are nearly exhausting their quota: currently 90% used. (Account: {{{ account.uid }}})"
 
   - eval_time: 40m
     alertname: RecordsPerHostedZoneQuotaExhaustion
@@ -289,4 +289,5 @@ tests:
       exp_annotations:
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Records per hosted zone are nearing service quota
-        message: "Records in hosted zone myhostedzone (1) are nearly exhausting their quota: currently 100% used. (Account: {{{ account_uid }}})"
+        message: "Records in hosted zone myhostedzone (1) are nearly exhausting their quota: currently 100% used. (Account: {{{ account.uid }}})"
+{{% endfor %}}
