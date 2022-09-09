@@ -243,7 +243,33 @@ These steps have been taken to create the Skupper vault service network.
 
 ## Possible app-interface integration
 
-Enhance `/openshift/namespace-1.yml` schema and add needed skupper parameters to `networkPoliciesAllow` section. Given that an integration can automatically:
+Enhance `/openshift/namespace-1.yml` schema and add a `skupper` section and a new `skupper-1.yml` schema, e.g.:
+
+```yaml
+$schema: /openshift/namespace-1.yml
+...
+skupper:
+  $ref: .../my-skupper.yml
+  policies:
+  - $ref: .../my-skupper-network-policy.yml
+  # to set local skupper options, e.g. limits, replicas
+  config:
+    ...
+```
+
+and
+
+```yaml
+$schema: /XXX/skupper-1.yml
+
+identifier: ...
+# default configs. can be enhanced/overridden in the namespace.
+config:
+  ...
+
+```
+
+ Given that, an integration can automatically:
 
 * Install a specific skupper version (*site-controller*, *service-account*, ...) into all related namespaces in all related clusters.
 * Create `skupper-site` configmaps.
