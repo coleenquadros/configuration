@@ -103,7 +103,7 @@ Skupper securely connects your services with TLS authentication and encryption. 
 ![](https://skupper.io/docs/overview/_images/clusters-tls.svg)
 
 Router (access to the skupper service network) can be exposed either via *load-balancer* or *Openshift route*.
-On a private cluster (`edge: false`), the router doesn't need to be exposed (public reachable), all connections are initiated outgoing to the connected sites, e.g. on private cluser appsres03ue1:
+On a private cluster (`edge: true`), the router doesn't need to be exposed (public reachable), all connections are initiated outgoing to the connected sites, e.g. on private cluser appsres03ue1:
 
 ```shell
 $ oc status
