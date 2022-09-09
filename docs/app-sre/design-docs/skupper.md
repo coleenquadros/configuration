@@ -1,5 +1,28 @@
-# Skupper Network
+<font size="100">Skupper Network</font>
+
 ---
+Table of contents:
+- [Author/date](#authordate)
+- [Tracking JIRA](#tracking-jira)
+- [Problem Statement](#problem-statement)
+- [Goal](#goal)
+- [Skupper Introduction](#skupper-introduction)
+  - [Features](#features)
+  - [Skupper Components](#skupper-components)
+  - [Security](#security)
+    - [Router](#router)
+    - [Service Access Control](#service-access-control)
+- [POC Spike Architecture](#poc-spike-architecture)
+  - [Use Case 1 - Vault](#use-case-1---vault)
+  - [Use Case 2 - OpenShift API Server](#use-case-2---openshift-api-server)
+  - [Site connections](#site-connections)
+- [Possible app-interface integration](#possible-app-interface-integration)
+- [Troubleshooting](#troubleshooting)
+- [Limitations/Bugs/Notes](#limitationsbugsnotes)
+- [Open Topics](#open-topics)
+- [Alternatives](#alternatives)
+- [Links](#links)
+
 
 ## Author/date
 Christian Assing - September 2022
@@ -52,7 +75,7 @@ A Skupper network could allow:
 * Redundant routes for high availability in the face of network failures
 
 
-## Skupper Deployment
+### Skupper Components
 
 Skupper consists of 3 components (kubernetes deployments) which are deployed in a namespace without any administration permissions:
 
@@ -69,14 +92,52 @@ Skupper consists of 3 components (kubernetes deployments) which are deployed in 
 * [**Router**](https://github.com/skupperproject/skupper-router)
   * Deployment created by **site-controller**
   * Is a high-performance, lightweight AMQP 1.0 message router.
-  * This is the Skupper network
+  * This is the Skupper network and it's exposed either via *load-balancer* or openshift *Route*
 
 
+### Security
+
+#### Router
+Skupper securely connects your services with TLS authentication and encryption. In a Skupper network, the connections between Skupper routers are secured with mutual TLS using a private, dedicated certificate authority (CA). Each router is uniquely identified by its own certificate.
+
+![](https://skupper.io/docs/overview/_images/clusters-tls.svg)
+
+Router (access to the skupper service network) can be exposed either via *load-balancer* or *Openshift route*.
+On a private cluster (`edge: false`), the router doesn't need to be exposed (public reachable), all connections are initiated outgoing to the connected sites, e.g. on private cluser appsres03ue1:
+
+```shell
+$ oc status
+In project skupper-vault on server https://api.appsres03ue1.5nvu.p1.openshiftapps.com:6443
+...
+
+$ oc get svc
+NAME                     TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+skupper                  ClusterIP   172.30.95.59     <none>        443/TCP    6d22h
+skupper-router-console   ClusterIP   172.30.231.221   <none>        443/TCP    6d22h
+skupper-router-local     ClusterIP   172.30.24.190    <none>        5671/TCP   6d22h
+vault                    ClusterIP   172.30.18.96     <none>        8080/TCP   2d23h
+
+$ oc get route
+No resources found in skupper-vault namespace.
+
+$ skupper status
+Skupper is enabled for namespace "skupper-vault" with site name "appsres03ue1-skupper-vault" in edge mode. It is connected to 2 other sites (1 indirectly). It has 1 exposed service.
+```
+
+#### Service Access Control
+
+Skupper has a built-in [Policy system](https://skupper.io/docs/policy/index.html) to specify granular permissions. With a CR `SkupperClusterPolicy` you've full control
+over various aspects of the skupper networks, e.g.:
+* Which resources are allowed to be exposed
+* Allow skupper connection to certain hostnames only
+* Permit or deny incoming links from other skupper sites
+
+On a cluster itself, Skupper works well with **Kubernetes network policies** and access to a Skupper service can be controlled with them. Exposing a service via Skupper doesn't mean it's widely accessible or so.
 
 ## POC Spike Architecture
 
 Everything is deployed via [app-interface](https://gitlab.cee.redhat.com/service/app-interface/-/blob/222a8aa1/data/services/skupper-cassing/app.yml) without any admin permissions.
-Connecting the Skupper sites was done manually.
+Connecting the Skupper sites was done [manually](#site-connections).
 
 ### Use Case 1 - Vault
 
@@ -98,11 +159,13 @@ Namespaces:
   * *skupper-router*
     * Not a namespace! It is a docker container running on a Linux box as part of the Skupper gateway
     * Exposes the Vault service on a port on the local machine
-    * ```
+    * ```shell
       $ oc login $PUBLIC_CLUSTER
       $ skupper gateway init --type docker
       $ skupper gateway forward vault 8080
       ```
+
+
 ### Use Case 2 - OpenShift API Server
 
 Showcase accessing OpenShift API servers running on public and private clusters from everywhere.
@@ -123,12 +186,71 @@ Namespaces:
   * *skupper-router*
     * Not a namespace! It is a docker container running on a Linux box as part of the Skupper gateway
     * Exposes the api-server services on ports on the local machine
-    * ```
-      $ oc login $PUBLIC_CLUSTER
-      $ skupper gateway init --type docker
-      $ skupper gateway forward appsres03ue1 8080
-      ```
 
+### Site connections
+
+Connecting Skupper sites was done manually. In the future, a qontract-reconcile integration should manage that.
+These steps have been taken to create the Skupper vault service network.
+
+1. Create a connection-token for app-sre-stage-01:
+   ```shell
+   $ oc login <app-sre-stage-01>
+   $ oc project skupper-vault-net
+
+   $ cat << __EOF__ | oc create -f -
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: site-token-app-sre-stage-01-skupper-vault-net
+     labels:
+       skupper.io/type: connection-token-request
+   __EOF__
+   $ oc get secret site-token-app-sre-stage-01-skupper-vault-net -ojson | jq 'del(.metadata.namespace,.metadata.resourceVersion,.metadata.uid) | .metadata.creationTimestamp=null' > site-token-app-sre-stage-01-skupper-vault-net.json
+   ```
+1. Create skupper site connection from private cluster *appsres03ue1* to public cluster *app-sre-stage-01* by importing the connection-token.
+   ```shell
+   $ oc login <appsres03ue1>
+   $ oc project skupper-vault
+   $ oc create -f site-token-app-sre-stage-01-skupper-vault-net.json
+   ```
+1. Verify site connection [optional]
+   ```
+   $ skupper status
+   Skupper is enabled for namespace "skupper-vault" with site name "appsres03ue1-skupper-vault" in edge mode. It is connected to ...
+   ```
+1. Create skupper site connection from public cluster *app-sre-stage-02* to public cluster *app-sre-stage-01* by importing the connection-token.
+   ```shell
+   $ oc login <app-sre-stage-02>
+   $ oc project skupper-vault-net
+   $ oc create -f site-token-app-sre-stage-01-skupper-vault-net.json
+   ```
+1. Verify site connection [optional]
+   ```
+   $ skupper status
+   Skupper is enabled for namespace "skupper-vault-net" with site name "app-sre-stage-02-skupper-vault-net" in interior mode.
+   It is connected to 2 other sites (1 indirectly). It has 1 exposed service.
+   The site console url is:  https://skupper-skupper-vault-net.apps.app-sre-stage-0.e9a2.p1.openshiftapps.com
+   ```
+1. Connect your local machine (or ci.ext) to public cluster *app-sre-stage-02* and forward fake api-server *appsres03ue1* skupper service
+   ```shell
+   $ oc login <app-sre-stage-02>
+   $ oc project skupper-vault-net
+   $ skupper gateway init --type docker
+   $ skupper gateway forward appsres03ue1 8080
+   $ curl localhost:8080
+   "api-server-appsres03ue1 on api-server-appsres03ue1-6594486f9f-jndl8"%
+   ```
+
+## Possible app-interface integration
+
+Enhance `/openshift/namespace-1.yml` schema and add needed skupper parameters to `networkPoliciesAllow` section. Given that an integration can automatically:
+
+* Install a specific skupper version (*site-controller*, *service-account*, ...) into all related namespaces in all related clusters.
+* Create `skupper-site` configmaps.
+  * Default settings can be adapted by `networkPoliciesAllow` section
+  * Set `edge: true` for private clusters
+* Create connection-tokens and spawn skupper connections. Also taking into account that a private cluster doesn't allow incoming connections.
+* A PR check can verify that we don't create overlapping Skupper networks or setups with some security concerns
 
 ## Troubleshooting
 
