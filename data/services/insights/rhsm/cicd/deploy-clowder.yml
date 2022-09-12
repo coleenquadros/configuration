@@ -92,7 +92,7 @@ resourceTemplates:
       ENABLE_AWS_DRY_RUN: 'true'
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 1d2ddc81e792b541758487bf5d4a96d9315cd01f
+    ref: 8213007267ffe6b18523f02d3b910c9339f0372f
     parameters:
       SWATCH_INTERNAL_SUBSCRIPTION_ENDPOINT: http://rhsm-subscriptions-capacity-ingress.rhsm-prod.svc.cluster.local:8000/api/rhsm-subscriptions/v1
       CPU_LIMIT: 1000m
@@ -126,7 +126,7 @@ resourceTemplates:
       USER_MAX_ATTEMPTS: 1
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 1d2ddc81e792b541758487bf5d4a96d9315cd01f
+    ref: 8213007267ffe6b18523f02d3b910c9339f0372f
     parameters:
       SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5
       USER_HOST: user.api.redhat.com
@@ -148,6 +148,14 @@ resourceTemplates:
     parameters:
       METRICS_WORKER_HAWTIO_BASE_PATH: /app/rhsm-metrics/hawtio
       USER_HOST: user.stage.api.redhat.com
+      INVENTORY_SECRET_KEY_NAME: host-inventory-db-readonly
+      INVENTORY_SECRET_KEY_NAME_PREFIX: 'db.'
+      DATABASE_MAX_POOL_SIZE: '25'
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+    ref: 8213007267ffe6b18523f02d3b910c9339f0372f
+    parameters:
+      USER_HOST: user.api.redhat.com
       INVENTORY_SECRET_KEY_NAME: host-inventory-db-readonly
       INVENTORY_SECRET_KEY_NAME_PREFIX: 'db.'
       DATABASE_MAX_POOL_SIZE: '25'
@@ -181,6 +189,20 @@ resourceTemplates:
       INVENTORY_SECRET_KEY_NAME: host-inventory-db-readonly
       INVENTORY_SECRET_KEY_NAME_PREFIX: 'db.'
       DATABASE_MAX_POOL_SIZE: '25'
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+    ref: 8213007267ffe6b18523f02d3b910c9339f0372f
+    parameters:
+      SUBSCRIPTION_SYNC_ENABLED: true
+      PRODUCT_URL: https://product.api.redhat.com/svcrest/product/v3
+      SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5
+      KAFKA_MESSAGE_THREADS: 6
+      USER_HOST: user.api.redhat.com
+      SPRING_ACTIVEMQ_BROKER_URL: ssl://umb.api.redhat.com:61616
+      UMB_SERVICE_ACCOUNT_NAME: insightsrhsm
+      UMB_PROCESSING_ENABLED: false
+      INVENTORY_SECRET_KEY_NAME: host-inventory-db-readonly
+      INVENTORY_SECRET_KEY_NAME_PREFIX: 'db.'
 
 - name: swatch-system-conduit
   path: /swatch-system-conduit/deploy/clowdapp.yaml
@@ -204,6 +226,17 @@ resourceTemplates:
       RHSM_SYSTEM_CONDUIT_SERVICE_HOST: swatch-system-conduit-service.rhsm-stage.svc.cluster.local
       RHSM_SYSTEM_CONDUIT_SERVICE_PORT: 8000
       TOLERATE_MISSING_ACCOUNT_NUMBER: true
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+    ref: 8213007267ffe6b18523f02d3b910c9339f0372f
+    parameters:
+      PINHEAD_URL: https://systems.api.redhat.com/v1
+      RHSM_URL: https://api.rhsm.redhat.com/v1
+      CURL_CRON_IMAGE: quay.io/app-sre/ubi8-ubi-minimal
+      CURL_CRON_IMAGE_TAG: 8.6-854
+      RHSM_SYSTEM_CONDUIT_SERVICE_HOST: swatch-system-conduit-service.rhsm-prod.svc.cluster.local
+      RHSM_SYSTEM_CONDUIT_SERVICE_PORT: 8000
+      TOLERATE_MISSING_ACCOUNT_NUMBER: false
 
 - name: swatch-api
   path: /swatch-api/deploy/clowdapp.yaml
@@ -222,6 +255,14 @@ resourceTemplates:
         SERVER_MAX_HTTP_HEADER_SIZE: '47000'
         RHSM_RBAC_HOST: ${RBAC_HOST}
         RHSM_RBAC_PORT: '8080'
+    - namespace:
+        $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+      ref: 8213007267ffe6b18523f02d3b910c9339f0372f
+      parameters:
+        SERVER_MAX_HTTP_HEADER_SIZE: '47000'
+        RHSM_RBAC_HOST: ${RBAC_HOST}
+        RHSM_RBAC_PORT: '8080'
+
 - name: swatch-tally
   path: /swatch-tally/deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -262,4 +303,23 @@ resourceTemplates:
         INVENTORY_SECRET_KEY_NAME_PREFIX: 'db.'
         POPULATOR_RUN_NUMBER: 2
         ORG_ID_POPULATOR_BATCH_SIZE: 500
-
+    - namespace:
+        $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+      ref: 8213007267ffe6b18523f02d3b910c9339f0372f
+      parameters:
+        ENABLE_ACCOUNT_RESET: false
+        CLOUDIGRADE_ENABLED: true
+        CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-prod.svc.cluster.local
+        CLOUDIGRADE_PORT: 8000
+        CLOUDIGRADE_INTERNAL_HOST: cloudigrade-api.cloudigrade-prod.svc.cluster.local
+        CLOUDIGRADE_INTERNAL_PORT: 8000
+        USER_HOST: user.api.redhat.com
+        MEMORY_REQUEST: 14000Mi
+        MEMORY_LIMIT: 15488Mi
+        CPU_REQUEST: 2000m
+        CPU_LIMIT: 4800m
+        KAFKA_MESSAGE_THREADS: 3
+        INVENTORY_SECRET_KEY_NAME: host-inventory-db-readonly
+        INVENTORY_SECRET_KEY_NAME_PREFIX: 'db.'
+        POPULATOR_RUN_NUMBER: 1
+        ORG_ID_POPULATOR_BATCH_SIZE: 500
