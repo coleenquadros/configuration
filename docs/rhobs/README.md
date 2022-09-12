@@ -36,7 +36,7 @@ Make sure you add the new cluster to `data/services/observability/namespaces/app
 Make sure to include secrets to generate cookie secret for oauth-proxy sidecars. These can be reused from other clusters. See `data/services/rhobs/observatorium-mst/namespaces/rhobsp02ue1/observatorium-mst-production.yml` for reference - new cluster should have all `vault-secret`s with suffix `*-proxy` added.
 
 ## Creating namespaces
-Follow the establishd pattern: New namespaces should be created under `data/services/rhobs/observatorium-mst/namespaces/<cluster_name>`.
+Follow the established pattern: New namespaces should be created under `data/services/rhobs/observatorium-mst/namespaces/<cluster_name>`.
 
 When creating new namespaces, reuse / follow the following pattern:
 - Create a `observatorium-mst-production` namespace. This namespace shall contain both `observatorium-common` and `observatorium-metrics` templates.
