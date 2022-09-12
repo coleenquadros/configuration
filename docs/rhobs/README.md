@@ -1,9 +1,9 @@
 # Setting up a new RHOBS cluster
-All RHOBS clustered exist under `data/services/rhobs/observatorium-mst` (MST - which stands for managed services tenant - is a legacy name that we keep using for now).
+All RHOBS clusters exist under `data/services/rhobs/observatorium-mst` (MST - which stands for managed services tenant - is a legacy name that we keep using for now).
 
 Namespaces are structured based on the clusters. For each new cluster, create a new subdirectory in `data/services/rhobs/observatorium-mst/namespaces/<new_cluster_name>`. This directory will include all new namespace SaaS files.
 
-New cluster namespaces are then goverend by the CICD files in `data/services/rhobs/observatorium-mst/cicd`. You will add the namespaces to the appropriate CICD files, in line with the instructions below.
+New cluster namespaces are then goverend by the CICD files in `data/services/rhobs/observatorium-mst/cicd`. You would need to add the namespaces to the appropriate CICD files, in line with the instructions below.
 
 _Please beware that most of the changes below cannot be self-serviced, i.e. they require an approval from the AppSRE. Although generally this process is fast, the extra time required for reviews by people outside of our team should be taken into consideration when planning cluster creation._
 
