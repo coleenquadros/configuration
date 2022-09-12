@@ -27,7 +27,7 @@ To request this, open a JIRA ticket in the OHSS project. You can follow [this](h
 _Since this change is done manually and it can take a couple of days to be processed, it is recommended to open the ticket as soon as possible_
 
 ## Creating S3 resources
-Create new S3 resources (buckets) for the new cluster. We need two buckets - one for metrics and one for rules. Add them to `externalResources` in the new `observatorium-mst-production` namespace file, follow configuration from existing clusters.
+Create a new S3 resources (bucket) for the new cluster. We need two buckets - one for metrics and one for rules. Add them to `externalResources` in the new `observatorium-mst-production` namespace file, follow configuration from existing clusters.
 
 ## Adding CloudWatch access
 Make sure you add the new cluster to `data/services/observability/namespaces/app-sre-observability-production.yml` to the external resources to enable CloudWatch access.
@@ -48,11 +48,29 @@ Follow the example of `data/services/rhobs/observatorium-mst/namespaces/rhobsp02
 - `observatorium-tools-cluster-scope-production.yml`
 - `observatorium-tools-production.yml`
 
+## Adding namespaces to non-RHOBS related roles
+For proper functioning within AppSRE, the newly created `observatorium-mst-production` namespace should be added to following roles:
+- `data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml`
+- `data/teams/rhobs/roles/observatorium-bot.yml`
+- `data/teams/telemeter/roles/dev.yml`
+
+[Example PR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/43988)
+
+## Creating S3 resources
+Create a new S3 resources (bucket) for the new cluster. We need two buckets - one for metrics and one for rules. Add them to `externalResources` in the new `observatorium-mst-production` namespace file, follow configuration from existing clusters.
+
+## Adding CloudWatch access
+Make sure you add the new cluster to `data/services/observability/namespaces/app-sre-observability-production.yml` to the external resources to enable CloudWatch access.
+
+## Proxy secrets
+Make sure to include secrets to generate cookie secret for oauth-proxy sidecars. These can be reused from other clusters. See `data/services/rhobs/observatorium-mst/namespaces/rhobsp02ue1/observatorium-mst-production.yml` for reference - new cluster should have all `vault-secret`s with suffix `*-proxy` added.
+
 ## Deploying templates
 Add entries into appropriate Saas files for the new namespaces:
 - For monitoring, add `observatorium-mst-production` namespace into `data/services/rhobs/observatorium-mst/cicd/saas-monitoring.yaml`. This will enable monitoring and will only manage `ServiceMonitor` resources.
 - For metrics and Observatorium templates, add `observatorium-mst-production` namespace into `data/services/rhobs/observatorium-mst/cicd/saas.yaml` under both resource templates: `observatorium-mst-common` and `observatorium-mst-metrics`. Copy and adjust parameters from the existing clusters.
 - For tools, add `observatorium-tools-production` namespace into `data/services/rhobs/observatorium-mst/cicd/saas-tools.yaml` into Jaeger and Paraca resource templates.
+- Don't forget to add `observatorium-tools-production` namespace to `networkPoliciesAllow:` section of `observatorium-mst-production` namespace to allow communication between namespaces.
 
 ## Configuring tenants
 To configure tenants, adjust the `data/services/rhobs/observatorium-mst/cicd/saas-tenants.yaml` file. You'll need to add a new `- namespace:` entry in the list and configure the tenants appropriately. You can follow existing tenants config from other clusters as a reference.
@@ -69,4 +87,4 @@ To enable alerting, you should add the cluster-specific alerting rules under `da
 - Thanos infrastructure alerting -> `/observability/prometheusrules/observatorium-thanos-production.prometheusrules.yaml`
 - HTTP traffic -> `/observability/prometheusrules/observatorium-http-traffic-production.prometheusrules.yaml`
 
-In addition, don't forget to add the closed-box monitoring for the API route. You can do this by adding an entry in `data/services/rhobs/observatorium-mst/app.yml` under `endPoints` (follow example from other clusters)
+In addition, don't forget to add the closed-box monitoring for the API route. You can do this by adding an entry in `data/services/rhobs/observatorium-mst/app.yml` under `endPoints` (follow example from other clusters).
