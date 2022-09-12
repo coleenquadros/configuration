@@ -53,6 +53,9 @@ imagePatterns:
 - quay.io/jpkroehling/all-in-one
 - quay.io/openshift/origin-configmap-reloader
 - quay.io/prometheus/alertmanager
+- quay.io/openshift-logging/loki
+  # This should be deleted upon completion of https://issues.redhat.com/browse/RHOBS-112
+- quay.io/philipgough/envoy
 
 resourceTemplates:
 - name: observatorium-metrics
@@ -294,3 +297,21 @@ resourceTemplates:
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       JAEGER_COLLECTOR_NAMESPACE: observatorium-production
       SERVICE_ACCOUNT_NAME: observatorium-metrics
+- name: rhobs-thanos-receive-migration-stage
+  path: /resources/services/receiver-migration-template.yaml
+  url: https://github.com/rhobs/configuration
+  targets:
+    - namespace:
+        $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
+      ref: 92c94b598221b29bb726d122d5b972ca1cec91c2
+      parameters:
+        NAMESPACE: observatorium-metrics-stage
+        PRIMARY_UPSTREAM_HOST: 'observatorium-thanos-receive.observatorium-metrics-stage.svc.cluster.local'
+        MIRROR_HOST: 'observatorium-thanos-receive-router.observatorium-metrics-stage.svc.cluster.local'
+        RECEIVER_KETAMA_REPLICAS: '3'
+        RECEIVER_KETAMA_CPU_REQUEST: '700m'
+        RECEIVER_KETAMA_CPU_LIMIT: '700m'
+        RECEIVER_KETAMA_MEMORY_REQUEST: '5Gi'
+        RECEIVER_KETAMA_MEMORY_LIMIT: '5Gi'
+        THANOS_CONFIG_SECRET: thanos-objectstorage
+        THANOS_S3_SECRET: telemeter-thanos-stage-s3
