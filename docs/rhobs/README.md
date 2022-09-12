@@ -27,7 +27,7 @@ To request this, open a JIRA ticket in the OHSS project. You can follow [this](h
 _Since this change is done manually and it can take a couple of days to be processed, it is recommended to open the ticket as soon as possible_
 
 ## Creating S3 resources
-Create a new S3 resources (bucket) for the new cluster. We need two buckets - one for metrics and one for rules. Add them to `externalResources` in the new `observatorium-mst-production` namespace file, follow configuration from existing clusters.
+Create new S3 resources (buckets) for the new cluster. We need two buckets - one for metrics and one for rules. Add them to `externalResources` in the new `observatorium-mst-production` namespace file, follow configuration from existing clusters.
 
 ## Adding CloudWatch access
 Make sure you add the new cluster to `data/services/observability/namespaces/app-sre-observability-production.yml` to the external resources to enable CloudWatch access.
