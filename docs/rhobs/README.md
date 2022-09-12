@@ -20,7 +20,7 @@ When creating a new cluster, prefer memory-optimized instances, e.g. for cluster
 - When creating new routes, follow the `<service>.<cluster_name>.api.openshift.com` pattern. For example, for Alertmanager on cluster `rhobsp02ue`, this would be `alertmanager.rhobsp02ue1.api.openshift.com`
 
 ## Requesting creation of DNS entries
-To create functioning routes, adding route resources from previous step is not enough. A proper DNS entries for the cluster need to be created. This is done by creating a request to the OpenShift Hosted SRE Support.
+To create functioning routes, adding route resources from previous step is not enough. Proper DNS entries for the cluster need to be created. This is done by creating a request to the OpenShift Hosted SRE Support.
 
 To request this, open a JIRA ticket in the OHSS project. You can follow [this](https://issues.redhat.com/browse/OHSS-14411) ticket to create ticket for DNS entries in the new cluster. Don't forget to specify that these entries need to have CNAME type.
 
