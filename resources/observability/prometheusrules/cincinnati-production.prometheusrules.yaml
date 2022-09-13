@@ -117,10 +117,21 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
         message: "Policy engine container has restarted"
-        link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
+        link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
       expr: |
         increase(kube_pod_container_status_restarts_total{namespace="cincinnati-production",container="cincinnati-policy-engine"}[15m]) > 1
       for: 2m
       labels:
         service: cincinnati
         severity: warning
+    - alert: PEHighLatency
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+        dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+        message: "Policy engine has a high latency > 1 sec"
+        link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+      expr: |
+        component:latency:p90_rate5m{component="cincinnati-policy-engine", job="cincinnati-policy-engine", service="cincinnati"} > 1
+      labels:
+        service: cincinnati
+        severity: high
