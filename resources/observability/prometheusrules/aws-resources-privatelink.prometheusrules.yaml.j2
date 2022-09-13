@@ -100,4 +100,16 @@ spec:
           runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
           summary: Records per hosted zone are nearing service quota
           message: "Records in hosted zone {{ $labels.hostedzonename }} ({{ $labels.hostedzoneid }}) are nearly exhausting their quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account.uid }}})"
+      - alert: HostedZonesPerAccountQuotaExhaustion
+        expr: |
+          sum(aws_resources_exporter_route53_hostedzonesperaccount_total{job="{{{ job_stage }}}"}) /
+          sum(aws_resources_exporter_route53_hostedzonesperaccount_quota{job="{{{ job_stage }}}"}) >= 0.9
+        for: 10m
+        labels:
+          service: privatelink-monitoring
+          severity: high
+        annotations:
+          runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
+          summary: Records per hosted zone are nearing service quota
+          message: "The number of hosted zones is approaching their quota: currently {{ $value | humanizePercentage }} used. (Account: {{{ account.uid }}})"
       {{%- endfor %}}
