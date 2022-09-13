@@ -1,0 +1,40 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: uhc
+
+name: saas-uhc-envoy-config
+description: SaaS tracking file for UHC Envoy config
+
+app:
+  $ref: /services/ocm/cs/app.yml
+
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-uhc-info
+
+managedResourceTypes:
+- ConfigMap
+
+imagePatterns: []
+
+resourceTemplates:
+- name: uhc-clusters-service-envoy-config
+  url: https://gitlab.cee.redhat.com/service/uhc-clusters-service
+  path: /templates/envoy-template.yml
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration.yml
+    ref: master
+    parameters:
+      ENVOY_CONFIGMAP_NAME: clusters-service-envoy-integration
+      ENVOY_RATE_LIMIT_DOMAIN: integration
+
+
+
+
