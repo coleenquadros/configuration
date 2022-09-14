@@ -12,6 +12,7 @@ Table of contents:
   - [Security](#security)
     - [Router](#router)
     - [Service Access Control](#service-access-control)
+    - [Service Sync](#service-sync)
 - [POC Spike Architecture](#poc-spike-architecture)
   - [Use Case 1 - Vault](#use-case-1---vault)
   - [Use Case 2 - OpenShift API Server](#use-case-2---openshift-api-server)
@@ -34,18 +35,16 @@ https://issues.redhat.com/browse/APPSRE-6122
 ## Problem Statement
 There are many cases where cross-service connectivity is needed. When the services are collocated or accessible on the internet, this works. For other cases, we currently rely on AWS connectivity resources such as Peerings, Transit Gateways (TGW), and others.
 
-This requires additional management of CIDR blocks so they don't collide, and thus planning and so on.
-It also does not scale beyond a single cloud provider (AWS).
-There are also questions being raised each time a workload hosted on a more or less 'public' VPC (e.g. ci.ext which worker nodes are not public) needs to reach internal services.
+There are also questions being raised each time a workload hosted on a more or less 'public' VPC (e.g., ci.ext which worker nodes are not public) needs to reach internal services. This requires additional management of CIDR blocks so they don't collide, and thus planning and so on. It also does not scale beyond a single cloud provider (AWS).
 
 
 ## Goal
-The purpose of this POC is to show how Skupper networks could be deployed on our clusters to 'link' namespaces together and publish/consume services over that network.
+This POC aims to show how Skupper networks could be deployed on our clusters to 'link' namespaces together and publish/consume services over that network.
 
 
 ## Skupper Introduction
 
-[Skupper](skupper.io) is a layer 7 service interconnect. It enables secure communication across Kubernetes clusters with no VPNs or special firewall rules.
+[Skupper](skupper.io) is a layer 7 service interconnect. It enables secure communication across Kubernetes clusters without VPNs or special firewall rules.
 
 It allows spawning an 'application' network, abstracting the underlying network subtleties and letting apps connect by name and port. Once Skupper sites (namespaces) are interconnected, Skupper will route the traffic to wherever the service resides. It also provides load balancing/failover on all instances fulfilling the service.
 
@@ -58,7 +57,7 @@ It allows spawning an 'application' network, abstracting the underlying network 
 
 A Skupper network could allow:
 * Grafana to reach private clusters prometheus without peerings
-* ci.ext node to reach Vault, hosted on a private cluster, without peerings
+* ci.ext node to connect Vault, hosted on a private cluster, without peerings
 * Bastions/backplane - access to private clusters by authorized staff
 * Cross-cloud service connectivity
 * Qontract-reconcile integrations reaching remote/private clusters without peerings
@@ -103,7 +102,7 @@ Skupper securely connects your services with TLS authentication and encryption. 
 ![](https://skupper.io/docs/overview/_images/clusters-tls.svg)
 
 Router (access to the skupper service network) can be exposed either via *load-balancer* or *Openshift route*.
-On a private cluster (`edge: true`), the router doesn't need to be exposed (public reachable), all connections are initiated outgoing to the connected sites, e.g. on private cluser appsres03ue1:
+On a private cluster (`edge: true`), the router doesn't need to be exposed (public reachable); all connections are initiated outgoing to the connected sites, e.g., on private cluster appsres03ue1:
 
 ```shell
 $ oc status
@@ -126,13 +125,16 @@ Skupper is enabled for namespace "skupper-vault" with site name "appsres03ue1-sk
 
 #### Service Access Control
 
-Skupper has a built-in [Policy system](https://skupper.io/docs/policy/index.html) to specify granular permissions. With a CR `SkupperClusterPolicy` you've full control
-over various aspects of the skupper networks, e.g.:
+Skupper has a built-in [Policy system](https://skupper.io/docs/policy/index.html) to specify granular permissions. With a CR `SkupperClusterPolicy` you've complete control over various aspects of the skupper networks, e.g.:
 * Which resources are allowed to be exposed
-* Allow skupper connection to certain hostnames only
+* Allow skupper connection to specific hostnames only
 * Permit or deny incoming links from other skupper sites
 
-On a cluster itself, Skupper works well with **Kubernetes network policies** and access to a Skupper service can be controlled with them. Exposing a service via Skupper doesn't mean it's widely accessible or so.
+On a cluster itself, Skupper works well with **Kubernetes network policies**, and access to a Skupper service can be controlled with them. Exposing a service via Skupper doesn't mean it's widely accessible.
+
+#### Service Sync
+
+The `service-sync` option in the `configmap/skupper-site` controls the creation of skupper service in the skupper network. You've to enable it in the source namespace, to expose a service, and you can't create a skupper service manually on the remote sites. To have fine-grained control of which service is accessible from which namespace, you have to use `SkupperClusterPolicy`.
 
 ## POC Spike Architecture
 
@@ -207,31 +209,31 @@ These steps have been taken to create the Skupper vault service network.
    __EOF__
    $ oc get secret site-token-app-sre-stage-01-skupper-vault-net -ojson | jq 'del(.metadata.namespace,.metadata.resourceVersion,.metadata.uid) | .metadata.creationTimestamp=null' > site-token-app-sre-stage-01-skupper-vault-net.json
    ```
-1. Create skupper site connection from private cluster *appsres03ue1* to public cluster *app-sre-stage-01* by importing the connection-token.
+1. Create a skupper site connection from private cluster *appsres03ue1* to the public cluster *app-sre-stage-01* by importing the connection-token.
    ```shell
    $ oc login <appsres03ue1>
    $ oc project skupper-vault
    $ oc create -f site-token-app-sre-stage-01-skupper-vault-net.json
    ```
-1. Verify site connection [optional]
+1. Verify site connection [optionally]
    ```
    $ skupper status
    Skupper is enabled for namespace "skupper-vault" with site name "appsres03ue1-skupper-vault" in edge mode. It is connected to ...
    ```
-1. Create skupper site connection from public cluster *app-sre-stage-02* to public cluster *app-sre-stage-01* by importing the connection-token.
+1. Create a skupper site connection from public cluster *app-sre-stage-02* to the public cluster *app-sre-stage-01* by importing the connection-token.
    ```shell
    $ oc login <app-sre-stage-02>
    $ oc project skupper-vault-net
    $ oc create -f site-token-app-sre-stage-01-skupper-vault-net.json
    ```
-1. Verify site connection [optional]
+1. Verify site connection [optionally]
    ```
    $ skupper status
    Skupper is enabled for namespace "skupper-vault-net" with site name "app-sre-stage-02-skupper-vault-net" in interior mode.
    It is connected to 2 other sites (1 indirectly). It has 1 exposed service.
    The site console url is:  https://skupper-skupper-vault-net.apps.app-sre-stage-0.e9a2.p1.openshiftapps.com
    ```
-1. Connect your local machine (or ci.ext) to public cluster *app-sre-stage-02* and forward fake api-server *appsres03ue1* skupper service
+1. Connect your local machine (or ci.ext) to the public cluster *app-sre-stage-02* and forward the fake api-server *appsres03ue1* skupper service
    ```shell
    $ oc login <app-sre-stage-02>
    $ oc project skupper-vault-net
@@ -271,11 +273,11 @@ config:
 
  Given that, an integration can automatically:
 
-* Install a specific skupper version (*site-controller*, *service-account*, ...) into all related namespaces in all related clusters.
+* Install a specific skupper version (*site-controller*, *service-account*, ...) into all related namespaces in all associated clusters.
 * Create `skupper-site` configmaps.
-  * Default settings can be adapted by `networkPoliciesAllow` section
+  * Adapt default settings with the `config` sections
   * Set `edge: true` for private clusters
-* Create connection-tokens and spawn skupper connections. Also taking into account that a private cluster doesn't allow incoming connections.
+* Create connection-tokens and spawn skupper connections by considering that a private cluster doesn't allow incoming connections.
 * A PR check can verify that we don't create overlapping Skupper networks or setups with some security concerns
 
 ## Troubleshooting
@@ -292,16 +294,15 @@ https://skupper-skupper-fake-api-server-net.apps.appsres04ue2.n4k3.p1.openshifta
 
 ## Limitations/Bugs/Notes
 
-* A namespace can be part of exactly one skupper site. No overlapping skupper networks
-
-![](https://skupper.io/docs/overview/_images/five-clusters.svg)
+* A namespace can be part of precisely one skupper site. No overlapping skupper networks
 * Service names must be unique in a Skupper network!
 * `console-ingress: route` -> no Skupper console route
 * Setting `ingress: route` site-controller creates route w/o restart
 * reset router statistics: `oc rollout restart deploy/skupper-router`
 * Router restart will interrupt Skupper services!!
 * The router console doesn't display the consuming pod's origin namespace
-* [No support](https://groups.google.com/g/skupper/c/YyGOHPj-5MA) for `DeploymentConfigs`, but can be used by annotating the service
+* [No support](https://groups.google.com/g/skupper/c/YyGOHPj-5MA) for `DeploymentConfigs`, but they can be used by annotating the services.
+* Changes to `configmap/skupper-site` won't apply to existing `skupper-router` and `skupper-service-controller` deployments. You've to remove them manually and restart the `site-controller`
 
 ## Open Topics
 
