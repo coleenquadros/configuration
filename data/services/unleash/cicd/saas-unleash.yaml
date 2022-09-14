@@ -1,0 +1,170 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: unleash
+
+name: saas-unleash
+description: SaaS tracking file for Unleash
+
+app:
+  $ref: /services/unleash/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Route
+- Service
+- ServiceAccount
+
+imagePatterns:
+- quay.io/app-sre/unleash
+
+resourceTemplates:
+- name: unleash
+  url: https://github.com/app-sre/unleash
+  path: /openshift/unleash.yaml
+  targets:
+  # app-interface
+  - name: app-interface-stage
+    namespace:
+      $ref: /services/unleash/namespaces/app-sre-stage-01.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-unleash-gh-build-master
+    parameters:
+      identifier: app-interface
+      configSecret: app-interface-stage-config
+      databaseSecret: app-interface-stage-unleash-rds
+      tokenSecret: app-interface-stage-token
+      org: app-sre
+      team: app-interface-unleash
+      host: app-interface.unleash.stage.devshift.net
+  # - name: app-interface-production
+  #   namespace:
+  #     $ref: /services/unleash/namespaces/app-sre-prod-01.yml
+  #   ref: c7a15ba54419ac82fcdcc3efec23f5f37b841357
+  #   parameters:
+  #     identifier: app-interface
+  #     configSecret: app-interface-config
+  #     databaseSecret: app-interface-unleash-rds
+  #     tokenSecret: app-interface-token
+  #     org: app-sre
+  #     team: app-interface-unleash
+  #     host: app-interface.unleash.devshift.net
+  # insights
+  - name: insights-stage
+    namespace:
+      $ref: /services/unleash/namespaces/app-sre-stage-01.yml
+    ref: c7a15ba54419ac82fcdcc3efec23f5f37b841357
+    parameters:
+      identifier: insights-stage
+      configSecret: insights-stage-config
+      tokenSecret: insights-stage-unleash-token
+      databaseSecret: insights-stage-unleash-rds
+      org: app-sre
+      team: insights-stage-unleash
+      read_only_team: insights-stage-unleash-read-only
+      host: insights-stage.unleash.devshift.net
+  # - name: insights-production
+  #   namespace:
+  #     $ref: /services/unleash/namespaces/app-sre-prod-01.yml
+  #   ref: c7a15ba54419ac82fcdcc3efec23f5f37b841357
+  #   parameters:
+  #     identifier: insights
+  #     configSecret: insights-config
+  #     tokenSecret: insights-unleash-token
+  #     databaseSecret: insights-unleash-rds
+  #     org: app-sre
+  #     team: insights-unleash
+  #     read_only_team: insights-unleash-read-only
+  #     host: insights.unleash.devshift.net
+  - name: insights-perf
+    namespace:
+      $ref: /services/unleash/namespaces/app-sre-stage-01.yml
+    ref: c7a15ba54419ac82fcdcc3efec23f5f37b841357
+    parameters:
+      identifier: insights-perf
+      configSecret: insights-perf-config
+      tokenSecret: insights-perf-unleash-token
+      databaseSecret: insights-perf-unleash-rds
+      org: app-sre
+      team: insights-perf-unleash
+      read_only_team: insights-perf-unleash-read-only
+      host: insights-perf.unleash.devshift.net
+  # ocm
+  - name: ocm-integration
+    namespace:
+      $ref: /services/unleash/namespaces/app-sre-stage-01.yml
+    ref: c7a15ba54419ac82fcdcc3efec23f5f37b841357
+    parameters:
+      identifier: ocm-integration
+      configSecret: ocm-integration-config
+      tokenSecret: ocm-integration-unleash-token
+      databaseSecret: ocm-integration-unleash-rds
+      org: app-sre
+      team: ocm-integration-unleash
+      read_only_team: ocm-integration-unleash-read-only
+      host: ocm-integration.unleash.devshift.net
+  - name: ocm-stage
+    namespace:
+      $ref: /services/unleash/namespaces/app-sre-stage-01.yml
+    ref: c7a15ba54419ac82fcdcc3efec23f5f37b841357
+    parameters:
+      identifier: ocm-stage
+      configSecret: ocm-stage-config
+      tokenSecret: ocm-stage-unleash-token
+      databaseSecret: ocm-stage-unleash-rds
+      org: app-sre
+      team: ocm-stage-unleash
+      read_only_team: ocm-stage-unleash-read-only
+      host: ocm-stage.unleash.devshift.net
+  # - name: ocm-production
+  #   namespace:
+  #     $ref: /services/unleash/namespaces/app-sre-prod-01.yml
+  #   ref: c7a15ba54419ac82fcdcc3efec23f5f37b841357
+  #   parameters:
+  #     identifier: ocm
+  #     configSecret: ocm-config
+  #     tokenSecret: ocm-unleash-token
+  #     databaseSecret: ocm-unleash-rds
+  #     org: app-sre
+  #     team: ocm-unleash
+  #     read_only_team: ocm-unleash-read-only
+  #     host: ocm.unleash.devshift.net
+  # managed-services
+  - name: managed-services-stage
+    namespace:
+      $ref: /services/unleash/namespaces/app-sre-stage-01.yml
+    ref: c7a15ba54419ac82fcdcc3efec23f5f37b841357
+    parameters:
+      identifier: managed-services-stage
+      configSecret: managed-services-stage-config
+      tokenSecret: managed-services-stage-unleash-token
+      databaseSecret: managed-services-stage-unleash-rds
+      org: app-sre
+      team: managed-services-stage-unleash
+      read_only_team: managed-services-stage-unleash-read-only
+      host: managed-services.unleash.stage.devshift.net
+  # - name: managed-services-production
+  #   namespace:
+  #     $ref: /services/unleash/namespaces/app-sre-prod-01.yml
+  #   ref: c7a15ba54419ac82fcdcc3efec23f5f37b841357
+  #   parameters:
+  #     identifier: managed-services
+  #     configSecret: managed-services-config
+  #     tokenSecret: managed-services-unleash-token
+  #     databaseSecret: managed-services-unleash-rds
+  #     org: app-sre
+  #     team: managed-services-unleash
+  #     read_only_team: managed-services-unleash-read-only
+  #     host: managed-services.unleash.devshift.net
