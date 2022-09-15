@@ -231,6 +231,32 @@ High possibility of latency increasing further
 
 ---
 
+## CincinnatiEnvoyHighBacklog
+
+### Summary:
+
+Cincinnati has a high number of envoy pending connections which can be a precursor to failing Update Service (Cincinnati).
+
+### Impact:
+
+- As the envoy backlog increases, the cincinnati might get overloaded with connections and latency will increase if not fixed quickly.
+- Cluster-Version-Operator (CVO) is showing errors on clusters console.
+
+### Access required:
+
+- Access to the clusters that run Cincinnati, namespaces:
+  - cincinnati-stage (app-sre-stage)
+  - cincinnati-production (app-sre)
+
+### Steps:
+
+- Contact Cincinnati team, investigate why the envoy backlog has increased.
+- Check if any container/pod has restarted. If yes, see if the backlog decreases as requests per second to pod crosses 60rps.
+  If backlog does not decrease, contact Cincinnati team immediately.
+- If the backlog increase appears to be due to a recent production deploy, consider [reverting the deploy](#reverting-broken-versions).
+
+---
+
 ## Escalations
 
 Slack: `#forum-auto-updates`
