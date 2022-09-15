@@ -83,6 +83,9 @@ externalResources:
     defaults: /terraform/resources/s3-gdpr-1.yml
     output_resource_name: insights-client-metrics-bucket
   - provider: s3
+    identifier: insights-upload-tower-analytics-prod
+    defaults: /terraform/resources/insights/production/s3/s3-gdpr-90.yml
+  - provider: s3
     identifier: insights-sideload-aicoe-prod
     defaults: /terraform/resources/s3-gdpr-1.yml
     sqs_identifier: insights-sideload-aicoe-prod
@@ -106,7 +109,8 @@ externalResources:
               "arn:aws:s3:::insights-ingress-rejected-prod",
               "arn:aws:s3:::insights-buck-it-openshift-prod",
               "arn:aws:s3:::insights-buck-it-ansible-prod",
-              "arn:aws:s3:::insights-ingress-archives-prod"
+              "arn:aws:s3:::insights-ingress-archives-prod",
+              "arn:aws:s3:::insights-upload-tower-analytics-prod",
             ]
           },
           {
@@ -119,7 +123,8 @@ externalResources:
               "arn:aws:s3:::insights-ingress-rejected-prod/*",
               "arn:aws:s3:::insights-buck-it-openshift-prod/*",
               "arn:aws:s3:::insights-buck-it-ansible-prod/*",
-              "arn:aws:s3:::insights-ingress-archives-prod/*"
+              "arn:aws:s3:::insights-ingress-archives-prod/*",
+              "arn:aws:s3:::insights-upload-tower-analytics-prod/*",
             ]
           }
         ]
@@ -251,3 +256,23 @@ externalResources:
         }]
       }
     output_resource_name: hydra-ss-insights-prod-bucket-user
+  - provider: aws-iam-service-account
+    identifier: tower-analytics-prod-user
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-upload-tower-analytics-prod",
+            "arn:aws:s3:::insights-upload-tower-analytics-prod/*"
+          ]
+        }]
+      }
+    output_resource_name: tower-analytics-prod-user
