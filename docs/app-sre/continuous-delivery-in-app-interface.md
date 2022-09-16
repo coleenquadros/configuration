@@ -57,7 +57,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * currently only `/dependencies/slack/coreos.yml` is supported.
     * `channel` - channel to send notifications to
 * `managedResourceTypes` - a list of resource types to deploy (indicates that any other type is filtered out)
-* `takeover` - (optional) if set to true, the specified `managedResourceTypes` will be managed exclusively
+* `takeover` - (optional) if set to true, the resource types declared in `managedResourceTypes` will be managed exclusively by the integration, meaning **ONLY** resources declared in the saas file will be kept and all others will be **DELETED**. **This is dangerous and probably not want you want in most cases. Use with caution!**
 * `deprecated` - (optional) if set to true, resource templates can be migrated to different saas files.
 * `compare` - (optional) if set to false, the job does not compare desired to current resource and applies all resources even if they have not changed
 * `timeout` - (optional) set a timeout in minutes for the deployment job ([default](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2581e30973e9ead6611d6fa1b0fa7dc34d41e63d/resources/jenkins/global/defaults.yaml#L24))
