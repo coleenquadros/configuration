@@ -15,4 +15,4 @@ Clair is expected to respond to 70% of indexing requests in under 10 seconds, th
 ## Alerting
  The following are the list of alerts that are associated with this SLO.
 
-- `ClairIndexReportCreateAPI30mto6hLatencyP70BudgetBurn`
+- `ClairIndexReportCreateAPI30mto10hLatencyP70BudgetBurn`
