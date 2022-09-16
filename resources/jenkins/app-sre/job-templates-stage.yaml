@@ -1,0 +1,22 @@
+- job-template:
+    id: 'jenkins-workers-cleanup'
+    name: 'jenkins-workers-cleanup'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_bot_key
+    builders:
+    - shell: |
+        trap "rm -f ${{WORKSPACE}}/ansible/app-sre-bot.key" EXIT SIGINT
+        cd ansible
+        echo ${{APP_SRE_BOT_KEY}} | base64 --decode > app-sre-bot.key
+        chmod 0600 app-sre-bot.key
+        eval `ssh-agent -s`
+        ssh-add app-sre-bot.key
+        ansible -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -m shell -a 'sudo -i -u jenkins /opt/clean-up-scripts/prune-podman-images.sh' stage.int.devshift.net
+    cron_expression: H * * * *
+    <<: *gl_timed
+
