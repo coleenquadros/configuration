@@ -1,0 +1,23 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: cincinnati-production-ext
+spec:
+  groups:
+    - name: cincinnati-production-ext
+      rules:
+      - alert: CincinnatiEnvoyHighBacklog
+        annotations:
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+          dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+          message: "Envoy backlog for cincinnati has exceeded 100 connections"
+          link_url: "https://console-openshift-console.apps.appsrep06ue2.ohlz.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+        expr: sum(envoy_cluster_upstream_rq_pending_active{envoy_cluster_name="upgrades_info"}) > 100
+        labels:
+          service: cincinnati
+          severity: high
