@@ -125,7 +125,7 @@ Skupper is enabled for namespace "skupper-vault" with site name "appsres03ue1-sk
 
 #### Service Access Control
 
-Skupper has a built-in [Policy system](https://skupper.io/docs/policy/index.html) to specify granular permissions. With a CR `SkupperClusterPolicy` you've complete control over various aspects of the skupper networks, e.g.:
+Skupper has a built-in [Policy system](https://skupper.io/docs/policy/index.html) (needs **cluster-admin**) to specify granular permissions. With a CR `SkupperClusterPolicy` (**not namespaced**) you've complete control over various aspects of the skupper networks, e.g.:
 * Which resources are allowed to be exposed
 * Allow skupper connection to specific hostnames only
 * Permit or deny incoming links from other skupper sites
