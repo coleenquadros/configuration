@@ -1,0 +1,42 @@
+---
+
+rule_files:
+  - /quay-p/quay/quay.alerts.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+    - series: catchpoint_check_failures_total{probe="quayio-push-pull-monitor-v2"}
+      values: 0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 3
+    alert_rule_test:
+    - eval_time: 5m
+      alertname: QuayPullMonitorFailed
+      exp_alerts: 
+    - eval_time: 10m
+      alertname: QuayPullMonitorFailed
+      exp_alerts:
+      - exp_labels:
+          alertname: QuayPullMonitorFailed
+          service: quay
+          severity: medium
+          probe: quayio-push-pull-monitor-v2
+        exp_annotations:
+          message: "The Quay Push/Pull monitor on catchpoint failed in the last 5m."
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/quay/sop/quay-catchpoint-failure.md"
+    - eval_time: 15m
+      alertname: QuayPullMonitorFailed
+      exp_alerts: 
+      - exp_labels:
+          alertname: QuayPullMonitorFailed
+          service: quay
+          severity: medium
+          probe: quayio-push-pull-monitor-v2
+        exp_annotations:
+          message: "The Quay Push/Pull monitor on catchpoint failed in the last 5m."
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/quay/sop/quay-catchpoint-failure.md"
+    - eval_time: 20m
+      alertname: QuayPullMonitorFailed
+      exp_alerts:
+
