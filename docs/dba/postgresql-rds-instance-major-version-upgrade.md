@@ -16,6 +16,7 @@
         - [Option A: Copy custom parameter group](#option-a-copy-custom-parameter-group)
         - [Option B: Use default parameter group](#option-b-use-default-parameter-group)
       - [Run upgrade](#run-upgrade)
+      - [Update pg_statistic Table](#update-pg_statistic-table)
       - [Monitor upgrade](#monitor-upgrade)
     - [5. Scale UP the application](#5-scale-up-the-application)
     - [6. Create read-replicas](#6-create-read-replicas)
@@ -184,6 +185,14 @@ aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <RE
 
 **Note:** If you don't run the command above, then the upgrade will not happen until the next maintenance window.
 
+#### Update pg_statistic Table
+
+Run the ANALYZE operation to refresh the `pg_statistic` table. You should do this for every database on all your PostgreSQL DB instances. Optimizer statistics aren't transferred during a major version upgrade, so you need to regenerate all statistics to avoid performance issues. Run the command without any parameters to generate statistics for all regular tables in the current database, as follows:
+
+```
+ANALYZE VERBOSE
+```
+
 #### Monitor upgrade
 
 Monitor the upgrade in AWS console. AWS will run a pre-upgrade check and the upgrade may not proceed if pre-upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre-upgrade checks.
@@ -206,8 +215,3 @@ Update your application configuration to use the read replicas.
 ### 8. Post-upgrade steps
 
 1. If [parameter group errors](#parameter-group-errors) were detected and a `-copy` parameter group was created, then delete that parameter group.
-2. Run the ANALYZE operation to refresh the `pg_statistic` table. You should do this for every database on all your PostgreSQL DB instances. Optimizer statistics aren't transferred during a major version upgrade, so you need to regenerate all statistics to avoid performance issues. Run the command without any parameters to generate statistics for all regular tables in the current database, as follows:
-
-```
-ANALYZE VERBOSE
-```
