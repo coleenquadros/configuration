@@ -1,25 +1,27 @@
 # Upgrade Major Version for PostgreSQL RDS Instance
 
-- [Major Version Upgrade vs. Minor Version Upgrade](#major-version-upgrade-vs-minor-version-upgrade)
-- [AWS Documentation](#aws-documentation)
-- [Steps for Upgrade at High Level](#steps-for-upgrade-at-high-level)
-  - [Note About Upgrading Read-Replicas](#note-about-upgrading-read-replicas)
-- [app-interface changes for upgrading](#app-interface-changes-for-upgrading)
-  - [1. Terminate Read Replicas](#1-terminate-read-replicas)
-    - [Remove Read Replica Dependency](#remove-read-replica-dependency)
-    - [Read Replicas Termination and Config Updates](#read-replicas-termination-and-config-updates)
-  - [2. Scale DOWN the application](#2-scale-down-the-application)
-  - [3. Create a New Parameter Group and Update Engine Version](#3-create-a-new-parameter-group-and-update-engine-version)
-  - [4. Start Database Upgrade](#4-start-database-upgrade)
-    - [Terraform Resource - Parameter group errors](#terraform-resource---parameter-group-errors)
-      - [Option A: Copy custom parameter group](#option-a-copy-custom-parameter-group)
-      - [Option B: Use default parameter group](#option-b-use-default-parameter-group)
-    - [Run upgrade](#run-upgrade)
-    - [Monitor upgrade](#monitor-upgrade)
-  - [5. Scale UP the application](#5-scale-up-the-application)
-  - [6. Create read-replicas](#6-create-read-replicas)
-  - [7. Update Application Config Changes to use read replicas](#7-update-application-config-changes-to-use-read-replicas)
-  - [8. Post-upgrade steps](#8-post-upgrade-steps)
+- [Upgrade Major Version for PostgreSQL RDS Instance](#upgrade-major-version-for-postgresql-rds-instance)
+  - [Major Version Upgrade vs. Minor Version Upgrade](#major-version-upgrade-vs-minor-version-upgrade)
+  - [AWS Documentation](#aws-documentation)
+  - [Steps for Upgrade at High Level](#steps-for-upgrade-at-high-level)
+    - [Note About Upgrading Read-Replicas](#note-about-upgrading-read-replicas)
+  - [app-interface changes for upgrading](#app-interface-changes-for-upgrading)
+    - [1. Terminate Read Replicas](#1-terminate-read-replicas)
+      - [Remove Read Replica Dependency](#remove-read-replica-dependency)
+      - [Read Replicas Termination and Config Updates](#read-replicas-termination-and-config-updates)
+    - [2. Scale DOWN the application](#2-scale-down-the-application)
+    - [3. Create a New Parameter Group and Update Engine Version](#3-create-a-new-parameter-group-and-update-engine-version)
+    - [4. Start Database Upgrade](#4-start-database-upgrade)
+      - [Terraform Resource - Parameter group errors](#terraform-resource---parameter-group-errors)
+        - [Option A: Copy custom parameter group](#option-a-copy-custom-parameter-group)
+        - [Option B: Use default parameter group](#option-b-use-default-parameter-group)
+      - [Run upgrade](#run-upgrade)
+      - [Update pg_statistic Table](#update-pg_statistic-table)
+      - [Monitor upgrade](#monitor-upgrade)
+    - [5. Scale UP the application](#5-scale-up-the-application)
+    - [6. Create read-replicas](#6-create-read-replicas)
+    - [7. Update Application Config Changes to use read replicas](#7-update-application-config-changes-to-use-read-replicas)
+    - [8. Post-upgrade steps](#8-post-upgrade-steps)
 
 This document outlines the steps and expectations for a major version upgrade of a PostgreSQL RDS instance.
 
@@ -182,6 +184,14 @@ aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <RE
 ```
 
 **Note:** If you don't run the command above, then the upgrade will not happen until the next maintenance window.
+
+#### Update pg_statistic Table
+
+Run the ANALYZE operation to refresh the `pg_statistic` table. You should do this for every database on all your PostgreSQL DB instances. Optimizer statistics aren't transferred during a major version upgrade, so you need to regenerate all statistics to avoid performance issues. Run the command without any parameters to generate statistics for all regular tables in the current database, as follows:
+
+```
+ANALYZE VERBOSE
+```
 
 #### Monitor upgrade
 
