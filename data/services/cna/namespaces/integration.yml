@@ -43,5 +43,45 @@ externalResources:
     identifier: cna-redis-integration
     defaults: /terraform/resources/cna/elasticache-integration.yml
     output_resource_name: cna-redis
-
+- provider: aws
+  provisioner:
+    $ref: /aws/cna-service-integration/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: cna-service-integration
+    output_resource_name: cna-service-integration-iam
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": [
+              "sts:AssumeRole"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:iam::*:role/RH-CNA"
+          },
+          {
+            "Action": [
+              "sts:AssumeRole"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:iam::*:role/network-mgmt-*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": "s3:ListBucket",
+            "Resource": "arn:aws:s3:::cna-s3-integration"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:PutObject",
+              "s3:GetObject",
+              "s3:DeleteObject"
+            ],
+            "Resource": ["arn:aws:s3:::cna-s3-integration/*"]
+          }
+        ]
+      }
     
