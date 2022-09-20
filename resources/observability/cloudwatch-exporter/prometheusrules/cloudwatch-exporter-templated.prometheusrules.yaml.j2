@@ -11,6 +11,20 @@ spec:
   groups:
   - name: cloudwatch-exporter-templated.rules
     rules:
+    {{%- for instance in cloudwatch_exporter_instances %}}
+    - alert: CloudWatchExporterTargetDown
+      labels:
+        service: app-sre-observability
+        severity: critical
+      expr: absent(up{job="{{{ instance }}}"}==1)
+      for: 5m
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net
+        html_url: https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter.prometheusrules.yaml
+        message: Cloudwatch exporter {{{ instance }}} has been down for 5m+.
+        runbook: https://github.com/rhobs/configuration/tree/main/docs/sop
+    {{%- endfor %}}
+
     {{%- for namespace in query('/queries/namespace-terraform-app-jira.graphql') %}}
     {{%- if (namespace.managedExternalResources and namespace.externalResources) %}}
     {{%- for er in namespace.externalResources %}}
