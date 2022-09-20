@@ -7,6 +7,7 @@
 - [Goals](#goals)
 - [Non-objectives](#non-objectives)
 - [Glitchtip](#glitchtip)
+  - [End-User Workflow](#end-user-workflow)
   - [Data structure](#data-structure)
   - [Roles](#roles)
 - [Proposal](#proposal)
@@ -48,6 +49,27 @@ Implement a qontract-reconcile integration with features similar to the sentry i
 * Management of *Alerts*
 
 ## Glitchtip
+
+### End-User Workflow
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant AI as App-Interface
+    participant G as GlitchTip
+    participant GH as GitHub
+
+    U -) AI: MR to add user to GlitchTip team
+    AI ->> G: Invite user to organizations
+    G -) U: Send invitation email
+    AI ->> G: Add user to teams
+    U ->> G: Go to invitation link
+    G -->> U: Redirect to login page
+    U ->> GH: OAuth login
+    GH -->> U: Redirect to GlitchTip
+    U ->> G: Accept Invitation to organization
+    G -->> U: Access to all projects within organization
+```
 
 ### Data structure
 
