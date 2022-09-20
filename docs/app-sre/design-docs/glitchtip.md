@@ -131,8 +131,8 @@ Enhance **/access/role-1.yml**:
 
 ```yaml
 glitchtip_roles:
-- instance:
-    $ref: <path to the glitchtip instance>
+- organization:
+    $ref: <path to the glitchtip organization>
   role: <role; default 'member'>
 
 glitchtip_teams:
