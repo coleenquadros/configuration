@@ -174,15 +174,13 @@ Enhance **/app-sre/app-1.yml** with a *glitchTipProjects* section:
 $schema: /app-sre/app-1.yml
 ...
 glitchTipProjects:
-- teams:
-    - $ref: <path to the glitchtip team>
+- name: <name of the project>
+  description: <description of the project>
+  platform: <project language [optional]>
+  teams:
+  - $ref: <path to the glitchtip team>
   organization:
     $ref: <path to the glitchtip organization>
-  projects:
-  - name: <name of the project>
-    description: <description of the project>
-    platform: <project language [optional]>
-
 ```
 > :warning: **Warning**
 >
