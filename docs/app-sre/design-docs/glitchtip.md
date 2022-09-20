@@ -449,7 +449,7 @@ sequenceDiagram
 
 ## Notes
 
-* [API documentation](https://app.glitchtip.com/docs/) is wrong :( Use the force and read the [source](https://gitlab.com/glitchtip/glitchtip-backend) ;)
+* The [API documentation](https://app.glitchtip.com/docs/) is not beloved. Use the force and read the [source](https://gitlab.com/glitchtip/glitchtip-backend) ;)
 * The [frontend](https://gitlab.com/glitchtip/glitchtip-frontend) is not aware about user roles. It displays "create" buttons, but the user has no sufficient permissions.
 * Glitchtip uses a mixture of pk's and slug's :(
 * *Uptime monitors* don't have a permission model assigned. Every authenticated user can create uptime monitors.
