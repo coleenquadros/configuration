@@ -146,8 +146,6 @@ labels: {}
 
 name: <name of the team>
 description: <description of the team>
-organization:
-  $ref: <path to the glitchtip organization>
 ```
 
 > :warning: **Warning**
