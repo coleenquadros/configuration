@@ -117,8 +117,11 @@ At this point, the file exists but is not referenced by your RDS instance. This 
 1. Update the `engine_version` for your RDS instance in either the defaults file or add it to the overriding section.
    * **IMPORTANT:** if changing a defaults file, you will upgrade every database that uses that defaults file, so take care in changing this setting. You can grep for the defaults filename to see where it is used and confirm that only the expected databases will be changed in the MR dry-run build.
 2. Add `allow_major_version_upgrade: true` to your RDS defaults file to allow the upgrade. Terraform will fail if this flag is not set.
-3. Update `parameter_group` reference to use the new parameter group file.
-4. The MR will be reviewed by the AppSRE team. They will not merge the MR until the upgrade is ready to begin.
+3. Update `parameter_group` reference to use the new parameter group file. Keep the old value which will be used in the step below.
+4. Add/Update `old_parameter_group` with the old value from above step. This is to ensure we keep parameter group until the terraform run is complete. 
+5. Add `apply_immediately: true` in the overrides section within RDS provider configuration.
+6. The MR will be reviewed by the AppSRE team. They will not merge the MR until the upgrade is ready to begin.
+   * If the RDS instance has already been updated in the past through this procedure, then terraform will delete the unused parameter group (referenced via `old_parameter_group` before the field was updated through step #4). This is expected and will not impact upgrade procedure. 
 
 Example MRs: [Upgrade RDS Instance from PostgreSQL 10.x to 11.6 & Create PostgreSQL 11 parameter group](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9698/diffs)
 
@@ -126,64 +129,29 @@ Example MRs: [Upgrade RDS Instance from PostgreSQL 10.x to 11.6 & Create Postgre
 
 ### 4. Start Database Upgrade
 
-Start by merging the MR that was created to upgrade the database. When qontract-reconcile runs next, the upgrade should be scheduled for the next maintenance window.
-
-**If you see errors related to deleting parameter group errors, then see the next section. Otherwise, you can skip to the next step.**
+Start by merging the MR that was created to upgrade the database. When qontract-reconcile runs next, the upgrade will be applied immediately. 
 
 ---
 
-#### Terraform Resource - Parameter group errors
+#### Terraform Resource - errors
 
-qontract-reconcile may fail in applying the upgrade if the parameter group is only being used by a single database because the current parameter group can't be deleted until the upgrade is done. Expect an error similar to the following:
-
-```
-[terraform-resources] error: b'\nError: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group steahan-dev-params, so the group cannot be deleted\n\tstatus code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e\n\n\n'
-[terraform-resources] [app-sre-stage - apply] Error: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group steahan-dev-params, so the group cannot be deleted
-[terraform-resources] [app-sre-stage - apply]     status code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e
-```
-
-**If you see the error above**, you have two options, either copy the existing custom parameter group or use the default parameter group temporarily.
-
-##### Option A: Copy custom parameter group
-
-Copying the existing parameter group is technically the safest path unless the tenant team indicates that using the default parameter group for a short period of time is safe. The steps below will copy the existing parameter group and apply it to the RDS instance so that the old parameter group can be deleted.
+qontract-reconcile ***occassionally*** may throw following errors
 
 ```
-# Create a '-copy' version of the parameter group
-aws rds copy-db-parameter-group --source-db-parameter-group-identifier <EXISTING_PARAMETER_GROUP> --target-db-parameter-group-identifier <EXISTING_PARAMETER_GROUP>-copy --target-db-parameter-group-description "Copy of <EXISTING_PARAMETER_GROUP> to be used during major version upgrade"
-
-# Switch to the '-copy' version of the parameter group so that the old parameter group can be deleted
-aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately --db-parameter-group-name <EXISTING_PARAMETER_GROUP>-copy
+[terraform-resources] error: b'\nError: Error modifying DB Instance dev-bhthakur-rds: InvalidParameterValue: Cannot modify engine version because another engine version upgrade is already in progress\n\tstatus code: 400, request id: 2fdb9061-630e-4ed7-97ed-86b6acd5cbcc\n\n  on config.tf.json line 1978, in resource.aws_db_instance.dev-bhthakur-rds:\n1978:       },\n\n\n'
 ```
 
-Wait for the next `terrfarm-resource` reconcile loop and the error should be solved. Now you can go ahead and start the upgrade
-
 ```
-aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately --db-parameter-group-name <EXISTING_PARAMETER_GROUP>
+[terraform-resources] error: b"\nError: Error modifying DB Instance dev-bhthakur-rds: InvalidParameterCombination: There are still pending changes to the instance's Parameter Group. Please wait for them to finish.\n\tstatus code: 400, request id: 6dac65f5-8994-4ae7-84f4-801f3fad5713\n\n  on config.tf.json line 1978, in resource.aws_db_instance.dev-bhthakur-rds:\n1978:       },\n\n\n"
 ```
 
-**Note:** After the upgrade, use the AWS console and delete the interim parameter group `<EXISTING_PARAMETER_GROUP>-copy`.
+This behavior is inconsistent and is documented [here](https://github.com/hashicorp/terraform-provider-aws/issues/24908)
 
-Skip to the [Monitor upgrade](#monitor-upgrade) section.
+**If you see this error, there is no need to take any action. Terraform will soon reconcile the state as soon as the upgrade is complete on AWS side.**
 
-##### Option B: Use default parameter group
+#### Monitor upgrade
 
-```
-aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately --db-parameter-group-name default.postgres<VERSION>
-
-# Example
-aws rds modify-db-instance --db-instance-identifier my-database --region us-east-1 --apply-immediately --db-parameter-group-name default.postgres10
-```
-
-#### Run upgrade
-
-Without any `terrfarm-resource` errors you can, whenever you're ready, **the upgrade**. Run the command below so that the pending RDS modifications are applied immediately:
-
-```
-aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately
-```
-
-**Note:** If you don't run the command above, then the upgrade will not happen until the next maintenance window.
+Monitor the upgrade in AWS console. AWS will run a pre-upgrade check and the upgrade may not proceed if pre-upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre-upgrade checks.
 
 #### Update pg_statistic Table
 
@@ -192,10 +160,7 @@ Run the ANALYZE operation to refresh the `pg_statistic` table. You should do thi
 ```
 ANALYZE VERBOSE
 ```
-
-#### Monitor upgrade
-
-Monitor the upgrade in AWS console. AWS will run a pre-upgrade check and the upgrade may not proceed if pre-upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre-upgrade checks.
+To connect to RDS instance you can follow steps described [here](/docs/dba/connect-to-postgres-mysql-database.md)
 
 
 ### 5. Scale UP the application
@@ -211,7 +176,3 @@ Now re-create the read-replica instances by adding them back to app-interface.
 ### 7. Update Application Config Changes to use read replicas
 
 Update your application configuration to use the read replicas.
-
-### 8. Post-upgrade steps
-
-1. If [parameter group errors](#parameter-group-errors) were detected and a `-copy` parameter group was created, then delete that parameter group.
