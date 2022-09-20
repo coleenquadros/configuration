@@ -71,6 +71,10 @@ sequenceDiagram
     G -->> U: Access to all projects within organization
 ```
 
+> :information_source: **Note**
+>
+> The GitHub OAuth Provider doesn't belong to AppSRE and does just the authentication part. Authorization is based on user [roles](#roles) within an organization
+>
 ### Data structure
 
 ```mermaid
@@ -88,6 +92,7 @@ classDiagram
 
 ### Roles
 
+User roles belong to an organization.
 * **Member**: Members can view and act on events and have read access to most other data within the organization.
 * **Admin**: An admin can create/update/delete teams and projects within the organization.
 * **Manager**: Gains admin access on all teams and the ability to add and remove members.
