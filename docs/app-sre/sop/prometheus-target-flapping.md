@@ -2,8 +2,8 @@
 
 ## Description
 
-Generally speaking, prometheus targets are monitored using the `up` function to check if a target is down `for` a determined amount of time.
-`Up` only has 1 or 0 as possible values.
+Generally speaking, Prometheus targets are monitored using the `up` metric to check if a target is down `for` a determined amount of time.
+The `up` metric only has `1` or `0` as possible values.
 
 Example:
 
@@ -22,7 +22,7 @@ of 1 hour, and the alert won't fire. To improve the detection of this situations
   for: 1m
 ```
 
-This alert will fire, if the range vector returned by the `Up` function has more changes (0 to 1 or 1 to 0) in its values than the defined threshold. This way we can detect if there
+This alert will fire if the range vector returned by the `up` metric has more changes (0 to 1 or 1 to 0) in its values than the defined threshold. This way we can detect if there
 are status changes in the targets.
 
 ## Troubleshooting
@@ -33,9 +33,9 @@ This alert is meant to detect changes in the targets, additional troubleshooting
 
 #### Scrape duration
 
-if a target scrapping ends in a timeout, the target is turned to a `down` state until a successful scrapping occurs. Depending the case, the scrape timeout of the target could be increased
+If a target scrapping ends in a timeout, the target is turned to a `down` state until a successful scrapping occurs. Depending the case, the scrape timeout of the target could be increased
 to solve this case.
 
 #### Target Issues
 
-Check the Target related alerts or target backend logs. Targets sometimes are multiple pods and if one of them is misbehaving it might cause a flapping state.
+Check the target related alerts or target backend logs. Targets sometimes are multiple pods and if one of them is misbehaving it might cause a flapping state.
