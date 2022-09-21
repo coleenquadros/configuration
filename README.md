@@ -1296,6 +1296,10 @@ Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qon
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
 
+#### AWS network configurations for security groups, subnet groups, and others
+
+Some resources such as RDS and Elasticache will require security group and subnet configurations. For any cases where it's unclear which settings to use, check the [AWS network resources page](docs/aws/aws-network-resource-configs.md) to see if the account that you're deploying resources to is covered.
+
 #### Manage shared AWS resources via App-interface (`/openshift/namespace-1.yml`) using Terraform
 
 In the time of this writing, Terraform resources can not be added to a [shared resources file](#manage-shared-openshift-resources-via-app-interface-openshiftnamespace-1yml).
