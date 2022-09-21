@@ -865,38 +865,71 @@ Current audit backends configurations can be found [here](/data/services/vault.d
 For more information please see [vault audit backends documentation](https://www.vaultproject.io/docs/audit/index.html)
 
 #### Manage vault auth backends (`/vault-config/auth-1.yml`)
-Auth backends are the components in Vault that perform authentication and are responsible for assigning identity and a set of policies to a user.
+Auth backends are the components within Vault that perform authentication. The permissions granted to users upon login are handled via Vault `Entities` and `Groups`. (see **Manage Vault Entities and Groups** below for details)
 
-Example:
+The primary authentication method used for user access to vault.devshift.net is [OIDC](https://learn.hashicorp.com/tutorials/vault/oidc-auth?in=vault/auth-methods). This method utilizes Red Hat's managed identity provider to verify user claims. The `Default` role is always utilized when attempting login.
+
+Current auth backends configurations can be found [here](/data/services/vault.devshift.net/config/prod/auth-backends)
+
+For more information please see [vault auth backends documentation](https://www.vaultproject.io/docs/auth/index.html)
+
+#### Manage vault entities and groups
+An `Entity` is a resource within Vault that represents a user. Entities are associated with one or more `Groups` that grant permissions to the entities via policies. (see **Manage vault policies** below for more on configuring policies)
+
+In the context of App-Interface, entities are generated for users that reference App-Interface roles that contain `oidc_permission` references.
+
+**Example:**
+
+User file that contains a reference to the `app-sre` role
 ```yaml
 ---
-$schema: /vault-config/auth-1.yml
+$schema: /access/user-1.yml
+
+labels: {}
+
+name: Drew Welch
+org_username: dwelch
+github_username: dwelch0
+quay_username: rh_ee_dwelch
+
+roles:
+- $ref: /teams/app-sre/roles/app-sre.yml
+```
+
+The `app-sre` role contains a reference to an `oidc_permission` 
+```yaml
+---
+$schema: /access/role-1.yml
+
+labels: {}
+name: app-sre
+
+oidc_permissions:
+- $ref: /dependencies/vault/permissions/oidc/prod/app-sre.yml
+```
+Note: roles that reference oidc_permissions are mapped as `groups` within Vault. i.e, there will be a Vault group named `app-sre`
+
+The `oidc_permission` file contains references to Vault policies
+```yaml
+---
+$schema: /access/oidc-permission-1.yml
 
 labels:
   service: vault.devshift.net
 
-_path: "github/"
-type: "github"
-description: "github auth backend"
-settings:
-  config:
-    _type: "github"
-    organization: "app-sre"
-    base_url: ""
-    max_ttl: "360h"
-    ttl: "120h"
-policy_mappings:
-  - github_team:
-      $ref: <github team datafile (`/access/permission-1.yml`), for example: /dependencies/vault/permissions/app-sre.yml>
-    policies:
-      - $ref: <vault policy datafile (`/vault-config/policy-1.yml`), for example: /services/vault.devshift.net/config/policies/app-sre-policy.yml>
+name: app-sre-oidc-vault
+description: app-sre vault administrator permission
+
+instance:
+  $ref: /services/vault.devshift.net/config/prod/devshift-net.yml
+
+service: vault
+vault_policies:
+- $ref: /services/vault.devshift.net/config/prod/policies/app-sre-policy.yml
+- $ref: /services/vault.devshift.net/config/prod/policies/vault-manager-policy.yml
 ```
-**Note**: some auth backends like github support policy mappings. Policy mapping can be applied to auth backed entity, for example in case with github auth currently allowed entity is a `team`.
-To apply vault policy on auth entity `policy_mappings` key should be used.
 
-Current auth backends configurations can be found [here](/data/services/vault.devshift.net/config/auth-backends)
-
-For more information please see [vault auth backends documentation](https://www.vaultproject.io/docs/auth/index.html)
+In summary, the user `dwelch` (username within Red Hat IdP) will have an entity within Vault also named `dwelch`. Upon logging in using OIDC method, the user will be mapped to the any groups they referenced (just the app-sre group in this example).
 
 #### Manage vault policies (`/vault-config/policy-1.yml`)
 Policies provide a declarative way to grant or forbid access to certain paths and operations in Vault
