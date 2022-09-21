@@ -200,6 +200,32 @@
         ansible-playbook -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key '{playbook}' -D
     <<: *gl_build_master
 
+- job-template:
+    id: 'gl-build-master-infra'
+    name: '{gl_group}-{gl_project}-gl-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *packer-account
+        - *ansible-reader-role-creds
+    <<: *gl_build_master
+
+- job-template:
+    id: 'gl-pr-check-infra'
+    name: '{gl_group}-{gl_project}-gl-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *packer-account
+        - *ansible-reader-role-creds
+    <<: *gl_pr_check
 
 - job-template:
     id: 'clusterimageset-run'
