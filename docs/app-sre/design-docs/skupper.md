@@ -34,10 +34,15 @@ https://issues.redhat.com/browse/APPSRE-6122
 
 
 ## Problem Statement
-There are many cases where cross-service connectivity is needed. When the services are collocated or accessible on the internet, this works. For other cases, we currently rely on AWS connectivity resources such as Peerings, Transit Gateways (TGW), and others.
+There are many cases where cross-service connectivity is needed. When the services are collocated or accessible on the internet, it's not an issue, but it can be very hard in other cases.
 
-There are also questions being raised each time a workload hosted on a more or less 'public' VPC (e.g., ci.ext which worker nodes are not public) needs to reach internal services. This requires additional management of CIDR blocks so they don't collide, and thus planning and so on. It also does not scale beyond a single cloud provider (AWS).
+There are several services, products and concepts available, which may solve parts of the problems, but those come with additional costs:
 
+* Most of them need proper management of CIDR blocks (e.g., VPC peerings, VPNs), which don't scale.
+* Others depend on a specific cloud provider service or feature (e.g., VPNs).
+* Or can't be used on Kubernetes or can only be used on Kubernetes
+* Require additional hardware or require administrative privileges to be consumed or deployed
+* Must be deployed cluster-wide and can't be deployed based on service needs (all or nothing)
 
 ## Goal
 This POC aims to show how Skupper networks could be deployed on our clusters to 'link' namespaces together and publish/consume services over that network.
