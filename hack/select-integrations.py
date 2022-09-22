@@ -124,6 +124,20 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False,
         if not select_all and pr.get('early_exit'):
             cmd += "EARLY_EXIT=true "
 
+        if int_name == "change-owners":
+            if select_all:
+                # select_all=true means that files outside the bundle has changed
+                # `change-owners`` only operates on bundle data and would be blind to other
+                # changes. therefore we run the integration in `limited` mode to let
+                # it know that it can't make full decisions about the merge
+                cmd += "CHANGE_TYPE_PROCESSING_MODE=limited "
+            else:
+                # select_all=false means that only datafiles have changed. this
+                # means that all changes of an MR are reflected in the bundle
+                # and `change-owners` sees the full picture and can make informed
+                # decisions about self-serviceability
+                cmd += "CHANGE_TYPE_PROCESSING_MODE=authorative "
+
         if int_name == "vault-manager":
             cmd += 'run_vault_reconcile_integration &'
         elif int_name == "user-validator":
