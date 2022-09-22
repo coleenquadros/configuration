@@ -121,9 +121,9 @@ At this point, the file exists but is not referenced by your RDS instance. This 
 4. Add/Update `old_parameter_group` with the old value from above step. This is to ensure we keep parameter group until the terraform run is complete. 
 5. Add `apply_immediately: true` in the overrides section within RDS provider configuration.
 6. The MR will be reviewed by the AppSRE team. They will not merge the MR until the upgrade is ready to begin.
-   * If the RDS instance has already been updated in the past through this procedure, then terraform will delete the unused parameter group (referenced via `old_parameter_group` before the field was updated through step #4). This is expected and will not impact upgrade procedure. 
+   * If the RDS instance has already been updated in the past through this procedure, then terraform will delete the unused parameter group (referenced via `old_parameter_group` before the field was updated through step #4). This is expected and will be reflected in app-interface JSON validation report. This **will not** impact RDS upgrade. 
 
-Example MRs: [Upgrade RDS Instance from PostgreSQL 10.x to 11.6 & Create PostgreSQL 11 parameter group](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9698/diffs)
+Example MRs: [Upgrade RDS Instance from PostgreSQL 11.x to 12.x & Create PostgreSQL 12 parameter group](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/47924/diffs)
 
 
 
