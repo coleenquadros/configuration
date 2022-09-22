@@ -102,8 +102,7 @@ Skupper securely connects your services with TLS authentication and encryption. 
 
 ![](https://skupper.io/docs/overview/_images/clusters-tls.svg)
 
-Router (access to the skupper service network) can be exposed either via *load-balancer* or *Openshift route*.
-On a private cluster (`edge: true`), the router doesn't need to be exposed (public reachable); all connections are initiated outgoing to the connected sites, e.g., on private cluster appsres03ue1:
+A Skupper site is either an **edge** or a **non edge** site (see [skupper connectivity](https://skupper.io/docs/overview/connectivity.html); site-config `edge: true | false`). The difference is that an **edge** site does not accept connections from other skupper sites; therefore, the router doesn't need to be accessible. Perfect for private clusters with limited public-faced ports. All links initiated outgoing to the related skupper sites, e.g., on private cluster appsres03ue1:
 
 ```shell
 $ oc status
@@ -122,6 +121,21 @@ No resources found in skupper-vault namespace.
 
 $ skupper status
 Skupper is enabled for namespace "skupper-vault" with site name "appsres03ue1-skupper-vault" in edge mode. It is connected to 2 other sites (1 indirectly). It has 1 exposed service.
+```
+
+On **non-edge** site, the router can be exposed either via *load-balancer* or *Openshift route*, e.g. on public cluster app-stage-01 via *load-balancer*:
+
+```shell
+$ oc status
+In project skupper-vault-net on server https://api.app-sre-stage-0.k3s7.p1.openshiftapps.com:6443
+...
+
+$ oc get svc
+NAME                     TYPE           CLUSTER-IP       EXTERNAL-IP                                                              PORT(S)                           AGE
+...
+skupper-router           LoadBalancer   10.120.103.165   a44a110cf2fab4e2dab924bfb10f3e6a-701031945.us-east-1.elb.amazonaws.com   55671:30317/TCP,45671:30157/TCP   20d
+...
+
 ```
 
 #### Service Access Control
