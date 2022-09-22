@@ -8,5 +8,13 @@
 
 {%- endif %}
 {%- endfor %}
+{%- for mutex in cluster.upgradePolicy.mutexes %}
+{%- if mutex not in cluster.ocm.upgradePolicyAllowedMutexes %}
+
+# raise an error if mutex is not within the allowed mutexes defined in the OCM file
+{% raise_error('Cluster "' + cluster.name + '" upgrade policy mutex "' +  mutex + '" not in upgradePolicyAllowedMutexes: ' + (cluster.ocm.upgradePolicyAllowedMutexes | join(', '))) %}
+
+{%- endif %}
+{%- endfor %}
 {%- endif %}
 {%- endfor %}
