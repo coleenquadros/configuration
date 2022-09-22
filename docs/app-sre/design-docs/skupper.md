@@ -44,7 +44,7 @@ This POC aims to show how Skupper networks could be deployed on our clusters to 
 
 ## Skupper Introduction
 
-[Skupper](skupper.io) is a layer 7 service interconnect. It enables secure communication across Kubernetes clusters without VPNs or special firewall rules.
+[Skupper](https://skupper.io) is a layer 7 service interconnect. It enables secure communication across Kubernetes clusters without VPNs or special firewall rules.
 
 It allows spawning an 'application' network, abstracting the underlying network subtleties and letting apps connect by name and port. Once Skupper sites (namespaces) are interconnected, Skupper will route the traffic to wherever the service resides. It also provides load balancing/failover on all instances fulfilling the service.
 
