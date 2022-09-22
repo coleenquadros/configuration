@@ -1273,8 +1273,10 @@ In order to provision external resources, you need to add them to the `externalR
 - `provider`: one of: `aws`.
 - `provisioner`: The entity to provision resources in. The referenced item should be according to the `provider`:
     - `aws`: The AWS account you want to provision resources in.
+    - `cloudflare`: The Cloudflare account you want to provision resources in.
 - `resources`: a list of resources to provision. The items should be according to the `provider`:
     - `aws`: Same as described in the [Manage AWS resources via App-Interface](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform) section, without `account`.
+    - `cloudflare`: Same as described in the [Manage Cloudflare resources via App-Interface](#manage-cloudflare-resources-via-app-interface-openshiftnamespace-1yml-using-terraform) section, without `account`.
 
 Notes:
 * Manual changes to external resources will be overridden by App-Interface in each run.
@@ -1282,7 +1284,6 @@ Notes:
 * Different provisioners may be implemented differently under the hood. For example, the `aws` provisioner is implemented using Terraform.
 
 Future support for additional provisioners:
-- Clouflare (Related to Quay CDN)
 - CNA (Consuming the CNA service)
 - GCP (Related to Hive GCP DNS zones)
 
@@ -2048,6 +2049,58 @@ Such an entry will enable this specific resource to be deleted even if the accou
 
 When submitting a MR to delete a resource which results in a build failure, look at the logs and find lines such as `['delete', '<account_name>', '<resource_type>', '<resource_name>']`. For each line (will also include an error such as `'delete' action is not enabled.`) - add an entry to the `deletionApprovals` list.
 
+### Manage Cloudflare resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform
+
+The `terraform-cloudflare-resources` integration is used to provision [Cloudflare](https://www.cloudflare.com/) services.
+
+In order to provision Cloudflare resources, you need to add them to the `externalResources` field in a `namespace` file.
+
+- `provider`: must be `cloudflare`
+- `provisioner`: must be a `$ref` to a `/cloudflare/account-1.yml` file
+- `resources`: list of Cloudflare resources to provision
+
+### Manage Cloudflare Zone via App-Interface (`/openshift/namespace-1.yml`) using Terraform
+
+The Cloudflare Zone definition follows the Cloudflare Terraform provider [zone definition](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/zone)
+
+When provisioning a new zone, it is necessary to change the domain nameservers to use the Cloudflare nameservers that are assigned to that zone. Those nameservers are returned by Terraform as output data but are currently not visible anywhere. An AppSRE team member can login to the Cloudflare account to retrieve the nameservers. Note: when using a `partial` type zone, nameservers do NOT need to be changed but some Cloudflare features are unavailable (see cloudflare docs).
+
+- `provider`: `zone`
+- `identifier`: a unique identifier for the zone (terraform identifier)
+- `zone`: a valid domain name
+- `plan`: `free` or `enterprise` (an enterprise account is required to enable the later)
+- `type`: `full` or `partial` (when you only want Cloudflare on some specific CNAME records)
+- `settings`: (Optional) See the Cloudflare Terraform provider docs for [cloudflare_zone_settings_override](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/zone_settings_override) for a list of available options
+- `argo`: (Optional) Settings either or both of these options will enable Cloudflare Argo on the zone (an enterprise account is required)
+  - `smart_routing`: `on` of `off`
+  - `tiered_caching`: `on` of `off`
+- `records`: A list of records to provision
+  - `name`: name of the record
+  - `type`: ex: `A`, `CNAME`
+  - `ttl`: Record's TTL (must be set to 1 for CNAME)
+  - `value`: The records target
+  - `proxied`: (Optional) Whether the record should get Cloudflare origin protection (enable or disable Cloudflare on the record)
+- `workers`: (Optional) A list of Cloudflare workers to provision 
+  - `identifier`: a unique identifier for the worker (terraform identifier)
+  - `pattern`: The URL pattern that the worker will act on (ex: `mydomain.com/some/path/*`)
+  - `script_name`: The name of the worker script that this worker will use to process requests (must be defined and match the name of a worker script resource)
+
+### Manage Cloudflare Worker Scripts via App-Interface (`/openshift/namespace-1.yml`) using Terraform
+
+The Cloudflare Worker Scripts definition follows the Cloudflare Terraform provider [worker script definition](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/worker_script)
+
+Worker scripts are programs that will process requests and possibly change them as they pass through Cloudflare
+
+- `provider`: `worker_script`
+- `identifier`: a unique identifier for the zone (terraform identifier)
+- `name`: name of the script (must match with the `script_name` set on a worker within a zone resource definition)
+- `content_from_github`: Fetch the script content from a GitHub repository
+  - `repo`: URL of the repo (ex: `https://github.com/app-sre/cfworkerdemo`)
+  - `path`: path to the script file within the repo (only a single file is supported at the moment)
+  - `ref`: SHA of the commit we want deployed (branch or tag not supported)
+- `vars`: (Optional) Variables that we want to pass to the worker script as environment variables
+  - `name`: Name of the variable
+  - `text`: Value of the variable
 
 ### Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)
 
