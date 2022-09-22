@@ -22,6 +22,7 @@ Table of contents:
 - [Limitations/Bugs/Notes](#limitationsbugsnotes)
 - [Open Topics](#open-topics)
 - [Alternatives](#alternatives)
+- [Milestones](#milestones)
 - [Links](#links)
 
 
@@ -313,6 +314,12 @@ https://skupper-skupper-fake-api-server-net.apps.appsres04ue2.n4k3.p1.openshifta
 ## Alternatives
 
 * [Chisel](https://github.com/jpillora/chisel): a fast TCP/UDP tunnel, transported over HTTP, secured via SSH
+
+## Milestones
+
+1. Go/No go decision for the usage of skupper within Red Hat in general
+1. Design document for a skupper qontract-reconcile integration
+1. Implementation of integration
 
 ## Links
 
