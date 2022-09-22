@@ -119,9 +119,9 @@ At this point, the file exists but is not referenced by your RDS instance. This 
 2. Add `allow_major_version_upgrade: true` to your RDS defaults file to allow the upgrade. Terraform will fail if this flag is not set.
 3. Update `parameter_group` reference to use the new parameter group file. Keep the old value which will be used in the step below.
 4. Add/Update `old_parameter_group` with the old value from above step. This is to ensure we keep parameter group until the terraform run is complete. 
+   * If the RDS instance has already been updated in the past through this procedure, then terraform will delete the unused parameter group (referenced via `old_parameter_group` before the field was updated through step #4). This is expected and will be reflected in app-interface JSON validation report. This **will not** impact RDS upgrade. 
 5. Add `apply_immediately: true` in the overrides section within RDS provider configuration.
 6. The MR will be reviewed by the AppSRE team. They will not merge the MR until the upgrade is ready to begin.
-   * If the RDS instance has already been updated in the past through this procedure, then terraform will delete the unused parameter group (referenced via `old_parameter_group` before the field was updated through step #4). This is expected and will be reflected in app-interface JSON validation report. This **will not** impact RDS upgrade. 
 
 Example MRs: [Upgrade RDS Instance from PostgreSQL 11.x to 12.x & Create PostgreSQL 12 parameter group](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/47924/diffs)
 
@@ -135,7 +135,7 @@ Start by merging the MR that was created to upgrade the database. When qontract-
 
 #### Terraform Resource - errors
 
-qontract-reconcile ***occassionally*** may throw following errors
+qontract-reconcile may ***occassionally*** throw the following errors:
 
 ```
 [terraform-resources] error: b'\nError: Error modifying DB Instance dev-bhthakur-rds: InvalidParameterValue: Cannot modify engine version because another engine version upgrade is already in progress\n\tstatus code: 400, request id: 2fdb9061-630e-4ed7-97ed-86b6acd5cbcc\n\n  on config.tf.json line 1978, in resource.aws_db_instance.dev-bhthakur-rds:\n1978:       },\n\n\n'
@@ -149,11 +149,11 @@ This behavior is inconsistent and is documented [here](https://github.com/hashic
 
 **If you see this error, there is no need to take any action. Terraform will soon reconcile the state as soon as the upgrade is complete on AWS side.**
 
-#### Monitor upgrade
+### 5. Monitor upgrade
 
 Monitor the upgrade in AWS console. AWS will run a pre-upgrade check and the upgrade may not proceed if pre-upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre-upgrade checks.
 
-#### Update pg_statistic Table
+### 6. Update pg_statistic Table
 
 Run the ANALYZE operation to refresh the `pg_statistic` table. You should do this for every database on all your PostgreSQL DB instances. Optimizer statistics aren't transferred during a major version upgrade, so you need to regenerate all statistics to avoid performance issues. Run the command without any parameters to generate statistics for all regular tables in the current database, as follows:
 
@@ -163,13 +163,13 @@ ANALYZE VERBOSE
 To connect to RDS instance you can follow steps described [here](/docs/dba/connect-to-postgres-mysql-database.md)
 
 
-### 5. Scale UP the application
+### 7. Scale UP the application
 
 When the RDS instance status changes to `Available`, scale the application back to usual capacity. At this point your application will still not use read-replica as none exist.
 
 Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9716
 
-### 6. Create read-replicas
+### 8. Create read-replicas
 
 Now re-create the read-replica instances by adding them back to app-interface.
 
