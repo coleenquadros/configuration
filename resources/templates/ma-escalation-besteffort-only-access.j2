@@ -1,0 +1,14 @@
+{%- for role in query('/queries/role-access-namespace-app-cluster.graphql', name='ma-escalation') %}
+{%- for access in role.access %}
+{%- if access.namespace %}
+{%- if access.role != 'view' %}
+{%- if access.namespace.app.onboardingStatus != 'BestEffort' %}
+
+# raise an error if ma-escalation has admin access to a non BestEffort app's namespace
+{% raise_error('ma-escalation role can not have non view access to namespace ' + access.namespace.cluster.name + '\\' + access.namespace.name + ' due to onboarding status different from BestEffort: ' + access.namespace.app.onboardingStatus) %}
+
+{%- endif %}
+{%- endif %}
+{%- endif %}
+{%- endfor %}
+{%- endfor %}
