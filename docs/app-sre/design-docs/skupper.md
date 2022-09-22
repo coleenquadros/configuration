@@ -323,6 +323,8 @@ https://skupper-skupper-fake-api-server-net.apps.appsres04ue2.n4k3.p1.openshifta
 * The router console doesn't display the consuming pod's origin namespace
 * [No support](https://groups.google.com/g/skupper/c/YyGOHPj-5MA) for `DeploymentConfigs`, but they can be used by annotating the services.
 * Changes to `configmap/skupper-site` won't apply to existing `skupper-router` and `skupper-service-controller` deployments. You've to remove them manually and restart the `site-controller`
+* Due to its nature of wrapping TCP packages into AMQP messages, we expect higher latency on skupper-exposed services.
+  For now, we don't have enough experience and benchmarks to judge this; therefore, currently, it should be for non-latency critical applications only.
 
 ## Open Topics
 
