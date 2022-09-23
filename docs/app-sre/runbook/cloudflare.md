@@ -31,9 +31,9 @@ TBD
 
 ## Troubleshooting
 
-### Access
+### Dashboard access
 
-[Cloudflar Dashboard](https://dash.cloudflare.com/)
+[Cloudflare Dashboard](https://dash.cloudflare.com/)
 
 Credentials to Cloudflare accounts can be found in Vault at https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/cloudflare
 
@@ -44,6 +44,22 @@ Example
 vault login -method=github -address=https://vault.devshift.net
 vault read totp/app-sre/code/sd-app-sre+cloudflare-app-sre
 ```
+
+### Enterprise support
+
+**Non-critical production issues**
+* For reactive and immediate responses: Open a support ticket via the Cloudflare Dashboard under the Support / Contact Support menu
+* Email 24/7 Enterprise support team at entsupport@cloudflare.com
+  * Support team will review emails only from registered account users
+* Web chat via the Cloudflare Dashboard
+
+**24/7 Emergency line**
+* North America: +1 (650) 353-5922
+* UK: +44 808-169-9540
+* Singapore: +65 800-321-1182
+* Additional info can be found at the [Enterprise Customer Portal](cloudflare.com/ecp/overview/) (need to be logged in to the account)
+
+Security verification is mandatory to receive enterprise support. Such verification is done via a `Single-use token` which can be retrieved via the Cloudflare dashboard, under Contact Support / Get Single-use token
 
 ## SOPs
 
@@ -72,6 +88,15 @@ vault read totp/app-sre/code/sd-app-sre+cloudflare-app-sre
     - Workers Routes: Edit
     - DNS: Edit
 
-## Known Issues
+## Helpful links & resources
 
-TBD
+[Cloudflare status page](https://www.cloudflarestatus.com/)
+
+Enterprise account contacts:
+
+| Name | Email | Role |
+|------|-------|------|
+| Tim Flynn | tflinn@cloudflare.com | Customer Success Manager |
+| Tom Hammell | thammell@cloudflare.com | Field Solutions Engineer |
+| Brian Ceppi | bceppi@cloudflare.com | Enterprise Account Manager |
+| Rick Fernandez | | Customer Solutions Engineer |
