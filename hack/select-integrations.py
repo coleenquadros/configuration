@@ -136,7 +136,7 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False,
                 # means that all changes of an MR are reflected in the bundle
                 # and `change-owners` sees the full picture and can make informed
                 # decisions about self-serviceability
-                cmd += "CHANGE_TYPE_PROCESSING_MODE=authorative "
+                cmd += "CHANGE_TYPE_PROCESSING_MODE=authoritative "
 
         if int_name == "vault-manager":
             cmd += 'run_vault_reconcile_integration &'
