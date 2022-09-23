@@ -1425,6 +1425,7 @@ In order to create or update an RDS database, you need to add them to the `exter
 - `identifier` - name of database instance to create (or update). Must be unique across all RDS instances in the AWS account.
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `parameter_group`: (optional) path relative to [resources](/resources) to a file with parameter group values. Note that it starts with `/`.
+- `old_parameter_group`: (optional) path relative to [resources](/resources) to a file with parameter group values. Note that it starts with `/`. This field is only used during RDS major version upgrades and requires `parameter_group`.
 - `overrides`: (optional) list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
 - `replica_source`: (optional) indicates this will be a read replica with this identifier of an rds instance acting as the source
 - `output_resource_name`: (optional) name of Kubernetes Secret to be created.
