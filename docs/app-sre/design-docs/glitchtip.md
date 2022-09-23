@@ -1,24 +1,8 @@
 # Design doc: GlitchTip Integration
 
 **Table of contents:**
-- [Author/date](#authordate)
-- [Tracking JIRA](#tracking-jira)
-- [Problem Statement](#problem-statement)
-- [Goals](#goals)
-- [Non-objectives](#non-objectives)
-- [Glitchtip](#glitchtip)
-  - [End-User Workflow](#end-user-workflow)
-  - [Data structure](#data-structure)
-  - [Roles](#roles)
-- [Proposal](#proposal)
-- [Workflows](#workflows)
-  - [Get Current State](#get-current-state)
-  - [Reconcile Organizations](#reconcile-organizations)
-  - [Reconcile Teams](#reconcile-teams)
-  - [Reconcile Projects](#reconcile-projects)
-  - [Reconcile Users](#reconcile-users)
-- [Requirements](#requirements)
-- [Notes](#notes)
+
+[toc]
 
 ## Author/date
 
