@@ -59,8 +59,11 @@ resourceTemplates:
         REPLICAS: 1
     - namespace:
         $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-      ref: 94b8ce12a1a9df5a2575d5e9ff1d02ffbfe2d364
-      disable: false
+      ref: 14f148a699b42ba380f85af1ffea9f7c75a183bb
+      # upstream:
+      #   instance:
+      #     $ref: /dependencies/ci-ext/ci-ext.yml
+      #   name: ansible-galaxy_ng-gh-build-master
       parameters:
         REPLICAS: 1
         SUFFIX: '-cwa'
@@ -80,20 +83,16 @@ resourceTemplates:
         REDIS_SSL: 'true'
         ENABLE_SIGNING: "2"
         GALAXY_SIGNATURE_UPLOAD_ENABLED: 'true'
-        GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
+        GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'true'
         GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
         GALAXY_COLLECTION_SIGNING_SERVICE: ""
         GALAXY_FEATURE_FLAGS_DISPLAY_SIGNATURES: 'false'  # temporary until AAH-1794 resolved
-      #upstream:
-      #  instance:
-      #    $ref: /dependencies/ci-ext/ci-ext.yml
-      #  name: ansible-galaxy_ng-gh-build-master
       promotion:
         publish:
         - automation-hub-stage-deploy-success-channel
     - namespace:
         $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-      ref: 94b8ce12a1a9df5a2575d5e9ff1d02ffbfe2d364
+      ref: 14f148a699b42ba380f85af1ffea9f7c75a183bb
       parameters:
         REPLICAS: 1
         SUFFIX: '-cwa'
@@ -111,9 +110,9 @@ resourceTemplates:
         IMPORTER_JOB_NAMESPACE: automation-hub-jobs-prod
         IMPORTER_IMAGE_TAG: '573a599'
         REDIS_SSL: 'true'
-        ENABLE_SIGNING: "0"
-        GALAXY_SIGNATURE_UPLOAD_ENABLED: 'false'
-        GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'false'
+        ENABLE_SIGNING: "2"
+        GALAXY_SIGNATURE_UPLOAD_ENABLED: 'true'
+        GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'true'
         GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
         GALAXY_COLLECTION_SIGNING_SERVICE: ""
         GALAXY_FEATURE_FLAGS_DISPLAY_SIGNATURES: 'false'
@@ -137,13 +136,13 @@ resourceTemplates:
     targets:
     - namespace:
         $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-      ref: 94b8ce12a1a9df5a2575d5e9ff1d02ffbfe2d364
+      ref: 2cdc7b795fcb77a163d611b52d672710756979d9
       parameters:
         ARGS: django-admin shell -c 'from django.db import connection; cursor = connection.cursor(); cursor.execute("""SELECT OID, relname FROM pg_class;"""); print("\n".join([str(x) for x in cursor.fetchall() ])); cursor.close()'
         RERUN: 1
     - namespace:
         $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-      ref: 94b8ce12a1a9df5a2575d5e9ff1d02ffbfe2d364
+      ref: 2cdc7b795fcb77a163d611b52d672710756979d9
       parameters:
         ARGS: django-admin shell -c 'from pulpcore.app.models.task import TaskSchedule; print(TaskSchedule.objects.all().count()); print(TaskSchedule.objects.all()); t = TaskSchedule.objects.all().first(); print(vars(t))'
         RERUN: 0

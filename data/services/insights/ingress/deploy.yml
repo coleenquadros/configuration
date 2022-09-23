@@ -158,6 +158,7 @@ resourceTemplates:
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
     parameters:
+      MEMORY_LIMIT: 512Mi
       MIN_REPLICAS: 1
       INGRESS_PAYLOADTRACKERURL: http://payload-tracker-api:8000/api/v1/payloads/
 - name: storage-broker
@@ -176,18 +177,21 @@ resourceTemplates:
       ENV_NAME: stage
       OPENSHIFT_BUCKET: insights-buck-it-openshift-stage
       ANSIBLE_BUCKET: insights-buck-it-ansible-stage
+      TOWER_BUCKET: insights-upload-tower-analytics-stage
       PERM_BUCKET: upload-stage
       REJECT_BUCKET: insights-ingress-rejected-stage
       BUCKET_MAP_FILE: /var/config.yaml 
+      MONITORED_SERVICES: openshift,ansible,tower,pinakes
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-prod.yml
-    ref: 4df44c192d16f90e8b380258fa07a6a5dd056f48
+    ref: 5b2505df115fa6bb220e3a923ba18e92f5eeca98 
     parameters:
       MIN_REPLICAS: 3
       ENV_NAME: prod
       REJECT_BUCKET: insights-ingress-rejected-prod
       OPENSHIFT_BUCKET: insights-buck-it-openshift-prod
       ANSIBLE_BUCKET: insights-buck-it-ansible-prod
+      TOWER_BUCKET: insights-upload-tower-analytics-prod
       PERM_BUCKET: insights-ingress-prod
       BUCKET_MAP_FILE: /var/config.yaml
   - namespace:

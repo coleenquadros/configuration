@@ -4,31 +4,33 @@
   - [Major Version Upgrade vs. Minor Version Upgrade](#major-version-upgrade-vs-minor-version-upgrade)
   - [AWS Documentation](#aws-documentation)
   - [Steps for Upgrade at High Level](#steps-for-upgrade-at-high-level)
-  - [Note About Upgrading Read-Replicas](#note-about-upgrading-read-replicas)
+    - [Note About Upgrading Read-Replicas](#note-about-upgrading-read-replicas)
   - [app-interface changes for upgrading](#app-interface-changes-for-upgrading)
-    - [Terminate Read Replicas](#terminate-read-replicas)
+    - [1. Terminate Read Replicas](#1-terminate-read-replicas)
       - [Remove Read Replica Dependency](#remove-read-replica-dependency)
       - [Read Replicas Termination and Config Updates](#read-replicas-termination-and-config-updates)
-    - [Create a New Parameter Group and Update Engine Version](#create-a-new-parameter-group-and-update-engine-version)
-    - [Scale DOWN the application](#scale-down-the-application)
-    - [Start Database Upgrade](#start-database-upgrade)
-      - [Disable Terraform Resources (tf-r) integration in Production using Unleash](#disable-terraform-resources-tf-r-integration-in-production-using-unleash)
-      - [Run Terraform Resources (tf-r) integration](#run-terraform-resources-tf-r-integration)
-      - [Apply RDS Modifications](#apply-rds-modifications)
-    - [Enable Terraform Resources (tf-r) integration in Production using Unleash](#enable-terraform-resources-tf-r-integration-in-production-using-unleash)
-    - [Scale UP the application](#scale-up-the-application)
-    - [Create read-replicas](#create-read-replicas)
-    - [Update Application Config Changes to use read replicas](#update-application-config-changes-to-use-read-replicas)
+    - [2. Scale DOWN the application](#2-scale-down-the-application)
+    - [3. Create a New Parameter Group and Update Engine Version](#3-create-a-new-parameter-group-and-update-engine-version)
+    - [4. Start Database Upgrade](#4-start-database-upgrade)
+      - [Terraform Resource - Parameter group errors](#terraform-resource---parameter-group-errors)
+        - [Option A: Copy custom parameter group](#option-a-copy-custom-parameter-group)
+        - [Option B: Use default parameter group](#option-b-use-default-parameter-group)
+      - [Run upgrade](#run-upgrade)
+      - [Update pg_statistic Table](#update-pg_statistic-table)
+      - [Monitor upgrade](#monitor-upgrade)
+    - [5. Scale UP the application](#5-scale-up-the-application)
+    - [6. Create read-replicas](#6-create-read-replicas)
+    - [7. Update Application Config Changes to use read replicas](#7-update-application-config-changes-to-use-read-replicas)
+    - [8. Post-upgrade steps](#8-post-upgrade-steps)
 
-This document outline the steps and expectations for a major version upgrade of PostgreSQL RDS instance.
+This document outlines the steps and expectations for a major version upgrade of a PostgreSQL RDS instance.
 
 ## Major Version Upgrade vs. Minor Version Upgrade
 
 There are two kinds of upgrades: major version upgrades and minor version upgrades. In general, a _major engine version upgrade_ can introduce changes that are not compatible with existing applications. In contrast, a _minor version upgrade_ includes only changes that are backward-compatible with existing applications.
 
 ## AWS Documentation
-
-Following documentations are _must_ read for anyone considering a _major engine version upgrade_.
+The following documentations are _must_ read for anyone considering a _major engine version upgrade_.
 
 - [Upgrading the PostgreSQL DB Engine for Amazon RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html)
 - [Best practices for upgrading Amazon RDS to major and minor versions of PostgreSQL](https://aws.amazon.com/blogs/database/best-practices-for-upgrading-amazon-rds-to-major-and-minor-versions-of-postgresql/)
@@ -41,7 +43,7 @@ Following documentations are _must_ read for anyone considering a _major engine 
 
 ---
 
-This section provides helpful information and an overview of the steps that your team will need to perform to a PostgreSQL major version upgrade.
+This section provides helpful information and an overview of the steps that your team will need to perform for a PostgreSQL major version upgrade.
 
 1. The upgrade duration is based on how large your database is and other factors like whether you have read-replicas. For those services with high availability requirements, a dry-run upgrade may be best to get a better estimate of how long the upgrade will take.
    * You should be prepared for the upgrade to take up to **6 hours**. Someone from AppSRE team will need to be available for the duration of the upgrade.
@@ -76,13 +78,15 @@ This section provides the high-level steps required to perform the major version
 
 #### Remove Read Replica Dependency
 
-1. Deploy configuration changes so that your application will stop using read replica instance.
+1. Deploy configuration changes so that your application will stop using read replica instances.
 
 #### Read Replicas Termination and Config Updates
 
 1. Update your parameter group to remove any parameters related to replication.
-2. Raise MR to app-interface to delete the read-replica instance. This step will have to executed by AppSRE team member. Remember to set `deletion_protection` to `false` for the read replica instance.
-3. Drop the `Logical replication slots`. This step will have to executed by AppSRE team member. If the database is using logical replication slots, the major version upgrade fails and shows the message `PreUpgrade checks failed: The instance could not be upgraded because one or more databases have logical replication slots. Please drop all logical replication slots and try again`. To resolve the issue, stop any running DMS or logical replication jobs and drop any existing replication slots. See the following code:
+2. Raise MR to app-interface to delete the read-replica instance. This step will have to be executed by AppSRE team member.
+   * Remember to set `deletion_protection` to `false` for the read replica instance.
+   * Add the rds instance and the parameter group to the account [deletionApprovals](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#enable-deletion-of-aws-resources-in-deletion-protected-accounts) if deletion protection is enabled for the AWS account, e.g. [insights-prod](https://gitlab.cee.redhat.com/service/app-interface/-/blob/0c447b6df71b3ac52c97233a30d0a8778d8d8657/data/aws/insights-prod/account.yml#L40).
+3. Drop the `Logical replication slots`. This step will have to be [executed by AppSRE team member](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/dba/connect-to-postgres-mysql-database.md). If the database is using logical replication slots, the major version upgrade fails and shows the message `PreUpgrade checks failed: The instance could not be upgraded because one or more databases have logical replication slots. Please drop all logical replication slots and try again`. To resolve the issue, stop any running DMS or logical replication jobs and drop any existing replication slots. See the following code:
 
 ```
    SELECT * FROM pg_replication_slots;
@@ -93,58 +97,44 @@ In case the slot can not be dropped with the following error: `ERROR:  replicati
    SELECT pg_cancel_backend(pid);
 ```
 
-Example MR: [Terminate read-replica](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9692)
+Example MR: [Terminate read-replica and disable deletion protection](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/47213/diffs)
 
-### 2. Create a New Parameter Group and Update Engine Version
-
-Create a copy of your current parameter group and update at least following 2 things:
-
-1. `family` : The family of the DB parameter group.
-2. `name` : The name of the DB parameter group. Must be unique.
-
-At this point the file exists but is not referenced by your RDS instance. This change can be combined with next step.
-
-1. Update the `engine_version` for your RDS instance in either the defaults file or add it to overriding section.
-   * **IMPORTANT:** if changing a defaults file, you will upgrade every database that uses that defaults file, so take care in changing this setting. You can grep for the defaults filename to see where it is used and confirm that only the expected databases will be changed in the MR dry-run build.
-2. Add `allow_major_version_upgrade: true` to your RDS defaults file to allow upgrade. Terraform will fail if this flag is not set.
-3. Update `parameter_group` reference to use the new parameter group file.
-4. The MR will be reviewed by the AppSRE team. They will not merge the MR until the upgrade is ready to begin.
-
-Example MRs: [Upgrade RDS Instance from PostgreSQL 10.x to 11.6 & Create PostgreSQL 11 parameter group](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9698/diffs)
-
-### 3. Scale DOWN the application
+### 2. Scale DOWN the application
 
 Raise MR that sets the deployment's replica count to `0`.
 
 Example MR: [Scale down service](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9695)
 
+### 3. Create a New Parameter Group and Update Engine Version
+
+Create a copy of your current parameter group and update at least the following 2 things:
+
+1. `family` : The family of the DB parameter group.
+2. `name` : The name of the DB parameter group. Must be unique.
+
+At this point, the file exists but is not referenced by your RDS instance. This change can be combined with the next step.
+
+1. Update the `engine_version` for your RDS instance in either the defaults file or add it to the overriding section.
+   * **IMPORTANT:** if changing a defaults file, you will upgrade every database that uses that defaults file, so take care in changing this setting. You can grep for the defaults filename to see where it is used and confirm that only the expected databases will be changed in the MR dry-run build.
+2. Add `allow_major_version_upgrade: true` to your RDS defaults file to allow the upgrade. Terraform will fail if this flag is not set.
+3. Update `parameter_group` reference to use the new parameter group file.
+4. The MR will be reviewed by the AppSRE team. They will not merge the MR until the upgrade is ready to begin.
+
+Example MRs: [Upgrade RDS Instance from PostgreSQL 10.x to 11.6 & Create PostgreSQL 11 parameter group](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9698/diffs)
+
+
+
 ### 4. Start Database Upgrade
 
 Start by merging the MR that was created to upgrade the database. When qontract-reconcile runs next, the upgrade should be scheduled for the next maintenance window.
-
-**When you're ready to begin the upgrade**, run the command below so that the pending RDS modifications are applied immediately:
-
-```
-aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately
-```
-
----
-
-**Note:** If you don't run the command above, then the upgrade will not happen until the next maintenance window.
-
----
-
-Monitor the upgrade in AWS console. AWS will run a pre-upgrade check and the upgrade may not proceed if pre-upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre-upgrade checks.
-
----
 
 **If you see errors related to deleting parameter group errors, then see the next section. Otherwise, you can skip to the next step.**
 
 ---
 
-#### Parameter group errors
+#### Terraform Resource - Parameter group errors
 
-qontract-reconcile may fail in applying the upgrade if the parameter group is only being used by a single database because the current parameter group can't be deleted until the upgrade is done. Expect an error similar to following:
+qontract-reconcile may fail in applying the upgrade if the parameter group is only being used by a single database because the current parameter group can't be deleted until the upgrade is done. Expect an error similar to the following:
 
 ```
 [terraform-resources] error: b'\nError: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group steahan-dev-params, so the group cannot be deleted\n\tstatus code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e\n\n\n'
@@ -152,9 +142,9 @@ qontract-reconcile may fail in applying the upgrade if the parameter group is on
 [terraform-resources] [app-sre-stage - apply]     status code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e
 ```
 
-**If you see the error above**, you have two options, either copy the existing custom parameter group, or use the default parameter group temporarily.
+**If you see the error above**, you have two options, either copy the existing custom parameter group or use the default parameter group temporarily.
 
-#### Option A: Copy custom parameter group
+##### Option A: Copy custom parameter group
 
 Copying the existing parameter group is technically the safest path unless the tenant team indicates that using the default parameter group for a short period of time is safe. The steps below will copy the existing parameter group and apply it to the RDS instance so that the old parameter group can be deleted.
 
@@ -166,7 +156,17 @@ aws rds copy-db-parameter-group --source-db-parameter-group-identifier <EXISTING
 aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately --db-parameter-group-name <EXISTING_PARAMETER_GROUP>-copy
 ```
 
-#### Option B: Use default parameter group
+Wait for the next `terrfarm-resource` reconcile loop and the error should be solved. Now you can go ahead and start the upgrade
+
+```
+aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately --db-parameter-group-name <EXISTING_PARAMETER_GROUP>
+```
+
+**Note:** After the upgrade, use the AWS console and delete the interim parameter group `<EXISTING_PARAMETER_GROUP>-copy`.
+
+Skip to the [Monitor upgrade](#monitor-upgrade) section.
+
+##### Option B: Use default parameter group
 
 ```
 aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately --db-parameter-group-name default.postgres<VERSION>
@@ -174,6 +174,29 @@ aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <RE
 # Example
 aws rds modify-db-instance --db-instance-identifier my-database --region us-east-1 --apply-immediately --db-parameter-group-name default.postgres10
 ```
+
+#### Run upgrade
+
+Without any `terrfarm-resource` errors you can, whenever you're ready, **the upgrade**. Run the command below so that the pending RDS modifications are applied immediately:
+
+```
+aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately
+```
+
+**Note:** If you don't run the command above, then the upgrade will not happen until the next maintenance window.
+
+#### Update pg_statistic Table
+
+Run the ANALYZE operation to refresh the `pg_statistic` table. You should do this for every database on all your PostgreSQL DB instances. Optimizer statistics aren't transferred during a major version upgrade, so you need to regenerate all statistics to avoid performance issues. Run the command without any parameters to generate statistics for all regular tables in the current database, as follows:
+
+```
+ANALYZE VERBOSE
+```
+
+#### Monitor upgrade
+
+Monitor the upgrade in AWS console. AWS will run a pre-upgrade check and the upgrade may not proceed if pre-upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre-upgrade checks.
+
 
 ### 5. Scale UP the application
 

@@ -66,7 +66,7 @@ resourceTemplates:
       UPDATE_USERS: 'true'  # add new users, update credentials
       UPDATE_DB_CONFIG: 'true'  # apply './database_admin/config.sql'
       FLOORIST_IMAGE_TAG: 37d0727  # 2022-07-01
-      ENABLE_MIGRATION: 'true'  # always migrate DB in ephemeral
+      ENABLE_MIGRATION: 'true' # needs to be set for PR checks where Patch is deployed as a dependency
   - namespace: # STAGE
       $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
     ref: master
@@ -85,6 +85,7 @@ resourceTemplates:
       RES_LIMIT_MEM_MANAGER: 1536Mi # prod: 2Gi
       PRELOAD_ADVISORY_DETAIL_CACHE: 'true'
       ADVISORY_DETAIL_CACHE_SIZE: '60000' # Advisories count (46k) + some reserve
+      ENABLE_PACKAGE_CACHE_MANAGER: 'true'
 
       # Listener
       REPLICAS_LISTENER: '3'
@@ -136,10 +137,10 @@ resourceTemplates:
       LOG_LEVEL_DATABASE_ADMIN: info
       UPDATE_USERS: 'false'  # add new users, update credentials
       UPDATE_DB_CONFIG: 'false'  # apply './database_admin/config.sql'
-      ENABLE_MIGRATION: 'false'  # set to false to allow auto deploy only for changes without migrations
+      SCHEMA_MIGRATION: "96" # set to the latest known schema to deny auto deploy changes with migrations
 
       # Jobs
-      JOBS_TIMEOUT: '21600'  # kill jobs after 6 hours
+      JOBS_TIMEOUT: '7200'  # kill jobs after 2 hours
       ADVISORY_REFRESH_SCHEDULE: '0 */1 * * *'
 
       # Common parameters
@@ -154,11 +155,11 @@ resourceTemplates:
 
   - namespace: # PRODUCTION
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: fb2aaeb9b879f762af0233ddbb2472de5c28340a # v2.2.21
+    ref: 5c02fbdaa44a8dd146341b34181fb4ccde3f419b # v2.2.37 + 1
     parameters:
       # Manager
       REPLICAS_MANAGER: '4'
-      IMAGE_TAG_MANAGER: fb2aaeb # v2.2.21
+      IMAGE_TAG_MANAGER: 5c02fbd # v2.2.37 + 1
       LOG_LEVEL_MANAGER: info
       RES_REQUEST_CPU_MANAGER: 500m
       RES_REQUEST_MEM_MANAGER: 1Gi
@@ -169,7 +170,7 @@ resourceTemplates:
 
       # Listener
       REPLICAS_LISTENER: '3'
-      IMAGE_TAG_LISTENER: fb2aaeb # v2.2.21
+      IMAGE_TAG_LISTENER: 5c02fbd # v2.2.37 + 1
       LOG_LEVEL_LISTENER: info
       CONSUMER_COUNT_LISTENER: "1"
       RES_REQUEST_MEM_LISTENER: 256Mi
@@ -177,7 +178,7 @@ resourceTemplates:
 
       # Evaluator - upload
       REPLICAS_EVALUATOR_UPLOAD: '5'
-      IMAGE_TAG_EVALUATOR_UPLOAD: fb2aaeb # v2.2.21
+      IMAGE_TAG_EVALUATOR_UPLOAD: 5c02fbd # v2.2.37 + 1
       LOG_LEVEL_EVALUATOR_UPLOAD: debug
       ENABLE_BASELINE_EVAL_EVALUATOR_UPLOAD: 'true'
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_UPLOAD: 'true'
@@ -190,7 +191,7 @@ resourceTemplates:
 
       # Evaluator - recalc
       REPLICAS_EVALUATOR_RECALC: '3'
-      IMAGE_TAG_EVALUATOR_RECALC: fb2aaeb # v2.2.21
+      IMAGE_TAG_EVALUATOR_RECALC: 5c02fbd # v2.2.37 + 1
       LOG_LEVEL_EVALUATOR_RECALC: info
       ENABLE_BASELINE_EVAL_EVALUATOR_RECALC: 'true'
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_RECALC: 'true'
@@ -203,7 +204,7 @@ resourceTemplates:
 
       # VMaaS sync
       REPLICAS_VMAAS_SYNC: '1'
-      IMAGE_TAG_VMAAS_SYNC: fb2aaeb # v2.2.21
+      IMAGE_TAG_VMAAS_SYNC: 5c02fbd # v2.2.37 + 1
       LOG_LEVEL_VMAAS_SYNC: info
       VMAAS_WS_ADDRESS: ws://vmaas-websocket.vmaas-prod.svc.cluster.local:8082 # use it if vmaas is not deployed with clowder
       PACKAGES_PAGE_SIZE: '500'
@@ -216,7 +217,7 @@ resourceTemplates:
       VMAAS_SYNC_SCHEDULE: '30 */4 * * *'
 
       # Database admin
-      IMAGE_TAG_DATABASE_ADMIN: fb2aaeb # v2.2.21
+      IMAGE_TAG_DATABASE_ADMIN: 5c02fbd # v2.2.37 + 1
       LOG_LEVEL_DATABASE_ADMIN: info
       UPDATE_USERS: 'false'  # add new users, update credentials
       UPDATE_DB_CONFIG: 'false'  # apply './database_admin/config.sql'
@@ -228,7 +229,7 @@ resourceTemplates:
       KAFKA_WRITER_MAX_ATTEMPTS: '60'
 
       # Jobs
-      IMAGE_TAG_JOBS: fb2aaeb # v2.2.21
+      IMAGE_TAG_JOBS: 5c02fbd # v2.2.37 + 1
       JOBS_TIMEOUT: '21600'  # kill jobs after 6 hours
       ADVISORY_REFRESH_SCHEDULE: '0 */1 * * *'
       ADVISORY_REFRESH_SUSPEND: 'true' # temporarily disable advisory refresh job since it's locking DB

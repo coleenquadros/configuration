@@ -1,0 +1,75 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: provisioning
+
+name: provisioning-stage
+description: Provisioning on the Stage cluster under app-interface management
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/provisioning/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+sharedResources:
+  - $ref: /services/insights/shared-resources/metrics-export-stage.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: provisioning-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-1.yml
+    overrides:
+      name: provisioning_backend
+      apply_immediately: true
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-quickstarts-stage.yml
+    enhanced_monitoring: true
+    output_resource_name: provisioning-backend
+    # This service account is supposed to assume Customer provided roles
+    # We do not define any naming pattern for the Customer roles.
+    # We could try to impose it in the documentation and see if customers follow
+    # and then use exact role name to scope down perms of this account.
+  - provider: aws-iam-service-account
+    identifier: provisioning-serviceaccount-stage
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "arn:aws:iam::*:role/*"
+        }]
+      }
+    output_resource_name: provisioning-aws-acc
+  - provider: cloudwatch
+    identifier: provisioning-cloudwatch-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

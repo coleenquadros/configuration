@@ -61,7 +61,7 @@ resourceTemplates:
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 93a3f23ac8254fa757a22ffd8d5a7bb5f035da84
+    ref: 40e774f5e345e170977dfad0346f3ec2a83f32f9
     parameters:
       MIN_REPLICAS: "16"
       MAX_REPLICAS: "16"
@@ -121,13 +121,13 @@ resourceTemplates:
       MAX_REPLICAS: "6"
       DB_WRITER_REPLICAS: "16"
       DB_WRITER_CPU_LIMIT: "500m"
-      DB_WRITER_MEMORY_LIMIT: "3000Mi"
+      DB_WRITER_MEMORY_LIMIT: "6000Mi"
       DB_WRITER_CPU_REQUEST: "100m"
-      DB_WRITER_MEMORY_REQUEST: "1000Mi"
+      DB_WRITER_MEMORY_REQUEST: "3000Mi"
       IRA_CPU_LIMIT: "500m"
-      IRA_MEMORY_LIMIT: "2000Mi"
+      IRA_MEMORY_LIMIT: "4000Mi"
       IRA_CPU_REQUEST: "100m"
-      IRA_MEMORY_REQUEST: "1000Mi"
+      IRA_MEMORY_REQUEST: "2000Mi"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
       CLOUDWATCH_ENABLED: "false"
   - namespace:
@@ -175,7 +175,7 @@ resourceTemplates:
       IRSP_INTERNAL_RULES_ORGANIZATIONS_CSV_FILE: "/internal-rules-organizations/internal_rules_organizations.csv"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 009df5095ecd5729723b594eb4b6db49d460121d
+    ref: eccaf564f5547a1cc4e184e1039bccc3c6176245
     delete: false
     parameters:
       MIN_REPLICAS: "2"
@@ -256,7 +256,7 @@ resourceTemplates:
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 262ea405571391295307d21b24d39b757e0ce8fc
+    ref: c2d8e3f9dd78dfa92728b90ed91415bae20a4b76
     delete: false
     parameters:
       CPU_LIMIT: "250m"
@@ -330,7 +330,7 @@ resourceTemplates:
       MAX_REPLICAS: "1"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 044932eec8285d1d8604b96ad456d3b73004df3f
+    ref: 9dfe7b4d4f7f01beaab994290c174cd3fcb68f83
     parameters:
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "6"
@@ -421,7 +421,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
-    disable: true
+    disable: false
     ref: master
     upstream:
       instance:
@@ -430,14 +430,16 @@ resourceTemplates:
     parameters:
       IMAGE: "quay.io/cloudservices/ccx-notification-writer"
       JOB_SCHEDULE: "0 * * * *"
-      OLD_REPORTS_MAX_AGE: '1 hour'
-      NEW_REPORTS_MAX_AGE: '1 hour'
+      OLD_REPORTS_MAX_AGE: '8 days'
+      NEW_REPORTS_MAX_AGE: '8 days'
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    disable: true
-    ref: 9bdc76bf6cb290b3b30a2f1c82a3f75f2f515819
+    disable: false
+    ref: 8554a2799555c877fa392fc13f90dac669c66a53
     parameters:
-      JOB_SCHEDULE: "0 0 * * *"
+      JOB_SCHEDULE: "0 */3 * * *"
+      OLD_REPORTS_MAX_AGE: '8 days'
+      NEW_REPORTS_MAX_AGE: '8 days'
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true
@@ -463,7 +465,7 @@ resourceTemplates:
       PLATFORM_UI_HOSTNAME: console.stage.redhat.com
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 095783c6cf7f6cad884d760ede54aa10618542b7
+    ref: 2f4c263a0b1c055a4fb3127579aedfd76149e314
     parameters:
       CONTENT_SERVICE_PORT: 10000
       JOB_SCHEDULE__NOTIFICATION_BACKEND: "*/15 * * * *"
@@ -541,6 +543,22 @@ resourceTemplates:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
     ref: 22730da7317411b6db2953d426179a7169342f3e
 
+
+- name: insights-content-template-renderer
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-content-template-renderer
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    disable: true # Enable when stage has been already tested
+    ref: 6bb726a43b05e6d3252a3d28f7900079d7ae6d5e
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # TODO: enable when there is any test running in ephemeral
+    ref: internal
 
 ### Grafana Dashboards
 

@@ -9,6 +9,30 @@ spec:
   groups:
   - name: cloudwatch-exporter-templated.rules
     rules:
+    - alert: CloudWatchExporterTargetDown
+      labels:
+        service: app-sre-observability
+        severity: critical
+      expr: absent(up{job="cloudwatch-exporter"}==1)
+      for: 5m
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net
+        html_url:  https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter-templated.prometheusrules.yaml.j2
+        message: Cloudwatch exporter cloudwatch-exporter has been down for 5m+.
+        runbook: https://github.com/rhobs/configuration/tree/main/docs/sop
+    - alert: CloudWatchExporterTargetDown
+      labels:
+        service: app-sre-observability
+        severity: critical
+      expr: absent(up{job="cloudwatch-exporter-osio"}==1)
+      for: 5m
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net
+        html_url:  https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter-templated.prometheusrules.yaml.j2
+        message: Cloudwatch exporter cloudwatch-exporter-osio has been down for 5m+.
+        runbook: https://github.com/rhobs/configuration/tree/main/docs/sop
+
+
     - alert: RDSPredictOutOfBurstBalance
       annotations:
         html_url: https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter-templated.prometheusrules.yaml.j2

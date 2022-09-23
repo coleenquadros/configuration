@@ -26,51 +26,40 @@ managedResourceTypes:
 imagePatterns:
 - quay.io/app-sre/aws-resource-exporter
 
-# note: it is currently not possible to deploy a single resourceTemplate
-# to the same target (namespace) more than once.
-# use a separate resourceTemplate list item for each AWS account for consistency.
 resourceTemplates:
-# osd-privatelink-int
-- name: aws-resource-exporter-osd-privatelink-int
+- name: aws-resource-exporter-osd-privatelink
   path: /openshift/aws-resource-exporter.yaml
   url: https://github.com/app-sre/aws-resource-exporter
-  parameters:
-    NAME: aws-resource-exporter-osd-privatelink-int
-    SECRET_NAME: aws-resource-exporter-osd-privatelink-int
-    CONFIGMAP_NAME: aws-resource-exporter-osd-privatelink-int
   targets:
-  - namespace:
+  - name: osd-privatelink-int
+    namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: master
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: app-sre-aws-resource-exporter-gh-build-master
-# osd-privatelink-stage
-- name: aws-resource-exporter-osd-privatelink-stage
-  path: /openshift/aws-resource-exporter.yaml
-  url: https://github.com/app-sre/aws-resource-exporter
-  parameters:
-    NAME: aws-resource-exporter-osd-privatelink-stage
-    SECRET_NAME: aws-resource-exporter-osd-privatelink-stage
-    CONFIGMAP_NAME: aws-resource-exporter-osd-privatelink-stage
-  targets:
-  - namespace:
+    parameters:
+      NAME: aws-resource-exporter-osd-privatelink-int
+      SECRET_NAME: aws-resource-exporter-osd-privatelink-int
+      CONFIGMAP_NAME: aws-resource-exporter-osd-privatelink-int
+  - name: osd-privatelink-stage
+    namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: master
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: app-sre-aws-resource-exporter-gh-build-master
-# osd-privatelink-prod
-- name: aws-resource-exporter-osd-privatelink-prod
-  path: /openshift/aws-resource-exporter.yaml
-  url: https://github.com/app-sre/aws-resource-exporter
-  parameters:
-    NAME: aws-resource-exporter-osd-privatelink-prod
-    SECRET_NAME: aws-resource-exporter-osd-privatelink-prod
-    CONFIGMAP_NAME: aws-resource-exporter-osd-privatelink-prod
-  targets:
-  - namespace:
+    parameters:
+      NAME: aws-resource-exporter-osd-privatelink-stage
+      SECRET_NAME: aws-resource-exporter-osd-privatelink-stage
+      CONFIGMAP_NAME: aws-resource-exporter-osd-privatelink-stage
+  - name: osd-privatelink-prod
+    namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: ef4b398afb84afac87cfa8290020c32dccdeb063
+    ref: 4db9d83f681ba12ff55bc6d284c782f740f2ae2d
+    parameters:
+      NAME: aws-resource-exporter-osd-privatelink-prod
+      SECRET_NAME: aws-resource-exporter-osd-privatelink-prod
+      CONFIGMAP_NAME: aws-resource-exporter-osd-privatelink-prod

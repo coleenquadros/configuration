@@ -95,7 +95,8 @@ resourceTemplates:
       RHSM_RBAC_PORT: '8080'
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 1d2ddc81e792b541758487bf5d4a96d9315cd01f
+    ref: 4f8dc9b8c395a8fc113c364669693c7c925e4795
+    delete: true
     parameters:
       RHSM_RBAC_HOST: ${RBAC_HOST}
       RHSM_RBAC_PORT: '8080'
@@ -126,6 +127,7 @@ resourceTemplates:
       UMB_SERVICE_ACCOUNT_NAME: nonprod-insightsrhsm
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+    delete: true
     ref: 1d2ddc81e792b541758487bf5d4a96d9315cd01f
     parameters:
       SUBSCRIPTION_SYNC_ENABLED: true
@@ -142,6 +144,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+    delete: true
     ref: main
     upstream:
       instance:
@@ -155,6 +158,7 @@ resourceTemplates:
       DB_CHANGELOG_CLEANUP_SUSPEND: false
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+    delete: true
     ref: 1d2ddc81e792b541758487bf5d4a96d9315cd01f
     parameters:
       SUBSCRIPTION_SYNC_ENABLED: true
@@ -177,6 +181,7 @@ resourceTemplates:
       USER_HOST: user.stage.api.redhat.com
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+    delete: true
     ref: 1d2ddc81e792b541758487bf5d4a96d9315cd01f
     parameters:
       USER_HOST: user.api.redhat.com
@@ -209,6 +214,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
     ref: 1d2ddc81e792b541758487bf5d4a96d9315cd01f
+    delete: true
     parameters:
       ENABLE_ACCOUNT_RESET: false
       CLOUDIGRADE_ENABLED: true
@@ -246,6 +252,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
     ref: 1d2ddc81e792b541758487bf5d4a96d9315cd01f
+    delete: true
     parameters:
       PINHEAD_URL: https://systems.api.redhat.com/v1
       RHSM_URL: https://api.rhsm.redhat.com/v1
@@ -284,11 +291,14 @@ resourceTemplates:
     parameters:
       RHSM_SERVICE_URL: https://api.rhsm.redhat.com/v1/cloud_access_providers/
       USER_SERVICE_URL: https://user.api.redhat.com/
-- name: subscription-inventory-ui
-  path: /deploy/frontend.yaml
-  url: https://github.com/RedHatInsights/subscription-inventory-ui
+- name: insights-subscription-watch
+  url: https://github.com/RedHatInsights/rhsm-subscriptions
+  path: /dashboards
+  provider: directory
   targets:
   - namespace:
-      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true  # do not create an app-sre deploy job for ephemeral namespace
-    ref: internal  # populated by bonfire
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: main
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 4f8dc9b8c395a8fc113c364669693c7c925e4795

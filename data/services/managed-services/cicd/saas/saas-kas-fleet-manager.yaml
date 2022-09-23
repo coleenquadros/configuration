@@ -50,7 +50,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
-    ref: 4179e0b0ca3bd19483f727f721e0713c4970a13e
+    ref: 15a8d9112fe3a44d30af99e00b4e747ef3794fb7
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/managedkafka
@@ -65,7 +65,7 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: d58bf6e5b8c189c17eea9f5e822057c5699f0643
+    ref: 86a6f829c2ac7481cf0b5879ed315a31f63061dc
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
@@ -117,7 +117,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
-    ref: 4179e0b0ca3bd19483f727f721e0713c4970a13e
+    ref: 15a8d9112fe3a44d30af99e00b4e747ef3794fb7
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: stage
@@ -151,7 +151,7 @@ resourceTemplates:
       # Token Refresher URL
       OBSERVATORIUM_TOKEN_REFRESHER_URL: http://token-refresher.managed-services-stage.svc.cluster.local
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.40.0
+      OBSERVABILITY_CONFIG_TAG: v1.40.1
       # Observatorium Red Hat SSO tenant for observability stack
       OBSERVATORIUM_RHSSO_TENANT: managedkafka
       # Red Hat SSO Observability gateway
@@ -187,6 +187,10 @@ resourceTemplates:
       KAS_FLEETSHARD_ADDON_ID: kas-fleetshard-operator-qe
       # The Cluster Logging Operator ID. An empty string indicates that the operator should not be installed.
       CLUSTER_LOGGING_OPERATOR_ADDON_ID: "cluster-logging-operator"
+      # Index image used for Observability Operator
+      OBSERVABILITY_OPERATOR_INDEX_IMAGE: "quay.io/rhoas/observability-operator-index:v3.0.15"
+      # Starting CSV used for Observability Operator
+      OBSERVABILITY_OPERATOR_STARTING_CSV: "observability-operator.v3.0.15"
       # As a user, one can only 1 developer instance if they do not have quota to create standard instances
       MAX_ALLOWED_DEVELOPER_INSTANCES: 1
       # A list of usernames representing users who do not have access to the service
@@ -348,12 +352,12 @@ resourceTemplates:
         standard: # the instance type. It must exist in SUPPORTED_INSTANCE_TYPES
           # The number of reserved kafka instances of the size specified in "base_streaming_unit_size". 
           # 1 guarantee that we'll always have hot capacity (3 worker nodes) prewarmed for 1 standard instance of size x1.
-          num_reserved_instances: 1     
+          num_reserved_instances: 1
           base_streaming_unit_size: x1
         developer: # The instance type. It must exist in SUPPORTED_INSTANCE_TYPES. 
           # The number of reserved kafka instances of the size specified in "base_streaming_unit_size". 
-          # 10 guarantee that we'll always have one worker node prewarmed for 10 developer instances of size x1.
-          num_reserved_instances: 10  
+          # 1 guarantee that we'll always hot capacity for one developer instance which should be enough for Stage cluster usage.
+          num_reserved_instances: 1
           base_streaming_unit_size: x1
 
   - namespace:
@@ -366,7 +370,7 @@ resourceTemplates:
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: d58bf6e5b8c189c17eea9f5e822057c5699f0643
+    ref: 86a6f829c2ac7481cf0b5879ed315a31f63061dc
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: production
@@ -418,7 +422,11 @@ resourceTemplates:
       # Red Hat SSO Observability auth server url
       OBSERVATORIUM_RHSSO_AUTH_SERVER_URL: https://sso.redhat.com/auth
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.38.0
+      OBSERVABILITY_CONFIG_TAG: v1.40.1
+      # Index image used for Observability Operator
+      OBSERVABILITY_OPERATOR_INDEX_IMAGE: "quay.io/rhoas/observability-operator-index:v3.0.15"
+      # Starting CSV used for Observability Operator
+      OBSERVABILITY_OPERATOR_STARTING_CSV: "observability-operator.v3.0.15"
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
       # A list of users with read-only permissions for data plane clusters
@@ -583,7 +591,7 @@ resourceTemplates:
           region: us-east-1
           multi_az: true
           schedulable: true # change this to false if you do not want the cluster to be schedulable
-          kafka_instance_limit: 34 # change this to match any value of configuration
+          kafka_instance_limit: 36 # change this to match any value of configuration
           supported_instance_type: standard
         - name: mk-1006-115633
           cluster_id: 1nlj5j786fsg44srlj7f2kep5htakcp7
@@ -599,7 +607,7 @@ resourceTemplates:
           region: us-east-1
           multi_az: false
           schedulable: true # change this to false if you do not want the cluster to be schedulable
-          kafka_instance_limit: 50 # change this to match any value of configuration
+          kafka_instance_limit: 100 # change this to match any value of configuration
           supported_instance_type: developer
         - name: mk-0727-163232
           cluster_id: 1tngp49ofbg8h7l26d8b6bhqbanv0l4f
@@ -633,3 +641,15 @@ resourceTemplates:
         - "16141777"
         - "13888347"
         - "16145549"
+      # Worker node prewarming configuration
+      NODE_PREWARMING_CONFIG:
+        standard: # the instance type. It must exist in SUPPORTED_INSTANCE_TYPES
+          # The number of reserved kafka instances of the size specified in "base_streaming_unit_size".
+          # 0 means that prewarming is disabled for standard instance.
+          num_reserved_instances: 0
+          base_streaming_unit_size: x1
+        developer: # The instance type. It must exist in SUPPORTED_INSTANCE_TYPES.
+          # The number of reserved kafka instances of the size specified in "base_streaming_unit_size".
+          # 20 guarantee that we'll always have one worker node prewarmed for 20 developer instances of size x1.
+          num_reserved_instances: 20
+          base_streaming_unit_size: x1

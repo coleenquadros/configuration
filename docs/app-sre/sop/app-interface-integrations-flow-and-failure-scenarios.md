@@ -112,3 +112,12 @@ In some cases, integrations will get "stuck" and will cease to execute.
 This is being investigated in [APPSRE-4905](https://issues.redhat.com/browse/APPSRE-4905).
 
 The temporary workaround is to restart pods of stuck integrations.
+
+### MR Queue Saturated
+
+[AWS Simple Queue Service (SQS)](https://aws.amazon.com/sqs/) is used by Qontract Reconcile to track merge requests, [technical details here](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/mr/README.md).
+If the queue becomes saturated, that typically means an issue with GitLab.cee processing the MRs.
+In a past incident [APPSRE-5772](https://issues.redhat.com/browse/APPSRE-5772), 
+this was due to a code change causing QR to create a ton of MRs, overloading GitLab.cee.
+1. Check the [AppSRE Bot](https://gitlab.cee.redhat.com/devtools-bot) for an abnormal increase in MRs which may indicate a code error.
+2. Reach out to the IT ALM team as described in the [Gitlab.cee Escalation Runbook](/docs/app-sre/runbook/gitlab-escalation.md) to determine if there are issues with Gitlab itself.

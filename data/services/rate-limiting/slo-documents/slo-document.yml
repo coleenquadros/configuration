@@ -1,0 +1,31 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: rate-limiting
+
+name: rate-limiting 
+
+namespaces:
+- $ref: /openshift/app-sre-prod-04/namespaces/app-sre-rate-limiting.yml
+
+app:
+  $ref:  /services/rate-limiting/app.yml
+
+slos:
+- name: Requests being evaluated for rate limiting
+  dashboard: https://grafana.app-sre.devshift.net/d/rate-limiting/rate-limits?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-environment=production
+  SLIType: availability
+  SLISpecification: Proportion of requests that was properly evaluated by rate-limiting instead of let through because failure on rate-limiting service
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 28d
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/rate-limiting/slos/rate-limiting-availability.md
+  expr: |
+    1- 
+      sum(rate(envoy_cluster_ratelimit_failure_mode_allowed[{{window}}])) 
+     / 
+     (sum(rate(envoy_cluster_ratelimit_failure_mode_allowed[{{window}}])) + 
+     sum(rate(authorized_calls[1m])) + sum(rate(limited_calls[{{window}}])))
+  prometheusRules: /resources/observability/prometheusrules/app-sre-rate-limiting-prometheusrules.yml

@@ -45,16 +45,30 @@ resourceTemplates:
   path: /deploy/frontend.yaml
   url: https://github.com/RHEnVision/provisioning-frontend
   targets:
-  - namespace:
+  - namespace: # EPHEMERAL frontend
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
+  - namespace: # STAGE frontend
+      $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RHEnVision-provisioning-frontend-gh-build-main
 
 - name: provisioning-backend
   path: /deploy/clowdapp.yaml
   url: https://github.com/RHEnVision/provisioning-backend
   targets:
-  - namespace:
+  - namespace: # EPHEMERAL api
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
+  - namespace: # STAGE api
+      $ref: /services/insights/provisioning/namespaces/provisioning-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RHEnVision-provisioning-backend-gh-build-main

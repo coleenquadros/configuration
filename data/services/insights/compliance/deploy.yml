@@ -76,7 +76,9 @@ resourceTemplates:
       MIN_REPLICAS: 1
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 8129086d14ef8e51c9d04b3363f074af8f771aa2
+    ref: 8d86c9026e5bb5df781acf37a25f96d9556602b5
+    parameters:
+      MIN_REPLICAS: 1
 - name: compliance
   path: /clowdapp.yaml
   url: https://github.com/RedHatInsights/compliance-backend
@@ -112,7 +114,7 @@ resourceTemplates:
       REPLICAS_SIDEKIQ: 1
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 54bc397fddb93e28bb08465c240a1f5a70663468
+    ref: 5cc8677232faef1dac5f2fd8f50fafe23fab81b3
     parameters:
       SETTINGS__FORCE_IMPORT_SSGS: 'false'
       REPLICAS_BACKEND: 6
@@ -121,6 +123,7 @@ resourceTemplates:
       FLOORIST_SUSPEND: 'false'
       FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-prod
       PRIMARY_REDIS_AS_CACHE: 'false'
+      IMPORT_SSG_SCHEDULE: "*/5 * * * *"
 - name: compliance-frontend
   path: /deployment_template.yaml
   url: https://github.com/RedHatInsights/compliance-frontend
@@ -129,3 +132,14 @@ resourceTemplates:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
+- name: compliance-dashboards
+  url: https://github.com/RedHatInsights/compliance-backend
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 3f1054eac0d31cbb549846ba4a3fce890bd093cc

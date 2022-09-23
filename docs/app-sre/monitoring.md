@@ -378,7 +378,7 @@ Next up, change all your panels to send queries to this datasource
 
 ### Adding dashboards
 
-Since the Grafana instance is read-only, there is no 'save' button for the dashboard changes you make. In order to add a new dashboard, you should use the 'Grafana Playground' dashboard. The Grafana Playground dashboard has one instance each for each of the supported panels. You can duplicate the panels as many times as you'd like, and use the query view to add the graphs for desired metrics. Once that's done, export the dashboard as json.
+Since the Grafana instance is read-only, there is no 'save' button for the dashboard changes you make. In order to add a new dashboard, you should use the ['Grafana Playground' dashboard](https://grafana.stage.devshift.net/d/playground/playground?orgId=1). The Grafana Playground dashboard has one instance each for each of the supported panels. You can duplicate the panels as many times as you'd like, and use the query view to add the graphs for desired metrics. Once that's done, export the dashboard as json.
 
 Dashboards are injected into grafana as ConfigMaps, to generate a ConfigMap from an existing dashboard, use a command similar to:
 

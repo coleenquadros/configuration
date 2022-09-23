@@ -35,6 +35,7 @@ managedResourceTypes:
 
 imagePatterns:
 - quay.io/cloudservices
+- quay.io/app-sre
 
 authentication:
   image:
@@ -71,7 +72,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: master
+    ref: e09117000c5a3f9e50df982e508419c99cf8501c
     parameters:
       FLOORIST_SUSPEND: 'false'
       FLOORIST_IMAGE_TAG: fe12542 # 2022-06-03
@@ -92,10 +93,10 @@ resourceTemplates:
       OB_TOKEN_CLIENT_SECRET: 6093511f-d7e9-4ccf-91ac-35365c587652
       QUARKUS_REST_CLIENT_OB_URL: https://event-bridge-event-bridge-stable.apps.ob-stable.0b9l.p1.openshiftapps.com
       QUARKUS_REST_CLIENT_KC_URL: https://sso.redhat.com
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-notifications-backend-gh-build-master
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-notifications-backend-gh-build-master
     promotion:
       publish:
       - notifications-backend-stage-deploy-success-channel
@@ -104,7 +105,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: eaf6ba29ab77c5190cff134b63ad4e9e2372cea1
+    ref: e09117000c5a3f9e50df982e508419c99cf8501c
     parameters:
       FLOORIST_SUSPEND: 'false'
       FLOORIST_IMAGE_TAG: b57a5a8
@@ -114,12 +115,8 @@ resourceTemplates:
       MEMORY_LIMIT: 1Gi
       MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
-      NOTIFICATIONS_USE_ORG_ID: true
-      NOTIFICATIONS_EVENTS_USE_ORG_ID: true
       SENTRY_ENABLED: true
     promotion:
-      subscribe:
-      - notifications-backend-stage-post-deploy-tests-success-channel
       publish:
       - notifications-backend-prod-deploy-success-channel
 
@@ -141,7 +138,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-engine.yaml version
-    ref: master
+    ref: e09117000c5a3f9e50df982e508419c99cf8501c
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_LIMIT: 300m
@@ -155,6 +152,7 @@ resourceTemplates:
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
       MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 180000
+      NOTIFICATIONS_DISABLE_WEBHOOK_ENDPOINTS_ON_FAILURE: true
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       NOTIFICATIONS_TRANSLATE_ACCOUNT_ID_TO_ORG_ID: true
       NOTIFICATIONS_USE_ORG_ID: true
@@ -169,10 +167,10 @@ resourceTemplates:
       SENTRY_ENABLED: true
       RECIPIENT_PROVIDER_USE_IT_IMPL: true
       NOTIFICATIONS_USE_DEFAULT_TEMPLATE: true
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-notifications-backend-gh-build-master
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-notifications-backend-gh-build-master
     promotion:
       publish:
       - notifications-engine-stage-deploy-success-channel
@@ -181,7 +179,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-engine.yaml version
-    ref: eaf6ba29ab77c5190cff134b63ad4e9e2372cea1
+    ref: e09117000c5a3f9e50df982e508419c99cf8501c
     parameters:
       CLOUDWATCH_ENABLED: true
       MEMORY_LIMIT: 6Gi
@@ -193,8 +191,6 @@ resourceTemplates:
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
       MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 180000
       NOTIFICATIONS_LOG_LEVEL: DEBUG
-      NOTIFICATIONS_TRANSLATE_ACCOUNT_ID_TO_ORG_ID: true
-      NOTIFICATIONS_USE_ORG_ID: true
       PROCESSOR_EMAIL_NO_REPLY: no-reply@redhat.com
       RBAC_S2S_READ_TIMEOUT: 120000
       SENTRY_ENABLED: true
@@ -221,17 +217,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: master
+    ref: e09117000c5a3f9e50df982e508419c99cf8501c
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       CRONTAB_AGGREGATION_JOB: 0 * * * *
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-notifications-backend-gh-build-master
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-notifications-backend-gh-build-master
     promotion:
       publish:
       - notifications-aggregator-stage-deploy-success-channel
@@ -240,7 +236,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: eaf6ba29ab77c5190cff134b63ad4e9e2372cea1
+    ref: e09117000c5a3f9e50df982e508419c99cf8501c
     parameters:
       CLOUDWATCH_ENABLED: true
       NOTIFICATIONS_LOG_LEVEL: DEBUG
@@ -267,17 +263,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: main
+    ref: c20ced1b8561a6f3c0f833d988542ffa42b7ae8e
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-notifications-gw-gh-build-main
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-notifications-gw-gh-build-main
     promotion:
       publish:
       - notifications-gw-stage-deploy-success-channel
@@ -286,7 +282,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: ab128f7bc74605a868f9285c07966756edebd617
+    ref: c20ced1b8561a6f3c0f833d988542ffa42b7ae8e
     parameters:
       CLOUDWATCH_ENABLED: true
       MIN_REPLICAS: 3

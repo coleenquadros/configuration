@@ -5,7 +5,7 @@ labels:
   service: acs-fleet-manager
 
 name: acs-fleet-manager
-description: 'SaaS tracking file for acs-fleet-manager'
+description: "SaaS tracking file for acs-fleet-manager"
 
 app:
   $ref: /services/acs-fleet-manager/app.yml
@@ -49,13 +49,18 @@ resourceTemplates:
         ref: main
         parameters:
           ENVIRONMENT: stage
-          CENTRAL_RHSSO_CLIENT_ID: rhacs-ms-dev
+          CENTRAL_IDP_CLIENT_ID: rhacs-ms-dev
+          CENTRAL_IDP_ISSUER: https://sso.stage.redhat.com/auth/realms/redhat-external
           DATAPLANE_CLUSTER_CONFIG_FILE: /config/dataplane-cluster-configuration-staging.yaml
           PROVIDERS_CONFIG_FILE: /config/provider-configuration.yaml
-          REGISTERED_USERS_PER_ORGANISATION: "[{id: 13473216, max_allowed_instances: 20, any_user: true, registered_users: []}, {id: 13640203, max_allowed_instances: 5, any_user: true, registered_users: []}, {id: 12147054, max_allowed_instances: 1, any_user: true, registered_users: []}, {id: 13639843, max_allowed_instances: 1, any_user: true, registered_users: []}]"
+          REGISTERED_USERS_PER_ORGANISATION: >-
+            [{id: 13473216, max_allowed_instances: 20, any_user: true, registered_users: []},
+            {id: 13640203, max_allowed_instances: 5, any_user: true, registered_users: []},
+            {id: 12147054, max_allowed_instances: 1, any_user: true, registered_users: []},
+            {id: 13639843, max_allowed_instances: 1, any_user: true, registered_users: []}]
           CLUSTER_LIST:
-            - name: /api-acs-stage-dp-01-8csb-p1-openshiftapps-com:6443/acsms-admin
-              cluster_id: 1u4lht1l70d399sslbtg68i0mjmm4sol
+            - name: default/api-acs-stage-dp-01-blbk-p1-openshiftapps-com:6443/acsms-admin
+              cluster_id: 1ujvmrppj7au6cvjps6dj6mlechenrl1
               cloud_provider: aws
               region: us-east-1
               schedulable: true
@@ -63,7 +68,7 @@ resourceTemplates:
               central_instance_limit: 1000
               provider_type: standalone
               supported_instance_type: "eval,standard"
-              cluster_dns: apps.acs-stage-dp-01.8csb.p1.openshiftapps.com
+              cluster_dns: apps.acs-stage-dp-01.blbk.p1.openshiftapps.com
               available_central_operator_versions:
                 - version: "3.71.0"
                   ready: true
@@ -74,14 +79,17 @@ resourceTemplates:
             $ref: /dependencies/ci-ext/ci-ext.yml
           name: stackrox-acs-fleet-manager-gh-build-main
       - namespace:
-          $ref: /services/acs-fleet-manager/namespaces/acs-fleet-manager-production.yml
-        ref: e03d3c1af2a6a2f46a5108045e60b614c1705d6c
+          $ref: /services/acs-fleet-manager/namespaces/acs-fleet-manager-production-app-sre-prod-04.yml
+        ref: 7132e7cbb7d75447a71e5ad1ce4d1aa0ed22b038
         parameters:
           ENVIRONMENT: production
-          CENTRAL_RHSSO_CLIENT_ID: rhacs-ms-qaprod
+          CENTRAL_IDP_CLIENT_ID: rhacs-ms-qaprod
+          CENTRAL_IDP_ISSUER: https://sso.redhat.com/auth/realms/redhat-external
           DATAPLANE_CLUSTER_CONFIG_FILE: /config/dataplane-cluster-configuration.yaml
           PROVIDERS_CONFIG_FILE: /config/provider-configuration.yaml
-          REGISTERED_USERS_PER_ORGANISATION: "[{id: 11009103, max_allowed_instances: 100, any_user: true, registered_users: []}]"
+          REGISTERED_USERS_PER_ORGANISATION: >-
+            [{id: 11009103, max_allowed_instances: 100, any_user: true, registered_users: []},
+            {id: 16238026, max_allowed_instances: 25, any_user: true, registered_users: []}]
           CENTRAL_DOMAIN_NAME: acs.rhcloud.com
           CLUSTER_LIST:
             - name: /api-acs-prod-dp-01-pnz3-p1-openshiftapps-com:6443/acsms-prod-admin
@@ -107,3 +115,7 @@ resourceTemplates:
       - namespace:
           $ref: /services/observability/namespaces/app-sre-observability-stage.yml
         ref: main
+      - namespace:
+          $ref: /services/observability/namespaces/app-sre-observability-production.yml
+        ref: 7132e7cbb7d75447a71e5ad1ce4d1aa0ed22b038
+

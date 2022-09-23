@@ -222,15 +222,9 @@ externalResources:
 
 ## Deployment
 
-To deploy the new instance to the `unleash` Namespace, create a new Saas file, and add this `resourceTemplates` section.
-[Exmaple Unleash SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/unleash/cicd/saas-ocm.yaml):
++To deploy the new instance to the `unleash` Namespace, add this section to the list of `targets` in [saas-unleash](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/unleash/cicd/saas-unleash.yaml) file:
 
 ```yaml
-resourceTemplates:
-- name: unleash
-  url: https://github.com/app-sre/unleash
-  path: /openshift/unleash.yaml
-  targets:
   - namespace:
       $ref: /services/unleash/namespaces/<application-name>-unleash.yml
     ref: <commit-hash>

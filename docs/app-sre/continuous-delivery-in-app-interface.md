@@ -57,7 +57,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * currently only `/dependencies/slack/coreos.yml` is supported.
     * `channel` - channel to send notifications to
 * `managedResourceTypes` - a list of resource types to deploy (indicates that any other type is filtered out)
-* `takeover` - (optional) if set to true, the specified `managedResourceTypes` will be managed exclusively
+* `takeover` - (optional) if set to true, the resource types declared in `managedResourceTypes` will be managed exclusively by the integration, meaning **ONLY** resources declared in the saas file will be kept and all others will be **DELETED**. **This is dangerous and probably not want you want in most cases. Use with caution!**
 * `deprecated` - (optional) if set to true, resource templates can be migrated to different saas files.
 * `compare` - (optional) if set to false, the job does not compare desired to current resource and applies all resources even if they have not changed
 * `timeout` - (optional) set a timeout in minutes for the deployment job ([default](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2581e30973e9ead6611d6fa1b0fa7dc34d41e63d/resources/jenkins/global/defaults.yaml#L24))
@@ -218,7 +218,7 @@ tkn pipelinerun logs openshift-saas-deploy-run-r2mkz -f -n crc-pipelines
 
 Most MRs to app-interface require a review from the App SRE team.  Merging of MRs to saas files does NOT require an approval from App SRE and should be completely self serviced.
 
-Each saas file must be referenced from at least one role under the `owned_saas_files` field. [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/e40300ca8ebc2cc0be18cf09fa076bb7ebae4dd9/data/teams/app-sre/roles/app-sre.yml#L189-191). Each such role must be referenced from at least one user file. TL;DR - every saas file should have at least one owner.
+Each saas file must be referenced from at least one role under the `self_service[].datafiles` field. [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/ea6150dd66c0a6d1bd4dbc56cab5ca5e7bd39e13/data/teams/app-sre/roles/app-sre.yml#L274-279). Each such role must be referenced from at least one user file. TL;DR - every saas file should have at least one owner.
 
 Each user with this role can approve MRs by adding a `/lgtm` comment in the MR in the following cases -
 - the MR only changes saas files that this user is an owner of and no other files

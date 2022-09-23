@@ -7,11 +7,12 @@ rule_files:
 evaluation_interval: 10m
 
 tests:
+{{%- for account in query("/queries/aws-account-uid.graphql", name="osd-privatelink-" + environment ) %}}
 - interval: 10m
   input_series:
-  - series: aws_resources_exporter_vpc_vpcsperregion_quota{job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_vpcsperregion_quota{job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 100+0x4
-  - series: aws_resources_exporter_vpc_vpcsperregion_usage{job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_vpcsperregion_usage{job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 0+0x1 90 90 100
 
   alert_rule_test:
@@ -24,12 +25,15 @@ tests:
     alertname: VpcsPerRegionQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: "VpcsPerRegionQuotaExhaustion"
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
+        quota_code: 123
+        service_code: abc
       exp_annotations:
-        message: "Number of VPCs in us-east-1 is nearly exhausting its quota: currently 90% used."
+        message: "Number of VPCs in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: VPCs per region are nearing service quota
 
@@ -37,20 +41,23 @@ tests:
     alertname: VpcsPerRegionQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: "VpcsPerRegionQuotaExhaustion"
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
+        quota_code: 123
+        service_code: abc
       exp_annotations:
-        message: "Number of VPCs in us-east-1 is nearly exhausting its quota: currently 100% used."
+        message: "Number of VPCs in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: VPCs per region are nearing service quota
 
 - interval: 10m
   input_series:
-  - series: aws_resources_exporter_vpc_subnetspervpc_quota{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_subnetspervpc_quota{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 800+0x4
-  - series: aws_resources_exporter_vpc_subnetspervpc_usage{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_subnetspervpc_usage{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 0+0x1 720 720 800
 
   alert_rule_test:
@@ -63,13 +70,16 @@ tests:
     alertname: SubnetsPerVpcQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: "SubnetsPerVpcQuotaExhaustion"
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
         vpcid: 1
+        quota_code: 123
+        service_code: abc
       exp_annotations:
-        message: "Number of subnets in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used."
+        message: "Number of subnets in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Subnets per vpc are nearing service quota
 
@@ -77,21 +87,24 @@ tests:
     alertname: SubnetsPerVpcQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: "SubnetsPerVpcQuotaExhaustion"
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
         vpcid: 1
+        quota_code: 123
+        service_code: abc
       exp_annotations:
-        message: "Number of subnets in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used."
+        message: "Number of subnets in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Subnets per vpc are nearing service quota
 
 - interval: 10m
   input_series:
-  - series: aws_resources_exporter_vpc_routesperroutetable_quota{routetableid="1", vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_routesperroutetable_quota{routetableid="1", vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 1000+0x5
-  - series: aws_resources_exporter_vpc_routesperroutetable_usage{routetableid="1", vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_routesperroutetable_usage{routetableid="1", vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 0+0x1 _ 900 900 1000
 
   alert_rule_test:
@@ -104,13 +117,16 @@ tests:
     alertname: RoutesPerRoutetableQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: RoutesPerRoutetableQuotaExhaustion
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
         routetableid: 1
+        quota_code: 123
+        service_code: abc
       exp_annotations:
-        message: "Number of routes in routetable 1 in us-east-1 is nearly exhausting its quota: currently 90% used."
+        message: "Number of routes in routetable 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Routes per routetable are nearing service quota
 
@@ -118,21 +134,24 @@ tests:
     alertname: RoutesPerRoutetableQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: RoutesPerRoutetableQuotaExhaustion
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
         routetableid: 1
+        quota_code: 123
+        service_code: abc
       exp_annotations:
-        message: "Number of routes in routetable 1 in us-east-1 is nearly exhausting its quota: currently 100% used."
+        message: "Number of routes in routetable 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Routes per routetable are nearing service quota
 
 - interval: 10m
   input_series:
-  - series: aws_resources_exporter_vpc_interfacevpcendpointspervpc_quota{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_interfacevpcendpointspervpc_quota{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 450+0x4
-  - series: aws_resources_exporter_vpc_interfacevpcendpointspervpc_usage{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_interfacevpcendpointspervpc_usage{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 0+0x1 405 405 450
 
   alert_rule_test:
@@ -145,12 +164,15 @@ tests:
     alertname: InterfaceVpcEndpointsQuotaExhausion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: InterfaceVpcEndpointsQuotaExhausion
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
+        quota_code: 123
+        service_code: abc
       exp_annotations:
-        message: "Interface VPC endpoints per VPC in us-east-1 are nearly exhausting their quota: currently 90% of all available endpoints used."
+        message: "Interface VPC endpoints per VPC in us-east-1 are nearly exhausting their quota: currently 90% of all available endpoints used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Interface VPC endpoints per VPC are nearing service quota
 
@@ -158,20 +180,23 @@ tests:
     alertname: InterfaceVpcEndpointsQuotaExhausion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: InterfaceVpcEndpointsQuotaExhausion
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
+        quota_code: 123
+        service_code: abc
       exp_annotations:
-        message: "Interface VPC endpoints per VPC in us-east-1 are nearly exhausting their quota: currently 100% of all available endpoints used."
+        message: "Interface VPC endpoints per VPC in us-east-1 are nearly exhausting their quota: currently 100% of all available endpoints used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Interface VPC endpoints per VPC are nearing service quota
 
 - interval: 10m
   input_series:
-  - series: aws_resources_exporter_vpc_routetablespervpc_quota{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_routetablespervpc_quota{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 450+0x4
-  - series: aws_resources_exporter_vpc_routetablespervpc_usage{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_routetablespervpc_usage{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 0+0x1 405 405 450
 
   alert_rule_test:
@@ -184,13 +209,16 @@ tests:
     alertname: RoutetablesPerVpcQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: RoutetablesPerVpcQuotaExhaustion
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
         vpcid: 1
+        quota_code: 123
+        service_code: abc
       exp_annotations:
-        message: "Routestables per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used."
+        message: "Routestables per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Routetables per VPC are nearing service quota
 
@@ -198,21 +226,24 @@ tests:
     alertname: RoutetablesPerVpcQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: RoutetablesPerVpcQuotaExhaustion
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
         vpcid: 1
+        quota_code: 123
+        service_code: abc
       exp_annotations:
-        message: "Routestables per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used."
+        message: "Routestables per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account.uid }}})"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Routetables per VPC are nearing service quota
 
 - interval: 10m
   input_series:
-  - series: aws_resources_exporter_vpc_ipv4blockspervpc_quota{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_ipv4blockspervpc_quota{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 20+0x4
-  - series: aws_resources_exporter_vpc_ipv4blockspervpc_usage{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_vpc_ipv4blockspervpc_usage{vpcid="1", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", aws_region="us-east-1", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 0+0x1 18 18 20
 
   alert_rule_test:
@@ -225,35 +256,41 @@ tests:
     alertname: Ipv4BlocksPerVpcQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: Ipv4BlocksPerVpcQuotaExhaustion
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
         vpcid: 1
+        quota_code: 123
+        service_code: abc
       exp_annotations:
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Ipv4 blocks per VPC are nearing service quota
-        message: "IPv4 blocks per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used."
+        message: "IPv4 blocks per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 90% used. (Account: {{{ account.uid }}})"
 
   - eval_time: 40m
     alertname: Ipv4BlocksPerVpcQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: Ipv4BlocksPerVpcQuotaExhaustion
         aws_region: "us-east-1"
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
         vpcid: 1
+        quota_code: 123
+        service_code: abc
       exp_annotations:
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Ipv4 blocks per VPC are nearing service quota
-        message: "IPv4 blocks per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used."
+        message: "IPv4 blocks per VPC in vpc 1 in us-east-1 is nearly exhausting its quota: currently 100% used. (Account: {{{ account.uid }}})"
 
 - interval: 10m
   input_series:
-  - series: aws_resources_exporter_route53_recordsperhostedzone_quota{hostedzoneid="1", hostedzonename="myhostedzone", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_route53_recordsperhostedzone_quota{hostedzoneid="1", hostedzonename="myhostedzone", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 10000+0x4
-  - series: aws_resources_exporter_route53_recordsperhostedzone_total{hostedzoneid="1", hostedzonename="myhostedzone", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", service="privatelink-monitoring"}
+  - series: aws_resources_exporter_route53_recordsperhostedzone_total{hostedzoneid="1", hostedzonename="myhostedzone", job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", service="privatelink-monitoring", quota_code="123", service_code="abc"}
     values: 0+0x1 9000 9000 10000
 
   alert_rule_test:
@@ -266,26 +303,58 @@ tests:
     alertname: RecordsPerHostedZoneQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: RecordsPerHostedZoneQuotaExhaustion
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
         hostedzoneid: 1
         hostedzonename: myhostedzone
+        quota_code: 123
+        service_code: abc
       exp_annotations:
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Records per hosted zone are nearing service quota
-        message: "Records in hosted zone myhostedzone (1) are nearly exhausting their quota: currently 90% used."
+        message: "Records in hosted zone myhostedzone (1) are nearly exhausting their quota: currently 90% used. (Account: {{{ account.uid }}})"
 
   - eval_time: 40m
     alertname: RecordsPerHostedZoneQuotaExhaustion
     exp_alerts:
     - exp_labels:
+        jiralert: OHSS
         alertname: RecordsPerHostedZoneQuotaExhaustion
         service: privatelink-monitoring
-        severity: high
+        severity: {{{ severity }}}
         hostedzoneid: 1
         hostedzonename: myhostedzone
+        quota_code: 123
+        service_code: abc
       exp_annotations:
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
         summary: Records per hosted zone are nearing service quota
-        message: "Records in hosted zone myhostedzone (1) are nearly exhausting their quota: currently 100% used."
+        message: "Records in hosted zone myhostedzone (1) are nearly exhausting their quota: currently 100% used. (Account: {{{ account.uid }}})"
+- interval: 10m
+  input_series:
+    - series: aws_resources_exporter_route53_hostedzonesperaccount_quota{job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", service="privatelink-monitoring", quota_code="123", service_code="abc"}
+      values: 500+0x8 # 500 500 500 500 500 500 500 500 500
+    - series: aws_resources_exporter_route53_hostedzonesperaccount_total{job="aws-resource-exporter-osd-privatelink-{{{ environment }}}", service="privatelink-monitoring", quota_code="123", service_code="abc"}
+      values: 400+10x8 # 400 410 420 430 440 450 460 470 480
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 20m
+    alertname: HostedZonesPerAccountQuotaExhaustion
+    exp_alerts:
+
+  - eval_time: 60m
+    alertname: HostedZonesPerAccountQuotaExhaustion
+    exp_alerts:
+    - exp_labels:
+        jiralert: OHSS
+        service: privatelink-monitoring
+        severity: {{{ severity }}}
+        quota_code: 123
+        service_code: abc
+      exp_annotations:
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/PrivatelinkQuotaExceeded.md"
+        summary: "Records per hosted zone are nearing service quota"
+        message: "The number of hosted zones is approaching their quota: currently 92% used. (Account: {{{ account.uid }}})"
+{{% endfor %}}

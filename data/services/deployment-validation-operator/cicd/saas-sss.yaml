@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: deployment-validation-operator
+
+name: saas-dvo-sss # Deployment Validation Operator (DVO) SelectorSyncSets
+description: SaaS tracking file for Deployment Validation Operator
+
+app:
+  $ref: /services/deployment-validation-operator/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: wg-dvo
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns: []
+
+resourceTemplates:
+- name: deployment-validation-operator
+  url: https://github.com/app-sre/deployment-validation-operator
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/app-sre/deployment-validation-operator-catalog
+    CHANNEL: alpha
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hivei01ue1/cluster-scope.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: app-sre-deployment-validation-operator-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
+    ref: 1d563e524a4cf4736fe9c03d4eae2789c9665c53
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
+    ref: 1d563e524a4cf4736fe9c03d4eae2789c9665c53

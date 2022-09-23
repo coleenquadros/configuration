@@ -71,14 +71,12 @@ Given the access required, an AppSRE engineer will be required to execute certai
     
       - provider: rds
         identifier: <identifier>-restore
-        defaults: /terraform/resources/app-sre-stage/staging/steahan-rds-defaults.yml
+        defaults: <defaults-file>
     +   output_resource_name: <identifier>-rds  # Alternatively, if `output_resource_name` was already set on the original database, use that value
         overrides:
+          snapshot_identifier: <snapshot_name>
           timeouts:
             create: 2h
-          restore_to_point_in_time:
-            restore_time: '2022-06-01T20:43:00Z'
-            source_db_instance_identifier: <identifier>
     ```
    * Swapping `output_resource_name` makes it so that the restored database now takes over the `Secret` name from the original database. This means that any `Secret` refs can remain unchanged. Note that if the original database had not set `output_resource_name`, then it will be `<identifier>-rds`.
 7. Merge the MR to switch the `Secret`s. Once this is complete, `qontract.recycle` should result in the restart of any pods using this secret.

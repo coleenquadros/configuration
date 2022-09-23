@@ -13,6 +13,7 @@
     - [PEIncomingRequestsHalted](#peincomingrequestshalted)
     - [PEUpstreamErrors](#peupstreamerrors)
     - [PEGraphResponseErrors](#pegraphresponseerrors)
+    - [PEHighLatency](#pehighlatency)
     - [Escalations](#escalations)
 
 <!-- /TOC -->
@@ -200,6 +201,59 @@ Cluster-Version-Operator (CVO) is showing errors on clusters console.
 
 - Contact Cincinnati team, investigate why policy-engine is generating error-reponses.
 - If the failure appears to be due to a recent production deploy, consider [reverting the deploy](#reverting-broken-versions).
+
+---
+
+## PEHighLatency
+
+### Summary:
+
+Policy-engine is working and processing client requests, but the latency is high > 1 sec.
+
+### Impact:
+
+Clusters might not be receiving updates hints.
+Cluster-Version-Operator (CVO) is showing errors on clusters console.
+High possibility of latency increasing further
+
+### Access required:
+
+- Access to the clusters that run Cincinnati, namespaces:
+  - cincinnati-stage (app-sre-stage)
+  - cincinnati-production (app-sre)
+
+### Steps:
+
+- Increasing number of pods or resources should reduce the latency if it is due to lack of resources. 
+- Check envoy backlog for cincinnati. If more than 100, contact Cincinnati team.
+- Contact Cincinnati team, investigate why policy-engine is having high latency.
+- If the failure appears to be due to a recent production deploy, consider [reverting the deploy](#reverting-broken-versions).
+
+---
+
+## CincinnatiEnvoyHighBacklog
+
+### Summary:
+
+Cincinnati has a high number of envoy pending connections which can be a precursor to failing Update Service (Cincinnati).
+
+### Impact:
+
+- As the envoy backlog increases, the cincinnati might get overloaded with connections and latency will increase if not fixed quickly.
+- Cluster-Version-Operator (CVO) is showing errors on clusters console.
+
+### Access required:
+
+- Access to the clusters that run Cincinnati, namespaces:
+  - cincinnati-stage (app-sre-stage)
+  - cincinnati-production (app-sre)
+
+### Steps:
+
+- Contact Cincinnati team, investigate why the envoy backlog has increased.
+- Check if any container/pod has restarted. If yes, see if the backlog decreases as requests per second to pod crosses 60rps.
+  If backlog does not decrease, contact Cincinnati team immediately.
+- If the backlog increase appears to be due to a recent production deploy, consider [reverting the deploy](#reverting-broken-versions).
 
 ---
 

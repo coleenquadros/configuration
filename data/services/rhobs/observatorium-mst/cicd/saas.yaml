@@ -56,6 +56,8 @@ imagePatterns:
 - quay.io/openshift/origin-configmap-reloader
 - quay.io/prometheus/alertmanager
 - quay.io/openshift-logging/loki
+  # This should be deleted upon completion of https://issues.redhat.com/browse/RHOBS-112
+- quay.io/philipgough/envoy
 
 parameters:
   OAUTH_PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
@@ -77,7 +79,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
-    ref: e81d5d9ab68acbab4475bbbecdf9a2da425ebc89
+    ref: a9fb6916098c2f309a6f49cd30906e5f970fc7fb
     parameters:
       NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-stage
@@ -114,7 +116,7 @@ resourceTemplates:
       OPA_AMS_MEMORY_REQUEST: 100Mi
       OSD_ORGANIZATION_ID: 1lneg5EWJaGAK3d7RZpAJM9WujU
       PROMETHEUS_AMS_REMOTE_WRITE_PROXY_TARGET: 'observatorium-thanos-receive'
-      RULES_OBJSTORE_IMAGE_TAG: main-2022-04-01-64cd17e
+      RULES_OBJSTORE_IMAGE_TAG: main-2022-09-21-9df4d2c
       RULES_OBJSTORE_S3_SECRET: observatorium-mst-rules-objstore-stage-s3
       RULES_OBJSTORE_SECRET: observatorium-mst-rules-objstore-objectstorage
       RULES_OBJSTORE_LOG_LEVEL: debug
@@ -123,17 +125,19 @@ resourceTemplates:
       OIDC_AUDIENCE: 'observatorium'
       OIDC_ISSUER_URL: '${SSO_BASE_URL}'
       SLEEP_DURATION_SECONDS: '15'
-      MANAGED_TENANTS: 'rhobs'
+      MANAGED_TENANTS: 'rhobs,osd'
       OBSCTL_RELOADER_SECRET_NAME: rhobs-tenant-mst-staging
       OBSCTL_RELOADER_IMAGE: 'quay.io/app-sre/obsctl-reloader'
       OBSCTL_RELOADER_IMAGE_TAG: 'a9daddf'
+      METRICS_WRITE_SERVICE_NAME: observatorium-thanos-receive
+      METRICS_WRITE_SERVICE_PORT: '19291'
     promotion:
       publish:
       - observatorium-mst-stage-deploy-success-channel
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: ecc47b4ef17d84ec53d2c6f4d97754ad97a370fc
+    ref: 41569d118351156446437aabc8bd6beda6d9e510
     parameters:
       NAMESPACE: observatorium-mst-production
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-production
@@ -172,7 +176,7 @@ resourceTemplates:
       OBSERVATORIUM_API_IMAGE: quay.io/observatorium/api
       OBSERVATORIUM_API_IMAGE_TAG: main-2022-08-23-v0.1.2-242-g23af39e
       OPA_AMS_IMAGE_TAG: master-2021-07-14-d517f70
-      RULES_OBJSTORE_IMAGE_TAG: main-2022-04-01-64cd17e
+      RULES_OBJSTORE_IMAGE_TAG: main-2022-09-21-9df4d2c
       RULES_OBJSTORE_S3_SECRET: observatorium-mst-rules-objstore-production-s3
       RULES_OBJSTORE_SECRET: observatorium-mst-rules-objstore-objectstorage
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
@@ -184,6 +188,8 @@ resourceTemplates:
       OBSCTL_RELOADER_SECRET_NAME: rhobs-tenant-mst-production
       OBSCTL_RELOADER_IMAGE: 'quay.io/app-sre/obsctl-reloader'
       OBSCTL_RELOADER_IMAGE_TAG: 'a9daddf'
+      METRICS_WRITE_SERVICE_NAME: observatorium-thanos-receive
+      METRICS_WRITE_SERVICE_PORT: '19291'
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/rhobsp02ue1/observatorium-mst-production.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
@@ -242,7 +248,11 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
-    ref: 433f40435c66a677dce7a8e5901b1a5703e31b7e
+    ## While this comment is here, do not alter the ref for this target without speaking to @pgough :)
+    ## There is a breaking change on the ref below which is living on a temp branch until all migrations
+    ## are complete. Once all migrations are complete, the branch will be merged to main and
+    # this comment can be removed
+    ref: fac1ad97bdb7b872cb387f556a41877221df315f
     parameters:
       NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_ALERTMANAGER_LOG_LEVEL: debug
@@ -295,7 +305,8 @@ resourceTemplates:
       THANOS_RECEIVE_MEMORY_LIMIT: '12Gi'
       THANOS_RECEIVE_MEMORY_REQUEST: '12Gi'
       THANOS_RECEIVE_REPLICAS: 4
-      THANOS_RULE_SYNCER_IMAGE_TAG: main-2022-09-06-9b68ddf
+      THANOS_RECEIVE_HASHRINGS_ALGORITHM: ketama
+      THANOS_RULE_SYNCER_IMAGE_TAG: main-2022-09-14-338f9ec
       THANOS_RULER_CPU_LIMIT: '4'
       THANOS_RULER_CPU_REQUEST: '4'
       THANOS_RULER_LOG_LEVEL: 'info'
@@ -311,13 +322,20 @@ resourceTemplates:
       THANOS_STORE_MEMORY_LIMIT: '8Gi'
       THANOS_STORE_MEMORY_REQUEST: '4Gi'
       THANOS_STORE_REPLICAS: 1
+      THANOS_RECEIVE_HASHRING_SERVICE_NAME: observatorium-thanos-receive-default
+
     promotion:
       publish:
       - observatorium-mst-metrics-stage-deploy-success-channel
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: c9af81c05622ee863962ade46cceabe390c79f4a
+
+    ## While this comment is here, do not alter the ref for this target without speaking to @pgough :)
+    ## There is a breaking change on the ref below which is living on a temp branch until all migrations
+    ## are complete. Once all migrations are complete, the branch will be merged to main and
+    # this comment can be removed
+    ref: fac1ad97bdb7b872cb387f556a41877221df315f
     parameters:
       NAMESPACE: observatorium-mst-production
       OBSERVATORIUM_NAMESPACE: observatorium-mst-production
@@ -329,13 +347,13 @@ resourceTemplates:
       JAEGER_COLLECTOR_NAMESPACE: observatorium-production
       THANOS_CONFIG_SECRET: observatorium-mst-thanos-objectstorage
       THANOS_S3_SECRET: observatorium-mst-thanos-production-s3
-      THANOS_IMAGE_TAG: v0.27.0
+      THANOS_IMAGE_TAG: v0.28.0
       THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
       THANOS_QUERIER_REPLICAS: 4
-      THANOS_QUERIER_CPU_REQUEST: '1'
-      THANOS_QUERIER_CPU_LIMIT: '1'
-      THANOS_QUERIER_MEMORY_REQUEST: '16Gi'
-      THANOS_QUERIER_MEMORY_LIMIT: '16Gi'
+      THANOS_QUERIER_CPU_REQUEST: '3'
+      THANOS_QUERIER_CPU_LIMIT: '6'
+      THANOS_QUERIER_MEMORY_REQUEST: '24Gi'
+      THANOS_QUERIER_MEMORY_LIMIT: '24Gi'
       THANOS_QUERIER_FILE_SD_TARGETS: '[]'
       THANOS_QUERY_FRONTEND_REPLICAS: 3
       THANOS_QUERY_FRONTEND_CPU_REQUEST: '100m'
@@ -355,6 +373,7 @@ resourceTemplates:
       THANOS_RECEIVE_MEMORY_LIMIT: '15Gi'
       THANOS_RECEIVE_LOG_LEVEL: 'debug'
       THANOS_RECEIVE_DEBUG_ENV: '1'
+      THANOS_RECEIVE_HASHRINGS_ALGORITHM: ketama
       THANOS_COMPACTOR_REPLICAS: 1
       THANOS_COMPACTOR_RETENTION_RESOLUTION_RAW: '365d'
       THANOS_COMPACTOR_RETENTION_RESOLUTION_FIVE_MINUTES: '365d'
@@ -362,8 +381,8 @@ resourceTemplates:
       # TODO(bwplotka): Fix it on templating side, it's super confusing. It means downsampling is enabled.
       THANOS_COMPACTOR_RETENTION_DISABLE_DOWNSAMPLING: '--no-downsampling.disable'
       THANOS_COMPACTOR_PVC_REQUEST: '50Gi'
-      THANOS_RULE_SYNCER_IMAGE_TAG: main-2022-01-11-1290656
-      THANOS_RULER_LOG_LEVEL: 'info'
+      THANOS_RULE_SYNCER_IMAGE_TAG: main-2022-09-14-338f9ec
+      THANOS_RULER_LOG_LEVEL: 'debug'
       THANOS_RULER_REPLICAS: 2
       THANOS_RULER_CPU_REQUEST: '4'
       THANOS_RULER_CPU_LIMIT: '4'
@@ -384,6 +403,7 @@ resourceTemplates:
       MEMCACHED_EXPORTER_MEMORY_REQUEST: 50Mi
       MEMCACHED_EXPORTER_MEMORY_LIMIT: 200Mi
       SERVICE_ACCOUNT_NAME: observatorium-mst
+      THANOS_RECEIVE_HASHRING_SERVICE_NAME: observatorium-thanos-receive-default
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/rhobsp02ue1/observatorium-mst-production.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
@@ -652,3 +672,22 @@ resourceTemplates:
         NAMESPACE: observatorium-production
         REMOTE_NAMESPACE: observatorium-mst-production
         SERVICE_ACCOUNT_NAME: observatorium
+- name: rhobs-thanos-receive-migration-template
+  path: /resources/services/receiver-migration-template.yaml
+  url: https://github.com/rhobs/configuration
+  targets:
+    - namespace:
+        $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
+      ref: c5e3d686d95dba479499f462cdd3bee25040d3a7
+      parameters:
+        NAMESPACE: observatorium-mst-production
+        PRIMARY_UPSTREAM_HOST: 'observatorium-thanos-receive-router.observatorium-mst-production.svc.cluster.local'
+        MIRROR_HOST: 'observatorium-thanos-receive.observatorium-mst-production.svc.cluster.local'
+        RECEIVER_KETAMA_REPLICAS: '0'
+        RECEIVER_KETAMA_CPU_REQUEST: '1500m'
+        RECEIVER_KETAMA_CPU_LIMIT: '1500m'
+        RECEIVER_KETAMA_MEMORY_REQUEST: '15Gi'
+        RECEIVER_KETAMA_MEMORY_LIMIT: '15Gi'
+        THANOS_CONFIG_SECRET: observatorium-mst-thanos-objectstorage
+        THANOS_S3_SECRET: observatorium-mst-thanos-production-s3
+        RECEIVER_SERVICE_ACCOUNT: observatorium-mst

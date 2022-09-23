@@ -170,6 +170,12 @@ externalResources:
             "Resource": [
               "arn:aws:autoscaling:us-east-1:920877988636:autoScalingGroup:*:autoScalingGroupName/imagebuilder-workers-aoc-x86-staging",
             ]
+          },
+          {
+            "Sid": "CopyImagePolicy",
+            "Effect": "Allow",
+            "Action": "ec2:CopyImage",
+            "Resource": "arn:aws:ec2:*::image/*"
           }
         ]
       }
@@ -225,11 +231,12 @@ externalResources:
       composer_host_aoc: api.openshift.com
       composer_host_aoc_staging: api.stage.openshift.com
       worker_config_aws_bucket: "image-builder-service-stage-2"
+      token_url: "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
     image:
       - provider: git
         tag_name: composer_commit
         url: https://github.com/osbuild/osbuild-composer
-        ref: 5f29dc312a86ad7aed5ec149794c91d9b0206545
+        ref: f0e48d36a9a4c945b359165d65db85a5e1453f25
         upstream:
           instance:
             $ref: /dependencies/ci-ext/ci-ext.yml
@@ -237,3 +244,26 @@ externalResources:
       - provider: static
         tag_name: arch
         value: x86_64
+  - provider: asg
+    identifier: imagebuilder-workers-aoc-aarch64-staging
+    defaults: /terraform/resources/image-builder/stage/asg/asg-aarch64.yml
+    cloudinit_configs:
+    - content: /terraform/resources/image-builder/stage/asg/worker_aoc.cfg
+    variables:
+      workspace_name: staging
+      composer_host_aoc: api.openshift.com
+      composer_host_aoc_staging: api.stage.openshift.com
+      worker_config_aws_bucket: "image-builder-service-stage-2"
+      token_url: "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
+    image:
+      - provider: git
+        tag_name: composer_commit
+        url: https://github.com/osbuild/osbuild-composer
+        ref: f0e48d36a9a4c945b359165d65db85a5e1453f25
+        upstream:
+          instance:
+            $ref: /dependencies/ci-ext/ci-ext.yml
+          name: osbuild-osbuild-composer-gh-build-main-packer
+      - provider: static
+        tag_name: arch
+        value: aarch64
