@@ -51,3 +51,33 @@ a certain environment. This also serves as documentation for what
 * To promote openshift-saas-deploy version in all Jenkins jobs, update `qontract_reconcile_image_tag` in [global defaults](/resources/jenkins/global/defaults.yaml).
 * To promote openshift-saas-deploy version in all Tekton pipelines, update `qontract_reconcile_image_tag` in [app-interface shared-resources](/data/services/app-interface/shared-resources).
     * Note: there may currently be additional shared-resources files containing `qontract_reconcile_image_tag`. It is usually needed to update all of them (search for `qontract_reconcile_image_tag`).
+
+## Updating specific shards
+
+If you want to promote a qontract-reconcile change for only one shard you can do this by adding a shardSpecOverride. Add it to the integration configuration in app-interface you changed. This will deploy the new change for the selected shard. In the MR process the integration will run with the image specified in shardSpecOverride and the image configured in `.env`. The change you test must be compatible to the old image (in reference to the schema). 
+
+1. Create RC image, run `make rc` in the `qontract-reconcile` repository. (With your change checked out) The build output will tell you the image tag it created, i.e. `f929a38-rc`.
+2. Create an override to promote the change for one shard.:
+   ```
+   shardSpecOverride:
+      - shardingStrategy: per-aws-account
+         awsAccount:
+         $ref: /aws/ter-int-dev/account.yml
+         imageRef: f929a38-rc
+   ```
+3. This needs to be added in two places in the corresponding yaml file, example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/TODO:
+   1. `$.pr_check.shardSpecOverride`
+   1. `$.managed.[prod].shardSpecOverride`
+4. Check the logs in the MR
+   * It should contain reference to your changed image. i.e.:
+   ```
+   reconcile-terraform-resources_ter-int-dev.txt
+   Unable to find image 'quay.io/app-sre/qontract-reconcile:f929a38-rc' locally
+   f929a38-rc: Pulling from app-sre/qontract-reconcile
+   ...
+   Status: Downloaded newer image for quay.io/app-sre/qontract-reconcile:f929a38-rc
+   ```
+   * The integration manager log should contain a new deployment for that shard:
+   ```
+   [2022-09-26 11:28:50] [INFO] [openshift_base.py:apply:317] - ['apply', 'appsrep05ue1', 'app-interface-production', 'Deployment', 'qontract-reconcile-terraform-resources-ter-int-dev']
+   ```
