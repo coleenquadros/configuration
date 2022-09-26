@@ -96,6 +96,47 @@ def get_integrations_by_schema(integrations, schema):
     return matches
 
 
+def print_cmd(pr, select_all, int_name, override=None):
+    cmd = ""
+    if pr.get('state'):
+        cmd += "STATE=true "
+    if pr.get('sqs'):
+        cmd += "SQS_GATEWAY=true "
+    if pr.get('no_validate_schemas'):
+        cmd += "NO_VALIDATE=true "
+    if not select_all and pr.get('early_exit'):
+        cmd += "EARLY_EXIT=true "
+
+    if int_name == "change-owners":
+        if select_all:
+            # select_all=true means that files outside the bundle has changed
+            # `change-owners`` only operates on bundle data and would be blind to other
+            # changes. therefore we run the integration in `limited` mode to let
+            # it know that it can't make full decisions about the merge
+            cmd += "CHANGE_TYPE_PROCESSING_MODE=limited "
+        else:
+            # select_all=false means that only datafiles have changed. this
+            # means that all changes of an MR are reflected in the bundle
+            # and `change-owners` sees the full picture and can make informed
+            # decisions about self-serviceability
+            cmd += "CHANGE_TYPE_PROCESSING_MODE=authoritative "
+    if int_name == "vault-manager":
+        cmd += 'run_vault_reconcile_integration &'
+    elif int_name == "user-validator":
+        cmd += 'run_user_validator &'
+    else:
+        if override:
+            # only qr integrations support sharding
+            shard = override['awsAccount']["$ref"].split("/")[2]
+            cmd += "ALIAS=" + pr['cmd'] + "_" + shard + " "
+            cmd += "IMAGE=" + override['imageRef'] + " "
+            cmd += "run_int " + pr['cmd'] + " --account-name " + shard +" &"
+        else:
+            cmd += "run_int " + pr['cmd'] + ' &'
+
+    print(cmd)
+
+
 def print_pr_check_cmds(integrations, selected=None, select_all=False,
                         valid_saas_file_changes=False):
     if selected is None:
@@ -114,38 +155,11 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False,
         if valid_saas_file_changes and run_for_valid_saas_file_changes is False:
             continue
 
-        cmd = ""
-        if pr.get('state'):
-            cmd += "STATE=true "
-        if pr.get('sqs'):
-            cmd += "SQS_GATEWAY=true "
-        if pr.get('no_validate_schemas'):
-            cmd += "NO_VALIDATE=true "
-        if not select_all and pr.get('early_exit'):
-            cmd += "EARLY_EXIT=true "
+        if pr.get("shardSpecOverride"):
+            for override in pr.get("shardSpecOverride"):
+                print_cmd(pr, select_all, int_name, override)
 
-        if int_name == "change-owners":
-            if select_all:
-                # select_all=true means that files outside the bundle has changed
-                # `change-owners`` only operates on bundle data and would be blind to other
-                # changes. therefore we run the integration in `limited` mode to let
-                # it know that it can't make full decisions about the merge
-                cmd += "CHANGE_TYPE_PROCESSING_MODE=limited "
-            else:
-                # select_all=false means that only datafiles have changed. this
-                # means that all changes of an MR are reflected in the bundle
-                # and `change-owners` sees the full picture and can make informed
-                # decisions about self-serviceability
-                cmd += "CHANGE_TYPE_PROCESSING_MODE=authoritative "
-
-        if int_name == "vault-manager":
-            cmd += 'run_vault_reconcile_integration &'
-        elif int_name == "user-validator":
-            cmd += 'run_user_validator &'
-        else:
-            cmd += "run_int " + pr['cmd'] + ' &'
-
-        print(cmd)
+        print_cmd(pr, select_all, int_name)
 
 
 def main():
