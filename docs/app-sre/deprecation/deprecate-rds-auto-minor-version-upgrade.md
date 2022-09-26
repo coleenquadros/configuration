@@ -14,12 +14,12 @@ If you have RDS DB defined within app-interface, you can follow these steps to i
 
 - Identify RDS databases used by your team
 - Go to the defaults file referenced by the RDS provider configuration. More info [here](../../../README.md#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
-- Check if `auto_minor_version_upgrade` is defined
+- Check the following in defaults file
     - If `auto_minor_version_upgrade: true`, then your DB will be affected by this change.
-    - If `auto_minor_version_upgrade: false`, then your DB **is not** affected by this change.
+    - If `auto_minor_version_upgrade: false` or `auto_minor_version_upgrade` is not set , then your DB **is not** affected by this change.
 
 
-## Current list of affected databases (As of 09/06/2022)
+## Current list of affected databases (As of September 26th 2022)
 ```
 remediations-stage
 automation-hub-stage
@@ -67,4 +67,8 @@ This deprecation **will not** cause any downtime and is considered a safe operat
 
 # When will this change take place?
 
-AppSRE will be moving forward with the removal of the `auto_minor_version_upgrade` parameter on 10/03/2022.
+AppSRE will be moving forward with the removal of the `auto_minor_version_upgrade` parameter on October 3rd 2022.
+
+# How do I upgrade my database without auto_minor_version_upgrade
+
+Please refer to [RDS minor version upgrades doc](/README.md#rds-minor-version-upgrades)
