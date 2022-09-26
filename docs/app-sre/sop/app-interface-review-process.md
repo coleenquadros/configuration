@@ -50,6 +50,10 @@ references the `status-page-component-1.yml` and verify that this is legit.
 On status.redhat.com, components are mostly placed in the existing groups depending on top level redhat.com domain they belong to. If a
 component should be placed outside of any groups, check for the reasons.
 
+### SQL Query
+
+The `sql-query` integration doesn't support updates on already submitted queries (scheduled or one-time ones). For scheduled ones (`scheduled: true`, executed via `CronJob`), the tenant must delete (`delete: true`) the old one and submit a new one. For one-time queries, the tenant must submit a new one with a different name.
+
 ## Additional Reviewers
 
 In general when anyone ask for access to tenant's resource, even if it's in lower environments, it's standard procedure to ask approval from the owner of the service.
