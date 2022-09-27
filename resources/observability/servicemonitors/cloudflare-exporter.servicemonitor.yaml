@@ -1,18 +1,18 @@
----
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: ingress-sideloader
+  name: {{ name | default('cloudflare-exporter') }}
   labels:
     prometheus: app-sre
 spec:
   endpoints:
-  - interval: 15s
+  - port: prom
+    interval: 60s
+    scrapeTimeout: 30s
     path: /metrics
-    port: metrics
   namespaceSelector:
     matchNames:
-    - ingress-prod
+    - {{namespace}}
   selector:
     matchLabels:
-      app: sideloader
+      app: {{ name | default('cloudflare-exporter') }}

@@ -9,9 +9,11 @@
 
 This alert indicates that the aws-resource-exporter service doesn't know about an instance type a database is using.
 
-It is necessary to update the mapping [upstream](https://github.com/app-sre/aws-resource-exporter/blob/master/rds.go#L16) to include the desired instance type as well as the DB Parameter group and the corresponding actual max_connections value.
+It is necessary to update the mapping [upstream](https://github.com/app-sre/aws-resource-exporter/blob/master/pkg/rds.go#L16) to include the desired instance type as well as the DB Parameter group and the corresponding actual max_connections value.
 
-One can retrieve the actual max_connections value by running the following SQL on a DB running on that instance type: `SELECT * FROM pg_settings WHERE name = 'max_connections';`
+One can retrieve the actual max_connections value by running the following SQL on a DB running on that instance type:
+* Postgres: `SELECT * FROM pg_settings WHERE name = 'max_connections';`
+* MySQL: `SHOW VARIABLES LIKE "max_connections";`
 
 ## RDSMaxConnections
 

@@ -50,6 +50,33 @@
     - *pr_check
     - *stack_analysis
 
+- job-template:
+    id: 'insights-minikube-gh-pr-check'
+    name: '{gh_org}-{gh_repo}-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+        - *insights_minikube_ssh_key
+        - *insightsdroid_github
+        - *ibutsu
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    <<: *gh_pr_check
+    builders:
+    - *pr_check
+    - *stack_analysis
+
 
 - job-template:
     id: 'insights-gh-pr-check'

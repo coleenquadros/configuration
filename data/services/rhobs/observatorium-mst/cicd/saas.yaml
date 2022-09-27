@@ -79,7 +79,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
-    ref: a9fb6916098c2f309a6f49cd30906e5f970fc7fb
+    ref: cd2a8a66da2d9b028290c6470fbf79ddff6d46a1
     parameters:
       NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-stage
@@ -116,7 +116,7 @@ resourceTemplates:
       OPA_AMS_MEMORY_REQUEST: 100Mi
       OSD_ORGANIZATION_ID: 1lneg5EWJaGAK3d7RZpAJM9WujU
       PROMETHEUS_AMS_REMOTE_WRITE_PROXY_TARGET: 'observatorium-thanos-receive'
-      RULES_OBJSTORE_IMAGE_TAG: main-2022-04-01-64cd17e
+      RULES_OBJSTORE_IMAGE_TAG: main-2022-09-21-9df4d2c
       RULES_OBJSTORE_S3_SECRET: observatorium-mst-rules-objstore-stage-s3
       RULES_OBJSTORE_SECRET: observatorium-mst-rules-objstore-objectstorage
       RULES_OBJSTORE_LOG_LEVEL: debug
@@ -125,10 +125,11 @@ resourceTemplates:
       OIDC_AUDIENCE: 'observatorium'
       OIDC_ISSUER_URL: '${SSO_BASE_URL}'
       SLEEP_DURATION_SECONDS: '15'
-      MANAGED_TENANTS: 'rhobs'
-      OBSCTL_RELOADER_SECRET_NAME: rhobs-tenant-mst-staging
+      MANAGED_TENANTS: 'rhobs,osd'
+      RHOBS_RELOADER_SECRET_NAME: rhobs-tenant-mst-staging
+      OSD_RELOADER_SECRET_NAME: observatorium-observatorium-mst-api
       OBSCTL_RELOADER_IMAGE: 'quay.io/app-sre/obsctl-reloader'
-      OBSCTL_RELOADER_IMAGE_TAG: 'a9daddf'
+      OBSCTL_RELOADER_IMAGE_TAG: '95d2b04'
       METRICS_WRITE_SERVICE_NAME: observatorium-thanos-receive
       METRICS_WRITE_SERVICE_PORT: '19291'
     promotion:
@@ -137,7 +138,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: 41569d118351156446437aabc8bd6beda6d9e510
+    ref: cd2a8a66da2d9b028290c6470fbf79ddff6d46a1
     parameters:
       NAMESPACE: observatorium-mst-production
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-production
@@ -176,7 +177,7 @@ resourceTemplates:
       OBSERVATORIUM_API_IMAGE: quay.io/observatorium/api
       OBSERVATORIUM_API_IMAGE_TAG: main-2022-08-23-v0.1.2-242-g23af39e
       OPA_AMS_IMAGE_TAG: master-2021-07-14-d517f70
-      RULES_OBJSTORE_IMAGE_TAG: main-2022-04-01-64cd17e
+      RULES_OBJSTORE_IMAGE_TAG: main-2022-09-21-9df4d2c
       RULES_OBJSTORE_S3_SECRET: observatorium-mst-rules-objstore-production-s3
       RULES_OBJSTORE_SECRET: observatorium-mst-rules-objstore-objectstorage
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
@@ -184,10 +185,11 @@ resourceTemplates:
       OIDC_AUDIENCE: 'observatorium'
       OIDC_ISSUER_URL: '${SSO_BASE_URL}'
       SLEEP_DURATION_SECONDS: '15'
-      MANAGED_TENANTS: 'rhobs'
-      OBSCTL_RELOADER_SECRET_NAME: rhobs-tenant-mst-production
+      MANAGED_TENANTS: 'rhobs,osd'
+      RHOBS_RELOADER_SECRET_NAME: rhobs-tenant-mst-production
+      OSD_RELOADER_SECRET_NAME: observatorium-observatorium-mst-api
       OBSCTL_RELOADER_IMAGE: 'quay.io/app-sre/obsctl-reloader'
-      OBSCTL_RELOADER_IMAGE_TAG: 'a9daddf'
+      OBSCTL_RELOADER_IMAGE_TAG: '95d2b04'
       METRICS_WRITE_SERVICE_NAME: observatorium-thanos-receive
       METRICS_WRITE_SERVICE_PORT: '19291'
   - namespace:
@@ -486,8 +488,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: 433f40435c66a677dce7a8e5901b1a5703e31b7e
+    ref: b036c8d1add2211ff0bcf01d4d0fb53899a48ddd
     parameters:
+      ALERTMANAGER_NAMESPACE: observatorium-mst-stage
+      ALERTMANAGER_EXTERNAL_URL: 'observatorium-alertmanager-mst.api.stage.openshift.com'
       NAMESPACE: observatorium-mst-stage
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       JAEGER_COLLECTOR_NAMESPACE: observatorium-stage
@@ -519,8 +523,8 @@ resourceTemplates:
       LOKI_DISTRIBUTOR_MEMORY_REQUESTS: '500Mi'
       LOKI_DISTRIBUTOR_MEMORY_LIMITS: '1Gi'
       LOKI_INGESTER_REPLICAS: 3
-      LOKI_INGESTER_CPU_REQUESTS: '1000m'
-      LOKI_INGESTER_CPU_LIMITS: '2000m'
+      LOKI_INGESTER_CPU_REQUESTS: '2000m'
+      LOKI_INGESTER_CPU_LIMITS: '4000m'
       LOKI_INGESTER_MEMORY_REQUESTS: '5Gi'
       LOKI_INGESTER_MEMORY_LIMITS: '10Gi'
       LOKI_INDEX_GATEWAY_REPLICAS: 2
@@ -529,20 +533,25 @@ resourceTemplates:
       LOKI_INDEX_GATEWAY_MEMORY_REQUESTS: '2Gi'
       LOKI_INDEX_GATEWAY_MEMORY_LIMITS: '4Gi'
       LOKI_QUERIER_REPLICAS: 3
-      LOKI_QUERIER_CPU_REQUESTS: '1000m'
-      LOKI_QUERIER_CPU_LIMITS: '2000m'
-      LOKI_QUERIER_MEMORY_REQUESTS: '1Gi'
-      LOKI_QUERIER_MEMORY_LIMITS: '2Gi'
+      LOKI_QUERIER_CPU_REQUESTS: '6000m'
+      LOKI_QUERIER_CPU_LIMITS: '8000m'
+      LOKI_QUERIER_MEMORY_REQUESTS: '4Gi'
+      LOKI_QUERIER_MEMORY_LIMITS: '8Gi'
       LOKI_QUERY_FRONTEND_REPLICAS: 2
-      LOKI_QUERY_FRONTEND_CPU_REQUESTS: '1000m'
-      LOKI_QUERY_FRONTEND_CPU_LIMITS: '2000m'
-      LOKI_QUERY_FRONTEND_MEMORY_REQUESTS: '600Mi'
-      LOKI_QUERY_FRONTEND_MEMORY_LIMITS: '1200Mi'
+      LOKI_QUERY_FRONTEND_CPU_REQUESTS: '2000m'
+      LOKI_QUERY_FRONTEND_CPU_LIMITS: '4000m'
+      LOKI_QUERY_FRONTEND_MEMORY_REQUESTS: '2000Mi'
+      LOKI_QUERY_FRONTEND_MEMORY_LIMITS: '6000Mi'
       LOKI_QUERY_SCHEDULER_REPLICAS: 2
-      LOKI_QUERY_SCHEDULER_CPU_REQUESTS: '1000m'
-      LOKI_QUERY_SCHEDULER_CPU_LIMITS: '2000m'
-      LOKI_QUERY_SCHEDULER_MEMORY_REQUESTS: '600Mi'
-      LOKI_QUERY_SCHEDULER_MEMORY_LIMITS: '1200Mi'
+      LOKI_QUERY_SCHEDULER_CPU_REQUESTS: '2000m'
+      LOKI_QUERY_SCHEDULER_CPU_LIMITS: '4000m'
+      LOKI_QUERY_SCHEDULER_MEMORY_REQUESTS: '1Gi'
+      LOKI_QUERY_SCHEDULER_MEMORY_LIMITS: '2Gi'
+      LOKI_RULER_REPLICAS: 2
+      LOKI_RULER_CPU_REQUESTS: '1000m'
+      LOKI_RULER_CPU_LIMITS: '2000m'
+      LOKI_RULER_MEMORY_REQUESTS: '4Gi'
+      LOKI_RULER_MEMORY_LIMITS: '6Gi'
       LOKI_QUERIER_MAX_CONCURRENCY: 2
       LOKI_INGESTER_WAL_REPLAY_MEMORY_CEILING: '5GB' # This is not defined in k8s units but in Loki's ByteSize units.
       LOKI_REPLICATION_FACTOR: 2
@@ -563,6 +572,7 @@ resourceTemplates:
       LOKI_RESULTS_CACHE_MEMORY_LIMITS: '1536Mi'
       LOKI_PVC_REQUEST: '50Gi'
       LOKI_INGESTER_PVC_REQUEST: '150Gi'
+      LOKI_RULER_PVC_REQUEST: '10Gi'
       SERVICE_ACCOUNT_NAME: observatorium-mst
     promotion:
       publish:
@@ -676,22 +686,6 @@ resourceTemplates:
   path: /resources/services/receiver-migration-template.yaml
   url: https://github.com/rhobs/configuration
   targets:
-    - namespace:
-        $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
-      ref: c5e3d686d95dba479499f462cdd3bee25040d3a7
-      delete: true # deleting from the namespace - will remove in followup MR.
-      parameters:
-        NAMESPACE: observatorium-mst-stage
-        PRIMARY_UPSTREAM_HOST: 'observatorium-thanos-receive-router.observatorium-mst-stage.svc.cluster.local'
-        MIRROR_HOST: 'observatorium-thanos-receive.observatorium-mst-stage.svc.cluster.local'
-        RECEIVER_KETAMA_REPLICAS: '4'
-        RECEIVER_KETAMA_CPU_REQUEST: '2'
-        RECEIVER_KETAMA_CPU_LIMIT: '2'
-        RECEIVER_KETAMA_MEMORY_REQUEST: '12Gi'
-        RECEIVER_KETAMA_MEMORY_LIMIT: '12Gi'
-        THANOS_CONFIG_SECRET: observatorium-mst-thanos-objectstorage
-        THANOS_S3_SECRET: observatorium-mst-thanos-stage-s3
-        RECEIVER_SERVICE_ACCOUNT: observatorium-mst
     - namespace:
         $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
       ref: c5e3d686d95dba479499f462cdd3bee25040d3a7

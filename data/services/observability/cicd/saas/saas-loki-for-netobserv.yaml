@@ -1,0 +1,60 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-loki-for-netobserv
+description: Temporary Loki instance for the netobserv operator (to be replaced in 4.12 with https://github.com/grafana/loki/pull/6769)
+
+app:
+  $ref: /services/observability/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- ConfigMap
+- Deployment
+- Secret
+- Service
+- ServiceAccount
+- StatefulSet
+
+imagePatterns:
+  - quay.io/openshift-logging
+
+allowedSecretParameterPaths:
+- app-sre/integrations-output/terraform-resources/app-sre-stage-01/network-observability
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: loki-for-netobserv
+  path: /openshift/netobserv-loki.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  targets:
+  - name: app-sre-stage
+    namespace:
+      $ref: /services/observability/namespaces/network-observability-stage.yml
+    ref: 5a4665152a4fd08b90d55069fd7353cff4e3f8bb
+    parameters:
+      S3_BUCKET_NAME: netobserv-app-sre-stage-01
+      LOKI_IMAGE: quay.io/openshift-logging/loki:v2.5.0
+    secretParameters:
+      - name: ACCESS_KEY_ID
+        secret:
+          path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/network-observability/netobserv-app-sre-stage-01-s3
+          field: aws_access_key_id
+      - name: SECRET_ACCESS_KEY
+        secret:
+          path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/network-observability/netobserv-app-sre-stage-01-s3
+          field: aws_secret_access_key

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 run_int() {
-  local status
+  local rc
 
   INTEGRATION_NAME="${ALIAS:-$1}"
   [ -n "$DRY_RUN" ] && DRY_RUN_FLAG="--dry-run"
@@ -9,6 +9,7 @@ run_int() {
   [ -n "$STATE" ] && APP_INTERFACE_STATE_ENV="-e APP_INTERFACE_STATE_BUCKET=$app_interface_state_bucket -e APP_INTERFACE_STATE_BUCKET_ACCOUNT=$app_interface_state_bucket_account"
   [ -n "$NO_GQL_SHA_URL" ] && NO_GQL_SHA_URL_FLAG="--no-gql-sha-url"
   [ -n "$NO_VALIDATE" ] && NO_VALIDATE="--no-validate-schemas"
+  [ -z "$IMAGE" ] && IMAGE="$RECONCILE_IMAGE_TAG"
   if [ -n "$EARLY_EXIT" ] && [ -n "$MASTER_BUNDLE_SHA256" ]; then
     EARLY_EXIT_ENV="-e EARLY_EXIT_COMPARE_SHA=$MASTER_BUNDLE_SHA256"
   fi
@@ -28,14 +29,15 @@ run_int() {
     $GITLAB_PR_SUBMITTER_QUEUE_URL_ENV \
     $APP_INTERFACE_STATE_ENV \
     $EARLY_EXIT_ENV \
-    -e RECONCILE_IMAGE_TAG=$RECONCILE_IMAGE_TAG \
+    -e CHANGE_TYPE_PROCESSING_MODE=${CHANGE_TYPE_PROCESSING_MODE:-"limited"} \
+    -e RECONCILE_IMAGE_TAG=$IMAGE \
     -w / \
     --memory 5g \
-    ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
+    ${RECONCILE_IMAGE}:${IMAGE} \
     qontract-reconcile --config /config/config.toml $NO_VALIDATE $DRY_RUN_FLAG $NO_GQL_SHA_URL_FLAG --no-gql-url-print $@ \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
 
-  status="$?"
+  rc="$?"
   ENDTIME=$(date +%s)
 
   duration="app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))"
@@ -67,12 +69,12 @@ EOF
   [ -n "$setting" ] && set -x
   fi
 
-  if [ "$status" != "0" ]; then
+  if [ "$rc" != "0" ]; then
     echo "INTEGRATION FAILED: $1" >&2
     mv ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt ${FAIL_DIR}/reconcile-${INTEGRATION_NAME}.txt
   fi
 
-  return $status
+  return $rc
 }
 
 run_test() {
