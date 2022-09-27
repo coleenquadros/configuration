@@ -338,6 +338,9 @@ https://skupper-skupper-fake-api-server-net.apps.appsres04ue2.n4k3.p1.openshifta
 
 ## Milestones
 
+1. Implement Skupper for Grafana -> Prometheus connections and gain more experience
+   1. Monitor interruptions during cluster upgrades
+   1. Measure metrics via *blackbox-exporter*
 1. Go/No go decision for the usage of skupper within Red Hat in general
 1. Design document for a skupper qontract-reconcile integration
 1. Implementation of integration
