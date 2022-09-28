@@ -43,7 +43,7 @@ for information about the architecture of the software.
 
 List of available SOP's
 
-- [glitchtip-migration-sop](docs/glitchtip/sops/Load-testing.md)
+- [Load testing](docs/glitchtip/sops/Load-testing.md)
 
 - [glitchtip-migration-sop](docs/glitchtip/sops/glitchtip-migration-sop.md)
 
