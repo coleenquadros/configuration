@@ -323,7 +323,7 @@ Add `concurrent_build: true` to your job definition. [example](https://gitlab.ce
 
 ### Can one of the admins verify this patch?
 
-Tenants can self-service jobs in Jenkins. One type of a job that can be created in intended to run within PRs in GitHub, to validate the contents of the PR.
+Tenants can self-service jobs in Jenkins. One type of a job that can be created is intended to run within PRs in GitHub, to validate the contents of the PR.
 
 This job essentially runs a script in the repository (usually called `pr_check.sh`), and is running on Red Hat infrastructure (AppSRE Jenkins instances).
 
