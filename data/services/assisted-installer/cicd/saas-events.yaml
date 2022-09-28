@@ -99,3 +99,37 @@ resourceTemplates:
       CCX_EXPORT_MEMORY_REQUEST: "6000Mi"
       MEMORY_LIMIT: "2000Mi"
       MEMORY_REQUEST: "2000Mi"
+# Auto-report
+- name: auto-report
+  url: https://github.com/openshift-assisted/auto-report
+  path: /openshift/template.yaml
+  provider: openshift-template
+  targets:
+  - ref: master
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: openshift-assisted-auto-report-gh-build-master
+    parameters:
+      LOGLEVEL: "info"
+      MORNING_STATS_CRON_SUSPEND: "true"
+      MORNING_STATS_CRON_TIME: "0 7 * * *"
+      MEMORY_LIMIT: "256Mi"
+      MEMORY_REQUEST: "128Mi"
+      MORNING_STATS_WEBHOOK_SECRET_NAME: "auto-report-slack-webhook"
+  - ref: master
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: openshift-assisted-auto-report-gh-build-master
+    parameters:
+      LOGLEVEL: "info"
+      MORNING_STATS_CRON_SUSPEND: "false"
+      MORNING_STATS_CRON_TIME: "0 7 * * *"
+      MEMORY_LIMIT: "256Mi"
+      MEMORY_REQUEST: "128Mi"
+      MORNING_STATS_WEBHOOK_SECRET_NAME: "auto-report-slack-webhook"
