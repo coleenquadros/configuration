@@ -187,7 +187,7 @@ def main():
         # only docs: no need to run pr check
         return
 
-    non_bundled_data_modified=any_modified(lambda p: re.match(r'^docs/', p))
+    non_bundled_data_modified=any_modified(lambda p: not re.match(r'^(data|resources)/', p))
 
     if any_modified(lambda p: not re.match(r'^(data|resources|docs|test_data)/', p)):
         # unknow case: we run all integrations
