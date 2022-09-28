@@ -49,6 +49,10 @@ List of available SOP's
 
 - [PrometheusFailedToScrapGlitchTipWeb](docs/glitchtip/sops/prometheus-failed-to-scrape-glitcthip-web.md)
 
+- [glitchtip-availability](docs/glitchtip/sops/glitchtip-availability.md)
+
+- [glitchtip-latency](docs/glitchtip/sops/glitchtip-latency.md)
+
  
 ## Contributing
 
