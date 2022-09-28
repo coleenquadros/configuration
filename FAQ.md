@@ -321,6 +321,20 @@ If a job is pending and need to be rushed, contact the App SRE team for assitanc
 
 Add `concurrent_build: true` to your job definition. [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2d18ad87e9775cfefa0a18be77c9b795eb81b730/data/services/app-interface/cicd/ci-ext/jobs.yaml#L59)
 
+### Can one of the admins verify this patch?
+
+Tenants can self-service jobs in Jenkins. One type of a job that can be created in intended to run within PRs in GitHub, to validate the contents of the PR.
+
+This job essentially runs a script in the repository (usually called `pr_check.sh`), and is running on Red Hat infrastructure (AppSRE Jenkins instances).
+
+Malicious actors may submit a PR updating the pr-check script to do very bad things.
+
+To protect ourselves from such attacks, the pr-check job will only run automatically if the PR submitter is a member of the repository's organization.
+
+> Note: app-sre-bot must be a member of the GitHub organization, otherwise it can not see org members with a Private membership.
+
+In case a PR is submitted by an unknown person (not a member of the org), the bot will comment `Can one of the admins verify this patch?`, and will wait for a confirmation comment from one of the org members (a `/retest` or `/ok-to-test` would suffice).
+
 ### How can I see who has access to a service
 
 Start by accessing the Visual App-Interface at https://visual-app-interface.devshift.net.  Using the side bar, navigate to the [Services](https://visual-app-interface.devshift.net/services) section.
