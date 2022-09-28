@@ -2591,6 +2591,7 @@ Once your change is merged, the CronJob and related resources will be deleted fr
   (possibly including modifications to the queries), you must change the `name`
   field. This can be achieved by copying the existing file to a new file with a
   new `name`, or reusing the existing file and changing the query `name`.
+* Updates on CronJobs (schedule, queries, ...) aren't supported yet, delete old one by using `delete` parameter and submit a new file with your changes.
 
 ### Enable Gitlab Features on an App Interface Controlled Gitlab Repository
 
