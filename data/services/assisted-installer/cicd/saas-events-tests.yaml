@@ -1,0 +1,56 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: assisted-installer
+
+name: assisted-events-tests
+description: SaaS file for managing assisted-events-scrape tests autopromotion
+app:
+  $ref: /services/assisted-installer/app.yml
+pipelinesProvider:
+  $ref: /services/assisted-installer/pipelines/tekton.assisted-installer-pipelines.appsrep05ue1.yaml
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: assisted-app-sre-ci
+managedResourceTypes:
+- Job
+- ConfigMap
+
+publishJobLogs: true
+imagePatterns:
+- quay.io/edge-infrastructure/promql-tester
+
+resourceTemplates:
+- name: assisted-events-scrape
+  url: https://github.com/openshift-assisted/assisted-events-scrape
+  path: /openshift/template-autopromotion.yaml
+  provider: openshift-template
+  targets:
+  - ref: 1709ca37197d8cdf7c393dec01a2daab839ff78d
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
+    parameters:
+      PROMETHEUS_URL: "http://prometheus-app-sre.openshift-customer-monitoring.svc.cluster.local:9090"
+      TARGET_NAMESPACE: "assisted-installer-integration"
+    promotion:
+      publish:
+      - assisted-events-scraper-integration-tests-success-channel
+  - ref: 1709ca37197d8cdf7c393dec01a2daab839ff78d
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
+    parameters:
+      PROMETHEUS_URL: "http://prometheus-app-sre.openshift-customer-monitoring.svc.cluster.local:9090"
+      TARGET_NAMESPACE: "assisted-installer-stage"
+    promotion:
+      publish:
+      - assisted-events-scraper-stage-tests-success-channel
+  - ref: 1709ca37197d8cdf7c393dec01a2daab839ff78d
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
+    parameters:
+      PROMETHEUS_URL: "http://prometheus-app-sre.openshift-customer-monitoring.svc.cluster.local:9090"
+      TARGET_NAMESPACE: "assisted-installer-production"
+    promotion:
+      publish:
+      - assisted-events-scraper-production-tests-success-channel
