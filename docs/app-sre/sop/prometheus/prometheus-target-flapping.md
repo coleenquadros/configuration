@@ -17,8 +17,8 @@ This alert fires if the condition expr is `true` for 5 minutes, but it does not 
 of 1 hour, and the alert won't fire. To improve the detection of this situations there is a flapping state detection alert.
 
 ```yaml
-- alert: FooTargetIsFlapping
-  expr: changes(up{job="foo"}[15m]) >= 4 # 2 changes
+- alert: PrometheusTargetFlapping
+  expr: changes(up{namespace="ns"}[15m]) >= 4 # 2 changes
   for: 1m
 ```
 
