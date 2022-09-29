@@ -23,6 +23,8 @@ In the event of significant GitLab.cee issues, your contact point is the IT ALM 
 ## Grafana Dashboards
 - [GitLab Overview](https://grafana.engineering.redhat.com/d/wsSteMemz/gitlab-prod-omnibus-overview?orgId=1&refresh=1m)
     - Keep an eye on the Sidekiq queue. In [APPSRE-5772](https://issues.redhat.com/browse/APPSRE-5772), our integrations were responsible for a huge increase in the Sidekiq queue which degraded the performance of the service.
+- [Splunk Gitlab Dashboards](https://rhcorporate.splunkcloud.com/en-US/app/search/it_alm__gitlab_web_traffic)
+- [Splunk Gitlab Devtoolsbot Dashboard](https://rhcorporate.splunkcloud.com/en-US/app/search/gitlabcee_devtoolsbot)
 - [Additional GitLab Dashboards](https://grafana.engineering.redhat.com/dashboards/f/SSVDIpiGk/cip)
 - [AppSRE Integrations](https://grafana.app-sre.devshift.net/d/Integrations/integrations?orgId=1)
     - The MR queue depth may reflect a degradation of GitLab performance if too many MRs are not being processed correctly
