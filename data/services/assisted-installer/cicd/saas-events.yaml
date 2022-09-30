@@ -1,18 +1,13 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: assisted-installer
-
 name: assisted-installer-events
-description: 'SaaS tracking file for assisted-events-scrape and its ecosystem'
-
+description: SaaS tracking file for assisted-events-scrape and its ecosystem
 app:
   $ref: /services/assisted-installer/app.yml
-
 pipelinesProvider:
   $ref: /services/assisted-installer/pipelines/tekton.assisted-installer-pipelines.appsrep05ue1.yaml
-
 deployResources:
   requests:
     cpu: 200m
@@ -20,12 +15,10 @@ deployResources:
   limits:
     cpu: 200m
     memory: 700Mi
-
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: assisted-app-sre-ci
-
 managedResourceTypes:
 - Deployment
 - CronJob
@@ -47,12 +40,12 @@ resourceTemplates:
   path: /dashboards
   provider: directory
   targets:
-    - namespace:
-        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
-      ref: master
-    - namespace:
-        $ref: /services/observability/namespaces/app-sre-observability-production.yml
-      ref: 7c0ccddf93ebcfdc627a3f3a4b30f4463037db42
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 7c0ccddf93ebcfdc627a3f3a4b30f4463037db42
 - name: assisted-events-scrape
   url: https://github.com/openshift-assisted/assisted-events-scrape
   path: /openshift/template.yaml
@@ -66,11 +59,11 @@ resourceTemplates:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: openshift-assisted-assisted-events-scrape-gh-build-master
     parameters:
-      LOGLEVEL: "info"
-      CCX_EXPORT_CRON_SUSPEND: "true"
-      CCX_EXPORT_CLEANUP_CRON_SUSPEND: "true"
-      CCX_EXPORT_MEMORY_LIMIT: "1200Mi"
-      CCX_EXPORT_MEMORY_REQUEST: "1000Mi"
+      LOGLEVEL: info
+      CCX_EXPORT_CRON_SUSPEND: 'true'
+      CCX_EXPORT_CLEANUP_CRON_SUSPEND: 'true'
+      CCX_EXPORT_MEMORY_LIMIT: 1200Mi
+      CCX_EXPORT_MEMORY_REQUEST: 1000Mi
     promotion:
       publish:
       - assisted-events-scraper-integration-deploy-success-channel
@@ -83,11 +76,11 @@ resourceTemplates:
       name: openshift-assisted-assisted-events-scrape-gh-build-master
     parameters:
       SENTRY_DSN: https://df9707fcc4064b8d95b75c79703e4a4d@sentry.stage.devshift.net/37
-      LOGLEVEL: "info"
-      CCX_EXPORT_CRON_TIME: "0 16 * * *"
-      CCX_EXPORT_CRON_SUSPEND: "false"
-      CCX_EXPORT_CLEANUP_CRON_TIME: "30 15 * * *"
-      CCX_EXPORT_CLEANUP_CRON_SUSPEND: "false"
+      LOGLEVEL: info
+      CCX_EXPORT_CRON_TIME: 0 16 * * *
+      CCX_EXPORT_CRON_SUSPEND: 'false'
+      CCX_EXPORT_CLEANUP_CRON_TIME: 30 15 * * *
+      CCX_EXPORT_CLEANUP_CRON_SUSPEND: 'false'
     promotion:
       auto: true
       subscribe:
@@ -96,18 +89,18 @@ resourceTemplates:
       - assisted-events-scraper-stage-deploy-success-channel
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
-    ref: master
+    ref: 1709ca37197d8cdf7c393dec01a2daab839ff78d
     parameters:
       SENTRY_DSN: https://e865b3c62cce46619101231a74254525@sentry.devshift.net/1022
-      LOGLEVEL: "info"
-      CCX_EXPORT_CRON_TIME: "0 2 * * *"
-      CCX_EXPORT_CRON_SUSPEND: "false"
-      CCX_EXPORT_CLEANUP_CRON_TIME: "30 13 * * *"
-      CCX_EXPORT_CLEANUP_CRON_SUSPEND: "true"
-      CCX_EXPORT_MEMORY_LIMIT: "6200Mi"
-      CCX_EXPORT_MEMORY_REQUEST: "6000Mi"
-      MEMORY_LIMIT: "2000Mi"
-      MEMORY_REQUEST: "2000Mi"
+      LOGLEVEL: info
+      CCX_EXPORT_CRON_TIME: 0 2 * * *
+      CCX_EXPORT_CRON_SUSPEND: 'false'
+      CCX_EXPORT_CLEANUP_CRON_TIME: 30 13 * * *
+      CCX_EXPORT_CLEANUP_CRON_SUSPEND: 'true'
+      CCX_EXPORT_MEMORY_LIMIT: 6200Mi
+      CCX_EXPORT_MEMORY_REQUEST: 6000Mi
+      MEMORY_LIMIT: 2000Mi
+      MEMORY_REQUEST: 2000Mi
     promotion:
       auto: true
       subscribe:
@@ -115,6 +108,12 @@ resourceTemplates:
       publish:
       - assisted-events-scraper-production-deploy-success-channel
  # Auto-report
+      promotion_data:
+      - channel: assisted-events-scraper-stage-tests-success-channel
+        data:
+        - parent_saas: assisted-events-tests
+          target_config_hash: 130c98ae3fed8103
+          type: parent_saas_config
 - name: auto-report
   url: https://github.com/openshift-assisted/auto-report
   path: /openshift/template.yaml
@@ -128,12 +127,12 @@ resourceTemplates:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: openshift-assisted-auto-report-gh-build-master
     parameters:
-      LOGLEVEL: "info"
-      MORNING_STATS_CRON_SUSPEND: "true"
-      MORNING_STATS_CRON_TIME: "0 7 * * *"
-      MEMORY_LIMIT: "256Mi"
-      MEMORY_REQUEST: "128Mi"
-      MORNING_STATS_WEBHOOK_SECRET_NAME: "auto-report-slack-webhook"
+      LOGLEVEL: info
+      MORNING_STATS_CRON_SUSPEND: 'true'
+      MORNING_STATS_CRON_TIME: 0 7 * * *
+      MEMORY_LIMIT: 256Mi
+      MEMORY_REQUEST: 128Mi
+      MORNING_STATS_WEBHOOK_SECRET_NAME: auto-report-slack-webhook
   - ref: master
     namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
@@ -142,19 +141,19 @@ resourceTemplates:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: openshift-assisted-auto-report-gh-build-master
     parameters:
-      LOGLEVEL: "info"
-      MORNING_STATS_CRON_SUSPEND: "false"
-      MORNING_STATS_CRON_TIME: "0 7 * * *"
-      MEMORY_LIMIT: "256Mi"
-      MEMORY_REQUEST: "128Mi"
-      MORNING_STATS_WEBHOOK_SECRET_NAME: "auto-report-slack-webhook"
+      LOGLEVEL: info
+      MORNING_STATS_CRON_SUSPEND: 'false'
+      MORNING_STATS_CRON_TIME: 0 7 * * *
+      MEMORY_LIMIT: 256Mi
+      MEMORY_REQUEST: 128Mi
+      MORNING_STATS_WEBHOOK_SECRET_NAME: auto-report-slack-webhook
   - ref: c0d051e65efe90186c0d7c95aeb36e66ebff2bc0
     namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
     parameters:
-      LOGLEVEL: "info"
-      MORNING_STATS_CRON_SUSPEND: "false"
-      MORNING_STATS_CRON_TIME: "0 7 * * *"
-      MEMORY_LIMIT: "256Mi"
-      MEMORY_REQUEST: "128Mi"
-      MORNING_STATS_WEBHOOK_SECRET_NAME: "auto-report-slack-webhook"
+      LOGLEVEL: info
+      MORNING_STATS_CRON_SUSPEND: 'false'
+      MORNING_STATS_CRON_TIME: 0 7 * * *
+      MEMORY_LIMIT: 256Mi
+      MEMORY_REQUEST: 128Mi
+      MORNING_STATS_WEBHOOK_SECRET_NAME: auto-report-slack-webhook
