@@ -1,0 +1,69 @@
+---
+$schema: /openshift/cluster-1.yml
+labels:
+  service: app-sre
+name: tst-rosa
+description: ROSA cluster to test the app-interface support.
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+#auth:
+#  service: github-org-team
+#  org: app-sre
+#  team: tst-rosa-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+#managedGroups:
+#- dedicated-admins
+
+# managedClusterRoles: true
+spec:
+  product: rosa
+  account:
+    $ref: /aws/app-sre-rosa/account.yml
+  id: ''
+  external_id: ''
+  provider: aws
+  region: us-east-1
+  channel: stable
+  version: 4.11.2
+  initial_version: 4.11.2
+  multi_az: false
+  nodes: 2
+  instance_type: m5.xlarge
+  private: false
+  provision_shard_id: ''
+  disable_user_workload_monitoring: true
+
+upgradePolicy:
+  workloads:
+  - appsre
+  schedule: 0 8 * * 1-5
+  conditions:
+    soakDays: 7
+
+machinePools: []
+network:
+  vpc: 10.138.0.0/20
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+automationToken:
+  path: app-sre/creds/kube-configs/tst-rosa
+  field: token
+internal: false
+
+#awsInfrastructureManagementAccounts:
+#- account:
+#    $ref: /aws/app-sre/account.yml
+#  accessLevel: network-mgmt
+#  default: true
+
+#addons:
+#- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
