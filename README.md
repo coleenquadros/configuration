@@ -1710,6 +1710,7 @@ In order to add or update an ElastiCache database, you need to add them to the `
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
   - This defaults file must have `auto_minor_version_upgrade: false` field, otherwise you will run into validation error.
+    Please see [deprecation_notice](/docs/app-sre/deprecation/deprecate-rds-auto-minor-version-upgrade.md)
   ```
   True is not one of [False]\n\nFailed validating 'enum' in schema['properties']['auto_minor_version_upgrade']:\n    {'enum': [False], 'type': 'boolean'}\n\nOn instance['auto_minor_version_upgrade']:\n    True
   ``` 
