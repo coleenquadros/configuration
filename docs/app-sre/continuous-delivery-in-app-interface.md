@@ -106,6 +106,12 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
             - instance reference and job name to build after:
                 * `instance` - reference to Jenkins instance where upstream job exists
                 * `name` - name of the Jenkins job to use as upstream
+        * `image` - (optional):
+            * use this option in the case a docker image should be built before deployment and is not being built by a jenkins job managed via app-interface (`upstream`).
+            * use this option only with a `ref` which is a branch (such as `master` or `main`). using it with a commit sha is not valid.
+            - org reference and repository name to deploy after:
+                * `org` - reference to Quay org where repository exists
+                * `name` - name of the Quay repository
         * `disable` - (optional) if set to `true`, target will be skipped during deployment.
         * `delete` - (optional) if set to `true`, resources coming from this target will be deleted.
     * `hash_length` - (optional) if `IMAGE_TAG` should be set according to the referenced target, specify a length to use from the commit hash.
