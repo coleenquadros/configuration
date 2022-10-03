@@ -1709,6 +1709,11 @@ In order to add or update an ElastiCache database, you need to add them to the `
 - `provider`: must be `elasticache`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
+  - This defaults file must have `auto_minor_version_upgrade: false` field, otherwise you will run into validation error.
+    Please see [deprecation_notice](/docs/app-sre/deprecation/deprecate-rds-auto-minor-version-upgrade.md)
+  ```
+  True is not one of [False]\n\nFailed validating 'enum' in schema['properties']['auto_minor_version_upgrade']:\n    {'enum': [False], 'type': 'boolean'}\n\nOn instance['auto_minor_version_upgrade']:\n    True
+  ``` 
 - `parameter_group`: (optional) path relative to [resources](/resources) to a file with parameter group values. Note that it starts with `/`.
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine_version: 5.0.3`.
 - `output_resource_name`: name of Kubernetes Secret to be created.
