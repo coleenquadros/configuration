@@ -14,6 +14,9 @@ It is measured at the router using the `haproxy_backend_http_responses_total` me
 ACS fleet manager is expected to be available 99 percent of the time on production. This might be tuned in the future onc ethe service is running on production.
 
 ## Alerts
+All alerts are multiwindow, multi-burn-rate alerts. The following are the list of alerts that are associated with this SLO.
 
-TODO
-  
+- `ACS Fleet Manager returning 5xx error budget burn 5m to 1h`
+- `ACS Fleet Manager returning 5xx error budget burn 30m to 6h`
+- `ACS Fleet Manager returning 5xx error budget burn 2h to 1d`
+- `ACS Fleet Manager returning 5xx error budget burn 1d to 3d` 
