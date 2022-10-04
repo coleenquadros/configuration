@@ -21,6 +21,7 @@ slack:
 
 managedResourceTypes:
 - ClowdApp
+- ConfigMap
 
 imagePatterns:
 - quay.io/cloudservices
@@ -38,6 +39,17 @@ parameters:
   LOG_GROUP: platform
 
 resourceTemplates:
+- name: yuptoo-dashboards
+  url: https://github.com/RedHatInsights/yuptoo
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: main
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 80dd4bcf6279fd7bcd20e3f0fc7705a0b446991e
 - name: yuptoo
   path: /clowdapp.yaml
   url: https://github.com/RedHatInsights/yuptoo
@@ -61,3 +73,10 @@ resourceTemplates:
       MEMORY_LIMIT: 1Gi
       MEMORY_REQUEST: 512Mi
       MIN_REPLICAS: 3
+  - namespace:
+      $ref:  /services/insights/yuptoo/namespaces/yuptoo-prod.yml
+    ref: 80dd4bcf6279fd7bcd20e3f0fc7705a0b446991e
+    parameters:
+      MEMORY_LIMIT: 1Gi
+      MEMORY_REQUEST: 512Mi
+      MIN_REPLICAS: 8
