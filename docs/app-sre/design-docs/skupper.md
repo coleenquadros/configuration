@@ -2,28 +2,8 @@
 
 ---
 Table of contents:
-- [Author/date](#authordate)
-- [Tracking JIRA](#tracking-jira)
-- [Problem Statement](#problem-statement)
-- [Goal](#goal)
-- [Skupper Introduction](#skupper-introduction)
-  - [Features](#features)
-  - [Skupper Components](#skupper-components)
-  - [Security](#security)
-    - [Router](#router)
-    - [Service Access Control](#service-access-control)
-    - [Service Sync](#service-sync)
-- [POC Spike Architecture](#poc-spike-architecture)
-  - [Use Case 1 - Vault](#use-case-1---vault)
-  - [Use Case 2 - OpenShift API Server](#use-case-2---openshift-api-server)
-  - [Site connections](#site-connections)
-- [Possible app-interface integration](#possible-app-interface-integration)
-- [Troubleshooting](#troubleshooting)
-- [Limitations/Bugs/Notes](#limitationsbugsnotes)
-- [Open Topics](#open-topics)
-- [Alternatives](#alternatives)
-- [Milestones](#milestones)
-- [Links](#links)
+
+[toc]
 
 
 ## Author/date
@@ -353,5 +333,6 @@ https://skupper-skupper-fake-api-server-net.apps.appsres04ue2.n4k3.p1.openshifta
 * [Skupper Examples](https://skupper.io/examples/index.html)
 * [Skupper Google Group](https://groups.google.com/g/skupper)
 * [Skupper TLS with Prepopulated Certificates][skupper-prepopulated-Certificates]
+* [Red Hat Application Interconnect](https://access.redhat.com/documentation/en-us/red_hat_application_interconnect/1.0)
 
 [skupper-prepopulated-Certificates]: https://docs.google.com/document/d/1dtdyCkM_Mjhu0EiFVc7OWhztk4MINnoZwjOtnvBN85Q/edit#heading=h.4kh30u4x81mm
