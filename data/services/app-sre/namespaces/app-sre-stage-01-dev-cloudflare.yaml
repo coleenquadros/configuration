@@ -1,0 +1,50 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: dev-cloudflare
+description: Dummy namespace to associate Cloudflare resources to for internal testing
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/app-sre/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: cloudflare
+  provisioner:
+    $ref: /cloudflare/app-sre/account.yml
+  resources:
+    - provider: zone
+      identifier: cloudflare-dev-app-sre
+      zone: cloudflare-dev.app-sre.devshift.net
+      plan: enterprise
+      type: partial
+      records:
+        - name: cdn01
+          type: CNAME
+          ttl: 1
+          # Dummy value, should be overriden by workers
+          value: visual-app-interface.devshift.net
+          proxied: true
+      workers:
+        - identifier: test-worker
+          pattern: cdn01.cloudflare-dev.app-sre.devshift.net/*
+          script_name: dev-worker
+    - provider: worker_script
+      identifier: dev-worker
+      name: dev-worker
+      content_from_github:
+        repo: https://github.com/app-sre/cfworkerdemo
+        path: script.js
+        ref: 6584e91ad4d28e69ea47e9913e60596be852c16a
+      vars:
+        - name: some-var
+          text: some-value
