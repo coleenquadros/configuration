@@ -39,5 +39,26 @@ resourceTemplates:
   parameters:
     IMAGE_TAG: v1.17.1
   targets:
-  - $ref: /services/observability/cicd/saas/targets/app-sre-observability-stage.yaml
-  - $ref: /services/observability/cicd/saas/targets/app-sre-observability-production.yaml
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+    parameters:
+      REPLICAS: 3
+    promotion:
+      publish:
+      - app-sre-observability-stage-deploy-success-channel
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 3f5b2a546f4ece5ed899ab604f904f04ada7d516
+    parameters:
+      REPLICAS: 3
+    promotion:
+      auto: true
+      subscribe:
+      - app-sre-observability-stage-deploy-success-channel
+      promotion_data:
+      - channel: app-sre-observability-stage-deploy-success-channel
+        data:
+        - parent_saas: saas-domain-exporter
+          target_config_hash: 86f598df6e774a4d
+          type: parent_saas_config
