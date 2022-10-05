@@ -65,7 +65,7 @@ If you want to promote a qontract-reconcile change for only one shard you can do
          $ref: /aws/ter-int-dev/account.yml
          imageRef: f929a38-rc
    ```
-3. This needs to be added in two places in the corresponding yaml file, example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/TODO:
+3. This needs to be added in two places in the corresponding yaml file, example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/49014:
    1. `$.pr_check.shardSpecOverride`
    1. `$.managed.[prod].shardSpecOverride`
 4. Check the logs in the MR
@@ -80,4 +80,13 @@ If you want to promote a qontract-reconcile change for only one shard you can do
    * The integration manager log should contain a new deployment for that shard:
    ```
    [2022-09-26 11:28:50] [INFO] [openshift_base.py:apply:317] - ['apply', 'appsrep05ue1', 'app-interface-production', 'Deployment', 'qontract-reconcile-terraform-resources-ter-int-dev']
+   ```
+5. After merging the MR check the deployments on the Cluster. The updated shard should run a different image than the others.:
+   ```
+   oc get pod  -o 'custom-columns=NAME:.metadata.name,CONTAINER:.spec.containers[0].name,IMAGE:.spec.containers[0].image' |grep terraform-resources
+   ...
+   qontract-reconcile-terraform-resources-app-sre-758584757c-fshtw   int                        quay.io/app-sre/qontract-reconcile:ed21267
+   qontract-reconcile-terraform-resources-app-sre-ci-698889d692fxh   int                        quay.io/app-sre/qontract-reconcile:ed21267
+   qontract-reconcile-terraform-resources-ter-int-dev-c8fccdvg2x5   int                        quay.io/app-sre/qontract-reconcile:f929a38-rc
+   ...
    ```
