@@ -1,0 +1,75 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: ocm
+
+name: saas-ocm-addons-service
+description: 'SaaS tracking file for OCM AddOns Service'
+
+app:
+  $ref: /services/ocm/ocm-addons-service/app.yml
+
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-uhc-info
+
+managedResourceTypes:
+- Deployment
+- Service
+- ConfigMap
+
+imagePatterns:
+- quay.io/app-sre/ocm-addons-service
+- quay.io/app-sre/centos
+- quay.io/centos/centos
+- quay.io/app-sre/envoyproxy
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: ocm-addons-service
+  url: https://gitlab.cee.redhat.com/ocm/ocm-addons-service
+  path: /templates/service-template.yml
+  parameters:
+    ENVIRONMENT: production
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/ocm-addons-service
+    JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
+    REPLICAS: 3
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: ocm-ocm-addons-service-gl-build-main
+    parameters:
+      GLOG_V: 5
+      REPLICAS: 1
+      # TODO: Configure sentry - https://issues.redhat.com/browse/SDA-5666
+      ENABLE_SENTRY: false
+      # SENTRY_URL: sentry.stage.devshift.net
+      # SENTRY_PROJECT: 15
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: ocm-ocm-addons-service-gl-build-main
+    parameters:
+      GLOG_V: 5
+      # Resources are lower in INT env since it does not have to be prod-like and there is significantly lower traffic
+      MEMORY_REQUEST: 100Mi
+      MEMORY_LIMIT: 512Mi
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 500m
