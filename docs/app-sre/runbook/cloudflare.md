@@ -82,8 +82,10 @@ Security verification is mandatory to receive enterprise support. Such verificat
   - Go to "API Tokens"
   - Click "Create Token"
   - Set up the token with the following permissions:
+    - Account: Billing: Edit
     - Account: Worker Scripts: Edit
     - Zone: Edit
+    - Zone: SSL and Certificates: Edit
     - Zone Settings: Edit
     - Workers Routes: Edit
     - DNS: Edit
