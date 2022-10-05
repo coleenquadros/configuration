@@ -1,0 +1,60 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: ocm
+
+name: ocm-addons-service
+
+description: |
+  The OCM Addon Service manages AddOns used by Cluster Mangement and other OCM services
+
+parentApp:
+  $ref: /services/ocm/app.yml
+
+architectureDocument: https://docs.google.com/document/d/1w8eILqkQV9o12ofqGdYjFg5l96iL40YAnX9Hh8Prqu4/
+sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/uhc/sop
+grafanaUrls:
+- title: OCM AddOn Service
+  # expected location but is not yet implemented
+  url: https://grafana.app-sre.devshift.net/d/ocm-addons-service
+onboardingStatus: InProgress
+
+serviceOwners:
+- name: SDA team
+  email: sda-devel@redhat.com
+
+serviceNotifications:
+- name: Red Hat Outage List
+  email: outage-list@redhat.com
+
+escalationPolicy:
+  $ref: /teams/ocm/escalation-policies/sda.yaml
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/sso/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  teams:
+  - permissions:
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-uhc.yml
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-prodsec.yml
+    role: read
+  items:
+  - name: ocm-addons-service
+    description: OCM AddOn Service
+    public: false
+
+codeComponents:
+- name: ocm-addons-service
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/ocm/ocm-addons-service
+  jira:
+    $ref: /dependencies/jira/issues-redhat-com.yaml
