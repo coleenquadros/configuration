@@ -65,7 +65,7 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: ef8ac62c3141a9a2ff208a24d89971e26465ca2c
+    ref: 324a0f5bdb906853b47144148b14bd9f659c4b10
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
@@ -350,16 +350,16 @@ resourceTemplates:
       # Worker node prewarming configuration
       NODE_PREWARMING_CONFIG:
         standard: # the instance type. It must exist in SUPPORTED_INSTANCE_TYPES
-          # The number of reserved kafka instances of the size specified in "base_streaming_unit_size". 
+          # The number of reserved kafka instances of the size specified in "base_streaming_unit_size".
           # 1 guarantee that we'll always have hot capacity (3 worker nodes) prewarmed for 1 standard instance of size x1.
           num_reserved_instances: 1
           base_streaming_unit_size: x1
-        developer: # The instance type. It must exist in SUPPORTED_INSTANCE_TYPES. 
-          # The number of reserved kafka instances of the size specified in "base_streaming_unit_size". 
+        developer: # The instance type. It must exist in SUPPORTED_INSTANCE_TYPES.
+          # The number of reserved kafka instances of the size specified in "base_streaming_unit_size".
           # 1 guarantee that we'll always hot capacity for one developer instance which should be enough for Stage cluster usage.
           num_reserved_instances: 1
           base_streaming_unit_size: x1
-      
+
       # admin endpoins API configuration
       ADMIN_API_SSO_BASE_URL: https://identity.api.stage.openshift.com
       ADMIN_API_SSO_ENDPOINT_URI: /auth/realms/rhoas-kafka-sre
@@ -388,7 +388,7 @@ resourceTemplates:
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: ef8ac62c3141a9a2ff208a24d89971e26465ca2c
+    ref: 324a0f5bdb906853b47144148b14bd9f659c4b10
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: production
@@ -594,6 +594,24 @@ resourceTemplates:
               supported_instance_type:
                 standard: {}
                 developer: {}
+
+      # admin endpoins API configuration
+      ADMIN_API_SSO_BASE_URL: https://identity.api.openshift.com
+      ADMIN_API_SSO_ENDPOINT_URI: /auth/realms/rhoas-kafka-sre
+      ADMIN_API_SSO_REALM: rhoas-kafka-sre
+      ADMIN_AUTHZ_CONFIG:
+        - method: GET
+          roles:
+            - kas-fleet-manager-admin-full
+            - kas-fleet-manager-admin-read
+            - kas-fleet-manager-admin-write
+        - method: PATCH
+          roles:
+            - kas-fleet-manager-admin-full
+            - kas-fleet-manager-admin-write
+        - method: DELETE
+          roles:
+            - kas-fleet-manager-admin-full
 
       # Changing this to true will delete all kafkas after their lifespan expired.
       ENABLE_KAFKA_LIFE_SPAN: true
