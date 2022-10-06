@@ -10,7 +10,13 @@ account:
   $ref: /aws/app-sre/account.yml
 
 unmanaged_record_names:
-- '^_acme-challenge.*'
+# Allow Let's Encrypt records for cloudflare-dev.app-sre.devshift.net because
+# it's used in the Cloudflare integration which doesn't create these DNS records
+# automatically.
+#
+# APPSRE-6393 will investigate removing unmanaged_record_names altogether
+#
+- '^_acme-challenge\.(?!(?:cdn01\.)?cloudflare-dev\.app-sre).*'
 
 records:
 # ; KB
@@ -111,6 +117,14 @@ records:
   type: TXT
   records:
   - 822297313-580914865
+- name: _acme-challenge.cloudflare-dev.app-sre
+  type: TXT
+  records:
+  - 0OXHql9KYiAKVZmWBRz0jG7OmselHLhFGLv05zk8BZU
+- name: _acme-challenge.cdn01.cloudflare-dev.app-sre
+  type: TXT
+  records:
+  - ujT2aTdS9PgVLEoA7RK-1W7L6kRVQ0csxiEMVULVlR4
 - {name: cdn01.cloudflare-dev.app-sre, type: CNAME, records: [cdn01.cloudflare-dev.app-sre.devshift.net.cdn.cloudflare.net]}
 
 - {name: prometheus.telemeter-prod-01, type: CNAME, _target_cluster: {$ref: /openshift/telemeter-prod-01/cluster.yml}}
