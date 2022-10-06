@@ -46,6 +46,28 @@ config:
             slack_channel_notification: service-registry
 
   - project:
+      name: srs-tenant-manager
+      label: service-registry
+      node: managed-services
+      gl_group: service-registry
+      gl_project: srs-tenant-manager
+      build_deploy_script_path: './build-deploy.sh'
+      pr_check_script_path: './pr-check.sh'
+      jobs:
+        - 'gl-pr-check-srs-tenant-manager':
+            display_name: srs-tenant-manager pr-check
+            concurrent_build: true
+        - 'gl-build-master-srs-projects':
+            display_name: srs-tenant-manager build main
+            branch: main
+        - 'managed-services-security-scan':
+            display_name: srs-tenant-manager security-scan
+            branch: master
+            ci_cmd: './security-scan.sh'
+            cron_expression: 'H 0 * * 1,4'
+            slack_channel_notification: service-registry
+
+  - project:
       name: srs-fleet-manager
       label: service-registry
       node: managed-services
