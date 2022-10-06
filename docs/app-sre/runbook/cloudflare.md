@@ -35,7 +35,12 @@ TBD
 
 [Cloudflare Dashboard](https://dash.cloudflare.com/)
 
-Credentials to Cloudflare accounts can be found in Vault at https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/cloudflare
+Credentials to Cloudflare accounts can be found in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/cloudflare). The table below describes which user has access to which account.
+
+| User email                               | Accounts                             |
+|------------------------------------------|--------------------------------------|
+| sd-app-sre+cloudflare-app-sre@redhat.com | app-sre<br/>quay-stage<br/>quay-prod |
+
 
 The 2FA TOTP codes for each account can be retrieved from Vault. The exact path to query is defined under the `2fa_code` key under each account (DO NOT use the recovery codes, except under an emergency situation)
 
@@ -65,17 +70,24 @@ Security verification is mandatory to receive enterprise support. Such verificat
 
 ### Creating a new Cloudflare account
 
+Cloudflare doesn't support email sub-addressing, so we cannot have a unique user login per account. Follow the steps below only if there isn't already a system account setup that would be appropriate for this use case.
+
 - Go to https://dash.cloudflare.com/sign-up
 - Enter desired user & password
-  - Email: sd-app-sre+cloudflare-SOMETHING@redhat.com
+  - Email: appropriate team address, again sub-addressing isn't supported
   - Password: generate something secure
-- Check emails sent to the sd-app-sre mailing list for an email verification email. Click the link
+- Complete email verification
 - Enable 2FA
   - Login to the account
   - Go to "My Profile"
   - Go to "Authentication"
   - Click "Enable 2FA"
   - [Add the 2FA to vault](https://gitlab.cee.redhat.com/service/app-interface#manage-vault-secret-engines-vault-configsecret-engine-1yml)
+
+The steps below are followed for new accounts whether there is an existing user login or not:
+
+- Invite the system account user
+  - This will generally be done by the Cloudflare team, just provide them with the email that you'd like to use
 - Create an API Token for use by the integration
   - Login to the account
   - Go to "My Profile"
@@ -84,11 +96,11 @@ Security verification is mandatory to receive enterprise support. Such verificat
   - Set up the token with the following permissions:
     - Account: Billing: Edit
     - Account: Worker Scripts: Edit
-    - Zone: Edit
+    - Zone: Zone: Edit
     - Zone: SSL and Certificates: Edit
-    - Zone Settings: Edit
-    - Workers Routes: Edit
-    - DNS: Edit
+    - Zone: Zone Settings: Edit
+    - Zone: Workers Routes: Edit
+    - Zone: DNS: Edit
 
 ## Helpful links & resources
 
@@ -96,9 +108,9 @@ Security verification is mandatory to receive enterprise support. Such verificat
 
 Enterprise account contacts:
 
-| Name | Email | Role |
-|------|-------|------|
-| Tim Flynn | tflinn@cloudflare.com | Customer Success Manager |
-| Tom Hammell | thammell@cloudflare.com | Field Solutions Engineer |
-| Brian Ceppi | bceppi@cloudflare.com | Enterprise Account Manager |
-| Rick Fernandez | | Customer Solutions Engineer |
+| Name           | Email                   | Role                        |
+|----------------|-------------------------|-----------------------------|
+| Tim Flynn      | tflinn@cloudflare.com   | Customer Success Manager    |
+| Tom Hammell    | thammell@cloudflare.com | Field Solutions Engineer    |
+| Brian Ceppi    | bceppi@cloudflare.com   | Enterprise Account Manager  |
+| Rick Fernandez |                         | Customer Solutions Engineer |
