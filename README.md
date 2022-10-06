@@ -631,8 +631,8 @@ Please note that the team name must be unique within an organization.
 
 Glitchtip users and glitchtip team members can be entirely self-serviced via App-Interface.
 
-In order to get access to Glitchtip, a user has to have:
-* The user's GitHub profile must display their @redhat.com email address in the publicly-visible email field.
+In order to get access to Glitchtip, a user has to have the following:
+* A publicly-visible GitHub email address; otherwise, `org_username@redhat.com` is being used.
 * A `role` that includes a `glitchtip_roles` and a `glitchtip_teams` sections.
   ```yaml
   glitchtip_roles:
