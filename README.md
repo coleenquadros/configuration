@@ -234,6 +234,10 @@ Please create the request file [here](/data/app-interface/requests).
 - Management of Sentry users.
 - Management of Sentry teams.
 - Management of Sentry projects.
+- Management of GlitchTip organizations.
+- Management of GlitchTip projects.
+- Management of GlitchTip teams.
+- Management of GlitchTip users.
 - Management of OpenShift Namespaces.
 - Management of OpenShift Groups.
 - Management of OpenShift LimitRanges.
@@ -560,6 +564,86 @@ Sentry users and team membership can be entirely self-serviced via App-Interface
 In order to get access to Sentry, a user has to have:
 * A `role` that includes a `sentry_teams` section, with one or more references to sentry team file(s).
     * Example: [dev](/data/teams/ocm/roles/dev.yml) role.
+
+---
+### Create a GlitchTip Project for an onboarded App (`/app-sre/app-1.yml`)
+
+The structure of this parameter is the following:
+
+```yaml
+glitchtipProjects:
+- name: <name of the project>
+  description: <description of the project>
+  platform: <project language>
+  teams:
+  - $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre-stage.yml`>
+  - ...
+  organization:
+    $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example TODO>
+- ...
+```
+
+The name, description, platform, teams, and organization fields are required. The name must be unique within an organization.
+
+In order to add or remove a Glitchtip project, an MR must be sent to the appropriate App datafile, and the project needs to be added to or removed from the project's array.
+
+### Create a Glitchtip Organization (`/dependencies/glitchtip-organization-1.yml`)
+
+A glitchtip project is related to a glitchtip organization, and all projects in an organization can be accessed by all organization members.
+
+Define your glitchtip organization:
+```yaml
+$schema: /dependencies/glitchtip-organization-1.yml
+
+labels:
+  service: glitchtip
+
+name: <name of the organization>
+description: <description of the organization>
+instance:
+  $ref: /dependencies/glitchtip/glitchtip-stage.yml
+
+```
+
+Please note that the organization's name must be unique.
+
+
+### Create a Glitchtip Team (`/dependencies/glitchtip-team-1.yml`)
+
+Glitchtip projects are associated with glitchtip teams. Teams are used for notification purposes only!
+
+To define a glitchtip team, create a file in /data/dependencies/glitchtip/teams with a structure like the following:
+
+```yaml
+---
+$schema: /dependencies/glitchtip-team-1.yml
+
+labels:
+  service: glitchtip
+
+name: <name of the team>
+description: <description of the team>
+```
+
+Please note that the team name must be unique within an organization.
+
+### Manage Glitchtip team membership via App-Interface (`/access/role-1.yml`)
+
+Glitchtip users and glitchtip team members can be entirely self-serviced via App-Interface.
+
+In order to get access to Glitchtip, a user has to have:
+* The user's GitHub profile must display their @redhat.com email address in the publicly-visible email field.
+* A `role` that includes a `glitchtip_roles` and a `glitchtip_teams` sections.
+  ```yaml
+  glitchtip_roles:
+  - organization:
+      $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example TODO>
+    role: member
+
+  glitchtip_teams:
+  - $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example TODO>
+  ```
+  TODO example
 
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
