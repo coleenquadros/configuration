@@ -6,7 +6,7 @@ CURRENT_DIR=$(dirname "$0")
 GIT_DIFF_TREE="git diff-tree --name-status -r remotes/origin/master..HEAD -- *yml *yaml"
 
 # Check EOF newline
-pip install --user binaryornot
+pip3 install --user binaryornot
 git ls-files | $CURRENT_DIR/eofcheck.py
 if [ $? != 0 ]; then
     echo "Detected files that do not end with newline"
