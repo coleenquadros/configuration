@@ -1,3 +1,5 @@
+{{% set q_settings_alerting_services = query('/queries/app-interface-alerting-services.graphql') %}}
+{{% set alerting_services = q_settings_alerting_services[0].alertingServices %}}
 ---
 $schema: /openshift/prometheus-rule-1.yml
 apiVersion: monitoring.coreos.com/v1
@@ -16,7 +18,7 @@ spec:
     {{% set labels = namespace.app.labels | json_to_dict %}}
     - alert: PrometheusTargetFlapping
       labels:
-        {{%- if "service" in labels %}}
+        {{%- if "service" in labels and labels["service"] in alerting_services %}}
         service: {{{ labels["service"] }}}
         {{%- else %}}
         service: app-sre-observability
