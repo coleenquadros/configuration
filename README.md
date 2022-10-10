@@ -2104,12 +2104,14 @@ The Cloudflare Zone definition follows the Cloudflare Terraform provider [zone d
 
 When provisioning a new zone, it is necessary to change the domain nameservers to use the Cloudflare nameservers that are assigned to that zone. Those nameservers are returned by Terraform as output data but are currently not visible anywhere. An AppSRE team member can login to the Cloudflare account to retrieve the nameservers. Note: when using a `partial` type zone, nameservers do NOT need to be changed but some Cloudflare features are unavailable (see cloudflare docs).
 
+When provisioning certificates with [Cloudflare ACM](https://developers.cloudflare.com/ssl/edge-certificates/advanced-certificate-manager/) you will need to prove ownership of the domain by creating TXT records. These challenge record values are currently only available in the console, but an AppSRE team member can assist in providing these. The TXT record(s) can be created in the `/dependencies/dns-zone-1.yml` file managing the DNS zone in question.
+
 - `provider`: `zone`
 - `identifier`: a unique identifier for the zone (terraform identifier)
 - `zone`: a valid domain name
 - `plan`: `free` or `enterprise` (an enterprise account is required to enable the later)
 - `type`: `full` or `partial` (when you only want Cloudflare on some specific CNAME records)
-- `settings`: (Optional) See the Cloudflare Terraform provider docs for [cloudflare_zone_settings_override](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/zone_settings_override) for a list of available options
+- `settings`: (Optional) See the Cloudflare Terraform provider docs for [cloudflare_zone_settings_override](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/zone_settings_override) for a list of available options. **Note:** be sure to quote any on/off values (`'on'` or `'off'`), otherwise in YAML they will turn into booleans and will be rejected by the Cloudflare API.
 - `argo`: (Optional) Settings either or both of these options will enable Cloudflare Argo on the zone (an enterprise account is required)
   - `smart_routing`: `on` of `off`
   - `tiered_caching`: `on` of `off`
@@ -2123,6 +2125,15 @@ When provisioning a new zone, it is necessary to change the domain nameservers t
   - `identifier`: a unique identifier for the worker (terraform identifier)
   - `pattern`: The URL pattern that the worker will act on (ex: `mydomain.com/some/path/*`)
   - `script_name`: The name of the worker script that this worker will use to process requests (must be defined and match the name of a worker script resource)
+- `certificates`: (Optional) A list of Cloudflare certificates to provision for the zone
+  - `identifier`: a unique identifier for the certificate (terraform identifier)
+  - `type`: the type of certificate (currently supports `advanced` for [Cloudflare ACM certificates](https://developers.cloudflare.com/ssl/edge-certificates/advanced-certificate-manager/))
+  - `certificate_authority`: certificate authority to issue the certificate. `lets_encrypt` is the only value that is currently supported.
+  - `hosts`: list of hostnames to provision the certificate for. If using Let's Encrypt, this must not contain more than 2 entries, one matching the zone name, and the other a subdomain or the subdomain wildcard (ex. `my.zone.com` and `*.my.zone.com`, or `my.zone.com` and `something.my.zone.com`)
+  - `validation_method`: validation method to use in order to prove domain ownership. Let's Encrypt only supports `txt`.
+  - `validity_days`: how long the certificate is valid for. Let's Encrypt only supports `90`.
+  - `cloudflare_branding`: (default **false**) whether to include Cloudflare branding. This will add sni.cloudflaressl.com as the Common Name.
+  - `wait_for_active_status`: (default **false**) whether to wait for a certificate pack to reach status active during creation. Note that if this takes longer than expected it could block other changes within your account.
 
 ### Manage Cloudflare Worker Scripts via App-Interface (`/openshift/namespace-1.yml`) using Terraform
 
