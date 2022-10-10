@@ -376,26 +376,6 @@ Next up, change all your panels to send queries to this datasource
 1. Submit a MR to app-interface to add a read replica for your RDS instance. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6f6e26253356a63853c9b4424a81bb5919f851b8/data/services/assisted-installer/namespaces/assisted-installer-production.yml#L90-98
 1. Once the MR is merged and the read replica is provisioned, submit another MR to add the read replica as a data source to Grafana. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6f6e26253356a63853c9b4424a81bb5919f851b8/resources/observability/grafana/grafana-datasources.secret.yaml#L1182-1198
 
-### Adding annotation using Web UI
-  
-* As we can create new Dashboard to check service deployment info in that case we can create annotation using below steps:  
-##### Steps to create new annotation:  
-
-1. Navigate specific to your Service Dashboard on Grafana UI.  
-2. Click on "Dashboard settings" menu.  
-3. Click on "Annotation" option on the left panel.  
-4. Click on "Add annotation query" button to create annotation.  
-5. Enter the Annotation name.  
-6. Select Data Source as "deploy-events-db" from dropdown menu to get deployment data.  
-7. Choose the color which we want to use for annotation data.  
-8. Enter the db-query in the "Query" text box.  
-   
-   * Example: create data of deployment status of Advisor service with success on stage env  
-   > SELECT deployment_time as "time", 'deployed ' || app_name || ' to ' || env_name as "text" from deployments WHERE app_name = 'advisor' and env_name = 'insights-stage' and succeeded = true;
-      * We can create annotaion for failed deployment information with `succeeded = false` info inside query.  
-9. Now click on the "save Dashobard" button to see data.  
-* If you still not able to see infomation on UI then please check the which timerange you have used(Select atleast 7day before till now).
-
 ### Adding dashboards
 
 Since the Grafana instance is read-only, there is no 'save' button for the dashboard changes you make. In order to add a new dashboard, you should use the ['Grafana Playground' dashboard](https://grafana.stage.devshift.net/d/playground/playground?orgId=1). The Grafana Playground dashboard has one instance each for each of the supported panels. You can duplicate the panels as many times as you'd like, and use the query view to add the graphs for desired metrics. Once that's done, export the dashboard as json.
