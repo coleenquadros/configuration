@@ -106,8 +106,6 @@ run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRe
 ### gitlab-ci-skipper runs first to determine if other integrations should run
 [[ "$(run_int gitlab-ci-skipper $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)" == "yes" ]] && exit 0
 
-## Run integrations on production
-ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare
 }
 
 # Prepare to run integrations on local server
@@ -134,11 +132,8 @@ cat "$CONFIG_TOML" \
 
 ## Run integrations on local server
 
-### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
-[[ "$IS_TEST_DATA" == "no" ]] && VALID_SAAS_FILE_CHANGES_ONLY=$(run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid) || VALID_SAAS_FILE_CHANGES_ONLY="no"
-
 # run integrations based on their pr_check definitions
-python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} ${VALID_SAAS_FILE_CHANGES_ONLY} ${IS_TEST_DATA} > $TEMP_DIR/integrations.sh
+python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} ${IS_TEST_DATA} > $TEMP_DIR/integrations.sh
 exit_status=$?
 if [ $exit_status != 0 ]; then
   exit $exit_status

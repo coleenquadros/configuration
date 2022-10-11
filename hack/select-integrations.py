@@ -138,7 +138,6 @@ def print_cmd(pr, select_all, non_bundled_data_modified, int_name, override=None
 
 
 def print_pr_check_cmds(integrations, selected=None, select_all=False,
-                        valid_saas_file_changes=False,
                         non_bundled_data_modified=False):
     if selected is None:
         selected = []
@@ -150,10 +149,6 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False,
 
         always_run = pr.get('always_run')
         if int_name not in selected and not select_all and not always_run:
-            continue
-
-        run_for_valid_saas_file_changes = pr.get('run_for_valid_saas_file_changes')
-        if valid_saas_file_changes and run_for_valid_saas_file_changes is False:
             continue
 
         if pr.get("shardSpecOverride"):
@@ -171,8 +166,7 @@ def main():
     with open(sys.argv[1], 'r') as f:
         data = json.load(f)
 
-    valid_saas_file_changes_only = True if sys.argv[2] == "yes" else False
-    is_test_data = True if sys.argv[3] == "yes" else False
+    is_test_data = True if sys.argv[2] == "yes" else False
 
     integrations = get_integrations(data)
     modified_files = get_modified_files()
@@ -221,7 +215,6 @@ def main():
     print_pr_check_cmds(
         integrations,
         selected=selected,
-        valid_saas_file_changes=valid_saas_file_changes_only,
         non_bundled_data_modified=non_bundled_data_modified
     )
 
