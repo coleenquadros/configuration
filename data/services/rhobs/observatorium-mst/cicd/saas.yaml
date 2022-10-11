@@ -56,8 +56,6 @@ imagePatterns:
 - quay.io/openshift/origin-configmap-reloader
 - quay.io/prometheus/alertmanager
 - quay.io/openshift-logging/loki
-  # This should be deleted upon completion of https://issues.redhat.com/browse/RHOBS-112
-- quay.io/philipgough/envoy
 
 parameters:
   OAUTH_PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
@@ -687,23 +685,3 @@ resourceTemplates:
         NAMESPACE: observatorium-production
         REMOTE_NAMESPACE: observatorium-mst-production
         SERVICE_ACCOUNT_NAME: observatorium
-- name: rhobs-thanos-receive-migration-template
-  path: /resources/services/receiver-migration-template.yaml
-  url: https://github.com/rhobs/configuration
-  targets:
-    - namespace:
-        $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
-      ref: c5e3d686d95dba479499f462cdd3bee25040d3a7
-      delete: true # deleting from the namespace - will remove in followup MR.
-      parameters:
-        NAMESPACE: observatorium-mst-production
-        PRIMARY_UPSTREAM_HOST: 'observatorium-thanos-receive-router.observatorium-mst-production.svc.cluster.local'
-        MIRROR_HOST: 'observatorium-thanos-receive.observatorium-mst-production.svc.cluster.local'
-        RECEIVER_KETAMA_REPLICAS: '0'
-        RECEIVER_KETAMA_CPU_REQUEST: '1500m'
-        RECEIVER_KETAMA_CPU_LIMIT: '1500m'
-        RECEIVER_KETAMA_MEMORY_REQUEST: '15Gi'
-        RECEIVER_KETAMA_MEMORY_LIMIT: '15Gi'
-        THANOS_CONFIG_SECRET: observatorium-mst-thanos-objectstorage
-        THANOS_S3_SECRET: observatorium-mst-thanos-production-s3
-        RECEIVER_SERVICE_ACCOUNT: observatorium-mst
