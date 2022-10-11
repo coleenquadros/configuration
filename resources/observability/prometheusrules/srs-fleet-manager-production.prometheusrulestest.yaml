@@ -23,8 +23,33 @@ tests:
           - exp_labels:
               alertname: SRSFleetManagerDown - production
               service: srs-fleet-manager
-              severity: high
+              namespace: service-registry-production
+              severity: critical
             exp_annotations:
-              message: "No targets found for SRS Fleet Manager in namespace . SRS Fleet Manager is down."
+              # TODO: For some reason the template is not working so {{ $labels.namespace }} is empty.
+              message: "No targets found for SRS Fleet Manager in the  namespace. SRS Fleet Manager is down."
+              dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#srs-fleet-manager-down"
+  - interval: 1m
+    input_series:
+      # 0m  - 20m Pod available
+      # 20m - 40m Pod unavailable
+      - series: 'kube_deployment_status_replicas_unavailable{namespace="service-registry-production",deployment="srs-fleet-manager-mt"}'
+        values: '0+0x20 1+0x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: SRSFleetManagerPodUnavailable - production
+        exp_alerts:
+      - eval_time: 40m
+        alertname: SRSFleetManagerPodUnavailable - production
+        exp_alerts:
+          - exp_labels:
+              alertname: SRSFleetManagerPodUnavailable - production
+              service: srs-fleet-manager
+              namespace: service-registry-production
+              deployment: srs-fleet-manager-mt
+              severity: critical
+            exp_annotations:
+              message: "One or more Service Registry pods are unavailable in the service-registry-production namespace."
               dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#srs-fleet-manager-down"

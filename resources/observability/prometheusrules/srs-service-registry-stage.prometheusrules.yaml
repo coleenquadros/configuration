@@ -13,11 +13,23 @@ spec:
     rules:
     - alert: SRSServiceRegistryDown - stage
       annotations:
-        message: "No targets found for Service Registry in namespace {{ $labels.namespace }}. Service Registry is down."
+        message: "No targets found for Service Registry in the {{ $labels.namespace }} namespace. Service Registry is down."
         dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry&var-interval=5m"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#service-registry-down"
       expr: |
         absent(up{job="apicurio-registry",namespace="service-registry-stage"} == 1)
+      for: 15m
+      labels:
+        service: srs-service-registry
+        namespace: service-registry-stage
+        severity: high
+    - alert: SRSServiceRegistryPodUnavailable - stage
+      annotations:
+        message: "One or more Service Registry pods are unavailable in the {{ $labels.namespace }} namespace."
+        dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry&var-interval=5m"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#service-registry-down"
+      expr: |
+        kube_deployment_status_replicas_unavailable{namespace="service-registry-stage",deployment="apicurio-registry"} > 0
       for: 15m
       labels:
         service: srs-service-registry
