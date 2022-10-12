@@ -585,8 +585,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: b3ac9f338cced7218051373f581f4169cf6dafbc
+    ref: ea7a95465f5d71a2ac0921a1d12e5e12f3e4b08d
     parameters:
+      ALERTMANAGER_NAMESPACE: observatorium-mst-production
+      ALERTMANAGER_EXTERNAL_URL: 'observatorium-alertmanager-mst.api.openshift.com'
       NAMESPACE: observatorium-mst-production
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       JAEGER_COLLECTOR_NAMESPACE: observatorium-production
@@ -642,6 +644,11 @@ resourceTemplates:
       LOKI_QUERY_SCHEDULER_CPU_LIMITS: '2000m'
       LOKI_QUERY_SCHEDULER_MEMORY_REQUESTS: '600Mi'
       LOKI_QUERY_SCHEDULER_MEMORY_LIMITS: '1200Mi'
+      LOKI_RULER_REPLICAS: 3
+      LOKI_RULER_CPU_REQUESTS: '2000m'
+      LOKI_RULER_CPU_LIMITS: '6000m'
+      LOKI_RULER_MEMORY_REQUESTS: '4Gi'
+      LOKI_RULER_MEMORY_LIMITS: '8Gi'
       LOKI_QUERIER_MAX_CONCURRENCY: 2
       LOKI_INGESTER_WAL_REPLAY_MEMORY_CEILING: '5GB' # This is not defined in k8s units but in Loki's ByteSize units.
       LOKI_REPLICATION_FACTOR: 2
@@ -662,6 +669,8 @@ resourceTemplates:
       LOKI_RESULTS_CACHE_MEMORY_LIMITS: '1536Mi'
       LOKI_PVC_REQUEST: '10Gi'
       LOKI_INGESTER_PVC_REQUEST: '150Gi'
+      LOKI_RULER_PVC_REQUEST: '10Gi'
+      RULES_OBJSTORE_S3_SECRET: observatorium-mst-rules-objstore-production-s3
       SERVICE_ACCOUNT_NAME: observatorium-mst
 - name: parca-observatorium-remote-ns-rbac-stage
   path: /resources/services/parca-observatorium-remote-ns-rbac-template.yaml
