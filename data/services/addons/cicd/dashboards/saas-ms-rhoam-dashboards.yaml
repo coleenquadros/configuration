@@ -1,0 +1,36 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels: {}
+
+name: saas-rhoam-dashboards
+description: SaaS tracking file for rhoam-dashboards
+
+app:
+  $ref: /services/addons/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  output: events
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-mt-sre-info
+
+managedResourceTypes:
+- ConfigMap
+
+imagePatterns: []
+
+# rhoam-dashboards
+resourceTemplates:
+- name: addon-rhoam-dashboards-stage
+  url: https://gitlab.cee.redhat.com/service/managed-tenants-slos
+  path: /RHOAM/saas-dashboards/
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: main
+
