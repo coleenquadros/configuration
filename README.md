@@ -2699,6 +2699,9 @@ repositories:
 - `jira`: Value as `$ref: /path/to/jira-server.yaml` will enable the
   Gitlab/JIRA integration, that links Merge Requests mentioning JIRA tickets
   to the mentioned JIRA ticket.
+- `showInReviewQueue` : When set to true, MRs from this repository 
+  display in the [review queue](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/app-interface-review-queue.md) so that the AppSRE IC can review MRs that are not self-servicable.
+  (For AppSRE usage only).
 
 Example:
 
