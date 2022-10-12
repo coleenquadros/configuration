@@ -1,0 +1,221 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: notifications
+  platform: insights
+
+name: notifications-perf
+description: notifications app on the Insights Platform deployed with Clowder
+
+app:
+  $ref: /services/insights/notifications/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 600Mi
+  limits:
+    cpu: 300m
+    memory: 600Mi
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: proj-perf-insights-cluster
+
+managedResourceTypes:
+- ClowdApp
+- ClowdJobInvocation
+- ConfigMap
+- CronJob
+- Frontend
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/app-sre
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+
+resourceTemplates:
+
+# notifications-backend
+- name: notifications-backend
+  path: /.rhcicd/clowdapp-backend.yaml
+  url: https://github.com/RedHatInsights/notifications-backend
+  targets:
+
+  # perf
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/perf-notifications-perf.yml
+    # notifications-backend commit hash that determines the clowdapp-backend.yaml version
+    ref: 778ffe9f3b7da60ed039b3731e2dbb20f93059fd
+    parameters:
+      FLOORIST_SUSPEND: 'false'
+      FLOORIST_IMAGE_TAG: fe12542 # 2022-06-03
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage #TODO what is this referencing?
+      FLOORIST_SCHEDULE: 0 6 * * *
+      CLOUDWATCH_ENABLED: true
+      CPU_LIMIT: 300m
+      CPU_REQUEST: 150m
+      MIN_REPLICAS: 3
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_ENABLED: true
+      INTERNAL_RBAC_ENABLED: true
+      OB_ENABLED: true
+      # OB_BRIDGE_NAME: notifications-stage #TODO? do we need this jan
+      OB_READY_CHECK_PERIOD: 10s
+      QUARKUS_REST_CLIENT_OB_URL: https://event-bridge-event-bridge-stable.apps.ob-stable.0b9l.p1.openshiftapps.com
+      QUARKUS_REST_CLIENT_KC_URL: https://sso.redhat.com
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-notifications-backend-gh-build-master
+    # promotion: #TODO do we need this Jan? 
+    #   publish:
+    #   - notifications-backend-stage-deploy-success-channel
+
+# notifications-engine
+- name: notifications-engine
+  path: /.rhcicd/clowdapp-engine.yaml
+  url: https://github.com/RedHatInsights/notifications-backend
+  targets:
+
+
+  # perf
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/perf-notifications-perf.yml
+    # notifications-backend commit hash that determines the clowdapp-engine.yaml version
+    ref: 778ffe9f3b7da60ed039b3731e2dbb20f93059fd
+    parameters:
+      CLOUDWATCH_ENABLED: true
+      CPU_LIMIT: 300m
+      CPU_REQUEST: 150m
+      KAFKA_CONSUMED_TOTAL_CHECKER_ENABLED: true
+      KAFKA_CONSUMED_TOTAL_CHECKER_INITIAL_DELAY: 60m
+      KAFKA_CONSUMED_TOTAL_CHECKER_PERIOD: 120m
+      MIN_REPLICAS: 3
+      MP_MESSAGING_INCOMING_AGGREGATION_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 180000
+      MP_MESSAGING_INCOMING_INGRESS_ENABLED: true
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
+      MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 180000
+      NOTIFICATIONS_DISABLE_WEBHOOK_ENDPOINTS_ON_FAILURE: true
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      OB_ENABLED: true
+      OB_BACKCHANNEL_FILLER_ENABLED: true
+      OB_BRIDGE_NAME: notifications-perf
+      PROCESSOR_EMAIL_NO_REPLY: no-reply-perf@redhat.com
+      QUARKUS_REST_CLIENT_OB_URL: https://event-bridge-event-bridge-stable.apps.ob-stable.0b9l.p1.openshiftapps.com
+      QUARKUS_REST_CLIENT_KC_URL: https://sso.redhat.com
+      RBAC_S2S_READ_TIMEOUT: 120000
+      SENTRY_ENABLED: true
+      RECIPIENT_PROVIDER_USE_IT_IMPL: true
+      NOTIFICATIONS_USE_DEFAULT_TEMPLATE: true
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-notifications-backend-gh-build-master
+    # promotion: #TODO Jan again commenting everything related to promotion key.
+    #   publish:
+    #   - notifications-engine-stage-deploy-success-channel
+
+
+# notifications-aggregator
+- name: notifications-aggregator
+  path: /.rhcicd/clowdapp-aggregator.yaml
+  url: https://github.com/RedHatInsights/notifications-backend
+  targets:
+
+  # perf
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/perf-notifications-perf.yml
+    # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
+    ref: 778ffe9f3b7da60ed039b3731e2dbb20f93059fd
+    parameters:
+      CLOUDWATCH_ENABLED: true
+      CPU_REQUEST: 200m
+      CRONTAB_AGGREGATION_JOB: 0 * * * *
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_ENABLED: true
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-notifications-backend-gh-build-master
+    # promotion:
+    #   publish:
+    #   - notifications-aggregator-stage-deploy-success-channel
+
+
+# notifications-gw
+- name: notifications-gw
+  path: /.rhcicd/clowdapp.yaml
+  url: https://github.com/RedHatInsights/notifications-gw
+  targets:
+
+  # perf
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/perf-notifications-perf.yml
+    # notifications-gw commit hash that determines the clowdapp.yaml version
+    ref: d886c3e3f063f18af76bc0a4020ef69b8bd9230f
+    parameters:
+      CLOUDWATCH_ENABLED: true
+      CPU_REQUEST: 200m
+      MIN_REPLICAS: 3
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_ENABLED: true
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-notifications-gw-gh-build-main
+    # promotion:
+    #   publish:
+    #   - notifications-gw-stage-deploy-success-channel
+
+
+# notifications-frontend
+# - name: notifications-frontend
+#   path: /.rhcicd/frontend.yaml
+#   url: https://github.com/RedHatInsights/notifications-frontend
+#   targets:
+
+#   # ephemeral
+#   - namespace:
+#       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+#     disable: true  # do not create an app-sre deploy job for ephemeral namespace
+#     ref: internal  # populated by bonfire
+#   # stage
+#   - namespace:
+#       $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+#     ref: master
+#     upstream:
+#       instance:
+#         $ref: /dependencies/ci-ext/ci-ext.yml
+#       name: RedHatInsights-notifications-frontend-gh-build-master
+
+# user preferences frontend
+# - name: user-preferences
+#   path: /.rhcicd/frontend.yml
+#   url: https://github.com/RedHatInsights/user-preferences-frontend
+#   targets:
+
+#   # ephemeral
+#   - namespace:
+#       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+#     disable: true  # do not create an app-sre deploy job for ephemeral namespace
+#     ref: internal  # populated by bonfire
+#   # stage
+#   - namespace:
+#       $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+#     ref: master
+#     upstream:
+#       instance:
+#         $ref: /dependencies/ci-ext/ci-ext.yml
+#       name: RedHatInsights-user-preferences-frontend-gh-build-master

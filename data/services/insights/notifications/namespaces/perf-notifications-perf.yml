@@ -1,0 +1,76 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: notifications
+
+name: notifications-perf
+description: Insights notifications-perf on the perf cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+# limitRanges:
+#   $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+# quota:
+#   $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/notifications/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rbac-stage/rbac-psks
+  version: 3
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/notifications-stage/iqe-testing-config
+  version: 2
+
+sharedResources:
+- $ref: /services/insights/shared-resources/metrics-export-stage.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: rds
+    identifier: notifications-backend-perf
+    defaults: /terraform/resources/insights/perf/rds/postgres11-rds-1.yml
+    overrides:
+      name: notifications_backend
+    output_resource_name: notifications-backend-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: notifications-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
