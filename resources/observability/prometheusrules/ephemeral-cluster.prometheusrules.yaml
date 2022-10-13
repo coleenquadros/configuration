@@ -16,7 +16,7 @@ spec:
         message: "CPU utilization is over 75% for node {{ $labels.instance }}"
         dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
       expr: |
-        instance:node_cpu:rate:sum >= 6.0
+        instance:node_cpu:rate:sum >= 4.0
       for: 1m
       labels:
         service: insights
@@ -41,7 +41,7 @@ spec:
         message: "Memory utilization is over 70% for node {{ $labels.instance }}"
         dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
       expr: |
-        node_memory_Active_anon_bytes >= 700
+        node_memory_Active_anon_bytes >= 300
       for: 5m
       labels:
         service: insights
@@ -54,6 +54,31 @@ spec:
         dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
       expr: |
         node_memory_Active_anon_bytes >= 900
+      for: 5m
+      labels:
+        service: insights
+        severity: medium
+        env: ephemeral
+        app_team: devprod
+
+    - alert: Cluster memory utilization is higher than normal
+      annotations:
+        message: "Cluster memory utilization is over 70% for node {{ $labels.instance }}"
+        dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
+      expr: |
+        (sum(node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Buffers_bytes - node_memory_Cached_bytes - node_memory_SReclaimable_bytes) / sum(node_memory_MemTotal_bytes)) > 0.25
+      for: 5m
+      labels:
+        service: insights
+        severity: medium
+        env: ephemeral
+        app_team: devprod
+    - alert: High node memory utilization
+      annotations:
+        message: "Memory utilization is over 90% for node {{ $labels.instance }}"
+        dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
+      expr: |
+        (sum(node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Buffers_bytes - node_memory_Cached_bytes - node_memory_SReclaimable_bytes) / sum(node_memory_MemTotal_bytes)) > 0.90
       for: 5m
       labels:
         service: insights
