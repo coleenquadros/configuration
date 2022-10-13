@@ -11,6 +11,11 @@ If the ACS team create an automation CI for load testing in the future,
 this document will be updated accordingly.
 
 
+### Rerun load test
+
+See ACS Fleet Manager documentation: https://github.com/stackrox/acs-fleet-manager/tree/main/e2e/loadtest
+
+
 ### Brief summary
 
 - The service memory consumption is not affected by the number of users and their request rate.
@@ -93,6 +98,9 @@ There was one request which took 15 seconds.
 ##### ACS Fleet Manager request rate metric:
 ![ACS Fleet Manager request rate](./images/multi_users_request_rate.png "ACS Fleet Manager request rate chart")
 ACS Fleet manager RPS metric correlates with locust data.
+
+*Note:* The growth is smooth because metrics visualisation used `sum(rate())` functions. So the data was smeared in 10 minutes interval.
+The current visualisation no longer spreads the metric data.
 
 
 ##### ACS Fleet Manager response code metric:
