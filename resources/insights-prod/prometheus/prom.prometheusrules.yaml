@@ -39,34 +39,6 @@ spec:
     - record: service:proportion:latency_adjusted:pctlrate5m
       expr: service:latency:adjusted:rate5m * 100 < bool on (exported_service) service:constant:sli:pctlatency
 
-  - name: network-check
-    rules:
-    - record: HttpFailuresLast1Min
-      expr: increase(netcheck_http_failures_total[1m])
-    - record: GetentFailuresLast1Min
-      expr: increase(netcheck_getent_failures_total[1m])
-    - alert: HttpFailuresAlert
-      expr: HttpFailuresLast1Min > 0
-      for: 5m
-      labels:
-        severity: medium
-        service: insights
-        env: {{{ env }}}
-      annotations:
-        dashboard: "https://grafana.app-sre.devshift.net/d/6Y8XkcHGz/network-check?orgId=1"
-        message: "insights network-check HTTP check has ongoing failures for the last 5min"
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/network-check.rst
-    - alert: GetentFailuresAlert
-      expr: GetentFailuresLast1Min > 0
-      for: 5m
-      labels:
-        severity: medium
-        service: insights
-        env: {{{ env }}}
-      annotations:
-        dashboard: "https://grafana.app-sre.devshift.net/d/6Y8XkcHGz/network-check?orgId=1"
-        message: "insights network-check getent check has ongoing failures for the last 5min"
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/network-check.rst
   - name: lag
     rules:
     - record: LagGauge
