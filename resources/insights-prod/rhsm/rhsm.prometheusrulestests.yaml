@@ -1,0 +1,92 @@
+
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+# For running these tests locally see https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/prometheus-rules-tests-in-app-interface.md
+
+rule_files:
+- /insights-prod/rhsm/rhsm.prometheusrules.yaml
+
+evaluation_interval: 5m
+
+tests:
+# Tests Rhsm5xx
+- interval: 1m
+  # 0m  - 9m    0% 5xx, 100% 2xx
+  # 10m - 19m   1% 5xx, 99% 2xx
+  # 20m - 29m   9% 5xx, 91% 2xx
+  # 30m - 49m   15% 5xx, 85% 2xx  <-- we should see alerts start in here
+  # 50m - 69m   0% 5xx, 100% 2xx  <-- we should see alerts stop in here
+
+  input_series:
+  - series: api_3scale_gateway_api_status{exported_service="rhsm-subscriptions", status="5xx"}
+    values: "0+0x9 1+1x9 19+9x9 115+15x19 250+0x9"
+  - series: api_3scale_gateway_api_status{exported_service="rhsm-subscriptions", status="2xx"}
+    values: "0+100x9 999+99x9 1981+91x9 2885+85x19 3750+100x9"
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 5m
+    alertname: Rhsm5xx
+    exp_alerts: []
+  - eval_time: 25m
+    alertname: Rhsm5xx
+    exp_alerts: []
+  # Test 5xx alert
+  - eval_time: 45m
+    alertname: Rhsm5xx
+    exp_alerts:
+    - exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+        message: "RHSM: more than 10% requests in prod returned HTTP 5XX in last 15 minutes"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/Rhsm5xx.md'
+      exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: rhsm
+  - eval_time: 60m
+    alertname: Rhsm5xx
+    exp_alerts: []
+
+# Tests RhsmLatency
+- interval: 1m
+  input_series:
+  # 0m  - 9m    0% too slow, 100% ok
+  # 10m - 19m   1% too slow, 99% ok
+  # 20m - 29m   9% too slow, 91% ok
+  # 30m - 49m   25% too slow, 75% ok  <-- we should see alerts start in here
+  # 50m - 70m   0% too slow, 100% ok  <-- we should see alerts stop in here
+  - series: 'api_3scale_gateway_api_time_count{exported_service="rhsm-subscriptions"}'
+    values: "0+100x9 1000+100x9 2000+100x9 3000+100x19 5000+100x19"
+  - series: 'api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="rhsm-subscriptions"}'
+    # these effectively expand to
+    # (0..900)(100%) (999..1890)(99%) (1981..2800)(91%) (2875..4300)(75%) (4400..6300)(100%)
+    values: "0+100x9 999+99x9 1981+91x9 2875+75x19 4400+100x29"
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: RhsmLatency
+    exp_alerts: []
+  - eval_time: 10m
+    alertname: RhsmLatency
+    exp_alerts: []
+  - eval_time: 15m
+    alertname: RhsmLatency
+    exp_alerts: []
+  - eval_time: 46m
+    alertname: RhsmLatency
+    exp_alerts:
+    - exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+        message: "RHSM: slow responses observed; more than 10% of requests with response time > 2 seconds for the last 15 minutes in prod"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/RhsmLatency.md'
+      exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: rhsm
+        exported_service: rhsm-subscriptions
+  - eval_time: 69m
+    alertname: RhsmLatency
+    exp_alerts: []

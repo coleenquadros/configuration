@@ -1,0 +1,67 @@
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: rhsm
+spec:
+  groups:
+  - name: rhsm-insights-prod
+    rules:
+
+    - alert: Rhsm5xx
+      expr: >
+        (sum(rate(api_3scale_gateway_api_status{exported_service="rhsm-subscriptions", status="5xx"}[15m]))
+        /
+        sum(rate(api_3scale_gateway_api_status{exported_service="rhsm-subscriptions"}[15m]))) * 100 > 10
+      for: 5m
+      labels:
+        # Move to a "high" priority once on-boarding is completed
+        severity: medium
+        service: insights
+        env: prod
+        app_team: rhsm
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+        message: "RHSM: more than 10% requests in prod returned HTTP 5XX in last 15 minutes"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/Rhsm5xx.md'
+
+    - alert: RhsmLatency
+      # The sum of the rate of requests over 15 minutes within the time bucket with the upper limit of 2000ms
+      # is less than 90% of the sum of the rate of total rhsm-subscriptions requests happening over 15 minutes.
+      # Which means that we have at least 10% of requests slower than 2000ms for at least 5 minutes
+      expr: |
+          sum(rate(api_3scale_gateway_api_time_bucket{exported_service="rhsm-subscriptions", le="2000.0"}[15m]))
+          /
+          sum(rate(api_3scale_gateway_api_time_count{exported_service="rhsm-subscriptions"}[15m])) < 0.9
+      for: 5m
+      labels:
+        # Move to a "high" priority once on-boarding is completed
+        severity: medium
+        service: insights
+        env: prod
+        app_team: rhsm
+        exported_service: rhsm-subscriptions
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+        message: "RHSM: slow responses observed; more than 10% of requests with response time > 2 seconds for the last 15 minutes in prod"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/RhsmLatency.md'
+
+    - alert: SplunkHECFailing
+      expr: |
+        rate(splunk_hec_message_failure_total[10m]) > 0
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: rhsm
+      annotations:
+        message: "Splunk HEC logging is failing for {{ $labels.namespace }}"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/SplunkHecFailure.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1&viewPanel=88"
