@@ -2383,6 +2383,7 @@ Supported resource types are:
 App-Interface users must define a `github_username` field in their user file. This profile must comply with the following requirements:
 
 * The profile `Company` field must contain `Red Hat` (regex expression: `^.*[Rr]ed ?[Hh]at.*$`)
+* The profile must have one `@redhat.com` e-mail address configured, that has been validated.
 
 ### Manage GitLab group members
 
