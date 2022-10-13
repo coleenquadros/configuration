@@ -1294,6 +1294,11 @@ cat FILENAME | sed -e 's/\ //g'| base64 -d | gpg
 
 Example: https://gitlab.cee.redhat.com/service/app-interface/blob/f40e0f27eacf5510a954c034292e937632caecc7/data/teams/app-sre/users/jmelisba.yml#L27
 
+**Key extension is NOT supported**
+
+Please be aware, that currently our tooling does not support the extension of already expired keys.
+If your key expired, you have to create a new key instead of extending the expired one.
+
 
 ### Manage external resources via App-Interface (`/openshift/namespace-1.yml`)
 
