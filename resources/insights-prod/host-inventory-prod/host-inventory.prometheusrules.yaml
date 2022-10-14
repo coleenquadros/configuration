@@ -54,7 +54,7 @@ spec:
         message: 'HBI Prod consumer error rate critically high'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/host-inventory/App-insights-inventory-In-platform-prod-Mq-Errors.rst"
     - alert: InventoryMqNotProcessingCritical
-      expr: sum(increase(inventory_ingress_add_host_successes_total{namespace="host-inventory-prod"}[30m])) by (namespace) < 1 and sum(increase(kafka_consumergroup_group_lag{group='inventory-mq', topic=~'platform.inventory.host-ingress.*'}[30m])) by (topic) > 1
+      expr: (sum(increase(inventory_ingress_add_host_successes_total{namespace="host-inventory-prod"}[30m])) by (namespace) < bool 1 + sum(increase(kafka_consumergroup_group_lag{group='inventory-mq', topic=~'platform.inventory.host-ingress.*'}[30m])) by (topic) > bool 1) %2 == bool 1
       labels:
         severity: critical
         service: insights
