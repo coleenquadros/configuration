@@ -1,0 +1,65 @@
+---
+$schema: /app-interface/app-interface-email-1.yml
+
+labels: {}
+
+name: clo-addon-decommission-announcement-20221017
+
+subject: Application logs moving to the app-sre-logs account
+
+to:
+  roles:
+  - $ref: /aws/app-sre-logs/roles/log-consumer.yml
+  - $ref: /aws/app-sre-logs/roles/log-consumer-crc.yml
+
+  services:
+  - $ref: /services/app-sre/app.yml
+
+body: |
+  Hello,
+
+  This is an automated email sent as part of an app-interface merge request[1].
+
+  AppSRE clusters currently use the ClusterLoggingOperator OCM Addon to
+  forward logs to the cluster's account CloudWatch. This Addon lacks some
+  support and functionalities (e.g., sending logs to RHOBS/Loki). Furthermore, it
+  will be deprecated with ADR 58 [2].
+  
+  AppSRE will migrate from using this Addon to using the standard
+  openshift-logging operator.
+
+  With this change, logs will not be sent to the cluster's account CloudWatch
+  anymore, but will be made available directly in the "app-sre-logs" account
+  (744086762512). This means there will be no need to switch AWS roles anymore
+  in order to access your logs: just login on the "app-sre-logs" account. There
+  will be one LogGroup for each cluster-namespace. Logs will be shipped to the
+  region the cluster is in.
+
+  Your Grafana dashboards using clusters' CloudWatch datasources will need to
+  be updated to use the "AWS app-sre-logs" datasource and the new LogGroup.
+
+  This migration unfortunately requires some downtime of log forwarding to
+  CloudWatch. This downtime is due to the Addon removal duration and the hive
+  synchronization process. This removal process should take less than 30min.
+  During this downtime, application logs will only be accessible via pod logs
+  (oc logs / console).
+
+  We will start migrating on Monday October, 17th. We will announce cluster
+  migrations in the #sd-app-sre channel[3]. You can always refer to the logging
+  saas file[4] targets to see if your cluster has the new logging operator
+  enabled.
+
+  Please follow these instructions[5] to get access to your application logs.
+
+  In case you need assistance, please consult our FAQ[6] or create a ticket on
+  the ASIC Jira board[7].
+
+  Thank you!
+
+  [1] https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/48847
+  [2] https://docs.google.com/document/d/1RJ66T0eqcaEZzuG3gKYKzedVxw62iXWq-fsJcWECGV4
+  [3] https://coreos.slack.com/archives/CCRND57FW
+  [4] https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-cluster-logging-operator.yaml
+  [5] https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/FAQ.md#get-access-to-cluster-logs-via-log-forwarding
+  [6] https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/FAQ.md
+  [7] https://issues.redhat.com/projects/ASIC/issues
