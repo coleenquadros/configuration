@@ -246,6 +246,7 @@ refer to the steps [ACS Central provisioning latency](#acs-central-provisioning-
 
 ## Escalations
 
+- For RDS disaster recovery follow [ACS Fleet Manager instructions](https://github.com/stackrox/acs-fleet-manager/tree/main/docs/architecture#data-continuity-and-disaster-recovery)
 - Error/exception appears related to ACS Fleet Manager API or no leader worker is running, try to restart the pods.
 - Error/exception related to OCM, check with OCM support to see if they've received OSD cluster request.
 - Error/exception events found in the OSD cluster level, check with OCM support.
