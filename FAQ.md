@@ -139,10 +139,11 @@ To gate production promotions, follow these steps:
 
 ### Get access to cluster logs via Log Forwarding
 
-The App SRE team uses the CloudWatch Log Forwarding Addon to forward Application and Infra logs to AWS CloudWatch on the cluster's AWS account.
+With the ClusterLoggingOperator AddOn decommission ([ADR 58](https://docs.google.com/document/d/1RJ66T0eqcaEZzuG3gKYKzedVxw62iXWq-fsJcWECGV4/edit)), App SRE is migrating to using the cluster-logging operator directly. With this change, logs will not be stored in the cluster account anymore. They will centralized in the `app-sre-logs` account. Logs are stored in log groups named `<cluster>.<namespace>`
 
-To get access to CloudWatch on a cluster's AWS account, follow these steps (examples for `app-sre-stage-01`):
+To know if your cluster uses the new cluster-logging operator deployment and centralized logs, check if the [cluster-logging-operator saas file](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-cluster-logging-operator.yaml) targets the cluster, and the target is enabled (does not contain `disable: true`).
 
+To get access to the `app-sre-logs` account:
 1. Submit a MR to app-interface to add the [log-consumer](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-logs/roles/log-consumer.yml) role to your user file. You will also need to [add your public GPG key](https://gitlab.cee.redhat.com/service/app-interface#adding-your-public-gpg-key) (if you havn't already) in the same MR.
     * For console.redhat.com use the [log-consumer-crc](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-logs/roles/log-consumer-crc.yml) role.
 1. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre-logs` account). Follow the instructions in the email to login to the account.
@@ -150,10 +151,25 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
     * Note: to decrypt the password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret) 
 1. Once you are logged in, go to [Security Credentials page](https://console.aws.amazon.com/iam/home?#/security_credentials) and enable Multi-factor authentication (MFA).
 1. Logout and login to the account again using the configured MFA device.
-1. Once you are logged in, navigate to the Switch Role link obtained from the [ocm-aws-infrastructure-access-switch-role-links](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-aws-infrastructure-access-switch-role-links.md) page (suggestion: add to bookmarks).
+1. Access CloudWatch
+
+During the CLO Addon decommission period (see [email](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/app-interface/emails/clo-addon-decommission-anouncement.yaml)):
+* check if you cluster is still using the old logging Addon (`disable: true` in the [saas-file](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-cluster-logging-operator.yaml))
+* If still using the old Addon, please use the following info to access logs on the cluster's AWS account
+
+To get access to CloudWatch on a cluster's AWS account, follow these steps (examples for `app-sre-stage-01`):
+
+1. Submit a MR to app-interface to add the [log-consumer](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-logs/roles/log-consumer.yml) role to your user file. You will also need to [add your public GPG key](https://gitlab.cee.redhat.com/service/app-interface#adding-your-public-gpg-key) (if you havn't already) in the same MR.
+    * For console.redhat.com use the [log-consumer-crc](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-logs/roles/log-consumer-crc.yml) role.
+2. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre-logs` account). Follow the instructions in the email to login to the account.
+    * Note: in case you did not get an invitation, the login details can be obtained from the [Terraform-users Credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) page.
+    * Note: to decrypt the password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret) 
+3. Once you are logged in, go to [Security Credentials page](https://console.aws.amazon.com/iam/home?#/security_credentials) and enable Multi-factor authentication (MFA).
+4. Logout and login to the account again using the configured MFA device.
+5. Once you are logged in, navigate to the Switch Role link obtained from the [ocm-aws-infrastructure-access-switch-role-links](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-aws-infrastructure-access-switch-role-links.md) page (suggestion: add to bookmarks).
     * Note: search for your org_username for the cluster you want to view logs.
-1. In the Switch Role page, select a name for this role (suggestion: `<cluster_name>-read-only`) and click "Switch Role" (Account and Role should be filled automatically).
-1. You are now logged in to the cluster's AWS account. Go to the [CloudWatch console](https://console.aws.amazon.com/cloudwatch/home?#logsV2:log-groups) and get your logs!
+6. In the Switch Role page, select a name for this role (suggestion: `<cluster_name>-read-only`) and click "Switch Role" (Account and Role should be filled automatically).
+7. You are now logged in to the cluster's AWS account. Go to the [CloudWatch console](https://console.aws.amazon.com/cloudwatch/home?#logsV2:log-groups) and get your logs!
 
 > Note: CloudWatch logs from all accounts are also available in Grafana, using the `<cluster_name>-cloudwatch` datasource. Feel free to [Explore](https://grafana.app-sre.devshift.net/explore?orgId=1&left=%5B%22now-5m%22,%22now%22,%22app-sre-stage-01-cloudwatch%22,%7B%22id%22:%22%22,%22region%22:%22us-east-1%22,%22namespace%22:%22%22,%22refId%22:%22A%22,%22queryMode%22:%22Logs%22,%22logGroupNames%22:%5B%22app-sre-stage-0-ctbn8.application%22%5D,%22expression%22:%22fields%20@message,%20kubernetes.namespace_name%5Cn%7C%20limit%20100%22,%22statsGroups%22:%5B%5D%7D%5D)!
 
