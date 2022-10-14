@@ -572,7 +572,7 @@ The structure of this parameter is the following:
 
 ```yaml
 glitchtipProjects:
-- name: <name of the project>
+- name: <name of the project - lower case max 64 characters>
   description: <description of the project>
   platform: <project language>
   teams:
@@ -583,7 +583,7 @@ glitchtipProjects:
 - ...
 ```
 
-The name, description, platform, teams, and organization fields are required. The name must be unique within an organization.
+The name, description, platform, teams, and organization fields are required. The name must be unique within an organization. The project name - organization combination must be globally unique.
 
 In order to add or remove a Glitchtip project, an MR must be sent to the appropriate App datafile, and the project needs to be added to or removed from the project's array.
 
@@ -591,14 +591,14 @@ In order to add or remove a Glitchtip project, an MR must be sent to the appropr
 
 A glitchtip project is related to a glitchtip organization, and all projects in an organization can be accessed by all organization members.
 
-Define your glitchtip organization:
+To define your glitchtip organization, create a file in `/data/dependencies/glitchtip/organizations/` with a structure like the following:
 ```yaml
 $schema: /dependencies/glitchtip-organization-1.yml
 
 labels:
   service: glitchtip
 
-name: <name of the organization>
+name: <name of the organization - lower case max 64 characters>
 description: <description of the organization>
 instance:
   $ref: /dependencies/glitchtip/glitchtip-stage.yml
@@ -612,7 +612,7 @@ Please note that the organization's name must be unique.
 
 Glitchtip projects are associated with glitchtip teams. Teams are used for notification purposes only!
 
-To define a glitchtip team, create a file in /data/dependencies/glitchtip/teams with a structure like the following:
+To define a glitchtip team, create a file in `/data/dependencies/glitchtip/teams`.
 
 ```yaml
 ---
@@ -621,7 +621,7 @@ $schema: /dependencies/glitchtip-team-1.yml
 labels:
   service: glitchtip
 
-name: <name of the team>
+name: <name of the team - lower case max 64 characters>
 description: <description of the team>
 ```
 

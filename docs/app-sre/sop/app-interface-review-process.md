@@ -54,13 +54,23 @@ component should be placed outside of any groups, check for the reasons.
 
 The `sql-query` integration doesn't support updates on already submitted queries (scheduled or one-time ones). For scheduled ones (`scheduled: true`, executed via `CronJob`), the tenant must delete (`delete: true`) the old one and submit a new one. For one-time queries, the tenant must submit a new one with a different name.
 
+### Glitchtip
+
+A `glitchtip_roles.role` must be `member` only. Currently, we don't use the other roles.
+```yaml
+glitchtip_roles:
+- organization:
+    $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example TODO>
+role: member
+```
+
 ## Additional Reviewers
 
 In general when anyone ask for access to tenant's resource, even if it's in lower environments, it's standard procedure to ask approval from the owner of the service.
 
 ### Telemeter access
 
-Access to Telemeter is approved by the telemetry-sme list: telemetry-sme <telemetry-sme@redhat.com> 
+Access to Telemeter is approved by the telemetry-sme list: telemetry-sme <telemetry-sme@redhat.com>
 
 The best way to request access is to email that list, point at the MR and ask for approval.
 
