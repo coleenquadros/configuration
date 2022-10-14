@@ -12,8 +12,7 @@ It is measured at the router using the `http_request_duration_seconds` metric.
 
 ## SLO Rationale
 The Quarkus Extension Registry is expected to serve at lest 90% of the requests in less than 1[s].
-More than 95% of the requests are actually served in less than 100[ms] but some APIs are more expensive like 'Get /clusters',
-especially for admins which fetch all the clusters of all the users in the cloud, therefore, a security margin was taken.
+More than 95% of the requests are actually served in less than 100[ms] but some APIs are more expensive like POSTs to the admin endpoint, performed when a new Quarkus platform version or Quarkiverse extension is released.
 
 ## Alerts
 All alerts are multi window, multi-burn-rate alerts. The following are the list of alerts that are associated with this SLO.
