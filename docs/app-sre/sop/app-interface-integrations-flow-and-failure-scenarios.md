@@ -26,7 +26,7 @@ There are 3 stages when running our integrations:
 
 ## Failure scenarions
 
-This section describes common failure scenrios for different integrations.
+This section describes common failure scenarios for different integrations.
 
 ### saas-file-owners
 
@@ -108,10 +108,22 @@ this situation.
 ### Integrations are stuck
 
 In some cases, integrations will get "stuck" and will cease to execute.
+This could be caused by various reasons, for example gql client http call timeout default to forever ([fixed](https://github.com/app-sre/qontract-reconcile/pull/2337/files)) used to be one of them.
 
-This is being investigated in [APPSRE-4905](https://issues.redhat.com/browse/APPSRE-4905).
+The temporary workaround is to restart pods of stuck integrations. But before killing the pod, following these steps to get a thread dump:
 
-The temporary workaround is to restart pods of stuck integrations.
+1. Stream the logs for my-pod in terminal 1, run
+```
+oc logs -c int -f my-pod
+```
+2. Send miscellaneous signal SIGUSR1 in terminal 2:
+```
+oc rsh -c int my-pod 
+# kill -USR1 1
+```
+You should be getting the logs stream in terminal 1 that helps with further troubleshooting.
+
+Related ticket [APPSRE-4905](https://issues.redhat.com/browse/APPSRE-4905).
 
 ### MR Queue Saturated
 
