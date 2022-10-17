@@ -50,7 +50,7 @@ instances:
 expirationDate: <YYYY-MM-DD>
 ```
 
-[example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/gabi-instances/gabi-dashdotdb.yml)
+[example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/gabi-instances/gabi-cloudigrade.yml)
 
 
 One gabi instance can include multiple namesapces for different environment. As a result, a configmap with a list of authorized users will be applied in these namespaces by [integration](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/gabi_authorized_users.py). The configmap name will be as same as gabi instance name.
