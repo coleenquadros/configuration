@@ -36,7 +36,7 @@ slos:
     window: 1d
   SLODetails: https://gitlab.cee.redhat.com/ccx/ccx-docs/-/blob/master/source/customer/sops/irdw_kafka_lag_gt_100.rst
   expr: |
-    sum(kafka_consumergroup_group_lag{topic="ccx.ocp.results", group="ccx_data_pipeline_app"}) > 200
+    sum(kafka_consumergroup_group_lag{topic="ccx.ocp.results", group="ccx_data_pipeline_app"}) > 100
   prometheusRules: /observability/prometheusrules/insights-ccx-processing-slo.prometheusrules.yaml
 
 - name: Archive processing is taking too long
@@ -49,23 +49,39 @@ slos:
     window: 1d
   SLODetails: https://gitlab.cee.redhat.com/ccx/ccx-docs/-/blob/master/source/customer/sops/archives_are_not_processed.rst
   expr: |
+    (((((  
+      sum(
+          increase(successful_messages_processing_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[1m])
+      ) /  
+      sum(   
+          increase(successful_messages_processing_time_count{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[1m])
+      )
+    ) < 5) + 
+    ((
+        sum(    
+            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-prod", service="ccx-data-pipeline-prometheus-exporter"}[1m])  
+        ) /  
+        sum(   
+            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-prod", service="ccx-data-pipeline-prometheus-exporter"}[1m])
+        )
+    ) < 5))
+    /
+    ((  
+        sum(
+            increase(successful_messages_processing_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[1m])
+        ) /  
+        sum(   
+            increase(successful_messages_processing_time_count{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[1m])
+        )
+    )  + 
     (
-      sum(
-        increase(successful_messages_processing_time_sum{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-prod"}[1m])
-      )
-      /
-      sum(
-        increase(successful_messages_processing_time_count{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-prod"}[1m])
-      )
-    ) + (
-      sum(
-        increase(ccx_process_duration_seconds_sum{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}[1m])
-      )
-      /
-      sum(
-        increase(ccx_process_duration_seconds_count{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}[1m])
-      )
-    ) > 300
+        sum(    
+            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-stage", service="ccx-data-pipeline-prometheus-exporter"}[1m])  
+        ) /  
+        sum(   
+            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-stage", service="ccx-data-pipeline-prometheus-exporter"}[1m])
+        )
+    ))) OR on() vector(0)) < 0.95
   prometheusRules: /observability/prometheusrules/insights-ccx-processing-slo.prometheusrules.yaml
 
 - name: API responses are taking too long
@@ -78,9 +94,9 @@ slos:
     window: 1d
   SLODetails: https://gitlab.cee.redhat.com/ccx/ccx-docs/-/blob/master/source/customer/sops/rest_api_gt_1_sec.rst
   expr: |
-    count (increase(api_endpoints_response_time_sum{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy"}[1m]) > 0.5 ) 
+    (( count ( rate(api_endpoints_response_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[5m]) < 0.5 ) 
     /
-    sum(increase(api_endpoints_response_time_count{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy"}[1m])) > 0.1
+    count(rate(api_endpoints_response_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[5m])) ) OR on() vector(0)) < 0.95
   prometheusRules: /observability/prometheusrules/insights-ccx-processing-slo.prometheusrules.yaml
 
 - name: API 500 responses are too frequent
@@ -93,7 +109,7 @@ slos:
     window: 1d
   SLODetails: https://gitlab.cee.redhat.com/ccx/ccx-docs/-/blob/master/source/customer/sops/too_much_500.rst
   expr: |
-    sum(rate(api_endpoints_status_codes{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", status_code="500"}[1m]))
+    (sum(rate(api_endpoints_status_codes{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", status_code!="500"}[5m]))
     /
-    sum(rate(api_endpoints_requests{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[1m])) > 0.05
+    sum(rate(api_endpoints_status_codes{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[5m]))) < 0.95
   prometheusRules: /observability/prometheusrules/insights-ccx-processing-slo.prometheusrules.yaml
