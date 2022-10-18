@@ -69,6 +69,15 @@ subjects:
   namespace: workspace-admin 
 ```
 
+You can fetch the token using the following command:
+
+```
+kubectl describe -n workspace-admin secret/workspace-admin-token
+```
+
+It needs to be store in vault, so we can use it as `automationToken`. 
+
+
 ## Adding the workspace in app-interface
 
 ```
