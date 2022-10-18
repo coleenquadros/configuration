@@ -14,6 +14,7 @@
   Password (again):
   Superuser created successfully.
   ```
+  and store the credentials in [vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/glitchtip-stage/admin)
 * Enter django admin interface and create an [automation account](https://glitchtip.stage.devshift.net/admin/users/user/add/) `sd-app-sre+glitchtip@redhat.com` with a random password. The integration will use a token instead of this password later.
 * [Create](https://glitchtip.stage.devshift.net/admin/organizations_ext/organization/add/) an `app-sre-init` organization. The integration needs a bootstrapping organization, and it will delete this organization as soon as other organizations are configured.
 * Add the automation account to the `app-sre-init` organization by [creating an organization user](https://glitchtip.stage.devshift.net/admin/organizations_ext/organizationuser/add/). Choose `owner` as role!
