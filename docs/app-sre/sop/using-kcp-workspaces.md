@@ -1,11 +1,15 @@
 # Using KCP workspaces (under development)
 
+The following SOP shows how to onboard a KCP workspace to app-interface. Give KCP is just a k8s API server, we can add a KCP workspaces as a cluser object in app-interface.
+
 Be aware when reading this document: as of 10/2022 KCP is still undergoing big changes. 
 
 
 [toc]
 
 ## Access token
+
+KCP workspaces are provided by the KCP team. Reach out to #forum-kcp to get a workspace provisioned. For development purposes you can follow this guide to get a personal namespace: https://docs.google.com/document/d/1ygHQOBDMMnnsEDQoXSLSxaLUrplhOC42R3_kHCr25TI/edit#
 
 In order to access KCP from app-interface, you need to provision a ServiceAccount and get a token from it. Use following resource deployment and apply it to the KCP workspace you want to access:
 
@@ -65,7 +69,7 @@ subjects:
   namespace: workspace-admin 
 ```
 
-## Adding the workspace
+## Adding the workspace in app-interface
 
 ```
 ---
@@ -75,7 +79,7 @@ labels:
   service: $workspace_name
 
 name: $workspace_name
-description: Insights CCS cluster for ephemeral environment
+description: add some meaniningful description here
 consoleUrl: ''
 kibanaUrl: ''
 prometheusUrl: ''
@@ -101,3 +105,12 @@ disable:
   - openshift-limitranges
   e2eTests: []
 ```
+
+### Can I deploy everything?
+
+Only resource types, that are supported by KCP can be deployed by our integrations. Currently per default only the following resources can be configured:
+
+ * configmaps
+ * deployments
+ * secrets
+ * serviceaccounts
