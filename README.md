@@ -579,7 +579,7 @@ glitchtipProjects:
   - $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre-stage.yml`>
   - ...
   organization:
-    $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example TODO>
+    $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example `/dependencies/glitchtip/glitchtip-stage.yml`>
 - ...
 ```
 
@@ -637,13 +637,13 @@ In order to get access to Glitchtip, a user has to have the following:
   ```yaml
   glitchtip_roles:
   - organization:
-      $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example TODO>
+      $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example `/dependencies/glitchtip/glitchtip-stage.yml`>
     role: member
 
   glitchtip_teams:
-  - $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example TODO>
+  - $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre.yml`>
   ```
-  TODO example
+  E.g.: [app-sre role](data/teams/app-sre/roles/app-sre.yml)
 
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
