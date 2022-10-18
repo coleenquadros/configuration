@@ -108,7 +108,7 @@ disable:
 
 ### Can I deploy everything?
 
-Only resource types, that are supported by KCP can be deployed by our integrations. Currently per default only the following resources can be configured:
+You first must add a KCP syncer to an OpenShift cluster as a regular deployment (needs documentation!). Only if a syncer is deployed you can leverage the following resource types, that are deployed per default:
 
  * configmaps
  * deployments
