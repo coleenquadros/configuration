@@ -4,7 +4,7 @@ As discussed during [SDE-1909](https://issues.redhat.com/browse/SDE-1909), HACBS
 
 ## Support agreement
 
-The app-interface components used by HACBS/AppStudio will be supported by AppSRE. HACBS & AppStudio teams are supporting their own services and once they grow to a certain size then they may share the responsibility with SRE, provided SRE Acceptance Criteria are met.
+The app-interface components used by HACBS/AppStudio will be supported by AppSRE. HACBS & AppStudio will support their own services, and SRE will not carry the pager for them. If at some time in the future either team wants SRE support, then the agreement is to follow the regular SRE onboarding process which implies satisfying all the SRE Acceptance Criteria.
 
 Note this hybrid SRE model is very new as of 2022-10-04. Further adaptations, discussions, agreements should be expected.
 
