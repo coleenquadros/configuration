@@ -1,22 +1,24 @@
-# HACBS - app-interface Support Agreement
+# HACBS & AppStudio - app-interface Support Agreement
 
-As discussed during [SDE-1909](https://issues.redhat.com/browse/SDE-1909), HACBS will not go over full onboarding in app-interface. Instead, HACBS will use only a selected set of features.
+As discussed during [SDE-1909](https://issues.redhat.com/browse/SDE-1909), HACBS & AppStudio will not go over full onboarding in app-interface. Instead, they will use only a selected set of features.
 
 ## Support agreement
 
-The app-interface components used by HACBS will be supported by AppSRE. HACBS teams are supporting their own services and once they grow to a certain size then they may share the responsibility with SRE. Note this hybrid SRE model is very new as of 2022-10-04. Further adaptations, discussions, agreements should be expected.
+The app-interface components used by HACBS/AppStudio will be supported by AppSRE. HACBS & AppStudio teams are supporting their own services and once they grow to a certain size then they may share the responsibility with SRE, provided SRE Acceptance Criteria are met.
+
+Note this hybrid SRE model is very new as of 2022-10-04. Further adaptations, discussions, agreements should be expected.
 
 AppSRE supports the tooling around app-interface, as it does for all its tenants.
-The HACBS team can get support from @app-sre-ic in [#sd-app-sre](https://coreos.slack.com/archives/CCRND57FW) on this tooling, for the features that are agreed to be used, as listed in the next section. 
+The HACBS & AppStudio teams can get support from @app-sre-ic in [#sd-app-sre](https://coreos.slack.com/archives/CCRND57FW) on this tooling, for the features that are agreed to be used, as listed in the next section. 
 
-## App-interface features agreed to be used by HACBS
+## App-interface features agreed to be used by HACBS & AppStudio
 
 As of 2022-10-04:
 * Preference to use clusters provided by appSRE but experimentation is done with the current provisioned HACBS cluster from appSRE (hacbss02ue1) and a bring your own cluster.
-* For the HACBS workload clusters:
+* For the workload clusters:
   * Have the observability stack applied which includes logging aggregation to cloudwatch and Prometheus/alertmanager
   * The target is to deploy the KCP syncer (includes a clusterrole and clusterrolebinding) via a saas file.
-* For the HACBS service provider workspaces:
+* For the service provider workspaces:
   * Secrets management from appSRE's Vault instance
 * Vault instance access could be done either by:
   * app-interface management to land secrets to the KCP workspace
@@ -25,7 +27,7 @@ As of 2022-10-04:
       * This will be re-examined once Vault moves behind the VPN.
 * AWS resources integrations, like RDS database and S3 bucket. Credentials to be put in KCP workspaces or in workload clusters
 
-## Features to be used by HACBS that is not app-interface or unsure if it will be used in app-interface
+## Features to be used by HACBS & AppStudio that is not app-interface or unsure if it will be used in app-interface
 
 As of 2020-10-04:
 * For the HACBS service provider workspaces:
