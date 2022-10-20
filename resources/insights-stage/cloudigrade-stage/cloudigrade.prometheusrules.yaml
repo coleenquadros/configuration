@@ -160,3 +160,17 @@ spec:
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/cloudigrade-stage/deployments/cloudigrade-worker"
         message: "cloudigrade: more than 2000 queued Celery tasks."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-too-many-queued-celery-tasks.md"
+
+    - alert: cloudigrade-stage-rds-low-free-space
+      expr: |
+        predict_linear(rdsosmetrics_fileSys_usedPercent{exported_instance="cloudigrade-stage",mount_point="/rdsdbdata"}[1h], 3600 * 24 * 14) > 80
+      for: 1h
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: cloudigrade
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&var-datasource=crcs02ue1-prometheus&var-namespace=cloudigrade-stage&var-datasource_rds=app-sre-stage-01-prometheus"
+        link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=cloudigrade-stage;is-cluster=false;tab=monitoring"
+        message: "cloudigrade: Database instance {{ $labels.exported_instance }} is about to be low on free disk space within 2 weeks."
