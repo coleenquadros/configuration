@@ -1,0 +1,57 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: image-builder-db-prod
+spec:
+  groups:
+  - name: aws.aws-resources.rules
+    interval: 5m
+    rules:
+      - alert: ImageBuilderProdStorageLow1Percent
+        labels:
+          service: image-builder
+          severity: medium
+          env: prod
+        expr: image_builder_db_prod_storage < 0.01
+        for: 5m
+        annotations:
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
+          dashboard: "https://grafana.app-sre.devshift.net"
+          message: "Database image-builder-composer-db-prod has less than 1% of free space"
+      - alert: ImageBuilderProdStorageLow10Percent
+        labels:
+          service: image-builder
+          severity: medium
+          env: prod
+        expr: image_builder_db_prod_storage < 0.1
+        for: 5m
+        annotations:
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
+          dashboard: "https://grafana.app-sre.devshift.net"
+          message: "Database image-builder-composer-db-prod has less than 10% of free space"
+      - alert: ImageBuilderProdStorageLow30Percent
+        labels:
+          service: image-builder
+          severity: info
+          env: prod
+        expr: image_builder_db_prod_storage < 0.3
+        for: 5m
+        annotations:
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
+          dashboard: "https://grafana.app-sre.devshift.net"
+          message: "Database image-builder-composer-db-prod has less than 30% of free space"
+      - expr: |
+          (
+            sum(aws_rds_free_storage_space_sum{dbinstance_identifier="image-builder-composer-db-prod"} offset 10m)
+            /
+            sum(aws_rds_free_storage_space_sum{dbinstance_identifier="image-builder-composer-db-prod"})
+          )
+        labels:
+          env: prod
+        record: image_builder_db_prod_storage
+    
