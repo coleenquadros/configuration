@@ -13,32 +13,6 @@ namespaces:
 - $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
 
 slos:
-- name: Archive Handler Kafka lag is too high
-  dashboard: https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=6
-  SLIType: throughput
-  SLISpecification: Kafka lag for received archives from ingress
-  SLOTarget: 95
-  SLOTargetUnit: percent_0_1
-  SLOParameters:
-    window: 1d
-  SLODetails: https://gitlab.cee.redhat.com/ccx/ccx-docs/-/blob/master/source/customer/sops/cdp_kafka_lag_gt_100.rst
-  expr: |
-    sum(kafka_consumergroup_group_lag{topic="platform.upload.announce",group="ccx_data_pipeline_app"}) > 200
-  prometheusRules: /observability/prometheusrules/insights-ccx-processing-slo.prometheusrules.yaml
-
-- name: DB Writer Kafka lag is too high
-  dashboard: https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=6
-  SLIType: throughput
-  SLISpecification: The db-writer Kafka lag is too high
-  SLOTarget: 95
-  SLOTargetUnit: percent_0_1
-  SLOParameters:
-    window: 1d
-  SLODetails: https://gitlab.cee.redhat.com/ccx/ccx-docs/-/blob/master/source/customer/sops/irdw_kafka_lag_gt_100.rst
-  expr: |
-    sum(kafka_consumergroup_group_lag{topic="ccx.ocp.results", group="ccx_data_pipeline_app"}) > 100
-  prometheusRules: /observability/prometheusrules/insights-ccx-processing-slo.prometheusrules.yaml
-
 - name: Archive processing is taking too long
   dashboard: https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=14
   SLIType: latency
@@ -46,42 +20,42 @@ slos:
   SLOTarget: 95
   SLOTargetUnit: percent_0_1
   SLOParameters:
-    window: 1d
+    window: 28d
   SLODetails: https://gitlab.cee.redhat.com/ccx/ccx-docs/-/blob/master/source/customer/sops/archives_are_not_processed.rst
   expr: |
     (((((  
       sum(
-          increase(successful_messages_processing_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[1m])
+          increase(successful_messages_processing_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[{{window}}])
       ) /  
       sum(   
-          increase(successful_messages_processing_time_count{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[1m])
+          increase(successful_messages_processing_time_count{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[{{window}}])
       )
     ) < 5) + 
     ((
         sum(    
-            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-prod", service="ccx-data-pipeline-prometheus-exporter"}[1m])  
+            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-prod", service="ccx-data-pipeline-prometheus-exporter"}[{{window}}])  
         ) /  
         sum(   
-            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-prod", service="ccx-data-pipeline-prometheus-exporter"}[1m])
+            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-prod", service="ccx-data-pipeline-prometheus-exporter"}[{{window}}])
         )
     ) < 5))
     /
     ((  
         sum(
-            increase(successful_messages_processing_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[1m])
+            increase(successful_messages_processing_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[{{window}}])
         ) /  
         sum(   
-            increase(successful_messages_processing_time_count{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[1m])
+            increase(successful_messages_processing_time_count{namespace="ccx-data-pipeline-prod", service="ccx-insights-results-db-writer-prometheus-exporter"}[{{window}}])
         )
     )  + 
     (
         sum(    
-            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-stage", service="ccx-data-pipeline-prometheus-exporter"}[1m])  
+            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-stage", service="ccx-data-pipeline-prometheus-exporter"}[{{window}}])  
         ) /  
         sum(   
-            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-stage", service="ccx-data-pipeline-prometheus-exporter"}[1m])
+            increase(ccx_process_duration_seconds_count{namespace="ccx-data-pipeline-stage", service="ccx-data-pipeline-prometheus-exporter"}[{{window}}])
         )
-    ))) OR on() vector(0)) < 0.95
+    ))) OR on() vector(0))
   prometheusRules: /observability/prometheusrules/insights-ccx-processing-slo.prometheusrules.yaml
 
 - name: API responses are taking too long
@@ -91,12 +65,12 @@ slos:
   SLOTarget: 95
   SLOTargetUnit: percent_0_1
   SLOParameters:
-    window: 1d
+    window: 28d
   SLODetails: https://gitlab.cee.redhat.com/ccx/ccx-docs/-/blob/master/source/customer/sops/rest_api_gt_1_sec.rst
   expr: |
-    (( count ( rate(api_endpoints_response_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[5m]) < 0.5 ) 
+    (( count ( rate(api_endpoints_response_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[{{window}}]) < 0.5 ) 
     /
-    count(rate(api_endpoints_response_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[5m])) ) OR on() vector(0)) < 0.95
+    count(rate(api_endpoints_response_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[{{window}}])) ) OR on() vector(0))
   prometheusRules: /observability/prometheusrules/insights-ccx-processing-slo.prometheusrules.yaml
 
 - name: API 500 responses are too frequent
@@ -106,10 +80,10 @@ slos:
   SLOTarget: 95
   SLOTargetUnit: percent_0_1
   SLOParameters:
-    window: 1d
+    window: 28d
   SLODetails: https://gitlab.cee.redhat.com/ccx/ccx-docs/-/blob/master/source/customer/sops/too_much_500.rst
   expr: |
-    (sum(rate(api_endpoints_status_codes{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", status_code!="500"}[5m]))
+    (sum(rate(api_endpoints_status_codes{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", status_code!="500"}[{{window}}]))
     /
-    sum(rate(api_endpoints_status_codes{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[5m]))) < 0.95
+    sum(rate(api_endpoints_status_codes{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[{{window}}])))
   prometheusRules: /observability/prometheusrules/insights-ccx-processing-slo.prometheusrules.yaml
