@@ -1,0 +1,62 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: glitchtip-production
+description: production namespace for glitchtip
+
+cluster:
+  $ref: /openshift/app-sre-prod-04/cluster.yml
+
+app:
+  $ref: /services/glitchtip/app.yml
+
+environment:
+  $ref: /products/glitchtip/environments/production.yaml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+
+managedRoles: true
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+managedResourceTypes:
+- Secret
+
+openshiftResources:
+- provider: route
+  path: /app-sre/glitchtip-production/glitchtip.route.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /app-sre/glitchtip-production/secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /app-sre/glitchtip-production/superuser.secret.yaml
+- provider: vault-secret
+  path: cs-sre/creds/glitchtip/stage/tokens
+  version: 3
+  annotations:
+    qontract.recycle: "true"
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: glitchtip-production
+    # we start with the same small DB that we have our testing cluster
+    defaults: /terraform/resources/app-sre/production/rds-3-pg13.yml
+    output_resource_name: glitchtip-rds
+    overrides:
+      instance_class: db.m6g.large
+      engine_version: '13.5'
+  - provider: elasticache
+    identifier: glitchtip-production
+    defaults: /terraform/resources/app-sre/production/glitchtip-redis-prod-1.yml 
+    output_resource_name: glitchtip-elasticache
