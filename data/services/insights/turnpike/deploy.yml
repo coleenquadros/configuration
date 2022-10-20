@@ -376,6 +376,11 @@ resourceTemplates:
           route: /api/uhc-auth-proxy/v1/
           auth:
             x509: "True"
+        - name: tasks-editing
+          origin: http://advisor-backend-api.advisor-stage.svc.cluster.local:8000/internal/api/tasks/v1/task
+          route: /api/tasks/v1/task
+          auth:
+            saml: "any(role in ['clouddot-infrastructure', 'advisor-dev'] for role in user['Role'])"
 
 
   - namespace:
@@ -628,6 +633,11 @@ resourceTemplates:
           origin: http://patchman-admin.patchman-engine-prod.svc.cluster.local:8000/api/patch/
           auth:
             saml: "'patch-administrators' in user['Role']"
+        - name: tasks-editing
+          origin: http://advisor-backend-api.advisor-prod.svc.cluster.local:8000/internal/api/tasks/v1/task
+          route: /api/tasks/v1/task
+          auth:
+            saml: "any(role in ['clouddot-infrastructure', 'advisor-dev'] for role in user['Role'])"
 
 - name: nginx-prometheus
   path: /templates/prometheus-nginx.yml
