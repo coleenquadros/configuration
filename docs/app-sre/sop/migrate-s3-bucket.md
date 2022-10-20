@@ -7,6 +7,8 @@ The data transfer from bucket to bucket is a repeatable process. Considering the
 
 Also consider data transfer costs. Keeping data transfer within a region reduces cost. Using a Pod on a cluster or an EC2 instance (e.g. ssh bastion.ci.ext.devshift.net) is a valid way to achieve that.
 
+If you are migrating a bucket from one account to another and decide to keep the same bucket name, there is a AWS deletion queue that happens in the background once you remove a bucket. That name is part of this queue and it can take anywhere from a few minutes to a couple of hours for that name to be out of the queue and ready to be reused again.
+
 ## Prerequisites
 In order to copy data from one bucket to the other, the AWS CLI can be used. Since we enforce MFA for account access, make sure to have an MFA device attached to your user.
 Also make sure your AWS cli setup allows you to get STS session tokens.
