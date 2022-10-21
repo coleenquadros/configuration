@@ -312,7 +312,7 @@ sequenceDiagram
     participant S as Server
 
     C ->> S: Delete a team
-    Note right of C: DELETE /api/0/organizations/{ org.slug }/{ team.pk }/
+    Note right of C: DELETE /api/0/teams/{ org.slug }/{ team.slug }/
     S ->> C: 204
 ```
 
