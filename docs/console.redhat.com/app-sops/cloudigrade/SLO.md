@@ -12,7 +12,7 @@
 
 ## Dashboards
 
-* [cloudigrade grafana dashboard](https://grafana.app-sre.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus&var-namespace=cloudigrade-prod)
+* [cloudigrade grafana dashboard](https://grafana.app-sre.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus&var-namespace=cloudigrade-prod&var-datasource_rds=app-sre-prod-01-prometheus)
 
 ## SOPs
 
