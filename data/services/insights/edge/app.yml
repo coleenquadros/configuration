@@ -1,83 +1,73 @@
----
 $schema: /app-sre/app-1.yml
-
 labels:
   service: edge
   platform: insights
-
 name: edge
-
 description: edge app on the Insights Platform
-
 architectureDocument: https://docs.google.com/document/d/1g89ulLEyFJPY8aLsf0LTaxKJxHPI7xwFC0Cn6QKKfMk/edit#heading=h.dllg9xgfvvyo
 sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/edge
 grafanaUrls:
-- title: SLO Dashboard
-  url: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&from=now-7d&to=now&var-datasource=crcp01ue1-prometheus&var-label=edge
+  - title: SLO Dashboard
+    url: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&from=now-7d&to=now&var-datasource=crcp01ue1-prometheus&var-label=edge
 onboardingStatus: InProgress
-
 parentApp:
   $ref: /services/insights/app.yml
-
 statusPageComponents:
-- $ref: /dependencies/statuspage/status-page-component-insights-edge.yml
-
+  - $ref: /dependencies/statuspage/status-page-component-insights-edge.yml
 escalationPolicy:
   $ref: /teams/insights/escalation-policies/crc-fleet-management-escalations.yml
 serviceOwners:
-- name: Og Maciel
-  email: omaciel@redhat.com
-- name: Adam Miller
-  email: admiller@redhat.com
-- name: Chris Hambridge
-  email: chambrid@redhat.com
-
+  - name: Og Maciel
+    email: omaciel@redhat.com
+  - name: Adam Miller
+    email: admiller@redhat.com
+  - name: Chris Hambridge
+    email: chambrid@redhat.com
 serviceNotifications:
-- name: Elyezer Rezende
-  email: erezende@redhat.com
-
+  - name: Elyezer Rezende
+    email: erezende@redhat.com
 dependencies:
-- $ref: /dependencies/github/service.yml
-- $ref: /dependencies/quay/service.yml
-- $ref: /dependencies/openshift/service.yml
-- $ref: /dependencies/aws/service.yml
-- $ref: /dependencies/ci-int/service.yml
-- $ref: /dependencies/ci-ext/service.yml
-
-
+  - $ref: /dependencies/github/service.yml
+  - $ref: /dependencies/quay/service.yml
+  - $ref: /dependencies/openshift/service.yml
+  - $ref: /dependencies/aws/service.yml
+  - $ref: /dependencies/ci-int/service.yml
+  - $ref: /dependencies/ci-ext/service.yml
 quayRepos:
-- org:
-    $ref: /dependencies/quay/cloudservices.yml
-  items:
-  - name: edge-api
-    public: false
-    description: Repo for the edge Insights app
-
+  - org:
+      $ref: /dependencies/quay/cloudservices.yml
+    items:
+      - name: edge-api
+        public: false
+        description: Repo for the edge Insights app
+      - name: edge-frontend
+        public: true
+        description: Quay repo for Insights Edge frontend
 codeComponents:
-- name: edge-api
-  resource: upstream
-  url: https://github.com/RedHatInsights/edge-api
-
+  - name: edge-api
+    resource: upstream
+    url: https://github.com/RedHatInsights/edge-api
+  - name: edge-frontend
+    resource: upstream
+    url: https://github.com/RedHatInsights/edge-frontend
 sentryProjects:
-- team:
-    $ref: /dependencies/sentry/teams/edge-api-stage.yml
-  projects:
-  - name: edge-api-stage
-    description: EdgeApi staging
-    email_prefix: edge-api
-    platform: go
-    # Auto resolve after 7 days
-    auto_resolve_age: 168
-    allowed_domains:
-    - '*'
-- team:
-    $ref: /dependencies/sentry/teams/edge-api-production.yml
-  projects:
-  - name: edge-api-production
-    description: EdgeApi production
-    email_prefix: edge-api
-    platform: go
-    # Auto resolve after 7 days
-    auto_resolve_age: 168
-    allowed_domains:
-      - '*'
+  - team:
+      $ref: /dependencies/sentry/teams/edge-api-stage.yml
+    projects:
+      - name: edge-api-stage
+        description: EdgeApi staging
+        email_prefix: edge-api
+        platform: go
+        auto_resolve_age: 168
+        allowed_domains:
+          - "*"
+  - team:
+      $ref: /dependencies/sentry/teams/edge-api-production.yml
+    projects:
+      - name: edge-api-production
+        description: EdgeApi production
+        email_prefix: edge-api
+        platform: go
+        auto_resolve_age: 168
+        allowed_domains:
+          - "*"
