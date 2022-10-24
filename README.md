@@ -1072,15 +1072,22 @@ options:
   secret_id_bound_cidrs: []
   token_bound_cidrs: []
 ```
-
-##### Output Approle credentials at desired Vault path
-The approle schema supports an optional attribute `output_path` that specifies a path within Vault to output the approle's `role_id`, `secret_id`, and `secret_id_accessor`.  
-An example of this attribute being utilized on an approle within vault.stage.devshift.net can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/config/stage/roles/approles/vault_manager_stage.yml#L12)  
-**NOTE:** Ensure the [vault-manager policy](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/config/prod/policies/vault-manager-policy.yml) has `read`, `create`, and `update` permission for the desired output path.
-
 Current vault roles can be found [here](/data/services/vault.devshift.net/config/roles)
 
 For more information please see [vault AppRole documentation](https://www.vaultproject.io/docs/auth/approle.html)
+
+##### Output Approle credentials at desired Vault path
+The approle schema supports an optional attribute `output_path` that specifies a path within Vault to output the approle's `role_id`, `secret_id`, and `secret_id_accessor`  
+
+###### Considerations
+* Do not manually create an empty secret beforehand
+  - Example: if specified `output_path` is `/app-sre/ci/stage/foobar`, do not manually create `foobar`  
+* Ensure the [vault-manager policy](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/config/prod/policies/vault-manager-policy.yml) has `read`, `create`, and `update` permission for the desired path. 
+  - **NOTE:** if the desired path resides within a KV V2 secret engine, ensure a `data` path segment exists after the secret engine name. [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/config/prod/policies/vault-manager-policy.yml#L85-91)  
+    - reference [vault kv v2 docs](https://developer.hashicorp.com/vault/docs/secrets/kv/kv-v2#acl-rules) for specifics
+
+An example of this attribute being utilized on an approle within vault.stage.devshift.net can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/config/stage/roles/approles/vault_manager_stage.yml#L12)  
+
 
 #### Manage vault secret-engines (`/vault-config/secret-engine-1.yml`)
 Secrets engines are components which store, generate, or encrypt data. Secrets engines are incredibly flexible, so it is easiest to think about them in terms of their function.
