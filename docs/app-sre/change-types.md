@@ -17,6 +17,8 @@ $schema: /app-interface/change-type-1.yml
 
 name: saas-file-self-service
 
+priority: medium
+
 contextType: datafile
 contextSchema: /app-sre/saas-file-2.yml
 
@@ -25,6 +27,8 @@ changes:
   jsonPathSelectors:
   - deployResources
 ```
+
+The `priority` field defines the order in which merge requests will be processed, and most importantly, merged. Generally, use `urgent` for change types with higher SLOs (like a production promotion), `high` for functional changes (like promoting a secret version), and `medium`/`low` for the rest (Yet to be defined). `critical` is also available, to be used with caution.
 
 The `contextType` and `contextSchema` define the allowed context a change-type can be used, therefore `saas-file-deploy-resource-limits` can only be bound to `datafiles` of the schema `/app-sre/saas-file-2.yml`.
 
