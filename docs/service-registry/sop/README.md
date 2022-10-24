@@ -57,6 +57,8 @@
 
 <!-- /TOC -->
 
+For additional SOPs intended for less urgent events visit [Service Registry Service SOP repository](https://gitlab.cee.redhat.com/service-registry/srs-sops)
+
 ---
 
 # SOP : Service Registry Service Fleet Manager
@@ -299,7 +301,7 @@ SRS Tenant Manager is not performing normally and is returning an abnormally hig
 
 ### Steps
 
-Tenant Manager is deployed as a sidecar to Service Registry. Refer to the steps in [SRS Service Registry availability](#srs-service-registry-availability)
+Tenant Manager component has been migrated to its own Deployment. Refer to the steps in [SRS Service Registry availability](#srs-service-registry-availability) until this guide is updated.
 
 ---
 
@@ -322,7 +324,7 @@ SRS Tenant Manager is not performing normally and is not able to handle the load
 
 ### Steps
 
-Tenant Manager is deployed as a sidecar to Service Registry. Refer to the steps in [SRS Service Registry availability](#srs-service-registry-availability)
+Tenant Manager component has been migrated to its own Deployment. Refer to the steps in [SRS Service Registry availability](#srs-service-registry-availability) until this guide is updated.
 
 ---
 

@@ -1,0 +1,36 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: srs-tenant-manager-stage
+spec:
+  groups:
+  - name: srs-tenant-manager-stage
+    rules:
+    - alert: SRSTenantManagerDown - stage
+      annotations:
+        message: "No targets found for SRS Tenant Manager in the {{ $labels.namespace }} namespace. SRS Tenant Manager is down."
+        dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry&var-interval=5m"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop"
+      expr: |
+        absent(up{job="tenant-manager",namespace="service-registry-stage"} == 1)
+      for: 15m
+      labels:
+        service: srs-tenant-manager
+        namespace: service-registry-stage
+        severity: high
+    - alert: SRSTenantManagerPodUnavailable - stage
+      annotations:
+        message: "One or more SRS Tenant Manager pods are unavailable in the {{ $labels.namespace }} namespace."
+        dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry&var-interval=5m"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop"
+      expr: |
+        kube_deployment_status_replicas_unavailable{namespace="service-registry-stage",deployment="tenant-manager"} > 0
+      for: 15m
+      labels:
+        service: srs-tenant-manager
+        severity: high
