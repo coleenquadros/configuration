@@ -1,0 +1,48 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-pyrra
+description: deployment of pyrra
+
+app:
+  $ref: /services/observability/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- ServiceAccount
+- Role
+- RoleBinding
+- DeploymentConfig
+- Deployment
+- Service
+- ClusterRole
+
+imagePatterns:
+- quay.io/app-sre/pyrra
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: pyrra-deployment
+  path: /openshift/template.yaml
+  url: https://github.com/app-sre/pyrra-template
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: main
+    parameters:
+      IMAGE: quay.io/app-sre/pyrra
+      RELEASE: v0.4.4
