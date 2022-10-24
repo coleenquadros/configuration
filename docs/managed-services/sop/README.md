@@ -51,6 +51,12 @@
     - [Access required](#access-required-7)
     - [Relevant secrets](#relevant-secrets-7)
     - [Steps](#steps-7)
+  - [Kas Fleet Manager Version Mismatch](#kas-fleet-manager-version-mismatch)
+    - [Impact](#impact-8)
+    - [Summary](#summary-8)
+    - [Access required](#access-required-8)
+    - [Relevant secrets](#relevant-secrets-8)
+    - [Steps](#steps-7)
   - [Escalations](#escalations)
 
 <!-- /TOC -->
@@ -407,6 +413,32 @@ kas-fleet-manager-rds
 ### Steps
 
 refer to the steps [Kafka cluster provisioning latency](#kafka-cluster-provisioning-latency)
+ 
+---
+
+## Kas Fleet Manager Version Mismatch
+
+### Impact
+
+Kafka cluster has mismatched version(s) for more than 15 minutes
+
+### Summary
+
+Kafka cluster has a mismatch (actual vs desired) of one or more versions (ibp version, strimzi version, kafka version). This can potentially be happening due to unsuccessful kafka upgrade.
+
+### Access required
+
+- OSD Console access to the cluster that runs the Kas Service Fleet Manager.
+- Access to cluster resources: Pods/Deployments
+
+### Relevant secrets
+
+kas-fleet-manager-rds
+
+### Steps
+
+Check the status of relevant kafka (by its id returned in the alert) and see if its failed. Check if there is a reason for failure. Find the relevant kafka in [this dashboard](https://grafana.app-sre.devshift.net/d/viefn9LMz/mk-fleet-links?orgId=1&refresh=1m) to see more information about not matching kafka versions.
+If unsure about the reason or how to resolve the issue, refer to [Escalations](#escalations) section below.
  
 ---
 
