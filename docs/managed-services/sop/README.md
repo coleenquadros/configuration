@@ -437,7 +437,7 @@ kas-fleet-manager-rds
 
 ### Steps
 
-Check the status of relevant kafka (by its id returned in the alert) and see if its failed. Check if there is a reason for failure. 
+Check the status of relevant kafka (by its id returned in the alert) and see if its failed. Check if there is a reason for failure. Find the relevant kafka in [this dashboard](https://grafana.app-sre.devshift.net/d/viefn9LMz/mk-fleet-links?orgId=1&refresh=1m) to see more information about not matching kafka versions.
 If unsure about the reason or how to resolve the issue, refer to [Escalations](#escalations) section below.
  
 ---
