@@ -1,0 +1,114 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: acs-fleet-manager
+
+name: acs-fleet-manager
+
+app:
+  $ref: /services/acs-fleet-manager/app.yml
+
+namespaces:
+- $ref: /services/acs-fleet-manager/namespaces/acs-fleet-manager-production-app-sre-prod-04.yml
+
+slos:
+- name: API availability
+  SLIType: availability
+  SLISpecification: Percentage of requests that are served successfully (status code != 5xx)
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/acs-fleet-manager/slos/acs-fleet-manager-api-availability.md
+  SLOParameters:
+    window: 30d
+  expr: |
+    avg_over_time(floor(
+      sum(rate(haproxy_backend_http_responses_total{route="acs-fleet-manager",exported_namespace="acs-fleet-manager-production",code!="5xx"}[10m])) 
+      / 
+      sum(rate(haproxy_backend_http_responses_total{route="acs-fleet-manager",exported_namespace="acs-fleet-manager-production"}[10m])) > 0.35)[{{window}}:])
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/acs-fleet-manager-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/acs-fleet-manager-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos
+
+
+- name: API Latency 90%
+  SLIType: latency
+  SLISpecification: Percentage of the successful requests served under 100ms
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/acs-fleet-manager/slos/acs-fleet-manager-api-latency.md
+  SLOParameters:
+    window: 30d
+  expr: |
+    sum(rate(api_inbound_request_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-production",le="0.1",code!~"5.."}[{{window}}]))
+    /
+    sum(rate(api_inbound_request_duration_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-production"}[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/acs-fleet-manager-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/acs-fleet-manager-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos
+
+- name: API Latency 99%
+  SLIType: latency
+  SLISpecification: Percentage of the successful requests served under 1s
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/acs-fleet-manager/slos/acs-fleet-manager-api-latency.md
+  SLOParameters:
+    window: 30d
+  expr: |
+    sum(rate(api_inbound_request_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-production",le="1",code!~"5.."}[{{window}}]))
+    /
+    sum(rate(api_inbound_request_duration_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-production"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/acs-fleet-manager-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/acs-fleet-manager-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos
+
+
+- name: ACS Central creation correctness
+  SLIType: correctness
+  SLISpecification: Percentage of ACS Central instances successful created
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/acs-fleet-manager/slos/acs-fleet-manager-acs-central-lifecycle-correctness.md
+  SLOParameters:
+    window: 30d
+  expr: |
+    sum(rate(acs_fleet_manager_central_operations_success_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-production",operation=~"create"}[{{window}}]))
+    /
+    sum(rate(acs_fleet_manager_central_operations_total_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-production",operation=~"create"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/acs-fleet-manager-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/acs-fleet-manager-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos
+
+- name: ACS Central deletion correctness
+  SLIType: correctness
+  SLISpecification: Percentage of ACS Central instances successful deleted
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/acs-fleet-manager/slos/acs-fleet-manager-acs-central-lifecycle-correctness.md
+  SLOParameters:
+    window: 30d
+  expr: |
+    sum(rate(acs_fleet_manager_central_operations_success_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-production",operation=~"delete"}[{{window}}]))
+    /
+    sum(rate(acs_fleet_manager_central_operations_total_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-production",operation=~"delete"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/acs-fleet-manager-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/acs-fleet-manager-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos
+
+
+- name: ACS Central provisioning Latency 90%
+  SLIType: latency
+  SLISpecification: Percentage of the created ACS Central ready in under 60m
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/acs-fleet-manager/slos/acs-fleet-manager-acs-central-creating-latency.md
+  SLOParameters:
+    window: 30d
+  expr: |
+    sum(rate(acs_fleet_manager_worker_central_duration_bucket{job="fleet-manager-metrics",namespace="acs-fleet-manager-production",le="3600",jobType="central_create"}[{{window}}]))
+    /
+    sum(rate(acs_fleet_manager_worker_central_duration_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-production",jobType="central_create"}[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/acs-fleet-manager-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/acs-fleet-manager-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos
