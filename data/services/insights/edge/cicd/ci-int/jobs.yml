@@ -1,43 +1,48 @@
----
 $schema: /dependencies/jenkins-config-1.yml
-
 labels:
   service: edge
-
 name: ci-int-edge-jobs
 description: edge ci-int jobs
-
 app:
   $ref: /services/insights/edge/app.yml
-
 instance:
   $ref: /dependencies/ci-int/ci-int.yml
-
 type: jobs
-
 config:
-- project:
-    name: edge-api
-    label: insights
-    node: rhel8
-    gh_org: RedHatInsights
-    gh_repo: edge-api
-    quay_org: cloudservices
-    jobs:
-    - "insights-edge-gh-pr-check":
-        display_name: edge-api pr check and security scan
-        pr_check_script_path: 'sh ./pr_check.sh && make scan_project'
-        branch: main
-        concurrent_build: true
-    - "insights-edge-gh-build-master":
-        display_name: edge-api build main and security scan
-        build_deploy_script_path: 'sh ./build_deploy.sh && make scan_project'
-        branch: main
-    - "insights-deploy-ephemeral":
-        display_name: edge ephemeral
-        app_name: edge
-        component_name: edge-api
-        image: "quay.io/cloudservices/edge-api"
-        git_commit: main
-        image_tag: latest
-        include_ui: true
+  - project:
+      name: edge-api
+      label: insights
+      node: rhel8
+      gh_org: RedHatInsights
+      gh_repo: edge-api
+      quay_org: cloudservices
+      jobs:
+        - insights-edge-gh-pr-check:
+            display_name: edge-api pr check and security scan
+            pr_check_script_path: sh ./pr_check.sh && make scan_project
+            branch: main
+            concurrent_build: true
+        - insights-edge-gh-build-master:
+            display_name: edge-api build main and security scan
+            build_deploy_script_path: sh ./build_deploy.sh && make scan_project
+            branch: main
+        - insights-deploy-ephemeral:
+            display_name: edge ephemeral
+            app_name: edge
+            component_name: edge-api
+            image: quay.io/cloudservices/edge-api
+            git_commit: main
+            image_tag: latest
+            include_ui: true
+  - project:
+      name: edge-frontend
+      label: insights
+      node: insights
+      gh_org: RedHatInsights
+      gh_repo: edge-frontend
+      quay_org: cloudservices
+      jobs:
+        - insights-gh-pr-check:
+            display_name: edge-frontend pr-check
+        - insights-gh-build-master:
+            display_name: edge-frontend build-master
