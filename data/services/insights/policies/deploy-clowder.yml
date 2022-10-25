@@ -1,3 +1,4 @@
+---
 $schema: /app-sre/saas-file-2.yml
 labels:
   service: policies
@@ -13,120 +14,120 @@ slack:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
 managedResourceTypes:
-  - ClowdApp
-  - ClowdJobInvocation
-  - ConfigMap
-  - CronJob
-  - PersistentVolumeClaim
-  - Frontend
+- ClowdApp
+- ClowdJobInvocation
+- ConfigMap
+- CronJob
+- PersistentVolumeClaim
+- Frontend
 imagePatterns:
-  - quay.io/cloudservices
+- quay.io/cloudservices
 authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
     version: 3
 resourceTemplates:
-  - name: policies-engine
-    path: /.rhcicd/clowdapp.yaml
-    url: https://github.com/RedHatInsights/policies-engine
-    targets:
-      - namespace:
-          $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-        disable: true
-        ref: internal
-      - namespace:
-          $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
-        ref: master
-        parameters:
-          CLOUDWATCH_ENABLED: true
-          EXTERNAL_LOGGING_LEVEL: DEBUG
-          MIN_REPLICAS: 3
-          SENTRY_ENABLED: true
-        upstream:
-          instance:
-            $ref: /dependencies/ci-ext/ci-ext.yml
-          name: RedHatInsights-policies-engine-gh-build-master
-        promotion:
-          publish:
-            - policies-engine-stage-deploy-success-channel
-      - namespace:
-          $ref: /services/insights/policies/namespaces/policies-prod.yml
-        ref: 081bc15fa319f2f15fa6b5a8afca29b78b4444aa
-        parameters:
-          CLOUDWATCH_ENABLED: true
-          MEMORY_LIMIT: 1500Mi
-          MEMORY_REQUEST: 750Mi
-          MIN_REPLICAS: 3
-          SENTRY_ENABLED: true
-        promotion:
-          subscribe:
-            - policies-engine-stage-post-deploy-tests-success-channel
-          publish:
-            - policies-engine-prod-deploy-success-channel
-  - name: policies-ui-backend
-    path: /.rhcicd/clowdapp.yaml
-    url: https://github.com/RedHatInsights/policies-ui-backend
-    targets:
-      - namespace:
-          $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-        disable: true
-        ref: internal
-        parameters:
-          FLOORIST_SUSPEND: "true"
-          FLOORIST_IMAGE_TAG: fe12542
-          FLOORIST_SCHEDULE: 0 5 * * *
-          DB_NAME: policies-ui-backend
-          DB_SECRET_HOSTNAME_KEY: hostname
-          DB_SECRET_PASSWORD_KEY: password
-          DB_SECRET_USERNAME_KEY: username
-          LIGHTWEIGHT_ENGINE_ENABLED: true
-          RBAC_READ_TIMEOUT: 30000
-      - namespace:
-          $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
-        ref: master
-        parameters:
-          FLOORIST_SUSPEND: "true"
-          FLOORIST_IMAGE_TAG: fe12542
-          FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage
-          FLOORIST_SCHEDULE: 0 5 * * *
-          CLOUDWATCH_ENABLED: true
-          MIN_REPLICAS: 3
-          SENTRY_ENABLED: true
-        upstream:
-          instance:
-            $ref: /dependencies/ci-ext/ci-ext.yml
-          name: RedHatInsights-policies-ui-backend-gh-build-master
-        promotion:
-          publish:
-            - policies-ui-backend-stage-deploy-success-channel
-      - namespace:
-          $ref: /services/insights/policies/namespaces/policies-prod.yml
-        ref: 41bbe1bade6197749f6a9da54644689a2a8ec8f2
-        parameters:
-          FLOORIST_SUSPEND: "true"
-          FLOORIST_IMAGE_TAG: b57a5a8
-          FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-prod
-          FLOORIST_SCHEDULE: 0 5 * * *
-          CLOUDWATCH_ENABLED: true
-          MIN_REPLICAS: 3
-          SENTRY_ENABLED: true
-          RBAC_READ_TIMEOUT: 2000
-        promotion:
-          subscribe:
-            - policies-ui-backend-stage-post-deploy-tests-success-channel
-          publish:
-            - policies-ui-backend-prod-deploy-success-channel
-  - name: policies-ui-frontend
-    path: /deploy/frontend.yml
-    url: https://github.com/RedHatInsights/policies-ui-frontend
-    targets:
-      - namespace:
-          $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-        disable: true
-        ref: internal
-      - namespace:
-          $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
-        ref: d5701d6214b431c096dea01edd20101f8d30a315
-        parameters:
-          ENV_NAME: env-stage
+- name: policies-engine
+  path: /.rhcicd/clowdapp.yaml
+  url: https://github.com/RedHatInsights/policies-engine
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+  - namespace:
+      $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
+    ref: master
+    parameters:
+      CLOUDWATCH_ENABLED: true
+      EXTERNAL_LOGGING_LEVEL: DEBUG
+      MIN_REPLICAS: 3
+      SENTRY_ENABLED: true
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-policies-engine-gh-build-master
+    promotion:
+      publish:
+      - policies-engine-stage-deploy-success-channel
+  - namespace:
+      $ref: /services/insights/policies/namespaces/policies-prod.yml
+    ref: 081bc15fa319f2f15fa6b5a8afca29b78b4444aa
+    parameters:
+      CLOUDWATCH_ENABLED: true
+      MEMORY_LIMIT: 1500Mi
+      MEMORY_REQUEST: 750Mi
+      MIN_REPLICAS: 3
+      SENTRY_ENABLED: true
+    promotion:
+      subscribe:
+      - policies-engine-stage-post-deploy-tests-success-channel
+      publish:
+      - policies-engine-prod-deploy-success-channel
+- name: policies-ui-backend
+  path: /.rhcicd/clowdapp.yaml
+  url: https://github.com/RedHatInsights/policies-ui-backend
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      FLOORIST_SUSPEND: 'true'
+      FLOORIST_IMAGE_TAG: fe12542
+      FLOORIST_SCHEDULE: 0 5 * * *
+      DB_NAME: policies-ui-backend
+      DB_SECRET_HOSTNAME_KEY: hostname
+      DB_SECRET_PASSWORD_KEY: password
+      DB_SECRET_USERNAME_KEY: username
+      LIGHTWEIGHT_ENGINE_ENABLED: true
+      RBAC_READ_TIMEOUT: 30000
+  - namespace:
+      $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
+    ref: master
+    parameters:
+      FLOORIST_SUSPEND: 'true'
+      FLOORIST_IMAGE_TAG: fe12542
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage
+      FLOORIST_SCHEDULE: 0 5 * * *
+      CLOUDWATCH_ENABLED: true
+      MIN_REPLICAS: 3
+      SENTRY_ENABLED: true
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-policies-ui-backend-gh-build-master
+    promotion:
+      publish:
+      - policies-ui-backend-stage-deploy-success-channel
+  - namespace:
+      $ref: /services/insights/policies/namespaces/policies-prod.yml
+    ref: 41bbe1bade6197749f6a9da54644689a2a8ec8f2
+    parameters:
+      FLOORIST_SUSPEND: 'true'
+      FLOORIST_IMAGE_TAG: b57a5a8
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-prod
+      FLOORIST_SCHEDULE: 0 5 * * *
+      CLOUDWATCH_ENABLED: true
+      MIN_REPLICAS: 3
+      SENTRY_ENABLED: true
+      RBAC_READ_TIMEOUT: 2000
+    promotion:
+      subscribe:
+      - policies-ui-backend-stage-post-deploy-tests-success-channel
+      publish:
+      - policies-ui-backend-prod-deploy-success-channel
+- name: policies-ui-frontend
+  path: /deploy/frontend.yml
+  url: https://github.com/RedHatInsights/policies-ui-frontend
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+    ref: d5701d6214b431c096dea01edd20101f8d30a315
+    parameters:
+      ENV_NAME: env-stage
