@@ -41,21 +41,29 @@
       - [Access required](#access-required-5)
       - [Relevant secrets](#relevant-secrets-5)
       - [Steps](#steps-5)
-    - [SRS Tenant Manager availability](#srs-tenant-manager-availability)
+    - [SRS Tenant Manager Down](#srs-tenant-manager-down)
       - [Impact](#impact-6)
       - [Summary](#summary-6)
       - [Access required](#access-required-6)
       - [Relevant secrets](#relevant-secrets-6)
       - [Steps](#steps-6)
-    - [SRS Tenant Manager latency](#srs-tenant-manager-latency)
+    - [SRS Tenant Manager availability](#srs-tenant-manager-availability)
       - [Impact](#impact-7)
       - [Summary](#summary-7)
       - [Access required](#access-required-7)
       - [Relevant secrets](#relevant-secrets-7)
       - [Steps](#steps-7)
+    - [SRS Tenant Manager latency](#srs-tenant-manager-latency)
+      - [Impact](#impact-8)
+      - [Summary](#summary-8)
+      - [Access required](#access-required-8)
+      - [Relevant secrets](#relevant-secrets-8)
+      - [Steps](#steps-8)
   - [Escalations](#escalations)
 
 <!-- /TOC -->
+
+For additional SOPs intended for less urgent events visit [Service Registry Service SOP repository](https://gitlab.cee.redhat.com/service-registry/srs-sops)
 
 ---
 
@@ -280,6 +288,49 @@ refer to the steps in [SRS Service Registry availability](#srs-service-registry-
 
 ---
 
+## SRS Tenant Manager Down
+
+### Impact
+
+- No incoming request can be received or processed.
+- Tenant Manager is a dependency of Service Registry, so the data plane is affected:
+  - Tenant information will not be available for processing Service Registry requests, which will start failing.
+  - Deprovisioned tenant data will not be able to be deleted.
+- Tenant Manager is a dependency of Fleet Manager, so control plane is affected:
+  - New Service Registry provisioning jobs will not be able to be processed.
+  - Failure to deprovision instances will lead to instances transitioning to a failed state.
+
+### Summary
+
+SRS Tenant Manager (all of the replicas or pods) are down.
+
+### Access required
+
+- OSD console access to the cluster that runs the SRS Service Registry.
+- Access to cluster resources: Pods/Deployments/Events
+
+### Relevant secrets
+
+### Steps
+
+- Check all relevant cluster resources, specifically `deployments/tenant-manager`.
+  - Make sure pods are configured and started. The default number of pods is `3`.
+- Check the pod logs for any errors
+- Check cluster event logs to ensure there is no abnormality in the cluster level that could impact SRS Tenant Manager.
+  - Search Error/exception events with keywords `Tenant Manager` and with text `image`, `deployment` etc.
+- Investigate the metrics in Grafana for any possible evidences of the crash.
+  - Application: Volume, Latency, Error
+    - Stage: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry&var-interval=5m
+    - Production: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry-production&var-interval=5m
+  - CPU, Network, Memory, IO
+    - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage
+    - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production
+- Sentry -- https://sentry.devshift.net/sentry/service-registry-production/
+- If necessary, escalate the incident to the corresponding teams.
+  - Check [Escalations](#escalations) section below.
+
+---
+
 ## SRS Tenant Manager availability
 
 ### Impact
@@ -299,7 +350,30 @@ SRS Tenant Manager is not performing normally and is returning an abnormally hig
 
 ### Steps
 
-Tenant Manager is deployed as a sidecar to Service Registry. Refer to the steps in [SRS Service Registry availability](#srs-service-registry-availability)
+- Investigate the metrics in Grafana for any possible cause of the issue
+  - Application: Volume, Latency, Error
+    - Stage: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry&var-interval=5m
+    - Production: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry-production&var-interval=5m
+  - CPU, Network, Memory, IO
+    - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage
+    - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production
+- If there are container performance issue are identified (e.g.: CPU spike, high Latency etc), increase the number of replicas.
+- Sentry -- https://sentry.devshift.net/sentry/service-registry-production/
+- Check `deployments/tenant-manager`, check details page to make sure pods are configured and started. Start the pod if none is running (default `3`).
+- Check if the SRS Tenant Manager pods are running and verify the logs.
+    ```
+    #example
+    oc get pods -n <service-registry-stage|service-registry-production>
+
+    tenant-manager-55c55b5888-gfn7n   1/1     Running
+    tenant-manager-55c55b5888-knkdc   1/1     Running
+    tenant-manager-55c55b5888-w259j   1/1     Running
+
+    # Check the pod logs to investigate possible causes of the issue (e.g. look for any Error/Exception messages)
+
+    oc logs tenant-manager-55c55b5888-gfn7n  | less
+- If necessary, escalate the incident to the corresponding teams.
+  - Check [Escalations](#escalations) section below.
 
 ---
 
@@ -322,7 +396,7 @@ SRS Tenant Manager is not performing normally and is not able to handle the load
 
 ### Steps
 
-Tenant Manager is deployed as a sidecar to Service Registry. Refer to the steps in [SRS Service Registry availability](#srs-service-registry-availability)
+Refer to the steps in [SRS Tenant Manager availability](#srs-tenant-manager-availability)
 
 ---
 
