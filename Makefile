@@ -59,3 +59,7 @@ promote-all: qr-promote user-validator-promote
 
 update-schemas:
 	@./hack/update-schemas.sh
+
+generate: bundle
+	mkdir -p $(DATA_DIR)/generated/roles/manage-own-user
+	@python ./hack/generate-data-files.py $(OUTPUT_DIR)/$(BUNDLE_FILENAME)
