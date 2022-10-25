@@ -424,3 +424,32 @@ tests:
       - eval_time: 40m
         alertname: cloudigrade-stage-too-many-queued-celery-tasks
         exp_alerts: []
+
+  # cloudigrade-stage-rds-low-free-space
+  - interval: 10m
+    input_series:
+    - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="cloudigrade-stage"}
+      values: 0+3x4 12-1x7
+    alert_rule_test:
+    - eval_time: 2h
+      alertname: cloudigrade-stage-rds-low-free-space
+
+  - interval: 10m
+    input_series:
+    - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="cloudigrade-stage"}
+      values: 0+3x12
+    alert_rule_test:
+    - eval_time: 2h
+      alertname: cloudigrade-stage-rds-low-free-space
+      exp_alerts:
+      - exp_labels:
+          severity: high
+          service: insights
+          env: stage
+          app_team: cloudigrade
+          exported_instance: cloudigrade-stage
+          mount_point: /rdsdbdata
+        exp_annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&var-datasource=crcs02ue1-prometheus&var-namespace=cloudigrade-stage&var-datasource_rds=app-sre-stage-01-prometheus"
+          link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=cloudigrade-stage;is-cluster=false;tab=monitoring"
+          message: "cloudigrade: Database instance cloudigrade-stage is about to be low on free disk space within 2 weeks."
