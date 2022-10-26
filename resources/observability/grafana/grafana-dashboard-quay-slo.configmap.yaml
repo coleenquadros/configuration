@@ -1,6 +1,6 @@
 apiVersion: v1
 data:
-  push_pull_dash.json: |-
+  quay-slo.json: |-
     {
       "annotations": {
         "list": [
@@ -27,86 +27,87 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "iteration": 1666621242696,
+      "iteration": 1666707119321,
       "links": [],
       "liveNow": false,
       "panels": [
         {
-          "collapsed": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tuHy3WB7z"
-          },
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 0
-          },
-          "id": 4,
-          "panels": [],
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "tuHy3WB7z"
-              },
-              "refId": "A"
-            }
-          ],
-          "title": "Building blocks",
-          "type": "row"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": {
             "type": "prometheus",
             "uid": "${datasource}"
           },
           "fieldConfig": {
             "defaults": {
-              "links": []
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
           "gridPos": {
             "h": 7,
-            "w": 5,
-            "x": 0,
-            "y": 1
+            "w": 12,
+            "x": 5,
+            "y": 0
           },
-          "hiddenSeries": false,
           "id": 29,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
           "links": [],
-          "nullPointMode": "null",
           "options": {
-            "alertThreshold": true
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
           },
-          "percentage": false,
           "pluginVersion": "9.0.3",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
           "targets": [
             {
               "datasource": {
@@ -114,9 +115,8 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "sum(rate(catchpoint_check_failures_total{probe=\"quayio-push-monitor-v2\"}[$rate])) / sum(rate(catchpoint_checks_total{probe=\"quayio-push-monitor-v2\"}[$rate]))",
-              "hide": false,
-              "legendFormat": "push",
+              "expr": "1 - (\n    sum(increase(catchpoint_check_failures_total{probe=\"quayio-pull-monitor-v2\"}[$rate]))\n    /\n    sum(increase(catchpoint_checks_total{probe=\"quayio-pull-monitor-v2\"}[$rate]))\n)\n",
+              "legendFormat": "pull availability %",
               "range": true,
               "refId": "A"
             },
@@ -126,185 +126,56 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "sum(rate(catchpoint_check_failures_total{probe=\"quayio-pull-monitor-v2\"}[$rate])) / sum(rate(catchpoint_checks_total{probe=\"quayio-pull-monitor-v2\"}[$rate]))",
+              "expr": "1 - (\n    sum(increase(catchpoint_check_failures_total{probe=\"quayio-push-monitor-v2\"}[$rate]))\n    /\n    sum(increase(catchpoint_checks_total{probe=\"quayio-push-monitor-v2\"}[$rate]))\n)",
               "hide": false,
-              "legendFormat": "pull",
+              "legendFormat": "push availability %",
               "range": true,
               "refId": "B"
             }
           ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "Pull/Push Failure Rate",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:122",
-              "format": "percentunit",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "$$hashKey": "object:123",
-              "format": "short",
-              "logBase": 1,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
+          "title": "Service Level Compliance",
+          "type": "timeseries"
         },
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "tuHy3WB7z"
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 20,
-            "x": 0,
-            "y": 8
-          },
-          "id": 28,
-          "links": [],
-          "options": {
-            "content": "# How to bulid a dashboard using this Playground\n\n## Full documentation on creating Dashboards\n\nhttps://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/monitoring.md#VisualizationwithGrafana\n\n## Getting started with the Playground dashboard\n\nBelow you wil find all available panels to be used for a dashboard.\n\nTo start, select a panel to use, and duplicate it (`Panel options > More > Duplicate`).\n\nDrag it to the top of the screen (above the Building blocks Row) and change the panel title, metrics, and any other settings as required.\n\n\n## Saving your dashboard to Grafana\n\nSince all dashboards are managed through source control, saving dashboards is not enabled.\n\nTo save your new dashboard, export it to a JSON file (through the options on the top right of the screen) and save it locally. You will now need to create a merge request to app-interface.\n\nPlease see: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/monitoring.md#adding-dashboards\n\n## Tips and Tricks\n\n* Keep the `Building blocks` Row as part of the dashboard in case you require changes in the future\n* Export the dashboard with the `Building blocks` Row collapsed\n* Group panels together using a Row object (you may find some below)\n\n\nGood luck!",
-            "mode": "markdown"
-          },
-          "pluginVersion": "9.0.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "tuHy3WB7z"
-              },
-              "refId": "A"
-            }
-          ],
-          "title": "Playground usage",
-          "type": "text"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tuHy3WB7z"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 7,
-            "w": 5,
-            "x": 0,
-            "y": 17
-          },
-          "hiddenSeries": false,
-          "id": 2,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "9.0.3",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "tuHy3WB7z"
-              },
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "Graph",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tuHy3WB7z"
+            "uid": "${datasource}"
           },
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "palette-classic"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "N/A"
-                    }
-                  },
-                  "type": "special"
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
                 }
-              ],
+              },
+              "links": [],
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -324,289 +195,156 @@ data:
           },
           "gridPos": {
             "h": 7,
-            "w": 5,
+            "w": 6,
             "x": 5,
-            "y": 17
+            "y": 7
           },
-          "id": 6,
+          "id": 31,
           "links": [],
-          "maxDataPoints": 100,
           "options": {
-            "colorMode": "none",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "mean"
-              ],
-              "fields": "",
-              "values": false
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom"
             },
-            "textMode": "auto"
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
           },
           "pluginVersion": "9.0.3",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "tuHy3WB7z"
+                "uid": "${datasource}"
               },
+              "editorMode": "code",
+              "expr": "sum(increase(catchpoint_check_failures_total{probe=\"quayio-pull-monitor-v2\"}[$rate]))",
+              "legendFormat": "budget burn rate",
+              "range": true,
               "refId": "A"
-            }
-          ],
-          "title": "SingleStat",
-          "type": "stat"
-        },
-        {
-          "columns": [],
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tuHy3WB7z"
-          },
-          "fontSize": "100%",
-          "gridPos": {
-            "h": 7,
-            "w": 5,
-            "x": 10,
-            "y": 17
-          },
-          "id": 8,
-          "links": [],
-          "scroll": true,
-          "showHeader": true,
-          "sort": {
-            "col": 0,
-            "desc": true
-          },
-          "styles": [
-            {
-              "alias": "Time",
-              "align": "auto",
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "pattern": "Time",
-              "type": "date"
             },
             {
-              "alias": "",
-              "align": "auto",
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "decimals": 2,
-              "pattern": "/.*/",
-              "thresholds": [],
-              "type": "number",
-              "unit": "short"
-            }
-          ],
-          "targets": [
-            {
               "datasource": {
                 "type": "prometheus",
-                "uid": "tuHy3WB7z"
+                "uid": "${datasource}"
               },
-              "refId": "A"
+              "editorMode": "code",
+              "expr": "(100 - $pull_target_slo) * sum(increase(catchpoint_checks_total{probe=\"quayio-pull-monitor-v2\"}[$rate]))",
+              "hide": false,
+              "legendFormat": "max budget",
+              "range": true,
+              "refId": "B"
             }
           ],
-          "title": "Table",
-          "transform": "timeseries_to_columns",
-          "type": "table-old"
+          "title": "Pull Error Budget Burn Rate",
+          "type": "timeseries"
         },
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "tuHy3WB7z"
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
           },
           "gridPos": {
             "h": 7,
-            "w": 5,
-            "x": 15,
-            "y": 17
+            "w": 6,
+            "x": 11,
+            "y": 7
           },
-          "id": 10,
+          "id": 30,
           "links": [],
           "options": {
-            "content": "# title",
-            "mode": "markdown"
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
           },
           "pluginVersion": "9.0.3",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "tuHy3WB7z"
+                "uid": "${datasource}"
               },
+              "editorMode": "code",
+              "expr": "increase(catchpoint_check_failures_total{probe=\"quayio-push-monitor-v2\"}[$rate])",
+              "legendFormat": "budget burn rate",
+              "range": true,
               "refId": "A"
-            }
-          ],
-          "title": "Text",
-          "type": "text"
-        },
-        {
-          "cards": {},
-          "color": {
-            "cardColor": "#b4ff00",
-            "colorScale": "sqrt",
-            "colorScheme": "interpolateOranges",
-            "exponent": 0.5,
-            "mode": "spectrum"
-          },
-          "dataFormat": "timeseries",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tuHy3WB7z"
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 5,
-            "x": 0,
-            "y": 24
-          },
-          "heatmap": {},
-          "hideZeroBuckets": false,
-          "highlightCards": true,
-          "id": 12,
-          "legend": {
-            "show": false
-          },
-          "links": [],
-          "reverseYBuckets": false,
-          "targets": [
+            },
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "tuHy3WB7z"
+                "uid": "${datasource}"
               },
-              "refId": "A"
+              "editorMode": "code",
+              "expr": "(100 - $push_target_slo) * increase(catchpoint_checks_total{probe=\"quayio-push-monitor-v2\"}[$rate])",
+              "hide": false,
+              "legendFormat": "max budget",
+              "range": true,
+              "refId": "B"
             }
           ],
-          "title": "Heatmap",
-          "tooltip": {
-            "show": true,
-            "showHistogram": false
-          },
-          "type": "heatmap",
-          "xAxis": {
-            "show": true
-          },
-          "yAxis": {
-            "format": "short",
-            "logBase": 1,
-            "show": true
-          },
-          "yBucketBound": "auto"
-        },
-        {
-          "dashboardFilter": "",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tuHy3WB7z"
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 5,
-            "x": 5,
-            "y": 24
-          },
-          "id": 14,
-          "limit": 10,
-          "links": [],
-          "nameFilter": "",
-          "onlyAlertsOnDashboard": false,
-          "options": {
-            "alertInstanceLabelFilter": "",
-            "alertName": "",
-            "dashboardAlerts": false,
-            "groupBy": [],
-            "groupMode": "default",
-            "maxItems": 20,
-            "sortOrder": 1,
-            "stateFilter": {
-              "error": true,
-              "firing": true,
-              "noData": false,
-              "normal": false,
-              "pending": true
-            }
-          },
-          "show": "current",
-          "sortOrder": 1,
-          "stateFilter": [],
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "tuHy3WB7z"
-              },
-              "refId": "A"
-            }
-          ],
-          "title": "Alert list",
-          "type": "alertlist"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tuHy3WB7z"
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 5,
-            "x": 10,
-            "y": 24
-          },
-          "id": 16,
-          "links": [],
-          "options": {
-            "maxItems": 10,
-            "query": "",
-            "showHeadings": true,
-            "showRecentlyViewed": false,
-            "showSearch": false,
-            "showStarred": true,
-            "tags": []
-          },
-          "pluginVersion": "9.0.3",
-          "tags": [],
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "tuHy3WB7z"
-              },
-              "refId": "A"
-            }
-          ],
-          "title": "Dashboard list",
-          "type": "dashlist"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "tuHy3WB7z"
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 5,
-            "x": 15,
-            "y": 24
-          },
-          "id": 20,
-          "links": [],
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "tuHy3WB7z"
-              },
-              "refId": "A"
-            }
-          ],
-          "title": "Plugin list",
-          "type": "pluginlist"
+          "title": "Push Error Budget Burn Rate",
+          "type": "timeseries"
         },
         {
           "collapsed": true,
@@ -618,7 +356,477 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 31
+            "y": 14
+          },
+          "id": 4,
+          "panels": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "tuHy3WB7z"
+              },
+              "gridPos": {
+                "h": 9,
+                "w": 20,
+                "x": 0,
+                "y": 15
+              },
+              "id": 28,
+              "links": [],
+              "options": {
+                "content": "# How to bulid a dashboard using this Playground\n\n## Full documentation on creating Dashboards\n\nhttps://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/monitoring.md#VisualizationwithGrafana\n\n## Getting started with the Playground dashboard\n\nBelow you wil find all available panels to be used for a dashboard.\n\nTo start, select a panel to use, and duplicate it (`Panel options > More > Duplicate`).\n\nDrag it to the top of the screen (above the Building blocks Row) and change the panel title, metrics, and any other settings as required.\n\n\n## Saving your dashboard to Grafana\n\nSince all dashboards are managed through source control, saving dashboards is not enabled.\n\nTo save your new dashboard, export it to a JSON file (through the options on the top right of the screen) and save it locally. You will now need to create a merge request to app-interface.\n\nPlease see: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/monitoring.md#adding-dashboards\n\n## Tips and Tricks\n\n* Keep the `Building blocks` Row as part of the dashboard in case you require changes in the future\n* Export the dashboard with the `Building blocks` Row collapsed\n* Group panels together using a Row object (you may find some below)\n\n\nGood luck!",
+                "mode": "markdown"
+              },
+              "pluginVersion": "9.0.3",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "tuHy3WB7z"
+                  },
+                  "refId": "A"
+                }
+              ],
+              "title": "Playground usage",
+              "type": "text"
+            },
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "tuHy3WB7z"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "links": []
+                },
+                "overrides": []
+              },
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 7,
+                "w": 5,
+                "x": 0,
+                "y": 24
+              },
+              "hiddenSeries": false,
+              "id": 2,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": true,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "links": [],
+              "nullPointMode": "null",
+              "options": {
+                "alertThreshold": true
+              },
+              "percentage": false,
+              "pluginVersion": "9.0.3",
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "tuHy3WB7z"
+                  },
+                  "refId": "A"
+                }
+              ],
+              "thresholds": [],
+              "timeRegions": [],
+              "title": "Graph",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "mode": "time",
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "short",
+                  "logBase": 1,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "logBase": 1,
+                  "show": true
+                }
+              ],
+              "yaxis": {
+                "align": false
+              }
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "tuHy3WB7z"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [
+                    {
+                      "options": {
+                        "match": "null",
+                        "result": {
+                          "text": "N/A"
+                        }
+                      },
+                      "type": "special"
+                    }
+                  ],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "none"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 7,
+                "w": 5,
+                "x": 5,
+                "y": 24
+              },
+              "id": 6,
+              "links": [],
+              "maxDataPoints": 100,
+              "options": {
+                "colorMode": "none",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                  "calcs": [
+                    "mean"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "textMode": "auto"
+              },
+              "pluginVersion": "9.0.3",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "tuHy3WB7z"
+                  },
+                  "refId": "A"
+                }
+              ],
+              "title": "SingleStat",
+              "type": "stat"
+            },
+            {
+              "columns": [],
+              "datasource": {
+                "type": "prometheus",
+                "uid": "tuHy3WB7z"
+              },
+              "fontSize": "100%",
+              "gridPos": {
+                "h": 7,
+                "w": 5,
+                "x": 10,
+                "y": 24
+              },
+              "id": 8,
+              "links": [],
+              "scroll": true,
+              "showHeader": true,
+              "sort": {
+                "col": 0,
+                "desc": true
+              },
+              "styles": [
+                {
+                  "alias": "Time",
+                  "align": "auto",
+                  "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                  "pattern": "Time",
+                  "type": "date"
+                },
+                {
+                  "alias": "",
+                  "align": "auto",
+                  "colors": [
+                    "rgba(245, 54, 54, 0.9)",
+                    "rgba(237, 129, 40, 0.89)",
+                    "rgba(50, 172, 45, 0.97)"
+                  ],
+                  "decimals": 2,
+                  "pattern": "/.*/",
+                  "thresholds": [],
+                  "type": "number",
+                  "unit": "short"
+                }
+              ],
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "tuHy3WB7z"
+                  },
+                  "refId": "A"
+                }
+              ],
+              "title": "Table",
+              "transform": "timeseries_to_columns",
+              "type": "table-old"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "tuHy3WB7z"
+              },
+              "gridPos": {
+                "h": 7,
+                "w": 5,
+                "x": 15,
+                "y": 24
+              },
+              "id": 10,
+              "links": [],
+              "options": {
+                "content": "# title",
+                "mode": "markdown"
+              },
+              "pluginVersion": "9.0.3",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "tuHy3WB7z"
+                  },
+                  "refId": "A"
+                }
+              ],
+              "title": "Text",
+              "type": "text"
+            },
+            {
+              "cards": {},
+              "color": {
+                "cardColor": "#b4ff00",
+                "colorScale": "sqrt",
+                "colorScheme": "interpolateOranges",
+                "exponent": 0.5,
+                "mode": "spectrum"
+              },
+              "dataFormat": "timeseries",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "tuHy3WB7z"
+              },
+              "gridPos": {
+                "h": 7,
+                "w": 5,
+                "x": 0,
+                "y": 31
+              },
+              "heatmap": {},
+              "hideZeroBuckets": false,
+              "highlightCards": true,
+              "id": 12,
+              "legend": {
+                "show": false
+              },
+              "links": [],
+              "reverseYBuckets": false,
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "tuHy3WB7z"
+                  },
+                  "refId": "A"
+                }
+              ],
+              "title": "Heatmap",
+              "tooltip": {
+                "show": true,
+                "showHistogram": false
+              },
+              "type": "heatmap",
+              "xAxis": {
+                "show": true
+              },
+              "yAxis": {
+                "format": "short",
+                "logBase": 1,
+                "show": true
+              },
+              "yBucketBound": "auto"
+            },
+            {
+              "dashboardFilter": "",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "tuHy3WB7z"
+              },
+              "gridPos": {
+                "h": 7,
+                "w": 5,
+                "x": 5,
+                "y": 31
+              },
+              "id": 14,
+              "limit": 10,
+              "links": [],
+              "nameFilter": "",
+              "onlyAlertsOnDashboard": false,
+              "options": {
+                "alertInstanceLabelFilter": "",
+                "alertName": "",
+                "dashboardAlerts": false,
+                "groupBy": [],
+                "groupMode": "default",
+                "maxItems": 20,
+                "sortOrder": 1,
+                "stateFilter": {
+                  "error": true,
+                  "firing": true,
+                  "noData": false,
+                  "normal": false,
+                  "pending": true
+                }
+              },
+              "show": "current",
+              "sortOrder": 1,
+              "stateFilter": [],
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "tuHy3WB7z"
+                  },
+                  "refId": "A"
+                }
+              ],
+              "title": "Alert list",
+              "type": "alertlist"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "tuHy3WB7z"
+              },
+              "gridPos": {
+                "h": 7,
+                "w": 5,
+                "x": 10,
+                "y": 31
+              },
+              "id": 16,
+              "links": [],
+              "options": {
+                "maxItems": 10,
+                "query": "",
+                "showHeadings": true,
+                "showRecentlyViewed": false,
+                "showSearch": false,
+                "showStarred": true,
+                "tags": []
+              },
+              "pluginVersion": "9.0.3",
+              "tags": [],
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "tuHy3WB7z"
+                  },
+                  "refId": "A"
+                }
+              ],
+              "title": "Dashboard list",
+              "type": "dashlist"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "tuHy3WB7z"
+              },
+              "gridPos": {
+                "h": 7,
+                "w": 5,
+                "x": 15,
+                "y": 31
+              },
+              "id": 20,
+              "links": [],
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "tuHy3WB7z"
+                  },
+                  "refId": "A"
+                }
+              ],
+              "title": "Plugin list",
+              "type": "pluginlist"
+            }
+          ],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "tuHy3WB7z"
+              },
+              "refId": "A"
+            }
+          ],
+          "title": "Building blocks",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "tuHy3WB7z"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 15
           },
           "id": 22,
           "panels": [],
@@ -644,7 +852,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 32
+            "y": 16
           },
           "id": 24,
           "panels": [],
@@ -670,7 +878,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 33
+            "y": 17
           },
           "id": 26,
           "panels": [],
@@ -705,7 +913,6 @@ data:
             "name": "datasource",
             "options": [],
             "query": "prometheus",
-            "queryValue": "",
             "refresh": 1,
             "regex": "app-sre-prod-01-prometheus",
             "skipUrlSync": false,
@@ -716,9 +923,9 @@ data:
             "auto_count": 30,
             "auto_min": "10s",
             "current": {
-              "selected": true,
-              "text": "10m",
-              "value": "10m"
+              "selected": false,
+              "text": "5m",
+              "value": "5m"
             },
             "hide": 0,
             "name": "rate",
@@ -729,12 +936,12 @@ data:
                 "value": "1m"
               },
               {
-                "selected": false,
+                "selected": true,
                 "text": "5m",
                 "value": "5m"
               },
               {
-                "selected": true,
+                "selected": false,
                 "text": "10m",
                 "value": "10m"
               },
@@ -784,11 +991,49 @@ data:
             "refresh": 2,
             "skipUrlSync": false,
             "type": "interval"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": "99.5",
+              "value": "99.5"
+            },
+            "hide": 0,
+            "name": "push_target_slo",
+            "options": [
+              {
+                "selected": true,
+                "text": "99.5",
+                "value": "99.5"
+              }
+            ],
+            "query": "99.5",
+            "skipUrlSync": false,
+            "type": "textbox"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": "99.9",
+              "value": "99.9"
+            },
+            "hide": 0,
+            "name": "pull_target_slo",
+            "options": [
+              {
+                "selected": true,
+                "text": "99.9",
+                "value": "99.9"
+              }
+            ],
+            "query": "99.9",
+            "skipUrlSync": false,
+            "type": "textbox"
           }
         ]
       },
       "time": {
-        "from": "now-5m",
+        "from": "now-24h",
         "to": "now"
       },
       "timepicker": {
@@ -817,8 +1062,8 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Playground",
-      "uid": "playground",
+      "title": "Quay SLO",
+      "uid": "quay-slo",
       "version": 1,
       "weekStart": ""
     }
