@@ -1,6 +1,7 @@
 - job-template:
     id: 'insights-gl-pr-check'
     name: '{gl_group}-{gl_project}-pr-check'
+    slack_channel_notification: 'consoledot-development-fails'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -8,6 +9,7 @@
     - vault-secrets:
         <<: *vault_defaults
         secrets:
+        - *insights_crcd_oc_login
         - *insights_ephemeral_oc_login
         - *app_interface_creds
         - *insights_rh_registry_pull_secret
@@ -29,6 +31,12 @@
         failure-only: true
         name: '{name}'
         mark-unstable-as-success: false
+    - slack: 
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
     <<: *gl_pr_check
 
 - job-template:
@@ -86,6 +94,7 @@
 - job-template:
     id: 'insights-gl-build-master'
     name: '{gl_group}-{gl_project}-gl-build-{branch}'
+    slack_channel_notification: 'consoledot-development-fails'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -96,6 +105,13 @@
         - *insights_rh_registry_pull_secret
         - *quay_secret_push
         - *quay_api_token
+    publishers:
+    - slack: 
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
     <<: *gl_build_master
 
 - job-template:
@@ -247,6 +263,7 @@
 - job-template:
     id: 'insights-gh-build-master'
     name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    slack_channel_notification: 'consoledot-development-fails'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -257,12 +274,20 @@
         - *insights_rh_registry_pull_secret
         - *quay_secret_push
         - *quay_api_token
+    publishers:
+    - slack: 
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
     <<: *gh_build_master
 
 - job-template:
     id: 'insights-gh-pr-check'
     name: '{gh_org}-{gh_repo}-pr-check'
     branch: "master"
+    slack_channel_notification: 'consoledot-development-fails'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -270,6 +295,7 @@
     - vault-secrets:
         <<: *vault_defaults
         secrets:
+        - *insights_crcd_oc_login
         - *insights_ephemeral_oc_login
         - *app_interface_creds
         - *insights_rh_registry_pull_secret
@@ -279,6 +305,13 @@
         - *hac_keycloak_secret
         - *ibutsu
         - *hac_prcheck_secret
+    publishers:
+    - slack: 
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
     <<: *insights_gh_pr_check
 
 - job-template:
