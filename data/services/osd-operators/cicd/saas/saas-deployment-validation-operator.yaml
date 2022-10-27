@@ -1,28 +1,21 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: deployment-validation-operator
-
-name: saas-dvo-sss # Deployment Validation Operator (DVO) SelectorSyncSets
+name: saas-dvo-sss
 description: SaaS tracking file for Deployment Validation Operator
-
 app:
   $ref: /services/deployment-validation-operator/app.yml
-
 pipelinesProvider:
   $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
-
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: wg-dvo
-
 managedResourceTypes:
 - SelectorSyncSet
 
 imagePatterns: []
-
 resourceTemplates:
 - name: deployment-validation-operator
   url: https://github.com/app-sre/deployment-validation-operator
@@ -49,28 +42,39 @@ resourceTemplates:
       name: app-sre-deployment-validation-operator-gh-build-master
   - namespace:
       $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
-    ref: 57117265f5ae9b8f23c1176526ada2120bb43c5c
+    ref: a72c1de9feeaaee47972133de6e4b6f1bee98e4e
     promotion:
       auto: true
       subscribe:
       - dvo-sss-deployment-success-channel-hivei01ue1
       publish:
       - dvo-sss-deployment-success-channel-hive-stage-01
+      promotion_data:
+      - channel: dvo-sss-deployment-success-channel-hivei01ue1
+        data:
+        - parent_saas: saas-dvo-sss
+          target_config_hash: 46b28deaf355f268
+          type: parent_saas_config
   - namespace:
       $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
-    ref: 57117265f5ae9b8f23c1176526ada2120bb43c5c
+    ref: a72c1de9feeaaee47972133de6e4b6f1bee98e4e
     promotion:
       auto: true
       subscribe:
       - dvo-sss-deployment-success-channel-hivei01ue1
       publish:
       - dvo-sss-deployment-success-channel-hives02ue1
+      promotion_data:
+      - channel: dvo-sss-deployment-success-channel-hivei01ue1
+        data:
+        - parent_saas: saas-dvo-sss
+          target_config_hash: 46b28deaf355f268
+          type: parent_saas_config
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml
-    # Note: this is the only ref to update to promote to production
     ref: 57117265f5ae9b8f23c1176526ada2120bb43c5c
     promotion:
-      auto: false # gated
+      auto: false
       subscribe:
       - dvo-sss-deployment-success-channel-hive-stage-01
       - dvo-sss-deployment-success-channel-hives02ue1
