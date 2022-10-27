@@ -1,0 +1,36 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  creationTimestamp: null
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: signalfx-prometheus-exporter
+spec:
+  groups:
+  - name: signalfx-prometheus-exporter-production
+    rules:
+    - alert: SignalFXPrometheusExporterProdDataProcessingStopped
+      labels:
+        service: app-sre-observability
+        severity: high
+        jiralert: ASIC
+      expr: sum(rate(sfxpe_flow_metrics_received_total{namespace="app-sre-observability-production"}[5m])) == 0
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/signalfx-exporter-stopped-processing.md"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }} has stopped processing data for 5 min"
+  - name: signalfx-prometheus-exporter-stage
+    rules:
+    - alert: SignalFXPrometheusExporterStageDataProcessingStopped
+      labels:
+        service: app-sre-observability
+        severity: warning
+      expr: sum(rate(sfxpe_flow_metrics_received_total{namespace="app-sre-observability-stage"}[5m])) == 0
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/signalfx-exporter-stopped-processing.md"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }} has stopped processing data for 5 min"
