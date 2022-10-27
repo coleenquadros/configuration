@@ -1,0 +1,45 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: osd-operators
+
+name: saas-obo # saas-observability-operator
+description: SaaS tracking file for observability-operator
+
+app:
+  $ref: /services/osd-operators/observability-operator/app.yaml
+
+pipelinesProvider:
+  $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: observability-operator-users
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns: []
+
+use_channel_in_image_tag: false
+
+resourceTemplates:
+- name: observability-operator
+  url: https://github.com/rhobs/observability-operator
+  path: /deploy/olm/syncselector-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/rhobs/observability-operator-catalog
+    IMAGE_TAG: "0.0.15"
+    CHANNEL: candidate
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
+    ref: b6608492e3c4bc0838f931a59661a7b9fabdaf7e
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
+    ref: b6608492e3c4bc0838f931a59661a7b9fabdaf7e
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hivei01ue1/cluster-scope.yml
+    ref: b6608492e3c4bc0838f931a59661a7b9fabdaf7e
