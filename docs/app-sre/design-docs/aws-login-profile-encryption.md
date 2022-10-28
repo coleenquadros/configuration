@@ -1,4 +1,4 @@
-# Design document - aws login profile creation
+# Design document - aws login profile encryption
 
 ## Author / Date
 
@@ -66,5 +66,6 @@ We publish generated passwords via app-interface-output, so users can copy it fr
   * send notifications on failed encryption attempts and retry encryption
 * update terraform-users to use app-sre pgp key and write secrets to vault
   * add a feautre toggle to accounts, that indicate if passwords should be sent encrypted or written to vault
+* update qontract-reconcile cli output tool, to read from vault
 * update account per account to the new behaviour
   * requires updating terraform statefile with new pgp key, most likely removal from state and import again
