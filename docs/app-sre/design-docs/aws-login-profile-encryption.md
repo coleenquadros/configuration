@@ -63,6 +63,10 @@ In the case the PGP Key of the user expired, we end the previous sequence before
 
 We publish generated passwords via app-interface-output, so users can copy it from there. This is based on a qontract-reconcile cli command `terraform-users-credentials`, which reads the console URL and encrypted password from the terraform statefile. Since we switched to the APP-SRE PGP Key, these passwords can not be used anymore. Instead the new integration will write the encrypted password to the S3 state bucket `app-interface-production`, along with the console URL and Username. The output CLI command will read the information from that place instead of the statefile.
 
+### User-validator
+
+Since the new integration can handle expired PGP Keys gracefully, the PGP key validation on the user-validator needs to be updated. User-validator should read the list of invalid PGP Keys from the `app-interface-production` bucket and skip them. 
+
 ### Additional use cases
 
 * This new integration could notify users about PGP Key expiration. Not only check in vault for new keys, but query existing keys from qontract-server, validate them and reuse the notification implementation.
