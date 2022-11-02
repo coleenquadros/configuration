@@ -2827,6 +2827,8 @@ Consider creating a gitlab group for your team to use with this feature. No gitl
 
 Provisioning Kafka managed clusters through the Kafka Service Fleet Manager can be self-serviced via app-interface.
 
+> Note: This feature is currently disabled due to [SDB-2914](https://issues.redhat.com/browse/SDB-2914).
+
 #### Request quota
 
 To request quota for a new cluster, create a merge request to the [ocm-resources](https://gitlab.cee.redhat.com/service/ocm-resources) repository requesting additional quota for the AppSRE OCM production organization. Here is an [example](https://gitlab.cee.redhat.com/service/ocm-resources/-/merge_requests/1916). The merge request should include details on the requesting entity and any information that supports the need to use a Kafka instance.
