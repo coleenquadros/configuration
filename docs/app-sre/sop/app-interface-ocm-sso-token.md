@@ -41,6 +41,8 @@ The AppSRE Service Account was associated to the AppSRE Organization is [SDB-323
 
 ## Rotate OCM client secret for app-interface integrations
 
+Rotation in not needed on a regular basis, as client credentials (unlike offline token) do not expire.
+
 - Follow the [Client secret rotation SOP](/docs/app-sre/sop/sso-redhat-com-sops.md#client-secret-rotation).
 - Update the client secret in the relevant paths in Vault (see details section).
 - If the secret is stored in Vault in a KV v2 secret engine, submit a MR to app-interface to bump the version of the secret in the relevant OCM data files (see details section).
