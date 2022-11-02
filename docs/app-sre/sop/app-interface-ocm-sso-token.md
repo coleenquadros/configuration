@@ -1,6 +1,6 @@
 # App-interface OCM SSO token
 
-App-interface integrations use a [Client Credentials grant type](https://www.appsdeveloperblog.com/keycloak-client-credentials-grant-example/) to login to OCM.
+App-interface integrations use a [Client Credentials grant type](https://www.appsdeveloperblog.com/keycloak-client-credentials-grant-example/) to login to OCM using an access token obtained from RH SSO.
 
 This document is the result of the work done in [APPSRE-2494](https://issues.redhat.com/browse/APPSRE-2494).
 
@@ -46,3 +46,8 @@ Rotation in not needed on a regular basis, as client credentials (unlike offline
 - Follow the [Client secret rotation SOP](/docs/app-sre/sop/sso-redhat-com-sops.md#client-secret-rotation).
 - Update the client secret in the relevant paths in Vault (see details section).
 - If the secret is stored in Vault in a KV v2 secret engine, submit a MR to app-interface to bump the version of the secret in the relevant OCM data files (see details section).
+
+
+## Qontract-reconcile usage
+
+This is where we use the Service Account credentials to authenticate to OCM in [qontract-reconcile](https://github.com/app-sre/qontract-reconcile/blob/83fea5949d1a0841fab3e8eebd8c2c471919c7d2/reconcile/utils/ocm_base_client.py#L34-L44).
