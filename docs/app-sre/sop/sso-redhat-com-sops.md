@@ -1,6 +1,10 @@
 # SOPs for sso.redhat.com
 
 - [SOPs for sso.redhat.com](#sops-for-ssoredhatcom)
+  - [Request Service Account](#request-service-account)
+    - [Summary](#summary)
+    - [Access required](#access-required)
+    - [Steps](#steps)
   - [Client secret rotation](#client-secret-rotation)
     - [Summary](#summary)
     - [Access required](#access-required)
@@ -11,6 +15,24 @@
     - [Steps](#steps-1)
 
 The following are generic SOPs for situations involving sso.redhat.com
+
+## Request Service Account
+
+### Summary
+
+How to get SSO for your application or vendor
+
+### Access required
+
+None
+
+### Steps
+
+- Follow [this guide](https://source.redhat.com/groups/public/identity-access-management/identity__access_management_wiki/how_to_get_sso_for_your_application_or_vendor_abridged) to submit a SNOW ticket with RHIT (Enterprise Services Platform Team).
+  - Follow this [Example](https://redhat.service-now.com/surl.do?n=RH0053947)
+  - Make sure when you request the service account, you specify an email address that is a good contact email for the team. When certs need renewal, this is the email address that will be used.
+  - OCM integration/stage environments requires a `@redhat.com` email address or requests will be denied.
+
 
 ## Client secret rotation
 
