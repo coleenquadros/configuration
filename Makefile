@@ -42,7 +42,7 @@ run:
 		-v $(OUTPUT_DIR):/bundle:z \
 		-p 4000:4000 \
 		-e LOAD_METHOD=fs \
-		-e INIT_BUNDLES="fs:///bundle/master.json,fs:///bundle/data.json" \
+		-e DATAFILES_FILE=/bundle/$(BUNDLE_FILENAME) \
 		$(QONTRACT_SERVER_IMAGE):$(QONTRACT_SERVER_IMAGE_TAG)
 
 dev: bundle validate run
