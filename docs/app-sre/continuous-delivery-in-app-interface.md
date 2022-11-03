@@ -265,6 +265,37 @@ Examples:
 
 To make the promotion process automated, set `promotion.auto` to `true`.
 
+## Blue/Green Deployments and Canary Rollouts
+
+Having multiple named deployments of your application allows a single Route to act as a control knob for releases of new software.
+
+For example, the AMS application in app-interface is `uhc-acct-mngr`. By introducing `uhc-acct-mngr-green`, admins can control traffic between original Blue and the new Green instance using weights in Routes.
+
+Routes are self-service in app-interface. This is your control knob.
+
+The formula for canary traffic is `weight / sum_of_weights`. This is an example where 100% of traffic is sent to Blue and nothing to standby Green:
+
+```
+
+    spec:
+      host: api.openshift.com
+      to:
+        kind: Service
+        name: uhc-acct-mngr-envoy
+        weight: 100
+      alternateBackends:
+      - kind: Service
+        name: uhc-acct-mngr-green-envoy
+        weight: 0
+```
+
+By changing the weight to, say, 90 and 10, an admin can send 10% of production traffic to the new Green instance. After the admin is satisfied, all traffic can be handled by Green while Blue is updated. Traffic can be canary deployed back to Blue and the Green instance is reduced to 0 replicas.
+
+Example:
+
+* AMS: [Blue/Green and Canary rollout](https://gitlab.cee.redhat.com/service/uhc-account-manager/docs/blue_green_deployments.md)
+
+
 ## Questions?
 
 Reach out to us on #sd-app-sre in the CoreOS slack!
