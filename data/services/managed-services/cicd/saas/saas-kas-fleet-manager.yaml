@@ -333,7 +333,46 @@ resourceTemplates:
                   limit: 30
 
       #manual: use data plane config file, auto: use kas-fleet-shard
-      DATAPLANE_CLUSTER_SCALING_TYPE: manual
+      DATAPLANE_CLUSTER_SCALING_TYPE: auto
+      DYNAMIC_SCALING_CONFIG:
+        new_data_plane_openshift_version: "4.10.15"
+        enable_dynamic_data_plane_scale_up: false
+        enable_dynamic_data_plane_scale_down: false
+        compute_machine_per_cloud_provider:
+          aws:
+            cluster_wide_workload:
+              compute_machine_type:  m5.2xlarge
+              compute_node_autoscaling:
+                min_compute_nodes: 3
+                max_compute_nodes: 18
+            kafka_workload_per_instance_type:
+              standard:
+                compute_machine_type: r5.xlarge
+                compute_node_autoscaling:
+                  min_compute_nodes: 3
+                  max_compute_nodes: 21
+              developer:
+                compute_machine_type: m5.2xlarge
+                compute_node_autoscaling:
+                  min_compute_nodes: 3
+                  max_compute_nodes: 3
+          gcp:
+            cluster_wide_workload:
+              compute_machine_type: custom-8-32768
+              compute_node_autoscaling:
+                min_compute_nodes: 3
+                max_compute_nodes: 18
+            kafka_workload_per_instance_type:
+              standard:
+                compute_machine_type: custom-4-32768
+                compute_node_autoscaling:
+                  min_compute_nodes: 3
+                  max_compute_nodes: 21
+              developer:
+                compute_machine_type: custom-8-32768
+                compute_node_autoscaling:
+                  min_compute_nodes: 3
+                  max_compute_nodes: 3
 
       # cluster list if dataplane cluster scaling type is set to manual
       CLUSTER_LIST:
@@ -353,7 +392,7 @@ resourceTemplates:
         standard: # the instance type. It must exist in SUPPORTED_INSTANCE_TYPES
           # The number of reserved kafka instances of the size specified in "base_streaming_unit_size".
           # 1 guarantee that we'll always have hot capacity (3 worker nodes) prewarmed for 1 standard instance of size x1.
-          num_reserved_instances: 1
+          num_reserved_instances: 7 # To be reverted to 1 once we finish the migration for enabling dynamic scaling
           base_streaming_unit_size: x1
         developer: # The instance type. It must exist in SUPPORTED_INSTANCE_TYPES.
           # The number of reserved kafka instances of the size specified in "base_streaming_unit_size".
