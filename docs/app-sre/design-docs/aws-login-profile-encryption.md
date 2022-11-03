@@ -88,7 +88,7 @@ Since the new integration can handle expired PGP Keys gracefully, the PGP key va
 * Adding an expiration notifier: https://issues.redhat.com/browse/APPSRE-4706
 * Use self hosted pastebin instead of PGP
 * Refactor user-validator to just check a single key passed via stdin
-  * In MR checks, use schema comparison to find the key being referenced by the change in the MR and only test this. (for terraform-users and aws-iam-password-reset)
+  * In MR checks, use schema comparison to find the key being referenced by the change in the MR and only test this. (for terraform-users, sql-query, requests_sender and aws-iam-password-reset)
   * Exit with error on validation error. This should break only the MR opened concerning the broken key.
   * This would work under the assumption that pgp keys are not validated by i.e. terraform
 
