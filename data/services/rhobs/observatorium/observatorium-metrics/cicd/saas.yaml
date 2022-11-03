@@ -54,8 +54,6 @@ imagePatterns:
 - quay.io/openshift/origin-configmap-reloader
 - quay.io/prometheus/alertmanager
 - quay.io/openshift-logging/loki
-  # This should be deleted upon completion of https://issues.redhat.com/browse/RHOBS-112
-- quay.io/philipgough/envoy
 
 resourceTemplates:
 - name: observatorium-metrics
@@ -205,11 +203,6 @@ resourceTemplates:
       - observatorium-metrics-stage-deploy-success-channel
   - namespace:
       $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
-
-    ## While this comment is here, do not alter the ref for this target without speaking to @pgough :)
-    ## There is a breaking change on the ref below which is living on a temp branch until all migrations
-    ## are complete. Once all migrations are complete, the branch will be merged to main and
-    # this comment can be removed
     ref: a98a5028b676f039d491ac9c5ee3e7828f0ca13c
     parameters:
       NAMESPACE: observatorium-metrics-production
@@ -321,23 +314,9 @@ resourceTemplates:
   url: https://github.com/rhobs/configuration
   targets:
     - namespace:
-        $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
-      ref: c5e3d686d95dba479499f462cdd3bee25040d3a7
-      delete: true # deleting from the namespace - will remove in followup MR.
-      parameters:
-        NAMESPACE: observatorium-metrics-stage
-        PRIMARY_UPSTREAM_HOST: 'observatorium-thanos-receive-router.observatorium-metrics-stage.svc.cluster.local'
-        MIRROR_HOST: 'observatorium-thanos-receive.observatorium-metrics-stage.svc.cluster.local'
-        RECEIVER_KETAMA_REPLICAS: '3'
-        RECEIVER_KETAMA_CPU_REQUEST: '700m'
-        RECEIVER_KETAMA_CPU_LIMIT: '700m'
-        RECEIVER_KETAMA_MEMORY_REQUEST: '5Gi'
-        RECEIVER_KETAMA_MEMORY_LIMIT: '5Gi'
-        THANOS_CONFIG_SECRET: thanos-objectstorage
-        THANOS_S3_SECRET: telemeter-thanos-stage-s3
-    - namespace:
         $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
       ref: 9a05873e125cbe1f1829e9cc244c25f5fa4653a6
+      delete: true
       parameters:
         NAMESPACE: observatorium-metrics-production
         PRIMARY_UPSTREAM_HOST: 'observatorium-thanos-receive-router.observatorium-metrics-production.svc.cluster.local'
