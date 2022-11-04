@@ -295,7 +295,16 @@ externalResources:
     - name: quayio-stage-py3
       default: true
       openshift_service: quay-py3-load-balancer-service
-    rules: []
+    - name: quayio-stage-py3-cloudflare
+      openshift_service: quay-py3-cloudflare-load-balancer-service
+    rules:
+    - condition:
+        path: /v2/cloudflare-test/busybox/*
+      action:
+        - target: quayio-stage-py3-cloudflare
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
   - provider: s3
     identifier: quayio-stage-cloudfront-logs
     defaults: /terraform/resources/s3-all-expires-90-days-external-acl.yml
