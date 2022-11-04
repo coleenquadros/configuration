@@ -56,7 +56,13 @@
     - [Summary](#summary-8)
     - [Access required](#access-required-8)
     - [Relevant secrets](#relevant-secrets-8)
-    - [Steps](#steps-7)
+    - [Steps](#steps-8)
+  - [Kas Fleet Manager Kafkas Stuck in Suspending State](#kas-fleet-manager-kafkas-stuck-in-suspending-status)
+    - [Impact](#impact-9)
+    - [Summary](#summary-9)
+    - [Access required](#access-required-9)
+    - [Relevant secrets](#relevant-secrets-9)
+    - [Steps](#steps-9)
   - [Escalations](#escalations)
 
 <!-- /TOC -->
@@ -439,7 +445,33 @@ kas-fleet-manager-rds
 
 Check the status of relevant kafka (by its id returned in the alert) and see if its failed. Check if there is a reason for failure. Find the relevant kafka in [this dashboard](https://grafana.app-sre.devshift.net/d/viefn9LMz/mk-fleet-links?orgId=1&refresh=1m) to see more information about not matching kafka versions.
 If unsure about the reason or how to resolve the issue, refer to [Escalations](#escalations) section below.
- 
+
+---
+
+## Kas Fleet Manager Kafkas Stuck In Suspending State
+
+### Impact
+
+Kafka cluster(s) stuck in suspending state for more than 5 minutes
+
+### Summary
+
+Kafka cluster is stuck in suspending state for more than 5 minutes. The transition from suspending to suspended status should normally be a fast process and if it exceeds 5 minutes, it indicates that there is an issue that requires investigation
+
+### Access required
+
+- OSD Console access to the cluster that runs the Kas Service Fleet Manager.
+- Access to cluster resources: Pods/Deployments
+
+### Relevant secrets
+
+kas-fleet-manager-rds
+
+### Steps
+
+Check the relevant kafka(s) (by the id(s) returned in the alert) on the dataplane cluster. Check if there are any errors in the kas-fleetshard operator logs.
+If unsure about the reason or how to resolve the issue, refer to [Escalations](#escalations) section below.
+
 ---
 
 ## Escalations
