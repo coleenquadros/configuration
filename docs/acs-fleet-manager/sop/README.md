@@ -1,39 +1,47 @@
 # SOP : ACS Fleet Manager
 
-
 - [SOP : ACS Fleet Manager](#sop--acs-fleet-manager)
-    - [ACS Fleet Manager Down](#acs-fleet-manager-down)
-        - [Impact](#impact)
-        - [Summary](#summary)
-        - [Access required](#access-required)
-        - [Steps](#steps)
-    - [ACS Fleet Manager availability](#acs-fleet-manager-availability)
-        - [Impact](#impact-1)
-        - [Summary](#summary-1)
-        - [Access required](#access-required-1)
-        - [Steps](#steps-1)
-    - [ACS Fleet Manager latency](#acs-fleet-manager-latency)
-        - [Impact](#impact-2)
-        - [Summary](#summary-2)
-        - [Access required](#access-required-2)
-        - [Steps](#steps-2)
-    - [ACS Central provisioning latency](#acs-central-provisioning-latency)
-        - [Impact](#impact-3)
-        - [Summary](#summary-3)
-        - [Access required](#access-required-3)
-        - [Steps](#steps-3)
-    - [ACS Central provisioning correctness](#acs-central-provisioning-correctness)
-        - [Impact](#impact-4)
-        - [Summary](#summary-4)
-        - [Access required](#access-required-4)
-        - [Steps](#steps-4)
-    - [ACS Central deletion correctness](#acs-central-deletion-correctness)
-        - [Impact](#impact-5)
-        - [Summary](#summary-5)
-        - [Access required](#access-required-5)
-        - [Steps](#steps-5)
-    - [Escalations](#escalations)
-
+  - [ACS Fleet Manager Down](#acs-fleet-manager-down)
+    - [Impact](#impact)
+    - [Summary](#summary)
+    - [Access required](#access-required)
+    - [Steps](#steps)
+  - [ACS Fleet Manager availability](#acs-fleet-manager-availability)
+    - [Impact](#impact-1)
+    - [Summary](#summary-1)
+    - [Access required](#access-required-1)
+    - [Steps](#steps-1)
+  - [ACS Fleet Manager latency](#acs-fleet-manager-latency)
+    - [Impact](#impact-2)
+    - [Summary](#summary-2)
+    - [Access required](#access-required-2)
+    - [Steps](#steps-2)
+  - [ACS Fleet Manager reconciler failure](#acs-fleet-manager-reconciler-failure)
+    - [Impact](#impact-3)
+    - [Summary](#summary-3)
+    - [Access required](#access-required-3)
+    - [Steps](#steps-3)
+  - [ACS Fleet Manager reconciler long duration](#acs-fleet-manager-reconciler-long-duration)
+    - [Impact](#impact-4)
+    - [Summary](#summary-4)
+    - [Access required](#access-required-4)
+    - [Steps](#steps-4)
+  - [ACS Central provisioning latency](#acs-central-provisioning-latency)
+    - [Impact](#impact-5)
+    - [Summary](#summary-5)
+    - [Access required](#access-required-5)
+    - [Steps](#steps-5)
+  - [ACS Central provisioning correctness](#acs-central-provisioning-correctness)
+    - [Impact](#impact-6)
+    - [Summary](#summary-6)
+    - [Access required](#access-required-6)
+    - [Steps](#steps-6)
+  - [ACS Central deletion correctness](#acs-central-deletion-correctness)
+    - [Impact](#impact-7)
+    - [Summary](#summary-7)
+    - [Access required](#access-required-7)
+    - [Steps](#steps-7)
+  - [Escalations](#escalations)
 
 ---
 
@@ -134,6 +142,79 @@ ACS Fleet Manager is not performing normally and is not able to handle the load.
 ### Steps
 
 refer to the steps in [ACS Fleet Manager availability](#acs-fleet-manager-availability)
+
+---
+
+## ACS Fleet Manager reconciler failure
+
+### Impact
+
+The tenants affected by the failed reconciliations experience degraded service functions.
+The level of impact and visibility depends on the type of reconciliation.
+
+### Summary
+
+ACS Fleet Manager encountered reconciliations with a long duration.
+
+### Access required
+
+- OSD console access to the cluster that runs the ACS Fleet Manager.
+- Access to cluster resources: Pods/Deployments/Events.
+- Access to ACS Fleet Manager logs.
+
+### Steps
+
+- Check cluster event logs to ensure there is no abnormality in the cluster level that could impact ACS Fleet Manager API.
+  - Search error/exception events with keywords "ACS Fleet Manager" and with text "reconcile".
+  - Identify the ACS tenants that are affected by the reconciliation failure.
+- Investigate the metrics in Grafana for any possible evidences of the failure.
+  - Application: Volume, Latency, Error
+    - Stage: https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+    - Production: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1
+  - CPU, Network, Memory, IO
+    - Stage: https://grafana.stage.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+    - Production: https://grafana.app-sre.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1
+- Check [OpenShift deployment template](https://github.com/stackrox/acs-fleet-manager/blob/main/templates/service-template.yml) for potential causes.
+- Check [ACS Fleet Manager CI job logs](https://ci.ext.devshift.net/job/stackrox-acs-fleet-manager-gh-build-main/) for potential error cause.
+- If necessary, escalate the incident to the corresponding teams.
+  - Check [Escalations](#escalations) section below.
+
+---
+
+## ACS Fleet Manager reconciler long duration
+
+### Impact
+
+The tenants affected by the long duration reconciliations experience degraded service functions.
+The level of impact and visibility depends on the type of reconciliation.
+
+### Summary
+
+ACS Fleet Manager encountered reconciliations with a long duration.
+
+### Access required
+
+- OSD console access to the cluster that runs the ACS Fleet Manager.
+- Access to cluster resources: Pods/Deployments/Events.
+- Access to ACS Fleet Manager logs.
+
+### Steps
+
+- Check cluster event logs to ensure there is no abnormality in the cluster level that could impact ACS Fleet Manager API.
+  - Search error/exception events with keywords "ACS Fleet Manager" and with text "reconcile".
+  - Identify the ACS tenants that are affected by the long reconciliation duration.
+  - Confirm if the reconciliations are stuck permanently or exit eventually.
+- Investigate the metrics in Grafana for any possible evidences of the duration.
+  - Application: Volume, Latency, Error
+    - Stage: https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+    - Production: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1
+  - CPU, Network, Memory, IO
+    - Stage: https://grafana.stage.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+    - Production: https://grafana.app-sre.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1
+- Check [OpenShift deployment template](https://github.com/stackrox/acs-fleet-manager/blob/main/templates/service-template.yml) for potential causes.
+- Check [ACS Fleet Manager CI job logs](https://ci.ext.devshift.net/job/stackrox-acs-fleet-manager-gh-build-main/) for potential error cause.
+- If necessary, escalate the incident to the corresponding teams.
+  - Check [Escalations](#escalations) section below.
 
 ---
 
