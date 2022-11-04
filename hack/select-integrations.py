@@ -106,6 +106,8 @@ def print_cmd(pr, select_all, non_bundled_data_modified, int_name, override=None
         cmd += "NO_VALIDATE=true "
     if not select_all and pr.get('early_exit'):
         cmd += "EARLY_EXIT=true "
+    elif int_name == "terraform-resources" and override is not None:
+        cmd += "EARLY_EXIT=false "
 
     if int_name == "change-owners":
         if select_all or non_bundled_data_modified:
@@ -172,10 +174,10 @@ def main():
     modified_files = get_modified_files()
 
     def any_modified(func):
-        return any([func(p) for p in modified_files])
+        return any(func(p) for p in modified_files)
 
     def all_modified(func):
-        return all([func(p) for p in modified_files])
+        return all(func(p) for p in modified_files)
 
     if all_modified(lambda p: re.match(r'^docs/', p)):
         # only docs: no need to run pr check
