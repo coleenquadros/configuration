@@ -1,0 +1,35 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: gabi-production
+description: A namespace for the GABI project
+
+cluster:
+  $ref: /openshift/app-sre-prod-01/cluster.yml
+
+app:
+  $ref: /services/gabi/app.yml
+
+environment:
+  $ref: /products/dashdot/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/app-interface/namespaces/app-interface-production.yml
+
+managedRoles: true
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: gabi-production
+    defaults: /terraform/resources/gabi/rds-production-1.yml
+    output_resource_name: gabi-production-rds
+    overrides:
+      apply_immediately: true
