@@ -118,9 +118,6 @@ This step should be performed in a single merge request.
       replicas: (desired number of instances in the pool)
       labels: {}
 
-    addons: # enable log forwarding to the cluster's AWS account
-    - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
-
     internal: false
 
     awsInfrastructureAccess:
