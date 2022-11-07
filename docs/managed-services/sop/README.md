@@ -63,6 +63,13 @@
     - [Access required](#access-required-9)
     - [Relevant secrets](#relevant-secrets-9)
     - [Steps](#steps-9)
+  - [Kas Fleet Manager Kafkas Stuck in Resuming State](#kas-fleet-manager-kafkas-stuck-in-resuming-status)
+    - [Impact](#impact-10)
+    - [Summary](#summary-10)
+    - [Access required](#access-required-10)
+    - [Relevant secrets](#relevant-secrets-10)
+    - [Steps](#steps-10)
+
   - [Escalations](#escalations)
 
 <!-- /TOC -->
@@ -470,6 +477,32 @@ kas-fleet-manager-rds
 ### Steps
 
 Check the relevant kafka(s) (by the id(s) returned in the alert) on the dataplane cluster. Check if there are any errors in the kas-fleetshard operator logs.
+If unsure about the reason or how to resolve the issue, refer to [Escalations](#escalations) section below.
+
+---
+
+## Kas Fleet Manager Kafkas Stuck In Resuming State
+
+### Impact
+
+Kafka cluster(s) stuck in resuming state for more than 15 minutes
+
+### Summary
+
+Kafka cluster is stuck in resuming state for more than 15 minutes. The transition from resuming to ready status should normally be similar to kafka request creation time. If it takes much longer, it might indicate that there is an issue that requires investigation.
+
+### Access required
+
+- OSD Console access to the cluster that runs the Kas Service Fleet Manager.
+- Access to cluster resources: Pods/Deployments
+
+### Relevant secrets
+
+kas-fleet-manager-rds
+
+### Steps
+
+Check the relevant kafka(s) (by the id(s) returned in the alert) on the dataplane cluster. Check if there are any errors in the kas-fleetshard operator logs, running pods or if any pods are crashlooping.
 If unsure about the reason or how to resolve the issue, refer to [Escalations](#escalations) section below.
 
 ---
