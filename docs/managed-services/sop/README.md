@@ -459,7 +459,7 @@ If unsure about the reason or how to resolve the issue, refer to [Escalations](#
 
 ### Impact
 
-Kafka cluster(s) stuck in suspending state for more than 5 minutes
+Kafka cluster stuck in suspending state for more than 5 minutes
 
 ### Summary
 
@@ -472,8 +472,6 @@ Kafka cluster is stuck in suspending state for more than 5 minutes. The transiti
 
 ### Relevant secrets
 
-kas-fleet-manager-rds
-
 ### Steps
 
 Check the relevant kafka(s) (by the id(s) returned in the alert) on the dataplane cluster. Check if there are any errors in the kas-fleetshard operator logs.
@@ -485,7 +483,7 @@ If unsure about the reason or how to resolve the issue, refer to [Escalations](#
 
 ### Impact
 
-Kafka cluster(s) stuck in resuming state for more than 15 minutes
+Kafka cluster stuck in resuming state for more than 15 minutes
 
 ### Summary
 
@@ -497,8 +495,6 @@ Kafka cluster is stuck in resuming state for more than 15 minutes. The transitio
 - Access to cluster resources: Pods/Deployments
 
 ### Relevant secrets
-
-kas-fleet-manager-rds
 
 ### Steps
 
