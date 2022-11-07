@@ -105,7 +105,7 @@ Since the new integration can handle expired PGP Keys gracefully, the PGP key va
   * encrypt keys from vault and send them PGP encrypted to users
   * send notifications on failed encryption attempts and retry encryption
 * update terraform-users to use app-sre PGP Key and write secrets to vault
-  * add a feautre toggle to accounts, that indicate if passwords should be sent encrypted or written to vault
+  * add a feature toggle to accounts, that indicate if passwords should be sent encrypted or written to vault
 * update qontract-reconcile cli output tool, to read from vault
 * update account per account to the new behaviour
   * PGP keys can be replaced, since lifecycle configuration on resource exists, that ignores key changes
