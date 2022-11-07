@@ -11,9 +11,9 @@ https://issues.redhat.com/browse/APPSRE-4706
 
 ## Problem statement
 
-The Terraform AWS provider supports creating random passwords for login profiles on the creation of these. Conveniently terraform encrypts this password using a PGP Key that can be passed in. We added some validation code (user-validator), that checks if PGP Keys are usable and fails on keys, that do not comply with terraform imposed key standards (obsoleted key standard).
+The Terraform AWS provider supports creating random passwords for login profiles on the creation of these. Conveniently terraform encrypts this password using a PGP Key that can be passed in. We added some validation code (user-validator), that checks if PGP Keys are usable and fails on keys that do not comply with terraform imposed key standards (obsoleted key standard).
 Additionally, if no PGP Key is provided the password will be stored in the state file: https://github.com/hashicorp/terraform-provider-aws/blob/main/internal/service/iam/user_login_profile.go#L152
-Thus we care for using a valid PGP Key, but it's unlikely users care, cause the password here is a random one and we enforce the users to change it upon first login. So it's pretty common that they forget about it once their request (account provsioning) was settled.
+Thus we care for using a valid PGP Key, but it's unlikely users care, because the password here is a random one and we enforce the users to change it upon first login. So it's pretty common that they forget about it once their request (account provisioning) was settled.
 
 Conclusion: PGP Keys need validation. Different reasons for this:
 
@@ -22,8 +22,8 @@ Conclusion: PGP Keys need validation. Different reasons for this:
 
 ## Goals
 
-* Terraform users integration is not crashing cause of invalid or expired PGP Keys.
-* Merge Request pipeline is not breaking cause of expired PGP Keys
+* Terraform users integration is not crashing due to invalid or expired PGP Keys.
+* Merge Request pipeline is not breaking due to expired PGP Keys
 * Users get notified upon tried usage of invalid keys
 
 ## Proposal
@@ -79,7 +79,7 @@ Since the new integration can handle expired PGP Keys gracefully, the PGP key va
     secret:
       key:
       version:
-  receiptiant: 
+  user: 
     $ref: /teams/abc/user/foobar.yml
   ```
 
