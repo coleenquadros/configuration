@@ -49,7 +49,7 @@ Flow for creating a new login profile (only mentioning aspects of PGP Key usage)
 
  1. Read newly created passwords from vault.
  2. Read the users PGP Key from qontract-server.
- 3. Check state bucket `app-interface-production` if the users key needs rotation.
+ 3. Check state bucket `app-interface-production` if the users key needs rotation (would be set by earlier runs, see paragraph below).
  4. Read APP-SRE PGP Key to unencrypt the password.
  5. Encrypt the password using the users public PGP Key and send it to the user, as email.
  6. Store the encrypted password in vault, so that the app-interface output job can export them.
@@ -57,15 +57,22 @@ Flow for creating a new login profile (only mentioning aspects of PGP Key usage)
  8. (Optional): remove state denoting users key needs rotation.
 
 
-In the case the PGP Key of the user expired, we end the previous sequence before 4 and instead of sending the re-encrypted password, we send a notification to the user, that a new PGP Key is required. After that we create a state file entry indicating, that this PGP needs rotation.
+In the case the PGP Key of the user expired, we end the previous sequence before 4 and instead of sending the re-encrypted password, we send a notification to the user, that a new PGP Key is required. After that we create a state file entry in `app-interface-production` indicating, that this PGP needs rotation.
+
+### state file usage
+
+The state bucket `app-interface-production` will be used to persist information about invalid keys. We create a state key, that will hold the following information:
+
+ * PGP key
+ * invalidation reason 
 
 ### Output 
 
-We publish generated passwords via app-interface-output, so users can copy it from there. This is based on a qontract-reconcile cli command `terraform-users-credentials`, which reads the console URL and encrypted password from the terraform statefile. Since we switched to the APP-SRE PGP Key, these passwords can not be used anymore. Instead the new integration will write the encrypted password to the S3 state bucket `app-interface-production`, along with the console URL and Username. The output CLI command will read the information from that place instead of the statefile.
+We publish generated passwords via [app-interface-output](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md), so users can copy it from there. This is based on a qontract-reconcile cli command `terraform-users-credentials`, which reads the console URL and encrypted password from the terraform statefile. Since we switched to the APP-SRE PGP Key, these passwords can not be used anymore. Instead the new integration will write the encrypted password to vault, along with the console URL and Username. The output CLI command will read the information from that place instead of the statefile.
 
 ### User-validator
 
-Since the new integration can handle expired PGP Keys gracefully, the PGP key validation on the user-validator needs to be updated. User-validator should read the list of invalid PGP Keys from the `app-interface-production` bucket and skip them. 
+Since the new integration can handle expired PGP Keys gracefully, the PGP key validation on the user-validator needs to be updated. User-validator should read the list of invalid PGP Keys from the `app-interface-production` bucket and skip validation for keys listed as invalid.
 
 ### Additional use cases
 
@@ -101,4 +108,4 @@ Since the new integration can handle expired PGP Keys gracefully, the PGP key va
   * add a feautre toggle to accounts, that indicate if passwords should be sent encrypted or written to vault
 * update qontract-reconcile cli output tool, to read from vault
 * update account per account to the new behaviour
-  * requires updating terraform statefile with new PGP Key, most likely removal from state and import again
+  * PGP keys can be replaced, since lifecycle configuration on resource exists, that ignores key changes
