@@ -15,7 +15,7 @@ and a node going down means a replica will not be able to get allocated.
 
 
 ## Elasticsearch
-Check the [Quay elasticsearch action logs](../../quay-elasticsearch-events-logs.md))
+Check the [Quay elasticsearch action logs](../../quay-elasticsearch-events-logs.md)
 
 ### Monitoring
 Metrics from the production cluster are sent in a separate Elasticsearch cluster in the same account. This cluster stores the time series data and allows vizualization in Grafana, and sending alerts to slack on events. e.g Cluster statuses, disk space.
