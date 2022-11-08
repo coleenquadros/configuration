@@ -8,7 +8,7 @@ The push/pull monitor [check on Catchpoint](https://portal.catchpoint.com/ui/Sym
 
 2. If pushes and pulls work for you consistently and on different images from
    your local machine and the check is failing, there might be something wrong
-   with the check. Please disable the check by going to the check via the link above and deactivate the check ![deactivate check](./assets/catchpoint-dactivate.png)
+   with the check. Please disable the check by going to the check via the link above and deactivate the check. Please open a bug with PROJQUAY to fix the alert ![deactivate check](./assets/catchpoint-dactivate.png). 
    
 
 3. If you see continuous or intermittent failures then it might be something wrong with Quay. 
