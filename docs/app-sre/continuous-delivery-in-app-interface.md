@@ -276,7 +276,6 @@ Routes are self-service in app-interface. This is your control knob.
 The formula for canary traffic is `weight / sum_of_weights`. This is an example where 100% of traffic is sent to Blue and nothing to standby Green:
 
 ```
-
     spec:
       host: api.openshift.com
       to:
@@ -293,7 +292,9 @@ By changing the weight to, say, 90 and 10, an admin can send 10% of production t
 
 Example:
 
-* AMS: [Blue/Green and Canary rollout](https://gitlab.cee.redhat.com/service/uhc-account-manager/docs/blue_green_deployments.md)
+* AMS: [Blue/Green and Canary rollout](https://gitlab.cee.redhat.com/service/uhc-account-manager/-/blob/master/docs/blue_green_deployments.md)
+* [AMS Green instance](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/ocm/ams/cicd/saas-uhc-account-manager.yaml#L47) 
+* [AMS Route with Weights](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/services/ocm/stage/accounts-mgmt.route.yaml) 
 
 
 ## Questions?
