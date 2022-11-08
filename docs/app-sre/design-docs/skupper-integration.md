@@ -57,8 +57,14 @@ config:
   routers: <Number of router replicas to start. default=3>
   service-controller: <Run the service controller. (true/false) default=true>
   service-sync: <Determine if the service controller participates in service synchronization. (true/false) default=true>
-  skupper-site-controller: <Skupper image and version. default=quay.io/skupper/site-controller:1.1.1>
+  skupper-site-controller: <Skupper image and version>
 ```
+
+Important configurations to highlight:
+
+* `edge: true` for internal clusters behind the VPN
+* `console-ingress: route` & `ingress: route` because a load-balancer IP isn't always available
+* `skupper-site-controller` a required attribute and defines the skupper software version, e.g., `skupper-site-controller: quay.io/skupper/site-controller:1.1.1`
 
 and enhance `/openshift/namespace-1.yml` with a `skupper` section:
 
@@ -93,11 +99,45 @@ skupper:
 ```
 Given that, the integration will:
 
-* Create `skupper-site` config map with config settings from the `config` sections.
+* Create a `skupper-site` config map with config settings from the `config` sections.
 * Deploy a *site-controller* (with a specific skupper version) into all related namespaces in all associated clusters.
 * Create *connection-tokens* and spawn skupper connections by considering that an internal cluster doesn't allow incoming connections.
 
-For `delete: true` the integration will delete `skupper-site` config map, *site-controller*, *connection-tokens* secrets, and skupper services.
+For `delete: true`, the integration will delete the `skupper-site` config map, *site-controller*, *connection-tokens* secrets, and skupper services.
+
+## Details
+
+### Definitions
+
+* A **public** cluster is publicly accessible
+* An **internal** cluster is not publicly accessible and is behind the VPN
+* An **edge** cluster (site-config `edge: true`) doesn't allow incoming skupper site connections.
+* A **non-edge** cluster (site-config `edge: false`) allows incoming skupper site connections.
+
+### Site Controller Deployment
+
+The *site-controller* is a Kubernetes deployment similar to the one used in the [POC](https://gitlab.cee.redhat.com/service/app-interface/-/blob/4751dee2c4ed02e5a3fbde4617074c508bf74e6c/resources/skupper-cassing/skupper/site-controller.yml).
+
+### Site connections
+
+Skupper site connections have several constraints to be fulfilled:
+
+* Public clusters cannot access internal clusters behind the VPN
+* Internal clusters may access other internal clusters
+* A connection token from the cluster you want to connect to needs to be available and valid
+* There is no need to bidirectional connect sites. Cluster A connects to B, but B doesn't need to connect to A.
+
+Apply these rules to create the connections:
+
+| Public         | Internal       | Edge           | Non-Edge       | Rule                                                                            |
+| -------------- | -------------- | -------------- | -------------- | ------------------------------------------------------------------------------- |
+| :red_circle:   | :green_circle: | :green_circle: | :red_circle:   | Connect to all[^all] other **non-edge** clusters (lexicographical order)        |
+| :red_circle:   | :green_circle: | :red_circle:   | :green_circle: | Connect to all[^all] other **non-edge** clusters (lexicographical order)        |
+| :green_circle: | :red_circle:   | :red_circle:   | :green_circle: | Connect to all[^all] other **public non-edge** clusters (lexicographical order) |
+| :green_circle: | :red_circle:   | :green_circle: | :red_circle:   | Connect to all[^all] other **public non-edge** clusters (lexicographical order) |
+
+[^all]: All or a configurable (app-interface settings) max number
+
 
 ## Milestones
 
