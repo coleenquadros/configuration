@@ -53,7 +53,7 @@ Flow for creating a new login profile (only mentioning aspects of PGP Key usage)
  4. Read APP-SRE PGP Key to unencrypt the password.
  5. Encrypt the password using the users public PGP Key and send it to the user, as email.
  6. Store the encrypted password in vault, so that the app-interface output job can export them.
- 7. Remove password encryted using APP-SRE key from vault.
+ 7. Remove password encrypted using APP-SRE key from vault.
  8. (Optional): remove state denoting users key needs rotation.
 
 
