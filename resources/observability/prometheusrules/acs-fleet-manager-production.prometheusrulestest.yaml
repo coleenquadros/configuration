@@ -510,3 +510,55 @@ tests:
               message: "High 1d/3d Central creation p90 latency budget burn for ACS Fleet Manager (current value: 151.5m)"
               dashboard: "https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-central-provisioning-latency"
+
+  # Reconciler failure
+  - interval: 1m
+    input_series:
+      # 0m    - 15m   all good
+      # 15m   - 45m   failure rate of 1/s
+      - series: 'acs_fleet_manager_reconciler_failure_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-prod",worker_type="deleting_dinosaur"}'
+        values: "0+0x15   0+60x30"
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: ACS Fleet Manager reconciler failure
+        exp_alerts: []
+      - eval_time: 35m
+        alertname: ACS Fleet Manager reconciler failure
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager reconciler failure
+              job: fleet-manager-metrics
+              namespace: acs-fleet-manager-prod
+              service: acs-fleet-manager
+              severity: critical
+              worker_type: deleting_dinosaur
+            exp_annotations:
+              message: "The reconciler of type deleting_dinosaur failed with a rate of 1/s over the last 15 minutes."
+              dashboard: "https://grafana.prod.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-reconciler-failure"
+
+  # Reconciler long duration
+  - interval: 1m
+    input_series:
+      # 0m    - 15m   all good
+      # 15m   - 45m   duration > 30
+      - series: 'acs_fleet_manager_reconciler_duration_in_seconds{job="fleet-manager-metrics",namespace="acs-fleet-manager-prod",worker_type="deleting_dinosaur"}'
+        values: "0+1x15   31+1x30"
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: ACS Fleet Manager reconciler long duration
+        exp_alerts: []
+      - eval_time: 35m
+        alertname: ACS Fleet Manager reconciler long duration
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager reconciler long duration
+              job: fleet-manager-metrics
+              namespace: acs-fleet-manager-prod
+              service: acs-fleet-manager
+              severity: medium
+              worker_type: deleting_dinosaur
+            exp_annotations:
+              message: "The maximum reconciler duration was 50s over the last 15 minutes."
+              dashboard: "https://grafana.prod.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-reconciler-long-duration"
