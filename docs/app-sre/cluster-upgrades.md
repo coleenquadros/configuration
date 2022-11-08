@@ -6,9 +6,26 @@ This document explains how the integration decides to upgrade a cluster.
 
 Jira ticket: https://issues.redhat.com/browse/SDE-1376
 
+## Cluster upgrades for Red Hat owned OCM organizations
+
+The AppSRE cluster upgrades integration can now be used to manage upgrades in additional OCM organizations, where clusters are not managed in app-interface.
+
+This is the result of a PoC to expose advanced cluster upgrade capabilities to internal RH teams.
+
+Jira ticket: https://issues.redhat.com/browse/SDE-2341
+
+> Note: The end goal is to expose this capability to external customers as well, likely as an OCM API.
+
+This documentation applies to both use cases:
+- Cluster upgrades for clusters managed in app-interface (AppSRE clusters)
+- Cluster ugprades for additional OCM organizations (RH only)
+
 ## Overview
 
-To enable upgrades for a cluster, add an `upgradePolicy` section to the cluster file:
+To enable upgrades for a cluster, add the following section to either:
+- the cluster file (if the cluster is managed in app-interface)
+- the `upgradePolicyClusters` section of an OCM file ([example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/4751dee2c4ed02e5a3fbde4617074c508bf74e6c/data/dependencies/ocm/production.yml#L43-50)), along with the cluster `name` field (for RH owned OCM organizations)
+
 ```yaml
 upgradePolicy:
   # types of workloads running on this cluster
