@@ -129,12 +129,12 @@ Skupper site connections have several constraints to be fulfilled:
 
 Apply these rules to create the connections:
 
-| Public         | Internal       | Edge           | Non-Edge       | Rule                                                                            |
-| -------------- | -------------- | -------------- | -------------- | ------------------------------------------------------------------------------- |
-| :red_circle:   | :green_circle: | :green_circle: | :red_circle:   | Connect to all[^all] other **non-edge** clusters (lexicographical order)        |
-| :red_circle:   | :green_circle: | :red_circle:   | :green_circle: | Connect to all[^all] other **non-edge** clusters (lexicographical order)        |
-| :green_circle: | :red_circle:   | :red_circle:   | :green_circle: | Connect to all[^all] other **public non-edge** clusters (lexicographical order) |
-| :green_circle: | :red_circle:   | :green_circle: | :red_circle:   | Connect to all[^all] other **public non-edge** clusters (lexicographical order) |
+| Public             | Internal           | Edge               | Non-Edge           | Rule                                                                            |
+| ------------------ | ------------------ | ------------------ | ------------------ | ------------------------------------------------------------------------------- |
+| :red_circle:       | :white_check_mark: | :white_check_mark: | :red_circle:       | Connect to all[^all] other **non-edge** clusters (lexicographical order)        |
+| :red_circle:       | :white_check_mark: | :red_circle:       | :white_check_mark: | Connect to all[^all] other **non-edge** clusters (lexicographical order)        |
+| :white_check_mark: | :red_circle:       | :red_circle:       | :white_check_mark: | Connect to all[^all] other **public non-edge** clusters (lexicographical order) |
+| :white_check_mark: | :red_circle:       | :white_check_mark: | :red_circle:       | Connect to all[^all] other **public non-edge** clusters (lexicographical order) |
 
 [^all]: All or a configurable (app-interface settings) max number
 
