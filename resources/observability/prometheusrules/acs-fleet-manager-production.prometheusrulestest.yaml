@@ -516,13 +516,13 @@ tests:
     input_series:
       # 0m    - 15m   all good
       # 15m   - 45m   failure rate of 1/s
-      - series: 'reconciler:acs_fleet_manager_reconciler_failures:rate15m{job="fleet-manager-metrics",namespace="acs-fleet-manager-prod",worker_type="deleting_dinosaur"}'
-        values: "0+0x15   1+0x30"
+      - series: 'acs_fleet_manager_reconciler_failure_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-prod",worker_type="deleting_dinosaur"}'
+        values: "0+0x15   1+1x30"
     alert_rule_test:
       - eval_time: 15m
         alertname: ACS Fleet Manager reconciler failure
         exp_alerts: []
-      - eval_time: 35m
+      - eval_time: 45m
         alertname: ACS Fleet Manager reconciler failure
         exp_alerts:
           - exp_labels:
@@ -530,8 +530,7 @@ tests:
               job: fleet-manager-metrics
               namespace: acs-fleet-manager-prod
               service: acs-fleet-manager
-              severity: high
-              env: prod
+              severity: critical
               worker_type: deleting_dinosaur
             exp_annotations:
               message: "The reconciler of type deleting_dinosaur failed with a rate of 1/s over the last 15 minutes."
@@ -543,7 +542,7 @@ tests:
     input_series:
       # 0m    - 15m   all good
       # 15m   - 45m   duration > 30
-      - series: 'reconciler:acs_fleet_manager_reconciler_duration_in_seconds:max{job="fleet-manager-metrics",namespace="acs-fleet-manager-prod",worker_type="deleting_dinosaur"}'
+      - series: 'acs_fleet_manager_reconciler_duration_in_seconds{job="fleet-manager-metrics",namespace="acs-fleet-manager-prod",worker_type="deleting_dinosaur"}'
         values: "0+1x15   31+1x30"
     alert_rule_test:
       - eval_time: 15m
@@ -558,7 +557,6 @@ tests:
               namespace: acs-fleet-manager-prod
               service: acs-fleet-manager
               severity: medium
-              env: prod
               worker_type: deleting_dinosaur
             exp_annotations:
               message: "The maximum reconciler duration was 50 seconds over the last 15 minutes."
