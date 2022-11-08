@@ -277,7 +277,7 @@ To learn more about the different entities and their relations:
 
 - [Products, Environments, Namespaces and Apps](/docs/app-interface/api/entities-and-relations.md#products-environments-namespaces-and-apps)
 
-## Howto
+## Our How-To Guides
 
 ### Add or modify a user (`/access/user-1.yml`)
 
