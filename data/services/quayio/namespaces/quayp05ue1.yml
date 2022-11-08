@@ -323,3 +323,59 @@ externalResources:
       default: true
       openshift_service: quay-py3-load-balancer-service
     rules: []
+- provider: cloudflare
+  provisioner:
+    $ref: /cloudflare/quay-prod/account.yml
+  resources:
+    - provider: zone
+      identifier: quayio-production
+      zone: quay.io
+      plan: enterprise
+      type: partial
+      settings:
+        always_use_https: 'on'
+        min_tls_version: '1.2'
+      records:
+        - name: cdn03
+          type: CNAME
+          ttl: 1
+          # Dummy value, should be overriden by workers
+          value: dummycdn.quay.io
+          proxied: true
+      workers:
+        - identifier: quay-cloudflare-worker
+          pattern: cdn03.quay.io/*
+          script_name: quay-cloudflare-worker
+      certificates:
+        - identifier: quayio-production
+          type: advanced
+          certificate_authority: lets_encrypt
+          hosts:
+            - quay.io
+            - cdn03.quay.io
+          validation_method: txt
+          validity_days: 90
+    - provider: worker_script
+      identifier: quay-cloudflare-worker
+      name: quay-cloudflare-worker
+      content_from_github:
+        repo: https://github.com/quay/quay-cloudflare-cdn-worker
+        path: index.js
+        ref: a0a3796e139c982eb948e585520f757216a0293e
+      vars:
+        - name: QUAY_S3_BUCKET
+          text: quayio-production-s3
+        - name: CACHE_TTL
+          text: "60"
+        - name: CLOUDFLARE_PUBLIC_KEY
+          text: |-
+            -----BEGIN PUBLIC KEY-----
+            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzDlPXS12Mu28V7iArKQU
+            MN6KD4ErNHBldtg/cqVuzq0R0SiG+BeZKLfwU2ZP4QyFmIYQVogujZRueIpG8Bg3
+            yRVdSlvdPa5WhcApjWgeWBN6E8s+ZnrmBszWSxWJjCQ2reTb2pmBFQos3+ehKowa
+            1b2cGHVbiMNCqNXw1ENjNbMxpuy0y9NVlVfEGyb3WCKb40JHw2kZiJc5rF6SIr56
+            Q/xS3iqgJfD4j8fRkfRoyqujzsxDDxdFv6DlUD3iN0tiADzcUI1u8Q8X13IZtoNS
+            lOrreb/R2LAmYu9Dr2ZZQ7ap3U9V4Boc8O4JxdIe52VmU1bL+MX2n6ATyDCwDWuw
+            uwIDAQAB
+            -----END PUBLIC KEY-----
+
