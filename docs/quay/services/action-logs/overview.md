@@ -15,13 +15,7 @@ and a node going down means a replica will not be able to get allocated.
 
 
 ## Elasticsearch
-The console for managing the Elastic account and clusters can be found at:
-- [https://cloud.elastic.co/deployments](https://cloud.elastic.co/deployments)
-
-The cluster name used for Quay.io: `quay-prod-logenry`
-The production cluster's Kibana dashboard can be found at:
-- [Production cluster's Kibana instance](https://37fecf6d2f6d4040bd2d4d24ae05af73.us-east-1.aws.found.io:9243/app/kibana)
-
+Check the [Quay elasticsearch action logs](../../quay-elasticsearch-events-logs.md)
 
 ### Monitoring
 Metrics from the production cluster are sent in a separate Elasticsearch cluster in the same account. This cluster stores the time series data and allows vizualization in Grafana, and sending alerts to slack on events. e.g Cluster statuses, disk space.
