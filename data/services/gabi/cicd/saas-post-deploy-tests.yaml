@@ -1,29 +1,22 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: gabi
-
 name: saas-gabi-post-deploy-tests
 description: SaaS tracking file for GABI post-deployment tests
-
 app:
   $ref: /services/gabi/app.yml
-
 pipelinesProvider:
   $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
-
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: sd-app-sre-info
-
 managedResourceTypes:
 - Job
 - ServiceAccount
 
 publishJobLogs: true
-
 imagePatterns:
 - quay.io/app-sre/gabi
 
@@ -34,10 +27,16 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/gabi/namespaces/gabi-stage.yml
-    ref: 327be6b2d60d7b45a2146a73862ff17c80307340
+    ref: e969267fd25306438d8fefaee8f4da6d9cb7833b
     promotion:
       auto: true
       subscribe:
       - github-gabi-stage-deploy-success-channel
       publish:
       - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-deploy-success-channel
+        data:
+        - parent_saas: saas-gabi
+          target_config_hash: 7b6dea5bd1eb49db
+          type: parent_saas_config
