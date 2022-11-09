@@ -1,18 +1,13 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: gabi
-
 name: saas-gabi
-description: 'SaaS file for Gabi'
-
+description: SaaS file for Gabi
 app:
   $ref: /services/gabi/app.yml
-
 pipelinesProvider:
   $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
-
 deployResources:
   requests:
     cpu: 1000m
@@ -20,12 +15,10 @@ deployResources:
   limits:
     cpu: 1000m
     memory: 4Gi
-
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: sd-app-sre-info
-
 managedResourceTypes:
 - Deployment
 - Service
@@ -52,7 +45,6 @@ secretParameters:
     field: Token
     path: app-sre/creds/splunk/app-sre-ext
     version: 1
-
 resourceTemplates:
 - name: gabi-performance-overview-dashboards-stage
   url: https://github.com/app-sre/gabi
@@ -75,7 +67,7 @@ resourceTemplates:
   path: /openshift/gabi.template.yaml
   parameters:
     SPLUNK_INDEX: rh_app_sre
-    OAUTH_PROXY_IMAGE_TAG: "4.10.0"
+    OAUTH_PROXY_IMAGE_TAG: 4.10.0
   targets:
   # stage
   - namespace:
@@ -95,11 +87,17 @@ resourceTemplates:
       - github-gabi-stage-deploy-success-channel
   - namespace:
       $ref: /services/dashdot/namespaces/app-sre-stage-01.yml
-    ref: e969267fd25306438d8fefaee8f4da6d9cb7833b
+    ref: 4bf929a7eb420ebfc2bda9b2f4f3835a57bf585f
     promotion:
       auto: true
       subscribe:
       - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 084cbcd2e9e96261
+          type: parent_saas_config
     parameters:
       HOST: gabi-dashdotdb-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
       NAMESPACE: dashdot
@@ -317,7 +315,6 @@ resourceTemplates:
       NAMESPACE: module-update-router-stage
       AWS_RDS_SECRET_NAME: module-update-router-db
       GABI_INSTANCE: gabi-module-update-router
-  # prod
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
     name: gabi-ocm-cluster-service-rds-production
