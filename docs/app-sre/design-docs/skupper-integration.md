@@ -13,15 +13,15 @@ Christian Assing - November 2022
 https://issues.redhat.com/browse/APPSRE-6515
 
 ## Problem Statement
-Creating a skupper network between namespaces on different clusters and exposing services needs a profound knowledge of skupper, how it works, the configuration, and how to connect skupper site links.
+Creating a Skupper network between namespaces on different clusters and exposing services needs a profound knowledge of Skupper, how it works, the configuration, and how to connect Skupper site links.
 
 ## Goal
 
-Tenants should be able to specify skupper networks between namespaces on different clusters in app-interface similar to network policies. The integration must automate the creation, deletion, and upgrade of those skupper networks.
+Tenants should be able to specify Skupper networks between namespaces on different clusters in app-interface similar to network policies. The integration must automate the creation, deletion, and upgrade of those Skupper networks.
 
 ## Non-objectives
 
-The integration won't handle exposing services on a skupper network. The tenants must use [the official skupper annotations](https://github.com/skupperproject/skupper/blob/f115df6db776f7124d6f909615394bc219c46f78/api/types/types.go#L138) on their deployments, services, and stateful sets.
+The integration won't handle exposing services on a Skupper network. The tenants must use [the official Skupper annotations](https://github.com/skupperproject/skupper/blob/f115df6db776f7124d6f909615394bc219c46f78/api/types/types.go#L138) on their deployments, services, and stateful sets.
 
 ## Proposal
 
@@ -34,8 +34,8 @@ $schema: /dependencies/skupper-1.yml
 
 identifier: <unique identifier>
 config:
-  cluster-local: <Set up skupper to only accept connections from within the local cluster. (true/false) default=false>
-  console: <Enable skupper console. (true/false) default=true>
+  cluster-local: <Set up Skupper to only accept connections from within the local cluster. (true/false) default=false>
+  console: <Enable Skupper console. (true/false) default=true>
   console-authentication: <Authentication method. ('openshift',) default=openshift>
   console-ingress: <Determines if/how console is exposed outside cluster. (route/loadbalancer/none) default=route>
   controller-cpu-limit: <CPU limit for service-controller pods. default=500m>
@@ -43,8 +43,8 @@ config:
   controller-memory-limit: <Memory limit for controller pods. default=128Mi>
   controller-memory: <Memory request for controller pods. default=128Mi>
   controller-pod-antiaffinity: <Pod antiaffinity label matches to control placement of controller pods. default='skupper.io/component=controller'>
-  controller-service-annotations: <Annotations to add to skupper controller service. default=unset>
-  edge: <Set up an edge skupper site. (true/false) default=true for internal clusters>
+  controller-service-annotations: <Annotations to add to Skupper controller service. default=unset>
+  edge: <Set up an edge Skupper site. (true/false) default=true for internal clusters>
   ingress: <(route/loadbalancer/ingress/none) Setup Skupper ingress specific type. default=route>
   name: <A name for the site. default={{ resource.namespace.cluster.name }}-{{ identifier }}>
   router-console: <Set up a Dispatch Router console (not recommended). (true/false) default=false>
@@ -64,7 +64,7 @@ Important configurations to highlight:
 
 * `edge: true` for internal clusters behind the VPN
 * `console-ingress: route` & `ingress: route` because a load-balancer IP isn't always available
-* `skupper-site-controller` a required attribute and defines the skupper software version, e.g., `skupper-site-controller: quay.io/skupper/site-controller:1.1.1`
+* `skupper-site-controller` a required attribute and defines the Skupper software version, e.g., `skupper-site-controller: quay.io/skupper/site-controller:1.1.1`
 
 and enhance `/openshift/namespace-1.yml` with a `skupper` section:
 
@@ -100,10 +100,10 @@ skupper:
 Given that, the integration will:
 
 * Create a `skupper-site` config map with config settings from the `config` sections.
-* Deploy a *site-controller* (with a specific skupper version) into all related namespaces in all associated clusters.
-* Create *connection-tokens* and spawn skupper connections by considering that an internal cluster doesn't allow incoming connections.
+* Deploy a *site-controller* (with a specific Skupper version) into all related namespaces in all associated clusters.
+* Create *connection-tokens* and spawn Skupper connections by considering that an internal cluster doesn't allow incoming connections.
 
-For `delete: true`, the integration will delete the `skupper-site` config map, *site-controller*, *connection-tokens* secrets, and skupper services.
+For `delete: true`, the integration will delete the `skupper-site` config map, *site-controller*, *connection-tokens* secrets, and Skupper services.
 
 ## Details
 
@@ -111,8 +111,8 @@ For `delete: true`, the integration will delete the `skupper-site` config map, *
 
 * A **public** cluster is publicly accessible
 * An **internal** cluster is not publicly accessible and is behind the VPN
-* An **edge** cluster (site-config `edge: true`) doesn't allow incoming skupper site connections.
-* A **non-edge** cluster (site-config `edge: false`) allows incoming skupper site connections.
+* An **edge** cluster (site-config `edge: true`) doesn't allow incoming Skupper site connections.
+* A **non-edge** cluster (site-config `edge: false`) allows incoming Skupper site connections.
 
 ### Site Controller Deployment
 
