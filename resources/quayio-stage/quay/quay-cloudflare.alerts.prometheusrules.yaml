@@ -1,0 +1,32 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: quay-cloudflare-stage
+spec:
+  groups:
+  - name: quay-cloudflare-worker-error-stage
+    rules:
+      - alert: Quay-CloudFlare-worker-error
+        expr: |
+          sum(rate(cloudflare_worker_errors_count{script_name="quay-cloudflare-worker"}[5m])) > 10
+        for: 15m
+        labels:
+          severity: high
+          service: quay
+          env: stage
+        annotations:
+          message: "Quayio CloudFlare worker script is reporting errors"
+      - alert: Quay CloudFlare worker duration too long
+        expr: cloudflare_worker_duration{script_name="quay-cloudflare-worker", quantile="P999"} > 5
+        for: 15m
+        labels:
+          severity: high
+          service: quay
+          env: stage
+        annotations:
+          message: "Quay CloudFlare worker taking too long to respond."
