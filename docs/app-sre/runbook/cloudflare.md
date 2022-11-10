@@ -64,7 +64,7 @@ vault read totp/app-sre/code/sd-app-sre+cloudflare-app-sre
 * North America: +1 (650) 353-5922
 * UK: +44 808-169-9540
 * Singapore: +65 800-321-1182
-* Additional info can be found at the [Enterprise Customer Portal](cloudflare.com/ecp/overview/) (need to be logged in to the account)
+* Additional info can be found at the [Enterprise Customer Portal](https://cloudflare.com/ecp/overview/) (need to be logged in to the account)
 
 Security verification is mandatory to receive enterprise support. Such verification is done via a `Single-use token` which can be retrieved via the Cloudflare dashboard, under Contact Support / Get Single-use token
 
