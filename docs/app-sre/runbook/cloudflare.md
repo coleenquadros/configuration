@@ -27,7 +27,9 @@ Additional information on specific resource parameters can be found in the [clou
 
 ## Metrics and Dashboards
 
-TBD
+* [Cloudflare Analytics dashboard in grafana](https://grafana.app-sre.devshift.net/d/mWxtnz5Mz/cloudflare-zone-analytics?orgId=1&var-datasource=app-sre-prod-01-prometheus&var-zone=quay.io&from=now-3h&to=now)
+
+We use the [lablabs/cloudflare-exporter](https://github.com/lablabs/cloudflare-exporter) to export metrics from Cloudflaire Analytics into prometheus
 
 ## Troubleshooting
 
@@ -114,3 +116,37 @@ Enterprise account contacts:
 | Tom Hammell    | thammell@cloudflare.com | Field Solutions Engineer    |
 | Brian Ceppi    | bceppi@cloudflare.com   | Enterprise Account Manager  |
 | Rick Fernandez |                         | Customer Solutions Engineer |
+
+# Service specific notes
+
+## Quay.io
+
+### Traffic routing
+
+Not all repositories may be routed through Cloudflare. We use the AWS Application Load-Balancer rules to determine what quay service & pods traffic is routed to for a given URI, which includes organisations and repository names allowing us to route on per org, per repository (ex: `https://quay.io/v2/some-org/some/repo/*`). These rules are defined under the ALB provider in the quay namespace definition file.
+
+One way to determine whether traffic for a given repository is routed through cloudflare is to look at response headers:
+
+```sh
+# Repo to test
+REPO=quayio-cloudflare-test/busybox
+
+# Grab the blobs for a given image
+$ curl -sL https://quay.io/v2/$REPO/manifests/latest | jq -r '.fsLayers[].blobSum'
+sha256:ee780d08a5b4de5192a526d422987f451d9a065e6da42aefe8c3b20023a250c7
+sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4
+sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4
+sha256:9c075fe2c773108d2fe2c18ea170548b0ee30ef4e5e072d746e3f934e788b734
+
+# Retrieve one of the blobs, show headers and output the redirect location (quay redirects to the CDN url)
+$ curl -vLo /dev/null -w '%{url_effective}' https://quay.io/v2/$REPO/blobs/$BLOB
+[...a bunch of connection info and headers...] 
+https://cdnXX.quay.io/sha256/9c/... (long url that includes AWS parameters as well as a cf_sign and cf_expiry parameters)
+
+# cdn01 & cdn02 are CloudFront
+# cdn03 is Cloudflare
+
+# Additionally, Cloudflare headers starts with cf- so that is also an indication that the request went through Cloudflare
+# < cf-ray: 768027d679740595-IAD
+# < cf-cache-status: HIT
+```
