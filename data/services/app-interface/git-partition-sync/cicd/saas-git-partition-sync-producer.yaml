@@ -25,4 +25,21 @@ managedResourceTypes:
 imagePatterns:
 - quay.io/app-sre/git-partition-sync-producer
 
-resourceTemplates: []
+resourceTemplates:
+- name: git-partition-sync-producer
+  url: https://github.com/app-sre/git-partition-sync-producer
+  path: /openshift/producer.yaml
+  targets:
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-stage-int.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-git-partition-sync-producer-gh-build-master
+    parameters:
+      DRY_RUN: true
+      VAULT_SECRET_NAME: git-partition-sync-producer
+      RECONCILE_SLEEP_TIME: 15m
+      GQL_SECRET_NAME: gql-creds
+      GRAPHQL_QUERY_FILE: /query.graphql
