@@ -90,44 +90,20 @@ resourceTemplates:
     OCP_USAGE_CLEANER_WORKER_COUNT: "1"
     OCP_USAGE_RECONCILER_ACTIVE_DEADLINE_SECONDS: "21600"
     OCP_USAGE_CLEANER_ACTIVE_DEADLINE_SECONDS: "30000"
-    HYDRA_FETCH_ORGANIZATIONS_DATA_CACHE_EXP: "24"
-    HYDRA_FETCH_ORGANIZATIONS_DATA_CARDINALITY: "500"
-    HYDRA_FETCH_ORGANIZATIONS_DATA_WORKER_COUNT: "3"
     # After openshift upgrade, we're seeing sporadic "http2: server: error reading preface"
     # errors in log, source IP is openshift router.
     GODEBUG: http2server=0
-    CENTOS_IMAGE_REPOSITORY: centos/centos
-    FETCH_TELEMETER_METRICS_WORKER_COUNT: "16"
-    FETCH_TELEMETER_METRICS_STALE_METRICS_DURATION: "1440h"
-    MOA_ENTITLEMENT_RECONCILER_DRY_RUN: "true"
-    MOA_ENTITLEMENT_RECONCILER_WORKER_COUNT: "1"
     MOA_SKU: "MW01369"
-    MOA_ENTITLEMENT_RENEW_DURATION: "120h"
-    AUTO_ENTITLEMENT_RECONCILER_DRY_RUN: "true"
-    AUTO_ENTITLEMENT_RECONCILER_WORKER_COUNT: "1"
-    AUTO_ENTITLEMENT_RENEW_DURATION: "120h"
     API_TARGET_AVERAGE_CPU_UTILIZATION: "80"
     API_TARGET_AVERAGE_MEMORY_UTILIZATION: "75"
     TARGET_CPU_UTILIZATION: "80"
-    SUBSCRIPTION_STATUS_RECONCILER_RELEASED_UNRELEASED_TRIGGER_DURATION: "120h"
-    SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_1_DURATION: "720h"
-    SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_2_DURATION: "336h"
-    SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_3_DURATION: "72h"
+
     # params for mock implementation of /certificates API
     ENABLE_CERTIFICATE_MOCK: "true"
     CERTIFICATE_MOCK_404_ORG_EXTERNAL_ID: "certificate-mock-404-org-external-id"
     MOCK_SCA_CRT_PATH: "/secrets/service/mock-sca.crt"
     MOCK_SCA_KEY_PATH: "/secrets/service/mock-sca.key"
-    # group cron schedules here
-    SUBSCRIPTION_STATUS_RECONCILER_SCHEDULE_EXPRESSION: "6 * * * *"
-    ACCOUNT_RECONCILER_CRON_SCHEDULE: "24 18 * * 1"
-    EBS_ACCOUNT_RECONCILER_CRON_SCHEDULE: "11 * * * *"
-    HYDRA_FETCH_ORGANIZATIONS_DATA_CRON_SCHEDULE: "16 * * * *"
-    OCP_USAGE_CLEANER_CRON_SCHEDULE: "21 */5 * * *"
-    OCP_USAGE_RECONCILER_CRON_SCHEDULE: "26 */2 * * *"
-    MOA_ENTITLEMENT_RECONCILER_CRON_SCHEDULE: "31 11 * * *"
-    AUTO_ENTITLEMENT_RECONCILER_CRON_SCHEDULE: "31 11 * * *"
-    RH_MARKETPLACE_QUOTA_RECONCILER_CRON_SCHEDULE: "*/5 * * * *"
+
   targets:
     - namespace:
         $ref: /services/ocm/namespaces/uhc-integration.yml
@@ -140,11 +116,6 @@ resourceTemplates:
         publish:
           - ocm-ams-deployed-int-green
       parameters:
-        UHC_BASE_URL: http://127.0.0.1:9090
-        API_REPLICA_COUNT_MIN: "2"
-        API_REPLICA_COUNT_MAX: "6"
-        SUSPEND_FETCH_TELEMETER_METRICS_CRON: "true"
-        FETCH_TELEMETER_METRICS_DRY_RUN: "true"
         TELEMETER_DEBUG: "true"
         SUSPEND_HYDRA_FETCH_ORGANIZATIONS_DATA_CRON: "true"
         HYDRA_DEBUG: "false"
@@ -219,16 +190,15 @@ resourceTemplates:
           - ocm-ams-deployed-stage-green
       parameters:
         UHC_BASE_URL: http://127.0.0.1:9090
-        REPLICAS: 6
+        REPLICAS: 1
         # Set replica min and max to the same value to essentially disable the HPA due to https://bugzilla.redhat.com/show_bug.cgi?id=1867477
-        API_REPLICA_COUNT_MIN: "6"
-        API_REPLICA_COUNT_MAX: "6"
+        API_REPLICA_COUNT_MIN: "1"
+        API_REPLICA_COUNT_MAX: "1"
         # Temporarily increase the CPU limit to 2 for stage AMS during scale testing the replicas were also increased for ^
         CPU_LIMIT: "2"
         # Increase memory to debug stage pod restarts
         MEMORY_LIMIT: '2Gi'
         SUSPEND_FETCH_TELEMETER_METRICS_CRON: "false"
-        FETCH_TELEMETER_METRICS_DRY_RUN: "false"
         TELEMETER_DEBUG: "true"
         RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
         WAREHOUSE_DELETED_CLUSTERS_DRY_RUN: "false"
