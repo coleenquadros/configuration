@@ -151,6 +151,26 @@ Apply these rules to create the connections:
 * [custom annotations on skupper deployments](https://github.com/skupperproject/skupper/issues/930)
 * [skupper-router restart leads to network interruption](https://github.com/skupperproject/skupper/issues/940)
 
+### Certificate Management
+
+Skupper (1.1.1) doesn't implement [certificate management yet](https://github.com/skupperproject/skupper/issues/941). Most certificates are valid for five years, except the console web certificates.
+
+| **Secret**                           | **Valid until**          |
+| ------------------------------------ | ------------------------ |
+| **skupper-claims-server.crt**        | Sep  1 09:32:13 2027 GMT |
+| **skupper-console-certs.crt**        | Sep  1 09:35:03 2024 GMT |
+| **skupper-local-ca.crt**             | Aug 31 12:21:13 2027 GMT |
+| **skupper-local-client.crt**         | Aug 31 12:21:14 2027 GMT |
+| **skupper-local-server.crt**         | Aug 31 12:21:14 2027 GMT |
+| **skupper-router-console-certs.crt** | Sep  1 09:35:01 2024 GMT |
+| **skupper-service-ca.crt**           | Aug 31 12:21:14 2027 GMT |
+| **skupper-site-ca.crt**              | Aug 31 12:21:13 2027 GMT |
+| **skupper-site-server.crt**          | Aug 31 12:21:20 2027 GMT |
+
+Unfortunately, to renew the certificates, you have to delete and re-initiate the skupper site and all skupper connection links again; this means a significant skupper service interruption!
+
+Alternatively, you can manage the certificates on your own (e.g., via cert-manager), but it brings all the certificate management burdens.
+
 ## Links
 
 * [Skupper design doc](skupper.md)
