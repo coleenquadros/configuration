@@ -105,10 +105,8 @@ def print_cmd(pr, select_all, non_bundled_data_modified, int_name,
         cmd += "SQS_GATEWAY=true "
     if pr.get('no_validate_schemas'):
         cmd += "NO_VALIDATE=true "
-    if not select_all and pr.get('early_exit'):
+    if not select_all and pr.get('early_exit') and not has_integrations_changes:
         cmd += "EARLY_EXIT=true "
-    elif override is not None and has_integrations_changes:
-        cmd += "EARLY_EXIT=false "
 
     if int_name == "change-owners":
         if select_all or non_bundled_data_modified:
