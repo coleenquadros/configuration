@@ -111,9 +111,15 @@ resourceTemplates:
     ref: e64e1634bbe256644a9c71841e9f77b52c18cf4d
     parameters:
       SWATCH_INTERNAL_SUBSCRIPTION_ENDPOINT: http://swatch-subscription-sync-service.rhsm-prod.svc.cluster.local:8000/api/rhsm-subscriptions/v1
-      CPU_LIMIT: 1000m
       ENABLE_AWS_DRY_RUN: 'false'
       SPLUNK_HEC_BATCH_SIZE: 1000
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 1000m
+      MEMORY_REQUEST: 400Mi
+      MEMORY_LIMIT: 400Mi
+      REPLICAS: 3
+      KAFKA_BILLABLE_USAGE_REPLICAS: 3
+      KAFKA_BILLABLE_USAGE_PARTITIONS: 24
 
 - name: swatch-producer-red-hat-marketplace
   path: /swatch-producer-red-hat-marketplace/deploy/clowdapp.yaml
@@ -163,6 +169,17 @@ resourceTemplates:
       USER_HOST: user.api.redhat.com
       ENABLE_TALLY_SUMMARY_LISTENER: 'false'
       SPLUNK_HEC_BATCH_SIZE: 1000
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 1
+      MEMORY_REQUEST: 600Mi
+      MEMORY_LIMIT: 600Mi
+      REPLICAS: 3
+      KAFKA_BILLABLE_USAGE_REPLICAS: 3
+      KAFKA_BILLABLE_USAGE_PARTITIONS: 24
+      KAFKA_TALLY_REPLICAS: 3
+      KAFKA_TALLY_PARTITIONS: 24
+      KAFKA_MESSAGE_THREADS: 1
+      DATABASE_MAX_POOL_SIZE: 3
 
 - name: swatch-metrics
   path: /swatch-metrics/deploy/clowdapp.yaml
@@ -201,8 +218,16 @@ resourceTemplates:
       USER_HOST: user.api.redhat.com
       INVENTORY_SECRET_KEY_NAME: host-inventory-db-readonly
       INVENTORY_SECRET_KEY_NAME_PREFIX: 'db.'
-      DATABASE_MAX_POOL_SIZE: '25'
       SPLUNK_HEC_BATCH_SIZE: 1000
+      CPU_REQUEST: 250m
+      CPU_LIMIT: 1
+      MEMORY_REQUEST: 600Mi
+      MEMORY_LIMIT: 600Mi
+      DATABASE_MAX_POOL_SIZE: '3'
+      REPLICAS: 3
+      KAFKA_METERING_TASKS_REPLICAS: 3
+      KAFKA_METERING_TASKS_PARTITIONS: 24
+      KAFKA_MESSAGE_THREADS: 1
 
 - name: swatch-subscription-sync
   path: /swatch-subscription-sync/deploy/clowdapp.yaml
@@ -254,7 +279,6 @@ resourceTemplates:
       SUBSCRIPTION_SYNC_ENABLED: true
       PRODUCT_URL: https://product.api.redhat.com/svcrest/product/v3
       SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5
-      KAFKA_MESSAGE_THREADS: 6
       USER_HOST: user.api.redhat.com
       SPRING_ACTIVEMQ_BROKER_URL: ssl://umb.api.redhat.com:61616
       UMB_SERVICE_ACCOUNT_NAME: insightsrhsm
@@ -262,6 +286,21 @@ resourceTemplates:
       INVENTORY_SECRET_KEY_NAME: host-inventory-db-readonly
       INVENTORY_SECRET_KEY_NAME_PREFIX: 'db.'
       SPLUNK_HEC_BATCH_SIZE: 1000
+      KAFKA_MESSAGE_THREADS: 1
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 1
+      MEMORY_REQUEST: 800Mi
+      MEMORY_LIMIT: 800Mi
+      DATABASE_MAX_POOL_SIZE: '3'
+      REPLICAS: 3
+      KAFKA_SUBSCRIPTIONS_SYNC_REPLICAS: 3
+      KAFKA_SUBSCRIPTIONS_SYNC_PARTITIONS: 24
+      KAFKA_CAPACITY_RECONCILE_REPLICAS: 3
+      KAFKA_CAPACITY_RECONCILE_PARTITIONS: 24
+      KAFKA_OFFERING_SYNC_REPLICAS: 3
+      KAFKA_OFFERING_SYNC_PARTITIONS: 24
+      KAFKA_SUBSCRIPTIONS_PRUNE_REPLICAS: 3
+      KAFKA_SUBSCRIPTIONS_PRUNE_PARTITIONS: 24
 
 - name: swatch-system-conduit
   path: /swatch-system-conduit/deploy/clowdapp.yaml
@@ -309,6 +348,16 @@ resourceTemplates:
       RHSM_SYSTEM_CONDUIT_SERVICE_PORT: 8000
       TOLERATE_MISSING_ACCOUNT_NUMBER: false
       SPLUNK_HEC_BATCH_SIZE: 1000
+      CPU_REQUEST: 200m
+      MEMORY_REQUEST: 600Mi
+      MEMORY_LIMIT: 600Mi
+      REPLICAS: 3
+      KAFKA_CONDUIT_TASKS_REPLICAS: 3
+      KAFKA_CONDUIT_TASKS_PARTITIONS: 24
+      KAFKA_HOST_INGRESS_REPLICAS: 3
+      KAFKA_HOST_INGRESS_PARTITIONS: 20
+      KAFKA_MESSAGE_THREADS: 1
+      DATABASE_MAX_POOL_SIZE: 3
 
 - name: swatch-api
   path: /swatch-api/deploy/clowdapp.yaml
@@ -341,6 +390,9 @@ resourceTemplates:
         RHSM_RBAC_HOST: ${RBAC_HOST}
         RHSM_RBAC_PORT: '8080'
         SPLUNK_HEC_BATCH_SIZE: 1000
+        REPLICAS: 3
+        CPU_REQUEST: 100m
+        MEMORY_REQUEST: 500Mi
 
 - name: swatch-tally
   path: /swatch-tally/deploy/clowdapp.yaml
