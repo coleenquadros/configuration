@@ -138,6 +138,165 @@ Apply these rules to create the connections:
 
 [^all]: All or a configurable (app-interface settings) max number
 
+### Monitoring
+
+The *skupper-router* exposes some prometheus metrics (:9000/metrics), but unfortunately, these are all Apache Qpid (message queue) specific and don't have any Skupper-related information.
+The *skupper-service-controller* exposes Skupper-related information as JSON via HTTP (:8888/DATA); the Skupper web console also uses this data. I recommend implementing a "JSON to prometheus metrics" proxy and having alerts based on those metrics:
+
+* Number of connected sites (`len(sites)`)
+* An increase of the `GET:50*` counters
+
+The proxy can be decommissioned as soon as Skupper has [native prometheus metrics support](https://github.com/skupperproject/skupper/issues/951).
+
+```json
+{
+  "sites": [
+    {
+      "site_name": "appsres03ue1-skupper-vault",
+      "site_id": "0f32f434-c47c-47d5-aad5-c45004d32061",
+      "version": "1.2.0",
+      "connected": [
+        "e0f79577-bf92-437f-85e9-ab66ce071cf1"
+      ],
+      "namespace": "skupper-vault",
+      "url": "",
+      "edge": true,
+      "gateway": false
+    },
+    {
+      "site_name": "app-sre-stage-01-skupper-vault-net",
+      "site_id": "e0f79577-bf92-437f-85e9-ab66ce071cf1",
+      "version": "1.2.0",
+      "connected": [],
+      "namespace": "skupper-vault-net",
+      "url": "skupper-inter-router-skupper-vault-net.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com",
+      "edge": false,
+      "gateway": false
+    },
+    {
+      "site_name": "app-sre-stage-02-skupper-vault-net",
+      "site_id": "b626627f-9bad-4405-9a5a-da3ab96c7063",
+      "version": "1.2.0",
+      "connected": [
+        "e0f79577-bf92-437f-85e9-ab66ce071cf1"
+      ],
+      "namespace": "skupper-vault-net",
+      "url": "skupper-inter-router-skupper-vault-net.apps.app-sre-stage-0.e9a2.p1.openshiftapps.com",
+      "edge": false,
+      "gateway": false
+    }
+  ],
+  "services": [
+    {
+      "address": "vault",
+      "protocol": "http",
+      "targets": [
+        {
+          "name": "vault-appsres03ue1-5657854bcb-nl4jq",
+          "target": "vault",
+          "site_id": "0f32f434-c47c-47d5-aad5-c45004d32061"
+        },
+        ...
+      ],
+      "requests_received": [
+        {
+          "site_id": "e0f79577-bf92-437f-85e9-ab66ce071cf1",
+          "by_client": {
+            "10.128.10.14": {
+              "requests": 2797,
+              "bytes_in": 307670,
+              "bytes_out": 514519,
+              "details": {
+                "GET:200": 2796,
+                "GET:503": 1
+              },
+              "latency_max": 212,
+              "by_handling_site": {
+                "": {
+                  "requests": 1,
+                  "bytes_in": 110,
+                  "bytes_out": 55,
+                  "details": {
+                    "GET:503": 1
+                  },
+                  "latency_max": 14
+                },
+                "0f32f434-c47c-47d5-aad5-c45004d32061": {
+                  "requests": 2796,
+                  "bytes_in": 307560,
+                  "bytes_out": 514464,
+                  "details": {
+                    "GET:200": 2796
+                  },
+                  "latency_max": 212
+                }
+              }
+            }
+          }
+        },
+        ...
+      ],
+      "requests_handled": [
+        {
+          "site_id": "0f32f434-c47c-47d5-aad5-c45004d32061",
+          "by_server": {
+            "vault-appsres03ue1-5657854bcb-nl4jq": {
+              "requests": 2127,
+              "bytes_in": 391368,
+              "bytes_out": 233970,
+              "details": {
+                "GET:200": 2127
+              },
+              "latency_max": 27
+            },
+            "vault-appsres03ue1-5657854bcb-sdcln": {
+              "requests": 2513,
+              "bytes_in": 462024,
+              "bytes_out": 276430,
+              "details": {
+                "GET:200": 2511,
+                "GET:500": 2
+              },
+              "latency_max": 210
+            },
+            "vault-appsres03ue1-5657854bcb-vxxcd": {
+              "requests": 1546,
+              "bytes_in": 284464,
+              "bytes_out": 170060,
+              "details": {
+                "GET:200": 1546
+              },
+              "latency_max": 21
+            }
+          },
+          "by_originating_site": {
+            "b626627f-9bad-4405-9a5a-da3ab96c7063": {
+              "requests": 3082,
+              "bytes_in": 566904,
+              "bytes_out": 339020,
+              "details": {
+                "GET:200": 3081,
+                "GET:500": 1
+              },
+              "latency_max": 27
+            },
+            "e0f79577-bf92-437f-85e9-ab66ce071cf1": {
+              "requests": 3104,
+              "bytes_in": 570952,
+              "bytes_out": 341440,
+              "details": {
+                "GET:200": 3103,
+                "GET:500": 1
+              },
+              "latency_max": 210
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+```
 
 ## Milestones
 
@@ -150,6 +309,7 @@ Apply these rules to create the connections:
 
 * [custom annotations on skupper deployments](https://github.com/skupperproject/skupper/issues/930)
 * [skupper-router restart leads to network interruption](https://github.com/skupperproject/skupper/issues/940)
+* [service-controller prometheus metrics](https://github.com/skupperproject/skupper/issues/951)
 
 ### Certificate Management
 
@@ -167,7 +327,7 @@ Skupper (1.1.1) doesn't implement [certificate management yet](https://github.co
 | **skupper-site-ca.crt**              | Aug 31 12:21:13 2027 GMT |
 | **skupper-site-server.crt**          | Aug 31 12:21:20 2027 GMT |
 
-Unfortunately, to renew the certificates, you have to delete and re-initiate the skupper site and all skupper connection links again; this means a significant skupper service interruption!
+Unfortunately, to renew the certificates, you must delete and re-initiate the skupper site and all skupper connection links again; this means a significant skupper service interruption!
 
 Alternatively, you can manage the certificates on your own (e.g., via cert-manager), but it brings all the certificate management burdens.
 
