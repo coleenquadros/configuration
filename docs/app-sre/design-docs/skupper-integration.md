@@ -331,6 +331,8 @@ Unfortunately, to renew the certificates, you must delete and re-initiate the sk
 
 Alternatively, you can manage the certificates on your own (e.g., via cert-manager), but it brings all the certificate management burdens.
 
+The integration can deploy [x509-exporter](https://github.com/enix/x509-certificate-exporter) to monitor the expiration dates of all involved certificates.
+
 ## Links
 
 * [Skupper design doc](skupper.md)
