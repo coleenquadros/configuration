@@ -1,30 +1,22 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels: {}
-
 name: saas-sss-sector-demo-c
 description: SelectorSyncSet sector c
-
 app:
   $ref: /services/app-sre/app.yml
-
 pipelinesProvider:
   $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
-
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: dev-null
-
 managedResourceTypes:
 - SelectorSyncSet
 
 imagePatterns: []
-
 parameters:
   SECTOR: c
-
 resourceTemplates:
 - name: sss-sector-a
   url: https://gitlab.cee.redhat.com/service/selectorsyncset-sector-demo
@@ -32,10 +24,16 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/osd-operators/namespaces/hivei01ue1/cluster-scope.yml
-    ref: d14f732f6e0398edc4841314681df989e07ddba5
+    ref: a684a30f0c91b5ac4be5f239203978f5fb596e11
     promotion:
       auto: true
       subscribe:
       - selectorsyncset-sector-demo-sector-b-deploy-success
       publish:
       - selectorsyncset-sector-demo-sector-c-deploy-success
+      promotion_data:
+      - channel: selectorsyncset-sector-demo-sector-b-deploy-success
+        data:
+        - parent_saas: saas-sss-sector-demo-b
+          target_config_hash: 8e4a7c79f0b10163
+          type: parent_saas_config
