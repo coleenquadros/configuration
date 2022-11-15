@@ -1,0 +1,41 @@
+# app-interface granular permission model change-types
+
+## What is it?
+
+With the granular permission model, engineering teams & partner SRE teams can acquire  more capabilities to manage and support their own services in app-interface without AppSREs explicit reviews and approvals.
+
+## How does it work?
+
+Declarative policies (a.k.a. app-interface change-types) enables change permissions from something wide like “change everything for all namespaces in a cluster” to something fine grained as “bump the version of a single vault secret” or “change the TTL of a record in a specific DNS zone”.
+
+Declaring such policies is a matter of defining what is desired, what makes sense and what is safe.
+
+## What is available right now?
+
+Here is a list of supported change-types and the app-interfaces schemas they can be applied to.
+
+| **change-type** | **description** | **applicable to** |
+|-----------------|-----------------|-------------------|
+{% for file, ct in change_types.items() -%}
+| [/app-interface/change-types/{{ file }}]({{file}}) | {{ ct.description }} | [{{ ct.contextSchema }}](https://github.com/app-sre/qontract-schemas/tree/main/schemas/{{ ct.contextSchema }}) |
+{% endfor %}
+
+You an idea for a new change-type? Let us know and create a ticket on the [AppSRE Jira Board](https://issues.redhat.com/projects/APPSRE)
+
+## How can i use a change-type?
+
+To grant the permissions of a `change-type` to certain app-interface files, add a `self_service` section like the following one to a role.
+
+```yaml
+$schema: /access/role-1.yml
+
+name: my-role
+...
+self_service:
+- change_type:
+    $ref: /app-interface/changetype/rds-maintainer.yml
+  datafiles:
+  - $ref: /services/dashdot/namespaces/app-sre-stage-01.yml
+```
+
+The role members will gain approval permissions for merge-requests covered by this `self-service` configuration.
