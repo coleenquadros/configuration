@@ -90,3 +90,24 @@ tests:
   - eval_time: 69m
     alertname: RhsmLatency
     exp_alerts: []
+
+# RhsmRdsFreeSpaceLow
+- interval: 1h
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="rhsm-prod"}
+    values: 0+0.5x96
+  alert_rule_test:
+  - eval_time: 4d
+    alertname: RhsmRdsFreeSpaceLow
+    exp_alerts:
+    - exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: rhsm
+        exported_instance: rhsm-prod
+        mount_point: /rdsdbdata
+      exp_annotations:
+        message: "DB instance rhsm-prod is about to run out of storage within 2 weeks."
+        link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=rhsm-prod;is-cluster=false;tab=monitoring"
+        dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1&viewPanel=52"
