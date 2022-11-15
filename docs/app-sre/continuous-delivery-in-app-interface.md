@@ -60,7 +60,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
 * `takeover` - (optional) if set to true, the resource types declared in `managedResourceTypes` will be managed exclusively by the integration, meaning **ONLY** resources declared in the saas file will be kept and all others will be **DELETED**. **This is dangerous and probably not want you want in most cases. Use with caution!**
 * `deprecated` - (optional) if set to true, resource templates can be migrated to different saas files.
 * `compare` - (optional) if set to false, the job does not compare desired to current resource and applies all resources even if they have not changed
-* `timeout` - (optional) set a timeout in minutes for the deployment job ([default](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2581e30973e9ead6611d6fa1b0fa7dc34d41e63d/resources/jenkins/global/defaults.yaml#L24))
+* `timeout` - (optional) set a timeout for the deployment job. It defaults to `60m` for Tekton provider. It is expressed in Go's [`ParseDuration`](https://pkg.go.dev/time#ParseDuration) format (up to seconds). See this important [issue](https://github.com/tektoncd/pipeline/issues/4035) about Tekton timeouts.
 * `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](/docs/app-sre/continuous-testing-in-app-interface.md), set this to `true` to publish Job's pods logs as artifacts in the Jenkins job.
 * `clusterAdmin` - (optional) set this to `true` if the resources deployed in the saas file require cluster-admin permissions (CRDs for example).
 * `imagePatterns` - a list of strings specifying allowed images to deploy
