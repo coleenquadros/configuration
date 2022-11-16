@@ -6,7 +6,9 @@ With the granular permission model, engineering teams & partner SRE teams can ac
 
 Declarative policies (a.k.a. app-interface change-types) enables change permissions from something wide like "change everything for all namespaces in a cluster" to something fine grained as "bump the version of a single vault secret" or "change the TTL of a record in a specific DNS zone".
 
-Declaring such policies is a matter of defining what is desired, what makes sense and what is safe.
+Declaring such change-types is a matter of defining what is desired, what makes sense and what is safe.
+
+If a change-type is in effect for a service, team members can approve changes to their app-interface configuration on their own.
 
 ## What is available right now?
 
