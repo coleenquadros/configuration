@@ -298,13 +298,6 @@ The proxy can be decommissioned as soon as Skupper has [native prometheus metric
 }
 ```
 
-## Milestones
-
-* [ ] AppSRE team approval
-* [ ] Implementation of the integration
-* [ ] Use for grafana -> prometheus connections
-* [ ] Cleanup [skupper-example](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/data/services/skupper-cassing) from app-interface
-
 ## Limitations and Open Topics
 
 * [custom annotations on skupper deployments](https://github.com/skupperproject/skupper/issues/930)
@@ -327,11 +320,20 @@ Skupper (1.1.1) doesn't implement [certificate management yet](https://github.co
 | **skupper-site-ca.crt**              | Aug 31 12:21:13 2027 GMT |
 | **skupper-site-server.crt**          | Aug 31 12:21:20 2027 GMT |
 
-Unfortunately, to renew the certificates, you must delete and re-initiate the skupper site and all skupper connection links again; this means a significant skupper service interruption!
+Unfortunately, to renew the certificates, you must delete and re-initiate the skupper site and all skupper connection links again; this means a significant (~5 minutes) skupper service interruption!
 
 Alternatively, you can manage the certificates on your own (e.g., via cert-manager), but it brings all the certificate management burdens.
 
 The integration can deploy [x509-exporter](https://github.com/enix/x509-certificate-exporter) to monitor the expiration dates of all involved certificates.
+
+## Milestones
+
+* [ ] AppSRE team approval
+* [ ] Implementation of the qontract-reconcile integration
+* [ ] Implementation of a prometheus exporter (see [Monitoring](#monitoring))
+* [ ] Deployment of [x509-exporter](https://github.com/enix/x509-certificate-exporter) to monitor certificates
+* [ ] Use for grafana -> prometheus connections
+* [ ] Cleanup [skupper-example](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/data/services/skupper-cassing) from app-interface
 
 ## Links
 
