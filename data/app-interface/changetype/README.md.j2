@@ -1,8 +1,6 @@
 # app-interface granular permission model change-types
 
-## What is it?
-
-With the granular permission model, engineering teams & partner SRE teams can acquire  more capabilities to manage and support their own services in app-interface without AppSREs explicit reviews and approvals.
+With the granular permission model, engineering teams & partner SRE teams can acquire more capabilities to manage and support their own services in app-interface without AppSREs explicit reviews and approvals.
 
 ## How does it work?
 
