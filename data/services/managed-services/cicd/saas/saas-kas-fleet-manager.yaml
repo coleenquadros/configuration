@@ -677,12 +677,14 @@ resourceTemplates:
               default: true
               supported_instance_type:
                 standard: {}
-                developer: {}
+                developer:
+                  limit: 100
             - name: eu-west-1
               default: false
               supported_instance_type:
                 standard: {}
-                developer: {}
+                developer:
+                  limit: 100
 
       # admin endpoins API configuration
       ADMIN_API_SSO_BASE_URL: https://auth.redhat.com
@@ -705,8 +707,54 @@ resourceTemplates:
       # Changing this to true will delete all kafkas after their lifespan expired.
       ENABLE_KAFKA_LIFE_SPAN: true
 
-      #manual: use data plane config file, auto: use kas-fleet-shard
-      DATAPLANE_CLUSTER_SCALING_TYPE: manual
+      #"auto": use kas-fleet-shard capacity reporting and the DYNAMIC_SCALING_CONFIG parameter.
+      #"manual": use data plane config file via the CLUSTER_LIST parameter.
+      DATAPLANE_CLUSTER_SCALING_TYPE: auto
+
+      # dynamic scaling configuration is used only when DATAPLANE_CLUSTER_SCALING_TYPE is set to "auto".
+      DYNAMIC_SCALING_CONFIG:
+        new_data_plane_openshift_version: openshift-v4.10.15
+        # The auto creation configuration is disabled for temporarily during migration.
+        # It will be enabled after capacity information have been populated in the database and dry run has been evaluated.
+        enable_dynamic_data_plane_scale_up: false
+        # The auto deletion configuration is disabled for temporarily during migration.
+        # It will be enabled after capacity information have been populated in the database and dry run has been evaluated.
+        enable_dynamic_data_plane_scale_down: false
+        compute_machine_per_cloud_provider:
+          aws:
+            cluster_wide_workload:
+              compute_machine_type:  m5.2xlarge
+              compute_node_autoscaling:
+                min_compute_nodes: 3
+                max_compute_nodes: 18
+            kafka_workload_per_instance_type:
+              standard:
+                compute_machine_type: r5.xlarge
+                compute_node_autoscaling:
+                  min_compute_nodes: 3
+                  max_compute_nodes: 150
+              developer:
+                compute_machine_type: m5.2xlarge
+                compute_node_autoscaling:
+                  min_compute_nodes: 1
+                  max_compute_nodes: 150
+          gcp:
+            cluster_wide_workload:
+              compute_machine_type: custom-8-32768
+              compute_node_autoscaling:
+                min_compute_nodes: 3
+                max_compute_nodes: 18
+            kafka_workload_per_instance_type:
+              standard:
+                compute_machine_type: custom-4-32768-ext
+                compute_node_autoscaling:
+                  min_compute_nodes: 3
+                  max_compute_nodes: 150
+              developer:
+                compute_machine_type: custom-8-32768
+                compute_node_autoscaling:
+                  min_compute_nodes: 1
+                  max_compute_nodes: 150
 
       # cluster list if dataplane cluster scaling type is set to manual
       CLUSTER_LIST:
@@ -771,7 +819,7 @@ resourceTemplates:
         standard: # the instance type. It must exist in SUPPORTED_INSTANCE_TYPES
           # The number of reserved kafka instances of the size specified in "base_streaming_unit_size".
           # 0 means that prewarming is disabled for standard instance.
-          num_reserved_instances: 0
+          num_reserved_instances: 23 # The 23 value is set temporarily, it'll be reverted in the followup PR
           base_streaming_unit_size: x1
         developer: # The instance type. It must exist in SUPPORTED_INSTANCE_TYPES.
           # The number of reserved kafka instances of the size specified in "base_streaming_unit_size".
