@@ -4,16 +4,14 @@
 
 The worker script that runs on CloudFlare is responsible for validating the
 request and sending the response. If the script gives errors, please revert the
-CDN back to CloudFront (see: [Rolling back cloudflare to CloudFront](#Rolling
-back cloudflare to CloudFront) 
+CDN back to CloudFront (see: [Rolling back cloudflare to CloudFront](#rolling-back-cloudflare-to-cloudfront) 
 
 
 ## Quay CloudFlare worker taking too long to respond
 
 The worker script that runs on CloudFlare is responsible for validating the
 request and sending the response. If the script takes too long to respond, please revert the
-CDN back to CloudFront (see: [Rolling back cloudflare to CloudFront](#Rolling
-back cloudflare to CloudFront) 
+CDN back to CloudFront (see: [Rolling back cloudflare to CloudFront](#rolling-back-cloudflare-to-cloudfront) 
 
 
 # Checking if response is from CloudFlare. 
