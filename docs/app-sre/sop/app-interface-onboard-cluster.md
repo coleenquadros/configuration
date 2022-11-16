@@ -66,7 +66,7 @@ This step should be performed in a single merge request.
     elbFQDN: ''
 
     auth:
-      service: github-org-team
+    - service: github-org-team
       org: app-sre
       team: <cluster_name>-cluster
 
