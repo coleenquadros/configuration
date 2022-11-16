@@ -175,7 +175,7 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
 
 If the `Invalid information in one or more fields. Check your information or contact your administrator.` error is displayed when trying to assume a different IAM role, make sure [to enable MFA on your user AWS Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html). After MFA is enabled, log out and back in. 
 
-### User can access AWS console but can't list anything
+### User can access AWS console but can't view resources
 
 Make sure [to enable MFA on your user AWS Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html). After MFA is enabled, log out and back in.
 
