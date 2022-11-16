@@ -96,7 +96,8 @@ def get_integrations_by_schema(integrations, schema):
     return matches
 
 
-def print_cmd(pr, select_all, non_bundled_data_modified, int_name, override=None):
+def print_cmd(pr, select_all, non_bundled_data_modified, int_name,
+              override=None, has_integrations_changes=False):
     cmd = ""
     if pr.get('state'):
         cmd += "STATE=true "
@@ -104,7 +105,7 @@ def print_cmd(pr, select_all, non_bundled_data_modified, int_name, override=None
         cmd += "SQS_GATEWAY=true "
     if pr.get('no_validate_schemas'):
         cmd += "NO_VALIDATE=true "
-    if not select_all and pr.get('early_exit'):
+    if not select_all and pr.get('early_exit') and not has_integrations_changes:
         cmd += "EARLY_EXIT=true "
 
     if int_name == "change-owners":
@@ -138,7 +139,7 @@ def print_cmd(pr, select_all, non_bundled_data_modified, int_name, override=None
 
 
 def print_pr_check_cmds(integrations, selected=None, select_all=False,
-                        non_bundled_data_modified=False):
+                        non_bundled_data_modified=False, has_integrations_changes=False):
     if selected is None:
         selected = []
 
@@ -153,7 +154,7 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False,
 
         if pr.get("shardSpecOverride"):
             for override in pr.get("shardSpecOverride"):
-                print_cmd(pr, select_all, non_bundled_data_modified, int_name, override)
+                print_cmd(pr, select_all, non_bundled_data_modified, int_name, override, has_integrations_changes)
 
         print_cmd(pr, select_all, non_bundled_data_modified, int_name)
 
@@ -172,23 +173,25 @@ def main():
     modified_files = get_modified_files()
 
     def any_modified(func):
-        return any([func(p) for p in modified_files])
+        return any(func(p) for p in modified_files)
 
     def all_modified(func):
-        return all([func(p) for p in modified_files])
+        return all(func(p) for p in modified_files)
 
     if all_modified(lambda p: re.match(r'^docs/', p)):
         # only docs: no need to run pr check
         return
 
-    non_bundled_data_modified=any_modified(lambda p: not re.match(r'^(data|resources)/', p))
+    non_bundled_data_modified = any_modified(lambda p: not re.match(r'^(data|resources)/', p))
+    has_integrations_changes = any_modified(lambda p: re.match(r'^data/integrations/', p))
 
     if any_modified(lambda p: not re.match(r'^(data|resources|docs|test_data)/', p)):
         # unknow case: we run all integrations
         print_pr_check_cmds(
             integrations,
             select_all=True,
-            non_bundled_data_modified=non_bundled_data_modified
+            non_bundled_data_modified=non_bundled_data_modified,
+            has_integrations_changes=has_integrations_changes
         )
         return
 
@@ -215,7 +218,8 @@ def main():
     print_pr_check_cmds(
         integrations,
         selected=selected,
-        non_bundled_data_modified=non_bundled_data_modified
+        non_bundled_data_modified=non_bundled_data_modified,
+        has_integrations_changes=has_integrations_changes
     )
 
 
