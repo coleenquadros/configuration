@@ -22,3 +22,4 @@ template = tmpl_env.get_template("README.md.j2")
 # write string to file
 with open("README.md", "w") as f:
     f.write(template.render({"change_types": load_change_types()}))
+    f.write("\n")
