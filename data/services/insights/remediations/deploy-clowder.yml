@@ -34,6 +34,9 @@ authentication:
     path: insights/quay/cloudservices-push
     field: all
     version: 3
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
 
 resourceTemplates:
 - name: remediations-consumer
@@ -97,7 +100,6 @@ resourceTemplates:
     LOG_LEVEL: info
     MAX_REPLICAS: 5
     MIGRATION_COMMAND: npm run db:create; npm run db:migrate
-#    MIGRATION_COMMAND: npm run hello; npm run db:hello
     MIN_REPLICAS: 3
     PATCHMAN_IMPL: impl
     PATH_PREFIX: /api
@@ -123,13 +125,20 @@ resourceTemplates:
       FLOORIST_SCHEDULE: '11 10 * * *'
   - namespace:
       $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
-    ref: d401c0fbca5c2b004fd0fc2c84a779f5ed7b84ff
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-remediations-gh-build-master
     parameters:
       PLATFORM_HOSTNAME_URL: "cert.${PLATFORM_HOSTNAME}"
       FLOORIST_SUSPEND: 'false'
       FLOORIST_IMAGE_TAG: fe12542 # 2022-06-03
       FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage
       FLOORIST_SCHEDULE: '11 10 * * *'
+    promotion:
+      publish:
+        - remediations-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true
