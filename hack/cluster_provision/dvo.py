@@ -5,21 +5,27 @@ import os
 from pathlib import Path
 from typing import Dict, Any, Mapping, MutableMapping
 
-from .common import STAGE, read_yaml_from_file, write_yaml_to_file, \
-    get_base_yaml, cluster_config_exists
+from .common import (
+    STAGE,
+    read_yaml_from_file,
+    write_yaml_to_file,
+    get_base_yaml,
+    cluster_config_exists,
+)
 
 log = logging.getLogger(__name__)
 
-DVO_FILENAME = 'openshift/{cluster}/namespaces/' \
-               'deployment-validation-operator-per-cluster.yml'
+DVO_FILENAME = (
+    "openshift/{cluster}/namespaces/" "deployment-validation-operator-per-cluster.yml"
+)
 
-CUSTOMER_MON_FILENAME = 'services/observability/namespaces/' \
-                           'openshift-customer-monitoring.{cluster}.yml'
+CUSTOMER_MON_FILENAME = (
+    "services/observability/namespaces/" "openshift-customer-monitoring.{cluster}.yml"
+)
 
-SAAS_FILENAME = 'services/deployment-validation-operator/cicd/saas.yaml'
+SAAS_FILENAME = "services/deployment-validation-operator/cicd/saas.yaml"
 
-MON_NAMESPACES_FILENAME = 'services/observability/roles/' \
-                          'monitored-dvo-namespaces.yml'
+MON_NAMESPACES_FILENAME = "services/observability/roles/" "monitored-dvo-namespaces.yml"
 
 DVO_TEMPLATE = """
 ---
@@ -86,9 +92,7 @@ def create_dvo_per_cluster(cluster: str) -> Dict[str, Any]:
     """
 
     yaml = get_base_yaml()
-    dvo_template = yaml.load(
-        DVO_TEMPLATE.format(cluster=cluster)
-    )
+    dvo_template = yaml.load(DVO_TEMPLATE.format(cluster=cluster))
     return dvo_template
 
 
@@ -102,20 +106,20 @@ def add_dvo_service_monitor(data: Mapping) -> bool:
 
     added = False
 
-    if 'sharedResources' in data:
+    if "sharedResources" in data:
         for m in SERVICE_MONITOR:
-            if m not in data['sharedResources']:
-                data['sharedResources'].append(m)
+            if m not in data["sharedResources"]:
+                data["sharedResources"].append(m)
                 added = True
     else:
         data["sharedResources"] = yaml.load(SERVICE_MONITOR)
         added = True
 
     if added:
-        log.info('Adding service monitor entry')
+        log.info("Adding service monitor entry")
     else:
-        log.info('No action required, service monitor entry already exists')
-    
+        log.info("No action required, service monitor entry already exists")
+
     return added
 
 
@@ -128,36 +132,40 @@ def add_saas_target(data: Mapping, cluster: str) -> bool:
     """
     yaml = get_base_yaml()
 
-    targets = data['resourceTemplates'][0]['targets']
+    targets = data["resourceTemplates"][0]["targets"]
 
     template = SAAS_TARGET_TEMPLATE
-    commit_hashes = {t['ref'] for t in targets if t['ref'] != 'master'}
+    commit_hashes = {t["ref"] for t in targets if t["ref"] != "master"}
 
     # Currently production uses the same commit hash and stage uses
     # 'master', so we can easily detect this. New logic will need to be
     # implemented in the future if this isn't a safe assumption.
     if len(commit_hashes) > 1:
-        raise ValueError('Could not determine which commit to use for '
-                         'the SaaS target, more than one option: '
-                         f'{commit_hashes}')
+        raise ValueError(
+            "Could not determine which commit to use for "
+            "the SaaS target, more than one option: "
+            f"{commit_hashes}"
+        )
 
     commit_hash = commit_hashes.pop()
 
-    saas_target_entry = yaml.load(template.format(
-        cluster=cluster, commit_hash=commit_hash))
+    saas_target_entry = yaml.load(
+        template.format(cluster=cluster, commit_hash=commit_hash)
+    )
 
     if saas_target_entry in targets:
-        log.info('No action required, SaaS target entry already exists')
+        log.info("No action required, SaaS target entry already exists")
         return False
     else:
-        log.info('Adding SaaS target entry')
+        log.info("Adding SaaS target entry")
         targets.append(saas_target_entry)
 
         # Sort the targets now that the new entry has been added. This
         # shouldn't harm formatting because there aren't any commented
         # blocks in the list.
-        data['resourceTemplates'][0]['targets'] = \
-            sorted(targets, key=lambda k: k['namespace']['$ref'])
+        data["resourceTemplates"][0]["targets"] = sorted(
+            targets, key=lambda k: k["namespace"]["$ref"]
+        )
         return True
 
 
@@ -169,22 +177,19 @@ def grant_service_account_perms(data: MutableMapping, cluster: str) -> bool:
     :return: whether the data changed or not
     """
     yaml = get_base_yaml()
-    namespace_entry = yaml.load(
-        MON_NAMESPACES_ACCESS.format(cluster=cluster)
-    )
+    namespace_entry = yaml.load(MON_NAMESPACES_ACCESS.format(cluster=cluster))
 
-    access = data['access']
+    access = data["access"]
 
     if namespace_entry in access:
-        log.info('No action required, service account permissions already '
-                 'added')
+        log.info("No action required, service account permissions already " "added")
         return False
     else:
-        log.info('Adding service account permissions')
+        log.info("Adding service account permissions")
         access.append(namespace_entry)
 
         # Sort the targets now that the new entry has been added.
-        data['access'] = sorted(access, key=lambda k: k['namespace']['$ref'])
+        data["access"] = sorted(access, key=lambda k: k["namespace"]["$ref"])
         return True
 
 
@@ -194,20 +199,21 @@ def main(data_dir: str, cluster: str) -> None:
         raise FileNotFoundError(f"{data_dir} does not exist")
 
     if not cluster_config_exists(data_dir, cluster):
-        raise FileNotFoundError(f"Cluster configuration doesn't exist for "
-                                f"{cluster}, check if the cluster name was "
-                                f"mistyped")
+        raise FileNotFoundError(
+            f"Cluster configuration doesn't exist for "
+            f"{cluster}, check if the cluster name was "
+            f"mistyped"
+        )
 
     # Create the deployment-validation-operator-per-cluster.yml namespace file
     # for the cluster.
-    log.info('Creating deployment-validation-operator-per-cluster.yml')
+    log.info("Creating deployment-validation-operator-per-cluster.yml")
     dvo_per_cluster = create_dvo_per_cluster(cluster)
     dvo_cluster_path = Path(data_dir, DVO_FILENAME.format(cluster=cluster))
     write_yaml_to_file(str(dvo_cluster_path), dvo_per_cluster)
 
     # Add a service monitor to the cluster for DVO.
-    customer_mon_path = Path(data_dir, CUSTOMER_MON_FILENAME.format(
-        cluster=cluster))
+    customer_mon_path = Path(data_dir, CUSTOMER_MON_FILENAME.format(cluster=cluster))
     customer_mon_data = read_yaml_from_file(str(customer_mon_path))
     if add_dvo_service_monitor(customer_mon_data):
         write_yaml_to_file(str(customer_mon_path), customer_mon_data)
