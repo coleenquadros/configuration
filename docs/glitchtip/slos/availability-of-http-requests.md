@@ -26,7 +26,7 @@ The following is the explanation of the SLI query.
 
 ## SLO Rationale
 
-Glitchtip is expected to be available 90% of the time. This is based on the [load tests](../sops/load-testing.md) performed on staging.
+Glitchtip is expected to be available 95% of the time. This is based on the [load tests](../sops/load-testing.md) performed on staging.
 This is a low bar estimation and can be re-evaluated once the service is running in production and performance tests are done for a longer
 period of time.
 
