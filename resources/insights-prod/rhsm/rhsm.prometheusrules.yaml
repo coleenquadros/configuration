@@ -78,3 +78,19 @@ spec:
         message: "DB instance {{ $labels.exported_instance }} is about to run out of storage within 2 weeks."
         link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=rhsm-prod;is-cluster=false;tab=monitoring"
         dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1&viewPanel=52"
+
+    - alert: SwatchKubePodCrashLooping
+      expr: |
+        sum(increase(kube_pod_container_status_restarts_total{namespace="rhsm-prod"}[3h])) > 3
+      for: 15m
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: rhsm
+        exported_service: rhsm-subscriptions
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+        message: "RHSM: more than 3 restarts in prod happened in that last 3 hours"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubePodCrashLooping.md'
