@@ -175,6 +175,10 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
 
 If the `Invalid information in one or more fields. Check your information or contact your administrator.` error is displayed when trying to assume a different IAM role, make sure [to enable MFA on your user AWS Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html). After MFA is enabled, log out and back in. 
 
+### User can access AWS console but can't view resources
+
+If an error  message like this, `User: arn:aws:iam::<account_id>:user/<your_user> is not authorized to perform: <service>:<action> on resource: * with an explicit deny in an identity-based policy`, is displayed in your console make sure [to enable MFA on your user AWS Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html). After MFA is enabled, log out and back in.
+
 ### What environments are supported by AppSRE?
 
 The AppSRE team supports only stage and production environments for onboarded services, as described in the [contract](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/environments.md).
