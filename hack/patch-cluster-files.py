@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 from typing import Generator, OrderedDict, Tuple
 from ruamel.yaml import YAML
