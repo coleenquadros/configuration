@@ -12,9 +12,9 @@ import cluster_provision.observability as observability
 
 
 def init_logging() -> None:
-    """ Intializes the logging system"""
+    """Intializes the logging system"""
 
-    formatter = logging.Formatter('%(levelname)s - %(message)s')
+    formatter = logging.Formatter("%(levelname)s - %(message)s")
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(formatter)
     logger = logging.getLogger()
@@ -23,13 +23,15 @@ def init_logging() -> None:
 
 
 @click.group()
-@click.option('--datadir',
-              default="data",
-              show_default=True,
-              help='Path of app-interface data directory')
+@click.option(
+    "--datadir",
+    default="data",
+    show_default=True,
+    help="Path of app-interface data directory",
+)
 @click.pass_context
 def cli(ctx, datadir):
-    """ Base CLI with helper commands for OSD cluster onboarding """
+    """Base CLI with helper commands for OSD cluster onboarding"""
     ctx.ensure_object(dict)
     ctx.obj["datadir"] = datadir
     init_logging()
@@ -39,7 +41,7 @@ def cli(ctx, datadir):
 @click.argument("cluster")
 @click.pass_context
 def create_olm_ns(ctx, cluster):
-    """ Generates Operator lifecycle manager manifest"""
+    """Generates Operator lifecycle manager manifest"""
     olm.create_namespace(ctx.obj["datadir"], cluster)
 
 
@@ -47,8 +49,8 @@ def create_olm_ns(ctx, cluster):
 @click.argument("cluster")
 @click.pass_context
 def create_dvo_cluster_config(ctx, cluster: str) -> None:
-    """ Generates Deployment Validation Operator (DVO) configs for a cluster"""
-    dvo.main(ctx.obj['datadir'], cluster)
+    """Generates Deployment Validation Operator (DVO) configs for a cluster"""
+    dvo.main(ctx.obj["datadir"], cluster)
 
 
 @cli.command()
@@ -56,14 +58,14 @@ def create_dvo_cluster_config(ctx, cluster: str) -> None:
 @click.pass_context
 def create_cso_cluster_config(ctx, cluster: str) -> None:
     """Generates Container Security Operator (CSO) configs for a cluster"""
-    cso.main(ctx.obj['datadir'], cluster)
+    cso.main(ctx.obj["datadir"], cluster)
 
 
 @cli.command()
 @click.argument("cluster")
 @click.pass_context
 def create_obs_dns_records(ctx, cluster: str) -> None:
-    """ Generates Observability DNS records"""
+    """Generates Observability DNS records"""
     observability.create_dns_records(ctx.obj["datadir"], cluster)
 
 
@@ -71,11 +73,11 @@ def create_obs_dns_records(ctx, cluster: str) -> None:
 @click.argument("cluster")
 @click.argument("environment")
 @click.pass_context
-def create_obs_customer_monitoring(ctx, cluster: str,
-                                   environment: str) -> None:
+def create_obs_customer_monitoring(ctx, cluster: str, environment: str) -> None:
     """Generates APP-SRE observability config for a cluster"""
-    observability.configure_customer_monitoring(ctx.obj['datadir'],
-                                                cluster, environment)
+    observability.configure_customer_monitoring(
+        ctx.obj["datadir"], cluster, environment
+    )
 
 
 @cli.command()
@@ -83,7 +85,7 @@ def create_obs_customer_monitoring(ctx, cluster: str,
 @click.pass_context
 def create_obs_grafana_datasources(ctx, cluster: str) -> None:
     """Generates APP-SRE observability config for a cluster"""
-    observability.configure_grafana_datasources(ctx.obj['datadir'], cluster)
+    observability.configure_grafana_datasources(ctx.obj["datadir"], cluster)
 
 
 if __name__ == "__main__":
