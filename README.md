@@ -1,13 +1,11 @@
 # App-Interface
 
-This repository serves as a central coordination point for hosted services being
-run by the Application SRE team. Many or all of the portions of the contract
-defined herein will be handled through automation after changes are accepted to
-this repository by the appropriate parties.
+This repository serves as a central coordination point for hosted services
+operated by the Application SRE team. Once the appropreiate parties accept changes to this repository, many or all portions of the contract defined herein are automated.
 
 If you are a team looking to run your service with the App SRE team, please follow the [onboarding-app](/docs/app-sre/onboarding-app.md) guide.
 
-The Application SRE team is responsible of fulfilling the contract defined in
+The Application SRE team is responsible for fulfilling the contract defined in
 this repository.
 
 [TOC]
@@ -15,7 +13,7 @@ this repository.
 ## Overview
 
 This repository contains of a collection of files under the `data` folder.
-Whatever is present inside that folder constitutes the App-SRE contract.
+This folder contains everything that constitutes the APP SRE contract. 
 
 These files can be `yaml` or `json` files, and they must validate against some
 [well-defined json schemas](https://github.com/app-sre/qontract-schemas).
