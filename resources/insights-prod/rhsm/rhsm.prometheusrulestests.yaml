@@ -132,3 +132,21 @@ tests:
           env: prod
           app_team: rhsm
           exported_service: rhsm-subscriptions
+
+- interval: 5m
+  input_series:
+    - series: inventory_ingress_add_host_failures_total{cause="ValidationException", reporter="rhsm-conduit", namespace="host-inventory-prod"}
+      values: 0 5 10 15 20 25 30
+  alert_rule_test:
+    - eval_time: 10m
+      alertname: RhsmConduitValidationErrors
+      exp_alerts:
+      - exp_annotations:
+          dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus&refresh=5m&viewPanel=68
+          link_url: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-12h,mode:quick,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:lucene,query:'@log_stream:%20%22host-inventory-mq-*%22%20AND%20message:%20%22Validation%20error%20while%20adding%20or%20updating%20host%20%22%20AND%20host.reporter:%20%22rhsm-conduit%22'),sort:!('@timestamp',desc))
+          message: Validation errors for rhsm-conduit messages in host-inventory-prod
+        exp_labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: rhsm
