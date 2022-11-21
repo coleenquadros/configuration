@@ -72,7 +72,7 @@ If you want to promote a qontract-reconcile change for only one shard you can do
    ```
    reconcile-terraform-resources_ter-int-dev.txt
    Unable to find image 'quay.io/app-sre/qontract-reconcile:f929a38' locally
-   f929a38-rc: Pulling from app-sre/qontract-reconcile
+   f929a38: Pulling from app-sre/qontract-reconcile
    ...
    Status: Downloaded newer image for quay.io/app-sre/qontract-reconcile:f929a38
    ```
