@@ -54,9 +54,9 @@ a certain environment. This also serves as documentation for what
 
 ## Updating specific shards
 
-If you want to promote a qontract-reconcile change for only one shard you can do this by adding a shardSpecOverride. Add it to the integration configuration in app-interface you changed. In the MR process the integration will run with the image specified in shardSpecOverride and the image configured in `.env`. The change you test must be compatible to the old image (in reference to the schema).
-
 > Note: there are some problems with the code that handles this approach. You should not use it until [APPSRE-6586](https://issues.redhat.com/browse/APPSRE-6586) is closed. Updates on this are coming.
+
+If you want to promote a qontract-reconcile change for only one shard you can do this by adding a shardSpecOverride. Add it to the integration configuration in app-interface you changed. In the MR process the integration will run with the image specified in shardSpecOverride and the image configured in `.env`. The change you test must be compatible to the old image (in reference to the schema).
 
 1. Create an override to fix the current commit i.e. `f929a38` on the shards that you don't want to update, to simplify this example we are going to use only one:
 ```yaml
