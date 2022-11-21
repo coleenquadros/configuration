@@ -1,8 +1,10 @@
 #!/usr/bin/env python
-
-from typing import Generator, OrderedDict, Tuple
-from ruamel.yaml import YAML
 from pathlib import Path
+from typing import Generator
+from typing import OrderedDict
+from typing import Tuple
+
+from ruamel.yaml import YAML
 
 yaml = YAML()
 yaml.preserve_quotes = True  # type: ignore
@@ -11,7 +13,9 @@ APP_INTERFACE_PATH = Path(__file__).parent.parent
 
 
 def get_files_by_schema(schema) -> Generator[Tuple[Path, OrderedDict], None, None]:
-    for i in (APP_INTERFACE_PATH / "data").glob("**/*"):
+    for i in list((APP_INTERFACE_PATH / "data").glob("**/*")) + list(
+        (APP_INTERFACE_PATH / "test_data").glob("**/*")
+    ):
         if not i.is_file():
             continue
 
