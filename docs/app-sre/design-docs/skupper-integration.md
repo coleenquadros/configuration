@@ -123,20 +123,17 @@ The *site-controller* is a Kubernetes deployment similar to the one used in the 
 Skupper site connections have several constraints to be fulfilled:
 
 * Public clusters cannot access internal clusters behind the VPN
-* Internal clusters may access other internal clusters
+* Internal clusters may access other internal clusters (only when peered together)
 * A connection token from the cluster you want to connect to needs to be available and valid
 * There is no need to bidirectional connect sites. Cluster A connects to B, but B doesn't need to connect to A.
 
 Apply these rules to create the connections:
 
-| Public             | Internal           | Edge               | Non-Edge           | Rule                                                                            |
-| ------------------ | ------------------ | ------------------ | ------------------ | ------------------------------------------------------------------------------- |
-| :red_circle:       | :white_check_mark: | :white_check_mark: | :red_circle:       | Connect to all[^all] other **non-edge** clusters (lexicographical order)        |
-| :red_circle:       | :white_check_mark: | :red_circle:       | :white_check_mark: | Connect to all[^all] other **non-edge** clusters (lexicographical order)        |
-| :white_check_mark: | :red_circle:       | :red_circle:       | :white_check_mark: | Connect to all[^all] other **public non-edge** clusters (lexicographical order) |
-| :white_check_mark: | :red_circle:       | :white_check_mark: | :red_circle:       | Connect to all[^all] other **public non-edge** clusters (lexicographical order) |
-
-[^all]: All or a configurable (app-interface settings) max number
+| Public/Private + internal | Edge                         | Rule                                                                                                 |
+| ------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------- |
+| public                    | false                        | Connect to all **other** public clusters (lexicographical order)                                     |
+| private & not internal    | false (but private exposure) | Connect to all public clusters + all **other** peered & private/not-internal (lexicographical order) |
+| private & internal        | true                         | Connect to all public clusters + all peered & private/not-internal                                   |
 
 ### Monitoring
 
