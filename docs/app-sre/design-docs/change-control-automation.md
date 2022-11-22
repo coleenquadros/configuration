@@ -110,7 +110,14 @@ An alertmanager receiver will be setup to route "fake" alertmanager alerts to ji
 
 ### gitlab-compliance-housekeeping integration
 
-Create a new integration in qontract-reconcile called `gitlab-compliance-housekeeping` (gch). The integration will poll all app-interface controlled gitlab repositories, looking for specific labels and acting on them. 
+Create a new integration in qontract-reconcile called `gitlab-compliance-housekeeping` (gch). The integration will poll all app-interface controlled gitlab repositories, looking for specific labels and acting on them. `gch` will perform specific state-based activities:
+
+* update MR comments to include links to the change control jira ticket
+* manage MR labels
+* enable and disable major change protection
+* enforce merge requirements on major changes
+
+An alternative proposal is to use the existing `gitlab-housekeeping` integration to perform the same activities. My original though was to keep compliance based label state management separate from `gitlab-housekeeping` activities. I am open to other ideas.
 
 #### Label Types
 
@@ -128,49 +135,58 @@ Create a new integration in qontract-reconcile called `gitlab-compliance-houseke
 
 #### Label Interactions
 
+Each table below describes the conditions for `gch` actions and the actions performed based on the state of the MR, Labels, Comments, and Jira Ticket.
+
 |   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
 |:---:|:---:|:---:|:---:|:---:|
 |  **Conditions** |   |   |   |   |
 |   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
 | **Actions**  |   |   |   |   |
-| | | | |
+
 |   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
+|:---:|:---:|:---:|:---:|:---:|
 |  **Conditions** |  open |   |   |   |
 |   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
 | **Actions**  |   |   |   |   |
-| | | | |
+
 |   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
+|:---:|:---:|:---:|:---:|:---:|
 |  **Conditions** |  open |   | /change-record  |   |
 |   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
 | **Actions**  |  Set labels | +change-record-pending  |   |  Create ticket |
-| | | | |
+
 |   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
+|:---:|:---:|:---:|:---:|:---:|
 |  **Conditions** |  open | change-record-pending  | /change-record  |  open |
 |   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
 | **Actions**  |  Set labels, find ticket | -change-record-pending +change-record-active | +ticket url  |   |
-| | | | |
+
 |   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
+|:---:|:---:|:---:|:---:|:---:|
 |  **Conditions** |  open | change-record-active | /change-record  |  approved |
 |   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
 | **Actions**  |  |  |   |   |
-| | | | |
+
 |   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
+|:---:|:---:|:---:|:---:|:---:|
 |  **Conditions** |  open | change-record-active | /change-record, /major-change  |  open |
 |   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
 | **Actions**  | Set labels, Poll for ticket status, enforce merge protection | +major-change-pending | +major change protection on  |   |
-| | | | |
+
 |   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
+|:---:|:---:|:---:|:---:|:---:|
 |  **Conditions** |  open | Change-record-active, major-change-pending | /change-record, /major-change  |  approved |
 |   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
 | **Actions**  | Set labels, Poll for ticket status, allow merge | -major-change-pending +major-change-approved | +change approved  |   |
-| | | | |
+
 |   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
+|:---:|:---:|:---:|:---:|:---:|
 |  **Conditions** |  open | Change-record-active, major-change-pending | /change-record, /major-change  |  denied |
 |   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
 | **Actions**  | Set labels, Poll for ticket status, deny merge | -major-change-pending +major-change-denied | +change denied  |   |
-| | | | |
+
 |   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
+|:---:|:---:|:---:|:---:|:---:|
 |  **Conditions** |  open | Change-record-active, major-change-pending | /change-record, /major-change  |  open |
 |   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
 | **Actions**  | Set labels | -major-change-pending  | +major change protection off  |   |
-| | | | |
