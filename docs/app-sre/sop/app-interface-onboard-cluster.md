@@ -24,7 +24,7 @@
 
 To on-board a new OSDv4 cluster to app-interface, perform the following operations:
 
-## Step 1 - Cluster creation and initial access for dedicated-admins
+## Step 1 - Cluster creation and initial access for dedicated-admins and automatic cluster file updates
 
 This step should be performed in a single merge request.
 
@@ -154,6 +154,19 @@ This step should be performed in a single merge request.
         - cluster:
             $ref: /openshift/<cluster_name>/cluster.yml
         group: dedicated-admins
+    ```
+
+1. Grant the AppSRE gitlab bot (@devtools-bot) permissions to self-service updates to the cluster file:
+
+    ```yaml
+    # /data/teams/app-sre/roles/app-sre-gitlab-bot.yml
+    ...
+    self_service:
+    - change_type:
+        $ref: /app-interface/changetype/cluster-auto-updater.yml
+      datafiles:
+      ...
+      - $ref: /openshift/<cluster_name>/cluster.yml
     ```
 
 1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM. Proceed with the following steps after the cluster's installation is complete.
