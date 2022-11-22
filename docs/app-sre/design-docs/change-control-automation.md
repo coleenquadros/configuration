@@ -187,6 +187,6 @@ Each table below describes the conditions for `gch` actions and the actions perf
 
 |   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
 |:---:|:---:|:---:|:---:|:---:|
-|  **Conditions** |  open | Change-record-active, major-change-pending | /change-record, /major-change  |  open |
+|  **Conditions** |  open | Change-record-active, major-change-pending | /change-record, /major-change, /major-change-cancel  |  open |
 |   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
 | **Actions**  | Set labels | -major-change-pending  | +major change protection off  |   |
