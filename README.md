@@ -1547,6 +1547,11 @@ The Secret will contain the following fields:
 
 RDS instances can be entirely self-serviced via App-Interface.
 
+App-Interface supports the following RDS engine types:
+
+- postgres
+- mysql
+
 In order to create or update an RDS database, you need to add them to the `externalResources` field.
 
 - `provider`: must be `rds`
