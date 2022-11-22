@@ -4,6 +4,12 @@
 
 Reduce toil time and improve consistency in change records by automating a connection between GitLab and Jira change control projects. Require an approved jira ticket for automatic merge approval for designated major changes.
 
+Further introduction by @anjaasta:
+
+* All "changes" that occur in the fedramp universe are expected to have a special "change-record jira ticket", assigned to a special change-record board, associated with that change.
+* A subset of these "change-record jira tickets" (dubbed "major changes") are supposed to be approved by one or more designated persons with change-approval power. These changes are discussed at a weekly change control meeting and approved by a cross-functional group.
+* These "change-record jira tickets" are completely separate from "normal jira tickets"; i.e. tickets that teams use as part of their own work tracking.
+
 ## What
 
 Automate the creation of change records for pending MRs to GitLab repositories (targeted at FedRAMP, but useful for commercial change control applications as well). When a MR is open and receives a comment `/change-record`, automatically populate a jira ticket in the change control project.
