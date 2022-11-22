@@ -18,7 +18,7 @@ Jira ticket: https://issues.redhat.com/browse/SDE-2341
 
 This documentation applies to both use cases:
 - Cluster upgrades for clusters managed in app-interface (AppSRE clusters)
-- Cluster ugprades for additional OCM organizations (RH only)
+- Cluster upgrades for additional OCM organizations (RH only)
 
 ## Overview
 
@@ -42,6 +42,8 @@ upgradePolicy:
     mutexes:
     - mutex-1
     - mutex-2
+    # OCM upgrade sector to which the cluster belongs
+    sector: sector-1
 ```
 
 ## How it works
@@ -51,7 +53,8 @@ For each cluster with an `upgradePolicy`, we check that the following conditions
 - there are available versions to upgrade to.
 - the upgrade schedule is within the next 2 hours.
 - the version has been soaking in other clusters with the same workloads (more than `soakDays`).
-- all the configured mutexes (by default `[]`) can be acquired. Said differently, there is no ongoing cluster upgrades with any of these mutexes.
+- all the configured `mutexes` (by default `[]`) can be acquired. Said differently, there is no ongoing cluster upgrades with any of these `mutexes`.
+- the sector name refers to a sector defined in the cluster OCM organization in app-interface (`ocm` field), with their `dependencies`. An upgrade can be applied on a cluster only if all clusters from previous sectors already run at least that version.
 
 The versions to upgrade to are iterated over in reverse order, so it is assumed that the latest version that meets the conditions is chosen.
 
