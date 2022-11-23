@@ -292,7 +292,7 @@ Gated promotions and progressive rollouts through environments are accomplished 
 
 Blue/Green deployments in _Integration_ and _Stage_ environments can be chained together into a single progressive rollout with gating tests at each step.
 
-This is example is AMS starting the rollout with Green Integration, the first canary environment. Green Int autodeploys after each merge commit to the master branch.
+This example shows AMS autodeploying to the green instance after any merge to the master branch. A successful deployment will publish the git sha on the channel `ocm-ams-deployed-int-green`.
 
 Use `promotion.publish` to specify the channel on which to publish the successful deployment.
 
