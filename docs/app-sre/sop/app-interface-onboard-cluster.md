@@ -440,7 +440,7 @@ hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <
 
 ## Step 7 - Obtain cluster-admin
 
-1. Create an OHSS ticket to enable cluster-admin in the cluster. Examples: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302), [OHSS-5939](https://issues.redhat.com/browse/OHSS-5939)
+1. Create an OHSS ticket to enable cluster-admin in the cluster. Examples: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302), [OHSS-5939](https://issues.redhat.com/browse/OHSS-5939). Be sure to mention in the ticket that this is an AppSRE cluster, which should grant approval (according to this [PR](https://github.com/openshift/ops-sop/pull/2297)).
 
 1. Once the ticket is Done, add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/administering_a_cluster/osd-admin-roles.html
 
