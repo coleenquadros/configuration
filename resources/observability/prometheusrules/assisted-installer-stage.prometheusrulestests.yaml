@@ -323,3 +323,67 @@ tests:
   input_series:
   - series: kube_pod_container_status_restarts_total{namespace="assisted-installer-stage",pod="assisted-service-123-456",container="assisted-service"}
     values: 0 0 0 1 2 2 2 2 2 2 2 2 2 2 2
+
+# Check that the assisted image service crashing alert fires when there are two restarts in the same
+# container and pod in less than ten minutes:
+- interval: 1m
+  input_series:
+  - series: kube_pod_container_status_restarts_total{namespace="assisted-installer-stage",pod="assisted-image-service-123-456",container="assisted-image-service"}
+    values: 0 0 0 1 2
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: Assisted Installer - Image service is crashing
+    exp_alerts:
+    - exp_labels:
+        pod: assisted-image-service-123-456
+        container: assisted-image-service
+        service: assisted-installer
+        severity: warning
+      exp_annotations:
+        message: Assisted Installer container 'assisted-image-service' of pod 'assisted-image-service-123-456' is crashing
+
+# Check that the assisted image service crashing alert doesn't fire when there is only one restart
+# in the last ten minutes:
+- interval: 1m
+  input_series:
+  - series: kube_pod_container_status_restarts_total{namespace="assisted-installer-stage",pod="assisted-image-service-123-456",container="assisted-image-service"}
+    values: 0 0 0 1 0
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: Assisted Installer - Image service is crashing
+    exp_alerts: []
+
+# Check that the assisted image service crashing alert fires independently for different pods:
+- interval: 1m
+  input_series:
+  - series: kube_pod_container_status_restarts_total{namespace="assisted-installer-stage",pod="assisted-image-service-123-456",container="assisted-image-service"}
+    values: 0 0 0 1 2
+  - series: kube_pod_container_status_restarts_total{namespace="assisted-installer-stage",pod="assisted-image-service-123-789",container="assisted-image-service"}
+    values: 0 0 0 1 2
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: Assisted Installer - Image service is crashing
+    exp_alerts:
+    - exp_labels:
+        pod: assisted-image-service-123-456
+        container: assisted-image-service
+        service: assisted-installer
+        severity: warning
+      exp_annotations:
+        message: Assisted Installer container 'assisted-image-service' of pod 'assisted-image-service-123-456' is crashing
+    - exp_labels:
+        pod: assisted-image-service-123-789
+        container: assisted-image-service
+        service: assisted-installer
+        severity: warning
+      exp_annotations:
+        message: Assisted Installer container 'assisted-image-service' of pod 'assisted-image-service-123-789' is crashing
+
+# Check that the assisted image service crashing alert clears after ten minutes without restarts:
+- interval: 1m
+  input_series:
+  - series: kube_pod_container_status_restarts_total{namespace="assisted-installer-stage",pod="assisted-image-service-123-456",container="assisted-image-service"}
+    values: 0 0 0 1 2 2 2 2 2 2 2 2 2 2 2
