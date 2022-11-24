@@ -42,28 +42,22 @@ sectors:
   dependencies:
   - name: us-east-2
 upgradePolicyDefaults:
-- name: service-cluster-soak-0
+- name: service-cluster
   matchLabels:
     ext-hypershift.openshift.io/cluster-type: service-cluster
-  upgradePolicy:
-    workloads:
-    - service-cluster
-    schedule: 0 11 * * 1-5
-    conditions:
-      soakDays: 0
-      mutexes:
-      - service-cluster
-- name: management-cluster-soak-0
+    # ext-hypershift.openshift.io/osdfm-managed-cluster: "true"
+  upgradePolicyTemplate:
+    path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
+    type: jinja2
+    variables:
+      schedule: 0 11 * * 1-5
+- name: management-cluster
   matchLabels:
     ext-hypershift.openshift.io/cluster-type: management-cluster
-  upgradePolicy:
-    workloads:
-    - management-cluster
-    schedule: 0 13 * * 1-5
-    conditions:
-      soakDays: 0
-      mutexes:
-      - management-cluster
+  upgradePolicyTemplate:
+    path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
+    variables:
+      schedule: 0 13 * * 1-5
 
 upgradePolicyClusters:
 - name: hs-sc-ccb0thlad
