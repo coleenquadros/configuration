@@ -29,12 +29,10 @@ Options:
 
 ## Installation
 
-In order to use this tool, the easiest option is to clone the `qontract-reconcile` repository. You will need Python 3.9
+In order to use this tool, the easiest option is to use pip to install `qontract-reconcile`.
 
 ```
-$ git clone https://github.com/app-sre/qontract-reconcile
-$ cd qontract-reconcile
-$ python -m venv venv && source venv/bin/activate && pip install -e .
+$ $ pip install --user qontract-reconcile --upgrade
 ```
 
 and `amtool` version 0.24. You can find as part of the Alertmanager [distribution](https://github.com/prometheus/alertmanager/releases/tag/v0.24.0).
