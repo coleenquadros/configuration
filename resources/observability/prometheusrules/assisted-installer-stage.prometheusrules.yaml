@@ -327,3 +327,15 @@ spec:
         labels:
           severity: warning
           service: assisted-installer
+
+      - alert: Assisted Installer - Image service is crashing
+        annotations:
+          message: Assisted Installer container '{{ $labels.container }}' of pod '{{ $labels.pod }}' is crashing
+        expr: |
+          sum(increase(kube_pod_container_status_restarts_total{namespace="assisted-installer-stage",pod=~"^assisted-image-service-.*$"}[10m]))
+          by (pod,container)
+          >= 2
+        for: 1m
+        labels:
+          severity: warning
+          service: assisted-installer
