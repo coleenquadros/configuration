@@ -24,7 +24,16 @@ If your MR is urgent or time sensitive requests, see [contacting AppSRE](#contac
 
 You can catch the AppSRE team in the `#sd-app-sre` channel of `coreos.slack.com`.
 
-To create a request, please open an issue in the [APPSRE Project](https://issues.redhat.com/projects/APPSRE/issues) in JIRA.
+To create a request, please open an issue in one of the following Jira projects:
+
+* [APPSRE](https://issues.redhat.com/projects/APPSRE/issues) for feature requests or other consultation with the AppSRE team
+  * Example(s):
+    * Request to support a new cloud resource type in app-interface
+    * Propose an enhancement to an existing app-interface integration
+* [ASIC](https://issues.redhat.com/projects/ASIC/issues) for issues requiring the attention of the AppSRE interrupt catcher, but aren't impacting production services
+  * Example(s):
+    * A build job is failing for a reason believed to be related to the build infrastructure
+    * Need assistance troubleshooting a failed deployment
 
 For *time sensitive* requests, please ping `@app-sre-ic` in the `#sd-app-sre` channel.
 
