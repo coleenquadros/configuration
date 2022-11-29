@@ -1,8 +1,13 @@
-# RhsmLatency
-Severity: Medium
+# App-koku-api-latency
+
+Severity: High
+
+## Incident Response Plan
+
+[Incident Response Doc](https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE) for console.redhat.com
 
 ## Impact
-- If the latency is high for requests, we might have an impact on our latency SLO and the customer experience might be degraded.
+- Cost provides visibilty of cloud and OpenShift costs to customers. If requests are slow the expereince may be degraded or effect any downstream customer tooling that expects a quicker response. If the latency is high for requests, we might have an impact on our latency SLO and the customer experience might be degraded.
 
 ## Summary
 This alert fires when at least 10% of requests in the last 5 min are slower than 2000ms, which can impact our latency SLO in the long term.
