@@ -101,3 +101,36 @@ externalResources:
     region: us-east-1
     identifier: ocp-art-dev
     output_resource_name: ocp-art-dev-ecr
+  - provider: s3
+    identifier: git-partition-sync
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: git-partition-sync-s3
+  - provider: aws-iam-service-account
+    identifier: git-partition-sync
+    variables:
+      bucket: git-partition-sync
+      region: us-east-1
+      endpoint: s3.us-east-1.amazonaws.com
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:ListBucket"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${bucket}",
+              "arn:aws:s3:::${bucket}/*",
+            ] 
+          }
+        ]
+      }
+    output_resource_name: git-partition-sync-aws-creds
+
+glitchtipProjects:
+- $ref: /dependencies/glitchtip/projects/glitchtip-production/app-interface-prod.yml

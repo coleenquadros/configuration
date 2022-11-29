@@ -1,0 +1,35 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: gabi-stage
+description: namespace for the gabi project
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/gabi/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/app-interface/namespaces/app-interface-stage.yml
+
+managedRoles: true
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: gabi-stage
+    defaults: /terraform/resources/gabi/rds-stage-1.yml
+    output_resource_name: gabi-stage-rds
+    overrides:
+      apply_immediately: true

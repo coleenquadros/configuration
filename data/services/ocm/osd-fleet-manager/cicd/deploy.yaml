@@ -22,6 +22,7 @@ managedResourceTypes:
 - Deployment
 - Service
 - ConfigMap
+- PodDisruptionBudget
 
 imagePatterns:
 - quay.io/app-sre/osd-fleet-manager
@@ -53,6 +54,7 @@ resourceTemplates:
       OIDCS3_BUCKET_NAME: oidc-bucket-integration
       AWS_BASE_DOMAIN: i3.devshift.org
       EXTERNAL_DNS_DOMAIN_FILTER: i3.devshift.org
+      CLUSTER_EXPIRATION_TIME_DELTA_DAYS: 3650
       SENTRY_ENABLE: false
       SUPPORTED_CLOUD_PROVIDERS: |-
         - name: aws
@@ -88,9 +90,10 @@ resourceTemplates:
         - "fleet-manager-debug"
       DEVELOPER_USERS:
         - "fleet-manager-debug"
-      CLUSTER_CHANNEL: "stable"
+      CLUSTER_CHANNEL: "candidate"
       ENABLE_CLUSTER_AUTO_UPGRADE: false
       CLUSTER_AUTO_UPGRADE_CRON: "0 4 * * *"
+      RHOBS_URL: "https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/hypershift-platform/api/v1/receive"
   - namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
     ref: main
@@ -108,6 +111,7 @@ resourceTemplates:
       ENABLE_PROVISION_SHARD_RECONCILIATION: true
       AWS_BASE_DOMAIN: s3.devshift.org
       EXTERNAL_DNS_DOMAIN_FILTER: s3.devshift.org
+      CLUSTER_EXPIRATION_TIME_DELTA_DAYS: 3650
       SENTRY_ENABLE: true
       SENTRY_PROJECT: 39
       SENTRY_URL: https://sentry.stage.devshift.net
@@ -115,6 +119,7 @@ resourceTemplates:
         - name: aws
           regions:
             - name: us-west-2
+            - name: us-east-2
       CLUSTER_TEMPLATES: |-2
           # HyperShift Service Cluster
           hs-sc:
@@ -137,12 +142,13 @@ resourceTemplates:
             compute_machine_type: m5.4xlarge
             compute_autoscale: true
             compute_autoscale_min_replicas: 3
-            compute_autoscale_max_replicas: 12
+            compute_autoscale_max_replicas: 30
             network_type: OVNKubernetes
             private: false
       ENABLE_SIMPLE_IDENTITY_PROVIDER: true
       READ_ONLY_USERS:
         - "fleet-manager-debug"
-      CLUSTER_CHANNEL: "stable"
-      ENABLE_CLUSTER_AUTO_UPGRADE: true
+      CLUSTER_CHANNEL: "candidate"
+      ENABLE_CLUSTER_AUTO_UPGRADE: false
       CLUSTER_AUTO_UPGRADE_CRON: "0 4 * * *"
+      RHOBS_URL: "https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/hypershift-platform/api/v1/receive"

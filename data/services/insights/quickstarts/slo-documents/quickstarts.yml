@@ -10,39 +10,9 @@ app:
   $ref: /services/insights/quickstarts/app.yml
 
 namespaces:
-- $ref: /services/insights/quickstarts/namespaces/quickstarts-stage.yml
 - $ref: /services/insights/quickstarts/namespaces/quickstarts-prod.yml
 
 slos:
-- name: Requests result in successful (non-5xx) response
-  dashboard: https://grafana.stage.devshift.net/d/aqaixAb7k/quickstarts?orgId=1
-  SLIType: availability
-  SLISpecification: Proportion of sucessful requests with a non-5xx response against all requests on Quickstarts API
-  SLOTarget: 0.90
-  SLOTargetUnit: percent_0_1
-  SLOParameters:
-    window: 28d
-  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/quickstarts/SLO.md
-  prometheusRules: /resources/insights-stage/quickstarts-stage/quickstarts.prometheusrules.yml
-  expr: |
-    round(sum(rate(api_3scale_gateway_api_status{exported_service="quickstarts", status=~"[234]xx"}[{{window}}])) 
-    /
-    sum(rate(api_3scale_gateway_api_status{exported_service="quickstarts"}[{{window}}])), 0.0001)
-
-- name: Request latency
-  dashboard: https://grafana.stage.devshift.net/d/aqaixAb7k/quickstarts?orgId=1
-  SLIType: latency
-  SLISpecification: Proportion of requests with less than <2000 ms against all requests on Quickstarts API
-  SLOTarget: 0.90
-  SLOTargetUnit: percent_0_1
-  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/quickstarts/SLO.md
-  SLOParameters:
-    window: 28d
-  prometheusRules: /resources/insights-stage/quickstarts-stage/quickstarts.prometheusrules.yml
-  expr: |
-    sum(rate(api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="quickstarts"}[{{window}}]))
-    /
-    sum(rate(api_3scale_gateway_api_time_bucket{le="+Inf", exported_service="quickstarts"}[{{window}}]))
 - name: Requests result in successful non-5xx response
   dashboard: https://grafana.app-sre.devshift.net/d/aqaixAb7k/quickstarts?orgId=1
   SLIType: availability
@@ -54,7 +24,7 @@ slos:
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/quickstarts/SLO.md
   prometheusRules: /resources/insights-prod/quickstarts-prod/quickstarts.prometheusrules.yml
   expr: |
-    round(sum(rate(api_3scale_gateway_api_status{exported_service="quickstarts", status=~"[234]xx"}[{{window}}])) 
+    round(sum(rate(api_3scale_gateway_api_status{exported_service="quickstarts", status=~"[234]xx"}[{{window}}]))
     /
     sum(rate(api_3scale_gateway_api_status{exported_service="quickstarts"}[{{window}}])), 0.0001)
 - name: Request latency

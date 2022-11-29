@@ -16,6 +16,7 @@ slack:
 managedResourceTypes:
 - ClowdApp
 - Service
+- Frontend
 
 imagePatterns:
 - quay.io/cloudservices
@@ -38,7 +39,7 @@ resourceTemplates:
     ref: internal
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
-    ref: 6dd577cdb368c8f80903ebe678f33dd96dad1c67
+    ref: e10f6648780fdc00558626840cb67ba33e4b01a7
     parameters:
       ENV_NAME: env-stage
 - name: tower-analytics-clowdapp
@@ -51,26 +52,26 @@ resourceTemplates:
     ref: internal
     parameters:
       RBAC_URL: http://rbac-service:8000
-      MEMORY_REQUEST_ONEVIEW: 400Mi
-      MEMORY_LIMIT_ONEVIEW: 800Mi
+      MEMORY_REQUEST_ONEVIEW: 512Mi
+      MEMORY_LIMIT_ONEVIEW: 1Gi
       MEMORY_REQUEST_FASTAPI: 512Mi
       MEMORY_LIMIT_FASTAPI: 1Gi
       MEMORY_REQUEST_PROCESSOR_CONTROLLER: 1Gi
       MEMORY_LIMIT_PROCESSOR_CONTROLLER: 2Gi
-      MEMORY_REQUEST_PROCESSOR_INGRESS: 500Mi
+      MEMORY_REQUEST_PROCESSOR_INGRESS: 512Mi
       MEMORY_LIMIT_PROCESSOR_INGRESS: 1Gi
-      MEMORY_REQUEST_PROCESSOR_REPLAY: 500Mi
+      MEMORY_REQUEST_PROCESSOR_REPLAY: 512Mi
       MEMORY_LIMIT_PROCESSOR_REPLAY: 1Gi
       MEMORY_REQUEST_RECOVERY: 1Gi
       MEMORY_LIMIT_RECOVERY: 2Gi
       MEMORY_REQUEST_EXPORTER: 1Gi
       MEMORY_LIMIT_EXPORTER: 2Gi
-      MEMORY_REQUEST_USER_METRICS: 400Mi
-      MEMORY_LIMIT_USER_METRICS: 800Mi
-      MEMORY_REQUEST_ROLLUPS: 400Mi
-      MEMORY_LIMIT_ROLLUPS: 800Mi
-      MEMORY_REQUEST_DATA_PRUNING: 400Mi
-      MEMORY_LIMIT_DATA_PRUNING: 800Mi
+      MEMORY_REQUEST_USER_METRICS: 512Mi
+      MEMORY_LIMIT_USER_METRICS: 1Gi
+      MEMORY_REQUEST_ROLLUPS: 512Mi
+      MEMORY_LIMIT_ROLLUPS: 1Gi
+      MEMORY_REQUEST_DATA_PRUNING: 512Mi
+      MEMORY_LIMIT_DATA_PRUNING: 1Gi
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
     ref: main
@@ -137,25 +138,25 @@ resourceTemplates:
       - automation-analytics-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
-    ref: a0fe32785408d826028c21c15fd2edd90429abf4
+    ref: d65989363282659c53313eaea0e8341322a43d83
     parameters:
       ENV_NAME: prod
       REPLICAS_API: 20
       REPLICAS_ONEVIEW: 2
       REPLICAS_ROLLUP: 8
-      REPLICAS_PROCESSOR_CONTROLLER: 8
+      REPLICAS_PROCESSOR_CONTROLLER: 6
       REPLICAS_PROCESSOR_INGRESS: 3
       REPLICAS_EXPORTER: 3
       REPLICAS_DEBUG: 0
       MEMORY_LIMIT_EXPORTER: 4Gi
-      MEMORY_REQUEST_PROCESSOR_CONTROLLER: 500Mi
+      MEMORY_REQUEST_PROCESSOR_CONTROLLER: 512Mi
       MEMORY_LIMIT_PROCESSOR_CONTROLLER: 1Gi
       RBAC_ENABLED: 'True'
       RBAC_PSKS_SECRET: rbac-psks
       BACKOFFICE_TOKEN: 13f199c0420efe635b892a730715bf092fd4f9db586aa6e7d8ed3f44ae031401
       PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
       # Cron jobs
-      CRON_SCHEDULE_MSG_RECOVERY: 0 */4 * * *
+      CRON_SCHEDULE_MSG_RECOVERY: 0 */6 * * *
       CRON_SCHEDULE_USER_METRICS: '* 10 * * *'
       CRON_SCHEDULE_DATA_PRUNING: 0 13 * * 2
       # Data exporter Svc

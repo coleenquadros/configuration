@@ -15,5 +15,5 @@ As of 2022-10-03:
 * Bring-you-own cluster. KCP will reference their cluster in app-interface
 * Standard AppSRE observability stack deployment over this cluster
 * Vault AppRole to manage `/control-plane-service/*` (See [MR 48835](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/48835))
-  * It is agreed that the AppSRE's Vault instance has no SLO / SLA and **must not be used at runtime by applications**. AppSRE will however ensure Vault is available most of the time since it is used a lot as part of the standard app-interface tooling for all its tenants.
   * This will be re-examined once Vault moves behind the VPN. The KCP team considers moving their ArgoCD server behind the VPN as well
+  * It is agreed that the AppSRE's Vault instance has no SLO / SLA and **must not be used at runtime by applications**. AppSRE will however ensure Vault is available most of the time since it is used a lot as part of the standard app-interface tooling for all its tenants.

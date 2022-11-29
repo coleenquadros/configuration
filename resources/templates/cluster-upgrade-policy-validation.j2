@@ -1,0 +1,51 @@
+{% macro validate(cluster, ocm_org) -%}
+    {%- if cluster.upgradePolicy is not none %}
+        {%- for workload in cluster.upgradePolicy.workloads %}
+            {%- if ocm_org.upgradePolicyAllowedWorkloads is none %}
+                # raise an error if upgradePolicyAllowedWorkloads is not set but workloads are being used (avoid generic "NoneType not iterable" error)
+                {% raise_error('OCM org "' + ocm_org.name + '" is missing the upgradePolicyAllowedWorkloads field') %}
+            {%- endif %}
+            {%- if workload not in ocm_org.upgradePolicyAllowedWorkloads %}
+                # raise an error if workload is not within the allowed workloads defined in the OCM file
+                {% raise_error('Cluster "' + cluster.name + '" upgrade policy workload "' +  workload + '" not in upgradePolicyAllowedWorkloads: ' + (ocm_org.upgradePolicyAllowedWorkloads | join(', '))) %}
+            {%- endif %}
+        {%- endfor %}
+
+        {%- if cluster.upgradePolicy.conditions.mutexes is not none %}
+            {%- for mutex in cluster.upgradePolicy.conditions.mutexes %}
+                {%- if ocm_org.upgradePolicyAllowedMutexes is none %}
+                    # raise an error if upgradePolicyAllowedMutexes is not set but mutexes are being used (avoid generic "NoneType not iterable" error)
+                    {% raise_error('OCM org "' + ocm_org.name + '" is missing the upgradePolicyAllowedMutexes field') %}
+                {%- endif %}
+                {%- if mutex not in ocm_org.upgradePolicyAllowedMutexes %}
+                    # raise an error if mutex is not within the allowed mutexes defined in the OCM file
+                    {% raise_error('Cluster "' + cluster.name + '" upgrade policy mutex "' +  mutex + '" not in upgradePolicyAllowedMutexes: ' + (ocm_org.upgradePolicyAllowedMutexes | join(', '))) %}
+                {%- endif %}
+            {%- endfor %}
+        {%- endif %}
+
+        {%- if cluster.upgradePolicy.conditions.sector is not none %}
+            {%- if ocm_org.sectors is none %}
+                # raise an error if ocm.sectors is not set but a sector are being used (avoid generic "NoneType not iterable" error)
+                {% raise_error('OCM org "' + ocm_org.name + '" is missing the sectors field. The cluster ' + cluster.name + ' is referring to sector ' + cluster.upgradePolicy.conditions.sector) %}
+            {%- endif %}
+            {%- if cluster.upgradePolicy.conditions.sector not in ocm_org.sectors | map(attribute='name') %}
+                # raise an error if sector is not within the allowed sectors defined in the OCM file
+                {% raise_error('Cluster "' + cluster.name + '" upgrade policy sector "' +  cluster.upgradePolicy.conditions.sector + '" not in ocm.sectors: ' + (ocm_org.sectors | join(', '))) %}
+            {%- endif %}
+        {%- endif %}
+    {%- endif %}
+{%- endmacro %}
+
+
+{%- for cluster in query('/queries/cluster-upgrade-policy.graphql') %}
+    {{ validate(cluster, cluster.ocm) }}
+{%- endfor %}
+
+{%- for ocm_org in query('/queries/ocm-org-upgrade-policy.graphql') %}
+    {%- if ocm_org.upgradePolicyClusters is not none %}
+        {%- for cluster in ocm_org.upgradePolicyClusters %}
+            {{ validate(cluster, ocm_org) }}
+        {%- endfor %}
+    {%- endif %}
+{%- endfor %}

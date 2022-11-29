@@ -1,0 +1,22 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: app-sre
+  name: quay-py3-cloudflare-service-monitor
+spec:
+  endpoints:
+  - interval: 30s
+    path: /metrics
+    port: metrics
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: 'quay_request_duration_seconds.*'
+      action: drop
+  namespaceSelector:
+    matchNames:
+    - {{ quay_app_namespace | default('quay') }}
+  selector:
+    matchLabels:
+      quay-py3-component: app-py3-cloudflare

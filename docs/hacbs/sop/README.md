@@ -1,3 +1,5 @@
 # SOP : HACBS SOPs
 
-TODO - build out SOPs here.
+## How to
+
+* [Access the logs](logs.md)

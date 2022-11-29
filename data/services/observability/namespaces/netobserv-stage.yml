@@ -1,0 +1,31 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: netobserv
+description: Namespace for netobserv resources like Loki
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /openshift/app-sre-stage-01/namespaces/openshift-operators.yaml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+    - provider: s3
+      identifier: netobserv-app-sre-stage-01
+      defaults: /terraform/resources/s3-private-1.yml

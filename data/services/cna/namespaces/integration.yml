@@ -18,6 +18,10 @@ environment:
 
 managedRoles: true
 
+managedResourceTypes:
+- Role
+- RoleBinding
+
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
@@ -28,6 +32,15 @@ openshiftResources:
 - provider: vault-secret
   path: app-interface/cna/integration/runtime
   version: 2
+  #- provider: route -- FIXME: need to request a hostname first
+  #  path: /cna/stage/cna.route.yaml
+# allows creation of Taskruns
+- provider: resource
+  path: /cna/integration/taskrunner.rolebinding.yaml
+- provider: resource
+  path: /cna/integration/taskrunner.role.yaml
+- provider: route
+  path: /cna/integration/cna.route.yaml
 
 managedExternalResources: true
 
@@ -39,6 +52,11 @@ externalResources:
   - provider: rds
     identifier: cna-integration
     defaults: /terraform/resources/app-sre-stage/rds-3-pg13.yml
+  - provider: rds
+    identifier: cna-integration-readonly
+    defaults: /terraform/resources/app-sre-stage/rds-3-pg13.yml
+    output_resource_name: cna-integration-rds-readonly
+    replica_source: cna-integration
   - provider: elasticache
     identifier: cna-redis-integration
     defaults: /terraform/resources/cna/elasticache-integration.yml

@@ -6,98 +6,92 @@ evaluation_interval: 1m
 tests:
   - interval: 1m
     input_series:
-      - series: haproxy_backend_http_responses_total:burnrate5m{exported_namespace="glitchtip-stage"}
-        values: '1.45+0.0x10' #(14.4*(1-0.90))=1.44 for 2 min
-      - series: haproxy_backend_http_responses_total:burnrate1h{exported_namespace="glitchtip-stage"}
-        values: '1.45+0.0x10'
+      # CurrentErrorRate * (t / WindowSize) = BurnRate * (1 - SLOGoal)
+      # ErrorRate = BurnRate * (1 - SLOTarget) per the given time period
+      # 0m  - 30m  all good
+      # 30m - 60m  5% burn rate ~> 6 * (1 - 0.95) = 0.30 error rate ~> 300 per 1000 requests, which should be just below the alert threshold
+      # 60m - 90m  10% burn rate ~> 2 * 6 * (1 - 0.95) = 0.6 error rate ~> 600 per 1000 requests, which should trigger the alert
+      - series: 'haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code="5xx"}'
+        values: '0+0x30   0+300x30      1800+600x30'
+      - series: 'haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code="2xx"}'
+        values: '0+1x30   30+700x30   28230+400x30'
     alert_rule_test:
-      - eval_time: 1m
-        alertname: ErrorBudgetBurn5mto1h
-        exp_alerts: [ ]
-      - eval_time: 2m
-        alertname: ErrorBudgetBurn5mto1h
-        exp_alerts:
-          - exp_labels:
-              service: glitchtip
-              alertname: ErrorBudgetBurn5mto1h
-              exported_namespace: glitchtip-stage
-              severity: medium
-            exp_annotations:
-              message: "High error budget burn for http responses on exported_namespace=glitchtip-stage (current value: 1.45)"
-              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
-              dashboard: "https://grafana.stage.devshift.net/d/8hKIWxr7z/glitchtip-slo"
-  - interval: 1m
-    input_series:
-      - series: haproxy_backend_http_responses_total:burnrate30m{exported_namespace="glitchtip-stage"}
-        values: '0.61+0.0x15' #(6.00 * (1-0.90000)) for 15 min
-      - series: haproxy_backend_http_responses_total:burnrate6h{exported_namespace="glitchtip-stage"}
-        values: '0.61+0.0x15'
-    alert_rule_test:
-      - eval_time: 5m
+      - eval_time: 30m
         alertname: ErrorBudgetBurn30mto6h
         exp_alerts: [ ]
-      - eval_time: 10m
+      - eval_time: 60m
         alertname: ErrorBudgetBurn30mto6h
         exp_alerts: [ ]
-      - eval_time: 15m
+      - eval_time: 90m
         alertname: ErrorBudgetBurn30mto6h
         exp_alerts:
           - exp_labels:
-              service: glitchtip
               alertname: ErrorBudgetBurn30mto6h
-              exported_namespace: glitchtip-stage
-              severity: medium
-            exp_annotations:
-              message: "High error budget burn for http responses on exported_namespace=glitchtip-stage (current value: 0.61)"
-              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
-              dashboard: "https://grafana.stage.devshift.net/d/8hKIWxr7z/glitchtip-slo"
-  - interval: 1m
-    input_series:
-      - series: haproxy_backend_http_responses_total:burnrate2h{exported_namespace="glitchtip-stage"}
-        values: '0.31+0.0x60' #(3.00 * (1-0.90000))=.3 for 1h
-      - series: haproxy_backend_http_responses_total:burnrate1d{exported_namespace="glitchtip-stage"}
-        values: '0.31+0.0x60'
-    alert_rule_test:
-      - eval_time: 20m
-        alertname: ErrorBudgetBurn2hto1d
-        exp_alerts: [ ]
-      - eval_time: 40m
-        alertname: ErrorBudgetBurn2hto1d
-        exp_alerts: [ ]
-      - eval_time: 60m
-        alertname: ErrorBudgetBurn2hto1d
-        exp_alerts:
-          - exp_labels:
               service: glitchtip
-              alertname: ErrorBudgetBurn2hto1d
               exported_namespace: glitchtip-stage
               severity: medium
             exp_annotations:
-              message: "High error budget burn for http responses on exported_namespace=glitchtip-stage (current value: 0.31)"
-              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
+              message: "High 6h error budget burn for http responses on exported_namespace=glitchtip-stage (current value: 489.5m)"
               dashboard: "https://grafana.stage.devshift.net/d/8hKIWxr7z/glitchtip-slo"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
   - interval: 1m
     input_series:
-      - series: haproxy_backend_http_responses_total:burnrate6h{exported_namespace="glitchtip-stage"}
-        values: '0.11+0.0x190' #(1.00 * (1-0.90000)=.1 for 3h
-      - series: haproxy_backend_http_responses_total:burnrate3d{exported_namespace="glitchtip-stage"}
-        values: '0.11+0.0x190'
+      # CurrentErrorRate * (t / WindowSize) = BurnRate * (1 - SLOGoal)
+      # ErrorRate = BurnRate * (1 - SLOTarget) per the given time period
+      # 0m   - 120m   all good
+      # 120m - 240m  10% burn rate ~> 3 * (1 - 0.95) = 0.15 error rate ~> 150 per 1000 requests, which should be just below the alert threshold
+      # 240m - 360m  20% burn rate ~> 2 * 3 * (1 - 0.95) = 0.3 error rate ~> 300 per 1000 requests, which should trigger the alert
+      - series: 'haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code="5xx"}'
+        values: '0+0x120   0+150x120      3600+300x120'
+      - series: 'haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code="2xx"}'
+        values: '0+1x120   120+850x120   116520+700x120'
     alert_rule_test:
-      - eval_time: 60m
-        alertname: ErrorBudgetBurn6hto3d
-        exp_alerts: [ ]
       - eval_time: 120m
-        alertname: ErrorBudgetBurn6hto3d
+        alertname: ErrorBudgetBurn2hto1d
         exp_alerts: [ ]
-      - eval_time: 180m
-        alertname: ErrorBudgetBurn6hto3d
+      - eval_time: 240m
+        alertname: ErrorBudgetBurn2hto1d
+        exp_alerts: [ ]
+      - eval_time: 360m
+        alertname: ErrorBudgetBurn2hto1d
         exp_alerts:
           - exp_labels:
+              alertname: ErrorBudgetBurn2hto1d
               service: glitchtip
-              alertname: ErrorBudgetBurn6hto3d
               exported_namespace: glitchtip-stage
               severity: medium
             exp_annotations:
-              message: "High error budget burn for http responses on exported_namespace=glitchtip-stage (current value: 0.11)"
-              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
+              message: "High 1d error budget burn for http responses on exported_namespace=glitchtip-stage (current value: 284.7m)"
               dashboard: "https://grafana.stage.devshift.net/d/8hKIWxr7z/glitchtip-slo"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
+  - interval: 1m
+    input_series:
+      # CurrentErrorRate * (t / WindowSize) = BurnRate * (1 - SLOGoal)
+      # ErrorRate = BurnRate * (1 - SLOTarget) per the given time period
+      # 0m   - 360m   all good
+      # 360m - 720m   10% burn rate ~> 1 * (1 - 0.95) = 0.05 error rate ~> 50 per 1000 requests, which should be just below the alert threshold
+      # 720m - 1080m  20% burn rate ~> 2 * 1 * (1 - 0.95) = 0.1 error rate ~> 100 per 1000 requests, which should trigger the alert
+      - series: 'haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code="5xx"}'
+        values: '0+0x360   0+50x360    7200+100x360'
+      - series: 'haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code="2xx"}'
+        values: '0+1x360   360+950x360   356760+900x360'
+    alert_rule_test:
+      - eval_time: 360m
+        alertname: ErrorBudgetBurn6hto3d
+        exp_alerts: [ ]
+      - eval_time: 720m
+        alertname: ErrorBudgetBurn6hto3d
+        exp_alerts: [ ]
+      - eval_time: 1080m
+        alertname: ErrorBudgetBurn6hto3d
+        exp_alerts:
+          - exp_labels:
+              alertname: ErrorBudgetBurn6hto3d
+              service: glitchtip
+              exported_namespace: glitchtip-stage
+              severity: medium
+            exp_annotations:
+              message: "High 3d error budget burn for http responses on exported_namespace=glitchtip-stage (current value: 113m)"
+              dashboard: "https://grafana.stage.devshift.net/d/8hKIWxr7z/glitchtip-slo"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
+# TODO: need to add prom rules tests for SLOs-RequestLatency

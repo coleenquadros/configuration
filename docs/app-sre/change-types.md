@@ -2,9 +2,16 @@
 
 ## ... in a nutshell
 
-The granular permission model is an approach to grant app-interface tenants the permissions to change selective parts of their service configurations without AppSRE involvement.
+With the granular permission model, engineering teams & partner SRE teams can acquire more permissions to manage and support their own services in app-interface without AppSREs explicit reviews and approvals.
+
+Declarative policies (a.k.a. app-interface `change-types`) enables change permissions from something wide like "change everything for all namespaces in a cluster" to something fine grained as "bump the version of a single vault secret" or "change the TTL of a record in a specific DNS zone".
 
 The key concept is a `/app-interface/change-type-1.yml` and holds the change permissions of structured app-interface files in a declarative way. Change-types can be bound to app-interface datafiles and resources in the context of a `/access/role-1.yml`, effectively making the members of that role app-interface merge-request approvers for the changes described in the change-type.
+
+A list of supported `change-types` can be found [here](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/change-types.md).
+
+You an idea for a new `change-type`? Let us know and create a ticket on the [AppSRE Jira Board](https://issues.redhat.com/projects/APPSRE)
+
 
 ## Quickstart example
 
@@ -28,11 +35,11 @@ changes:
   - deployResources
 ```
 
-The `priority` field defines the order in which merge requests will be processed, and most importantly, merged. Generally, use `urgent` for change types with higher SLOs (like a production promotion), `high` for functional changes (like promoting a secret version), and `medium`/`low` for the rest (Yet to be defined). `critical` is also available, to be used with caution.
-
 The `contextType` and `contextSchema` define the allowed context a change-type can be used, therefore `saas-file-deploy-resource-limits` can only be bound to `datafiles` of the schema `/app-sre/saas-file-2.yml`.
 
 The changes described by this changes-type can be found in the `changes` section. Following the `qontract-reconcile` provider pattern, selection mechanisms other than `JSONPath` can be supported in the future but the `jsonPath` provider is the only one supported right now. `changes.jsonPathSelectors` defines a list of `JSONPath` expressions that will be self-serviceable. In our example, it is everything under `deployResources`. You can learn more about JSONPath [here](https://goessner.net/articles/JsonPath/index.html)) and experiment with on this [playground](https://jsonpath.com/).
+
+The `priority` field defines the order in which merge requests will be processed, and most importantly, merged. Generally, use `urgent` for change types with higher SLOs (like a production promotion), `high` for functional changes (like promoting a secret version), and `medium`/`low` for the rest (Yet to be defined). `critical` is also available, to be used with caution.
 
 Once a change-type is defined, it can be bound to datafiles or resources within the context of an app-interface role.
 
@@ -125,7 +132,7 @@ $schema: /app-interface/change-type-1.yml
 name: add-role-member
 
 contextType: datafile
-contextSchema: /access/roles-1.yml
+contextSchema: /access/role-1.yml
 
 changes:
 - provider: jsonPath
@@ -170,7 +177,7 @@ $schema: /app-interface/change-type-1.yml
 name: add-role-member
 
 contextType: datafile
-contextSchema: /access/roles-1.yml
+contextSchema: /access/role-1.yml
 
 changes:
 - provider: jsonPath

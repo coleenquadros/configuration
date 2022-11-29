@@ -7,7 +7,7 @@ API
 
 
 ## SLI
-API Availability: `1.00 - (sum(rate(api_3scale_gateway_api_status{exported_service="cost-management", status="5xx"}[5m])) / sum(rate(api_3scale_gateway_api_status{exported_service="cost-management"}[5m])))`
+API Availability: `1.00 - (sum(rate(api_3scale_gateway_api_status{exported_service="cost-management", status="5xx"}[{{window}}])) / sum(rate(api_3scale_gateway_api_status{exported_service="cost-management"}[{{window}}])))`
 
 API Latency:  `sum(rate(api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="cost-management"}[{{window}}])) / sum(rate(api_3scale_gateway_api_time_count{exported_service="cost-management"}[{{window}}]))`
 

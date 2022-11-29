@@ -35,6 +35,7 @@ networkPoliciesAllow:
 - $ref: /services/insights/marketplace-gateway/namespaces/stage.yml
 - $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
 - $ref: /services/insights/provisioning/namespaces/provisioning-stage.yml
+- $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
 
 managedRoles: true
 
@@ -89,9 +90,6 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-kafkaCluster:
-  $ref: /kafka/crcs02ue1k/cluster.yml
-
 managedExternalResources: true
 
 externalResources:
@@ -101,23 +99,24 @@ externalResources:
   resources:
   - provider: rds
     identifier: sources-stage
-    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-stage-insights-sources.yml
+    defaults: /terraform/resources/insights/stage/rds/postgres14-rds-sources-stage.yml
     overrides:
+      apply_immediately: true
       username: "insights"
       name: "sources_production"
       instance_class: db.t3.medium
-    parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-sources-stage.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres14-parameter-group-sources-stage.yml
     output_resource_name: sources-db
     enhanced_monitoring: true
     # Replica instance for Gabi.
   - provider: rds
     identifier: sources-stage-readonly
-    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-stage-insights-sources.yml
+    defaults: /terraform/resources/insights/stage/rds/postgres14-rds-sources-stage.yml
     overrides:
       username: "insights"
       name: "sources_production"
       instance_class: db.t3.medium
-    parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-sources-stage.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres14-parameter-group-sources-stage.yml
     replica_source: sources-stage
     output_resource_name: sources-stage-db-ro
   - provider: cloudwatch

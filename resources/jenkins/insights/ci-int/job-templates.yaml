@@ -281,6 +281,8 @@
         notify-success: false
         notify-failure: true
         notify-repeated-failure: true
+    - naginator:
+        max-failed-builds: 3
     <<: *gh_build_master
 
 - job-template:
@@ -306,7 +308,11 @@
         - *ibutsu
         - *hac_prcheck_secret
     publishers:
-    - slack: 
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    - slack:
         room: '{slack_channel_notification}'
         notify-start: false
         notify-success: false
@@ -345,6 +351,7 @@
     gl_project: cicd-common
     app_name: ""
     ui_ref: ""
+    ui_image: ""
     component_name: ""
     image: ""
     git_commit: ""
@@ -392,7 +399,11 @@
     - string:
         name: UI_REF
         default: '{ui_ref}'
-        description: "(optional, default: prod-beta) git ref of the component's UI deployment repo to deploy front-end assets from. Only used if INCLUDE_UI is also true."
+        description: "(optional) If INCLUDE_UI is set to AGGREGATOR: (default: prod-beta) git ref of the component's UI deployment repo to deploy front-end assets from. If INCLUDE_UI is set to OPERATOR: (default: latest) image tag for the UI/front-end to deploy."
+    - string:
+        name: UI_IMAGE
+        default: '{ui_image}'
+        description: "(optional) image location of the UI/front-end on quay. Only used if INCLUDE_UI is set to OPERATOR."
     - string:
         name: COMPONENT_NAME
         default: '{component_name}'
@@ -446,3 +457,18 @@
     builders:
     - shell:
         command: "{ci_cmd}"
+
+- job-template:
+    id: 'prune-deployed-events-db'
+    name: 'prune-deployed-events-db'
+    gl_group: insights-platform
+    gl_project: cicd-common
+    branch: master
+    ci_cmd: 'app_scripts/remove_old_deployed_events.sh'
+    wrappers:
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *prune_deploy_events_db_secrets
+    <<: *gl_timed

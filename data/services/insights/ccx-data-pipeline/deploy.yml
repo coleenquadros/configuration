@@ -32,6 +32,7 @@ managedResourceTypes:
 - ConfigMap
 - HorizontalPodAutoscaler
 - Service
+- Frontend
 
 imagePatterns:
 - quay.io/cloudservices
@@ -61,10 +62,10 @@ resourceTemplates:
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 681c422771d6af6a3a82a9a9d24a918f9cae9de1
+    ref: f8323e3a01aacba50884c8ece70a62458839d94e
     parameters:
-      MIN_REPLICAS: "16"
-      MAX_REPLICAS: "16"
+      MIN_REPLICAS: "32"
+      MAX_REPLICAS: "32"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
       CPU_LIMIT: "1000m"
       MEMORY_LIMIT: "1024Mi"
@@ -115,7 +116,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
     delete: false
-    ref: f1bbcdde5287d6f8293fec7b1dc68e18b5d86b2d
+    ref: bd349f02cbfb512feee1958e036cbbea89fecbf9
     parameters:
       MIN_REPLICAS: "3"
       MAX_REPLICAS: "6"
@@ -175,7 +176,7 @@ resourceTemplates:
       IRSP_INTERNAL_RULES_ORGANIZATIONS_CSV_FILE: "/internal-rules-organizations/internal_rules_organizations.csv"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: f9e3f149431a254c976260a06a9da046dd894d06
+    ref: 7ffaa28bc34689a8bdcd66bc667222150ee60eb0
     delete: false
     parameters:
       MIN_REPLICAS: "3"
@@ -257,7 +258,7 @@ resourceTemplates:
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: f031bc917d377bf19b3249b9c212777cfa8edb8c
+    ref: 344e02da29e70309e46e8029ce926557e2afe437
     delete: false
     parameters:
       CPU_LIMIT: "250m"
@@ -373,7 +374,7 @@ resourceTemplates:
       TABLES_TO_IGNORE: "report,consumer_error"
       ACTIVE_DEADLINE_SECONDS: "1200" # 20 minutes
       DB_NAME: ccx-insights-results
-      TEST_DATE: 27/09/2022
+      TEST_DATE: 08/11/2022
     promotion:
       publish:
       - insights-aggregator-exporter-prod-ready-channel
@@ -470,7 +471,7 @@ resourceTemplates:
       SERVICE_LOG__URL: "https://api.stage.openshift.com/api/service_logs/v1/cluster_logs"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 4e3f5ba7a53e648d9c1f7ac17f0160adb6b00103
+    ref: 5bf97770234d106c0fac3fcc9f30e9d65910f0f9
     parameters:
       CONTENT_SERVICE_PORT: 10000
       JOB_SCHEDULE__NOTIFICATION_BACKEND: "*/15 * * * *"
@@ -479,7 +480,7 @@ resourceTemplates:
       TEMPLATE_RENDERER_SERVER: "http://insights-content-template-renderer-svc:8000/"
       SERVICE_LOG__URL: "https://api.openshift.com/api/service_logs/v1/cluster_logs"
       JOB_DEADLINE__SERVICE_LOG: "36000"
-      SUSPEND_JOB__SERVICE_LOG: "true"
+      SUSPEND_JOB__SERVICE_LOG: "false"
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true
@@ -562,7 +563,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: ca3cd20322cc64112e88e975eb6d935f4ae7965b
+    ref: 72f89aa04770793210ba3484aafc87218e5e788b
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true # TODO: enable when there is any test running in ephemeral
@@ -580,7 +581,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: a32549b292228369d49164f48ea993631cdb472c
+    ref: a184631d730e17075298f49fb6b2061e694658dc
 
 - name: grafana-dashboard-insights-content-service
   url: https://github.com/RedHatInsights/insights-content-service
@@ -665,3 +666,19 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: ee1877e7d8f8d447522209bc9feb62a2ec11e394
+
+### OCP Advisor Frontend
+
+- name: ocp-advisor-frontend
+  path: /deploy/frontend.yml
+  url: https://github.com/RedHatInsights/ocp-advisor-frontend
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+    ref: 51dae8ac36ed74270c28d8ea0ece143dc6b934ed
+    parameters:
+      ENV_NAME: env-stage

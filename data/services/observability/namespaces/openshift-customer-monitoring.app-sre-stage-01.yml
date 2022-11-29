@@ -21,6 +21,9 @@ managedResourceTypes:
 - Prometheus
 - PrometheusRule
 - ServiceMonitor
+- ServiceLevelObjective
+
+clusterAdmin: true
 
 openshiftResources:
 # Observability
@@ -273,6 +276,10 @@ openshiftResources:
   path: /observability/prometheusrules/kas-fleet-manager-cluster-capacity-stage.prometheusrules.yaml
 - provider: resource
   path: /observability/prometheusrules/kas-fleet-manager-kafka-version-mismatch-stage.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/kas-fleet-manager-kafkas-stuck-in-suspending-state-stage.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/kas-fleet-manager-kafkas-stuck-in-resuming-state-stage.prometheusrules.yaml
 ### COS Fleet Manager
 - provider: resource
   path: /observability/prometheusrules/cos-fleet-manager-slos-availability-stage.prometheusrules.yaml
@@ -393,6 +400,8 @@ openshiftResources:
 ## Glitchtip rules
 - provider: resource
   path: /observability/prometheusrules/glitchtip-slo-stage.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/glitchtip-stage-prometheusrules.yaml
 
 ## ServiceMonitors
 ### Vault
@@ -524,6 +533,19 @@ openshiftResources:
   variables:
     environment: integration
     namespace: uhc-integration
+#### OCM Addons Service
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-addons-service.servicemonitor.yaml
+  variables:
+    environment: integration
+    namespace: uhc-integration
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-addons-service-envoy.servicemonitor.yaml
+  variables:
+    environment: integration
+    namespace: uhc-integration
 #### Job Queue
 - provider: resource-template
   type: jinja2
@@ -594,6 +616,19 @@ openshiftResources:
 - provider: resource-template
   type: jinja2
   path: /observability/servicemonitors/ocm-managed-services-envoy.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: uhc-stage
+#### OCM Addons Service
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-addons-service.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: uhc-stage
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-addons-service-envoy.servicemonitor.yaml
   variables:
     environment: stage
     namespace: uhc-stage
@@ -965,6 +1000,12 @@ openshiftResources:
   path: /observability/prometheusrules/unleash-stage.prometheusrules.yaml
   variables:
     cluster: app-sre-stage-01
+
+#pyrra servicelevelobjective
+- provider: resource
+  path: /observability/pyrra-slo/pyrra-slo-test-apiserver-read.yaml
+- provider: resource
+  path: /observability/pyrra-slo/pyrra-slo-test-apiserver-write.yaml
 
 sharedResources:
 - $ref: /services/observability/shared-resources/dvo.yml

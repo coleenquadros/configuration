@@ -7,9 +7,9 @@ import sys
 
 from binaryornot.check import is_binary
 
-IGNORE_PATTERN = re.compile(r'^hack/new_osd_operator/.*\.tpl$')
+IGNORE_PATTERN = re.compile(r"^hack/new_osd_operator/.*\.tpl$")
 
-logging.basicConfig(format='%(levelname)s: %(message)s')
+logging.basicConfig(format="%(levelname)s: %(message)s")
 
 error = False
 for file_name in sys.stdin:
@@ -23,7 +23,7 @@ for file_name in sys.stdin:
         logging.info([file_name, "skipping file matching IGNORE_PATTERN"])
         continue
 
-    with open(file_name, 'rb') as f:
+    with open(file_name, "rb") as f:
         try:
             f.seek(-1, os.SEEK_END)
         except (OSError, IOError):
@@ -31,7 +31,7 @@ for file_name in sys.stdin:
             continue
 
         last_char = f.read()
-        if last_char != b'\n':
+        if last_char != b"\n":
             error = True
             logging.error([file_name, "no newline at EOF"])
 

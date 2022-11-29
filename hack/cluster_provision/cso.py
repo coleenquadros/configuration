@@ -4,14 +4,18 @@ import os
 from pathlib import Path
 from typing import Dict, Any, Mapping
 
-from .common import get_base_yaml, write_yaml_to_file, cluster_config_exists, \
-    read_yaml_from_file
+from .common import (
+    get_base_yaml,
+    write_yaml_to_file,
+    cluster_config_exists,
+    read_yaml_from_file,
+)
 
 log = logging.getLogger(__name__)
 
-CSO_FILENAME = 'openshift/{cluster}/namespaces/app-sre-cso-per-cluster.yml'
+CSO_FILENAME = "openshift/{cluster}/namespaces/app-sre-cso-per-cluster.yml"
 
-SAAS_FILENAME = 'services/container-security-operator/cicd/saas.yaml'
+SAAS_FILENAME = "services/container-security-operator/cicd/saas.yaml"
 
 CSO_TEMPLATE = """
 ---
@@ -62,35 +66,39 @@ def add_saas_target(data: Mapping, cluster: str) -> bool:
     """
     yaml = get_base_yaml()
 
-    targets = data['resourceTemplates'][0]['targets']
+    targets = data["resourceTemplates"][0]["targets"]
 
-    commit_hashes = {t['ref'] for t in targets if t['ref'] != 'master'}
+    commit_hashes = {t["ref"] for t in targets if t["ref"] != "master"}
 
     # Currently production uses the same commit hash and stage uses
     # 'master', so we can easily detect this. New logic will need to be
     # implemented in the future if this isn't a safe assumption.
     if len(commit_hashes) > 1:
-        raise ValueError('Could not determine which commit to use for '
-                         'the SaaS target, more than one option: '
-                         f'{commit_hashes}')
+        raise ValueError(
+            "Could not determine which commit to use for "
+            "the SaaS target, more than one option: "
+            f"{commit_hashes}"
+        )
 
     commit_hash = commit_hashes.pop()
 
     saas_target_entry = yaml.load(
-        SAAS_TARGET_TEMPLATE.format(cluster=cluster, commit_hash=commit_hash))
+        SAAS_TARGET_TEMPLATE.format(cluster=cluster, commit_hash=commit_hash)
+    )
 
     if saas_target_entry in targets:
-        log.info('No action required, SaaS target entry already exists')
+        log.info("No action required, SaaS target entry already exists")
         return False
     else:
-        log.info('Adding SaaS target entry')
+        log.info("Adding SaaS target entry")
         targets.append(saas_target_entry)
 
         # Sort the targets now that the new entry has been added. This
         # shouldn't harm formatting because there aren't any commented
         # blocks in the list.
-        data['resourceTemplates'][0]['targets'] = \
-            sorted(targets, key=lambda k: k['namespace']['$ref'])
+        data["resourceTemplates"][0]["targets"] = sorted(
+            targets, key=lambda k: k["namespace"]["$ref"]
+        )
         return True
 
 
@@ -100,12 +108,14 @@ def main(data_dir: str, cluster: str) -> None:
         raise FileNotFoundError(f"{data_dir} does not exist")
 
     if not cluster_config_exists(data_dir, cluster):
-        raise FileNotFoundError(f"Cluster configuration doesn't exist for "
-                                f"{cluster}, check if the cluster name was "
-                                f"mistyped")
+        raise FileNotFoundError(
+            f"Cluster configuration doesn't exist for "
+            f"{cluster}, check if the cluster name was "
+            f"mistyped"
+        )
 
     # Create the app-sre-cso-per-cluster.yml namespace file for the cluster.
-    logging.info('Creating app-sre-cso-per-cluster.yml')
+    logging.info("Creating app-sre-cso-per-cluster.yml")
     cso_per_cluster = create_cso_per_cluster(cluster)
     cso_cluster_path = Path(data_dir, CSO_FILENAME.format(cluster=cluster))
     write_yaml_to_file(str(cso_cluster_path), cso_per_cluster)

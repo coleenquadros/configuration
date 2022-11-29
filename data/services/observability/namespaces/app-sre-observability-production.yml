@@ -71,7 +71,7 @@ openshiftResources:
 ## Hypershift-platform Observatorium Credentials
 - provider: vault-secret
   path: osd-sre/rhobs-hypershift-platform
-  version: 2
+  version: 3
   name: hypershift-token-refresher
   annotations:
     qontract.recycle: "true"
@@ -108,6 +108,9 @@ openshiftResources:
   validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-appsre-aws-waf.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-appsre-cloudflare.configmap.yaml
   validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-appsre-rds.configmap.yaml
@@ -362,6 +365,11 @@ openshiftResources:
 ### Insights RDS Exporter Configuration
 - provider: resource
   path: /observability/rds-exporter/crc/rds-exporter.configmap.crc-prod.yaml
+
+## Cloudflare Exporter
+- provider: vault-secret
+  path: app-sre/creds/cloudflare/app-interface-read-metrics
+  version: 1
 
 ## AWS Resource exporter
 ### account: app-sre
@@ -859,44 +867,6 @@ externalResources:
     aws_infrastructure_access:
       cluster:
         $ref: /openshift/hive-stage-01/cluster.yml
-      access_level: read-only
-  ## hshifti01ue1 cloudwatch access
-  - provider: aws-iam-service-account
-    identifier: hshifti01ue1-cloudwatch-access
-    user_policy:
-      {
-        "Version": "2012-10-17",
-        "Statement": [{
-          "Action": [
-            "sts:AssumeRole"
-          ],
-          "Effect": "Allow",
-          "Resource": "*"
-        }]
-      }
-    output_resource_name: hshifti01ue1-cloudwatch-access
-    aws_infrastructure_access:
-      cluster:
-        $ref: /openshift/hshifti01ue1/cluster.yml
-      access_level: read-only
-  ## hsservicei01ue1 cloudwatch access
-  - provider: aws-iam-service-account
-    identifier: hsservicei01ue1-cloudwatch-access
-    user_policy:
-      {
-        "Version": "2012-10-17",
-        "Statement": [{
-          "Action": [
-            "sts:AssumeRole"
-          ],
-          "Effect": "Allow",
-          "Resource": "*"
-        }]
-      }
-    output_resource_name: hsservicei01ue1-cloudwatch-access
-    aws_infrastructure_access:
-      cluster:
-        $ref: /openshift/hsservicei01ue1/cluster.yml
       access_level: read-only
   ## quays02ue1 cloudwatch access
   - provider: aws-iam-service-account

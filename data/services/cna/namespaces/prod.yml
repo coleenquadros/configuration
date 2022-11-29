@@ -1,0 +1,111 @@
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: cna
+
+name: cna-production
+
+description: Production namespace for the CNA service
+
+cluster:
+  $ref: /openshift/app-sre-prod-01/cluster.yml
+
+app:
+  $ref: /services/cna/app.yml
+
+environment:
+  $ref: /products/cna/environments/prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Role
+- RoleBinding
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/cna/production/runtime
+  version: 4
+# allows creation of Taskruns
+- provider: resource
+  path: /cna/production/taskrunner.rolebinding.yaml
+- provider: resource
+  path: /cna/production/taskrunner.role.yaml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: cna-production
+    defaults: /terraform/resources/app-sre/production/rds-pg14.3.yml
+    parameter_group: /cna/production/cna-rds.parameter-group.yml
+    overrides:
+      apply_immediately: true
+      enabled_cloudwatch_logs_exports: ['postgresql', 'upgrade']
+    enhanced_monitoring: true
+  - provider: rds
+    identifier: cna-production-readonly
+    defaults: /terraform/resources/app-sre/production/rds-pg14.3.yml
+    parameter_group: /cna/production/cna-rds.parameter-group.yml
+    output_resource_name: cna-production-rds-readonly
+    replica_source: cna-production
+  - provider: elasticache
+    identifier: cna-redis-prod
+    defaults: /terraform/resources/cna/elasticache-production.yml
+    output_resource_name: cna-redis
+- provider: aws
+  provisioner:
+    $ref: /aws/cna-service/account.yml
+  resources:
+  - provider: s3
+    # this is the bucket for terraform state
+    identifier: cna-s3-prod
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: cna-s3
+  - provider: aws-iam-service-account
+    identifier: cna-service-production
+    output_resource_name: cna-service-iam
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": [
+              "sts:AssumeRole"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:iam::*:role/RH-CNA"
+          },
+          {
+            "Action": [
+              "sts:AssumeRole"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:iam::*:role/network-mgmt-*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": "s3:ListBucket",
+            "Resource": "arn:aws:s3:::cna-s3-prod"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:PutObject",
+              "s3:GetObject",
+              "s3:DeleteObject"
+            ],
+            "Resource": ["arn:aws:s3:::cna-s3-prod/*"]
+          }
+        ]
+      }

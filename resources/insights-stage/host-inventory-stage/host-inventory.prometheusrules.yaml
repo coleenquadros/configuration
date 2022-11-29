@@ -81,7 +81,7 @@ spec:
         link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:kuery,query:'@log_group:%20%22host-inventory-stage%22%20and%20%22NOT%20PRODUCED%22'),sort:!())
         message: 'Stage event producer failed to produce a(n) {{ $labels.event_type }} event'
     - alert: InventoryMqNotProcessing
-      expr: sum(increase(inventory_ingress_add_host_successes_total{namespace="host-inventory-stage"}[6h])) by (namespace) < 1
+      expr: (sum(increase(inventory_ingress_add_host_successes_total{namespace="host-inventory-stage"}[6h])) < 1) and (sum(increase(kafka_server_brokertopicmetrics_messagesin_total{topic=~'platform.inventory.host-ingress.*'}[6h])) > 1)
       labels:
         severity: medium
         service: insights

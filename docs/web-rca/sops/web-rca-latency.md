@@ -1,6 +1,6 @@
 ## Web RCA High Latency
 
-### Severity: Medium
+### Severity: High 
 
 ### Impact
 Users are experiencing high/slower latency on API requests.
