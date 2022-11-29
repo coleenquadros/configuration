@@ -50,7 +50,7 @@
 ### Impact
 
 No incoming request can be received or processed.
-The existing registered ACS Centrals will not be able to be processed.  
+The existing registered ACS Centrals will not be able to be processed.
 The ACS Centrals statuses will not be retrieved from OCM and updated to ACS Fleet Manager database.
 
 ### Summary
@@ -251,9 +251,9 @@ ACS Fleet Manager is not able to perform acs central provisioning normally and i
     ```
   check the log to ensure Fleet Manager worker is started: there is exactly one Fleet Manager leader running.
     ```
-    oc logs <pod-name> | grep 'Running as the leader.*FleetManager' 
-     
-    You should see output similar to the below from either one of the pods: 
+    oc logs <pod-name> | grep 'Running as the leader.*FleetManager'
+
+    You should see output similar to the below from either one of the pods:
     "Running as the leader and starting worker *workers.Worker"
     ```
 - Check if the Fleetshard-sync services pods are running and verify the logs.
@@ -269,9 +269,9 @@ ACS Fleet Manager is not able to perform acs central provisioning normally and i
     ```
   check the log to ensure Fleetshard-sync is started and reconcile loops start for requested centrals.
     ```
-    oc logs <pod-name> | grep 'Start reconcile central' 
-     
-    You should see output similar to the below: 
+    oc logs <pod-name> | grep 'Start reconcile central'
+
+    You should see output similar to the below:
     "Start reconcile central <central_name>"
     ```
 - How to handle:
@@ -322,7 +322,27 @@ ACS Fleet Manager is not able to performing ACS central deletion correctly.
 ### Steps
 
 refer to the steps [ACS Central provisioning latency](#acs-central-provisioning-latency)
- 
+
+---
+
+## Status page
+
+The ACS cloud service publishes its operational status under `Cloud Application Services/Red Hat Advanced Cluster Security Cloud Service`
+on [status.redhat.com](https://status.redhat.com). The status page integration is managed via app-interface as documented by the
+[dev-guidelines](https://service.pages.redhat.com/dev-guidelines/docs/appsre/advanced/statuspage/).
+
+The ACS status page currently displays a hard coded status, which defaults to `operational`. In case of an incident, the incident commander
+should [update the status page](https://service.pages.redhat.com/dev-guidelines/docs/appsre/advanced/statuspage/#define-a-status) depending
+on the nature of the incident:
+
+* `operational`
+* `under_maintenance`
+* `degraded_performance`
+* `partial_outage`
+* `major_outage`
+
+Use your best judgement to determine the appropriate status.
+
 ---
 
 ## Escalations
@@ -333,4 +353,4 @@ refer to the steps [ACS Central provisioning latency](#acs-central-provisioning-
 - Error/exception events found in the OSD cluster level, check with OCM support.
 - Error/exception related to SSO outage, check with CIAM team.
 - Error/exception related to fleetshard-sync, check with ACS team or Data Plane support.
-- Otherwise, or if unsure about the reason, escalate the issue to the Control Plane team 
+- Otherwise, or if unsure about the reason, escalate the issue to the Control Plane team
