@@ -132,7 +132,7 @@ $schema: /app-interface/change-type-1.yml
 name: add-role-member
 
 contextType: datafile
-contextSchema: /access/roles-1.yml
+contextSchema: /access/role-1.yml
 
 changes:
 - provider: jsonPath
@@ -177,7 +177,7 @@ $schema: /app-interface/change-type-1.yml
 name: add-role-member
 
 contextType: datafile
-contextSchema: /access/roles-1.yml
+contextSchema: /access/role-1.yml
 
 changes:
 - provider: jsonPath
