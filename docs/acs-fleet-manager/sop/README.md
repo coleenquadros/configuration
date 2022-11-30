@@ -341,7 +341,15 @@ on the nature of the incident:
 * `partial_outage`
 * `major_outage`
 
-Use your best judgement to determine the appropriate status.
+The status level during an incident is based primarily on the level of customer impact. Ultimately all parties involved
+in the incident handling determine the appropriate status. Some examples include:
+
+- ACS fleet manager is slow to respond to requests in relation to its latency targets.
+  - Status `degraded_performance` makes sense here.
+- A single ACS Central tenant is down.
+  - Status `partial_outage` makes sense here.
+- ACS fleet manager does not respond at all to requests.
+  - Status `major_outage` makes sense here.
 
 ---
 
