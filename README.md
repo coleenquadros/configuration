@@ -561,26 +561,24 @@ In order to get access to Sentry, a user has to have:
     * Example: [dev](/data/teams/ocm/roles/dev.yml) role.
 
 ---
-### Create a GlitchTip Project for an onboarded App (`/app-sre/app-1.yml`)
+### Create a GlitchTip Project for an onboarded App (`/dependencies/glitchtip-project-1.yml`)
 
-The structure of this parameter is the following:
-
+To define your glitchtip project, create a file in `/data/dependencies/glitchtip/projects/` with a structure like the following:
 ```yaml
-glitchtipProjects:
-- name: <name of the project - lower case max 64 characters>
-  description: <description of the project>
-  platform: <project language>
-  teams:
-  - $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre-stage.yml`>
-  - ...
-  organization:
-    $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example `/dependencies/glitchtip/glitchtip-stage.yml`>
+name: <name of the project - lower case max 64 characters>
+description: <description of the project>
+app:
+  $ref: <app datafile (`/app-sre/app-1.yml`)>
+platform: <project language>
+teams:
+- $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre-stage.yml`>
 - ...
+organization:
+  $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example `/dependencies/glitchtip/glitchtip-stage.yml`>
+
 ```
 
-The name, description, platform, teams, and organization fields are required. The name must be unique within an organization. The project name - organization combination must be globally unique.
-
-In order to add or remove a Glitchtip project, an MR must be sent to the appropriate App datafile, and the project needs to be added to or removed from the project's array.
+The name, app, description, platform, teams, and organization fields are required. The name must be unique.
 
 ### Create a Glitchtip Organization (`/dependencies/glitchtip-organization-1.yml`)
 
