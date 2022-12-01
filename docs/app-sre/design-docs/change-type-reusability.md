@@ -66,8 +66,8 @@ Add a new change provider named `change-type` to `/app-interface/change-type-1.y
 
 ```yaml
 - provider: change-type         <-- new provider
-  changeType:
-    $ref: namespace-owner.yml   <-- puts the existing change-type ...
+  changeTypes:
+  - $ref: namespace-owner.yml   <-- puts the existing change-type ...
   context:                      <-- ... into a new context
     selector: app.'$ref'
 ```
@@ -87,8 +87,8 @@ changes:
   changeSchema: /openshift/namespace-1.yml
   context:
     selector: app.'$ref'
-  changeType:
-    $ref: namespace-owner.yml
+  changeTypes:
+  - $ref: namespace-owner.yml
 - ...
 
 $schema: /access/role-1.yml
