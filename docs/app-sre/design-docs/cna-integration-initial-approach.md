@@ -63,7 +63,9 @@ ocm:
 Currently, the provisioner is merely a wrapper around an OCM object. However,
 CNA is in an early stage and it is not absolutely clear yet how the API will
 be exposed in the future. Using a custom object around OCM gives us more freedom
-for changes later on. E.g., it could be used to implement sharding once https://issues.redhat.com/browse/OSDEV-887 is completed.
+for changes later on.
+
+Further, it could be used to implement sharding once https://issues.redhat.com/browse/OSDEV-887 is completed.
 
 #### Defaults
 
@@ -137,7 +139,7 @@ externalResources:
 ```
 
 We expect app-interface to delete `my-first-asset`.
-Due to lack of life-cycle management, we need to implement the decommissioning tracking on the client side for now.
+Due to lack of declarative life-cycle management, we need to implement the decommissioning tracking on the client side for now.
 
 ##### Patching / Creating
 
