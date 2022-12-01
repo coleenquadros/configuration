@@ -1,0 +1,60 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: observatorium-metrics
+name: observatorium-metrics-2022-12-01
+app:
+  $ref: /services/rhobs/observatorium/observatorium-metrics/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/rhobs/configuration:
+    - branch: master
+      total: 8
+      success: 8
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: rhobs-testing
+    namespace: openshift-customer-monitoring
+    post_deploy_job: false
+  - cluster: app-sre-stage-01
+    namespace: openshift-customer-monitoring
+    post_deploy_job: false
+  - cluster: telemeter-prod-01
+    namespace: openshift-customer-monitoring
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: observatorium-metrics-stage
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 1
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 16
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 14
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 10
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 21
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 5
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 5
+  - cluster: telemeter-prod-01
+    namespace: observatorium-metrics-production
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 15
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 13
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 10
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 20
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 4
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 4
+  service_slo: null

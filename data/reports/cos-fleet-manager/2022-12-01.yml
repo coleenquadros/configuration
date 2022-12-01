@@ -1,0 +1,64 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: cos-fleet-manager
+name: cos-fleet-manager-2022-12-01
+app:
+  $ref: /services/managed-connectors/app.yaml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://gitlab.cee.redhat.com/mk-ci-cd/cos-fleet-manager:
+    - branch: master
+      total: 4
+      success: 4
+    https://gitlab.cee.redhat.com/mk-ci-cd/cos-ui:
+    - branch: master
+      total: 25
+      success: 25
+    https://gitlab.cee.redhat.com/mk-ci-cd/cos-debezium-ui:
+    - branch: master
+      total: 10
+      success: 10
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: managed-connectors-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: app-sre-prod-04
+    namespace: managed-connectors-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: managed-connectors-stage
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 1
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 1
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 1
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 1
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 1
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 1
+  - cluster: app-sre-prod-04
+    namespace: managed-connectors-production
+    validations:
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 1
+  service_slo:
+  - cluster: app-sre-prod-04
+    namespace: managed-connectors-production
+    slo_name: API availability
+    slo_doc_name: cos-fleet-manager
+    slo_value: 0.0
+    slo_target: 95.0
