@@ -63,7 +63,7 @@ ocm:
 Currently, the provisioner is merely a wrapper around an OCM object. However,
 CNA is in an early stage and it is not absolutely clear yet how the API will
 be exposed in the future. Using a custom object around OCM gives us more freedom
-for changes later on.
+for changes later on. E.g., it could be used to implement sharding once https://issues.redhat.com/browse/OSDEV-887 is completed.
 
 #### Defaults
 
@@ -88,9 +88,12 @@ vpc:
   $ref: /aws/ter-int-dev/vpcs/ter-int-dev-default-vpc.yml
 ```
 
+Further, this approach allows crossrefs, like the vpc pointer above.
+
 Like other integrations, every asset offers an `overrides` section to override values from the defaults file.
-The `overrides` section does not have a strict schema. However, the integration validates that parameters
+The `overrides` section does not have a strict GQL schema. However, the integration validates that parameters
 mentioned in the `overrides` section are compliant to the defaults file schema.
+Further, the `overrides` section has a jsonpath schema, which will show errors during bundling phase.
 
 ### Non-Schema Implementation Details
 
@@ -98,12 +101,14 @@ CNA is imperative, i.e., the order of API calls is important. This knowledge mus
 to keep app-interface declarative.
 
 In order to make CNA compliant with the app-interface way, we must also implement the concept of state on the client side.
+Lucky for us, the CNA API can be used to fetch the real-world state.
 State can be used to calculate differences between real-world state and desired app-interface defined state.
 Those differences can then be used to implement dry-run and life-cycle management on the client side.
 
 #### Life-cycle Management
 
-As of now CNA does not offer a mechanism for life-cycle management of assets. It must be implemented on the client-side.
+As of now CNA does not offer a mechanism for declarative life-cycle management of assets. It must be implemented on the client-side.
+In the following we explain what we mean with declarative life-cycle management.
 
 ##### Decommissioning
 
@@ -172,9 +177,11 @@ the integration must be able to distinguish it.
 CNA does not provide a dry-run option. app-interface heavily relies on a dry-run
 mechanism in order to evaluate if a change can be considered safe.
 
-#### CNA current state
+#### Fetching CNA current state
 
 CNA offers API calls to fetch information about assets. In order to get the full picture of
 what is already provisioned, we need to query all the assets including their bindings.
 This requires one API call to query the assets + one API call per asset to retrieve all bindings.
+I.e., the amount of calls required to fetch current state is linear to the amount of assets.
+This is a scaling issue.
 
