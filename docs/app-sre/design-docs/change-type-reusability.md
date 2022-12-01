@@ -100,4 +100,4 @@ self_service:
   - $ref: my-app.yml
 ```
 
-The way `changes.context` is configured is unchanged. The contexts it yields are applied additionally to a `change-type` and not exclusively to `jsonPathSelectors` anymore. The result of this `change-type` is identical to assigning the `namespace-owner` `change-type` to all namespaces of an app explicitely.
+The way `changes.context` is configured is unchanged. The result of this `change-type` is identical to assigning the `namespace-owner` `change-type` to all namespaces of an app explicitely.
