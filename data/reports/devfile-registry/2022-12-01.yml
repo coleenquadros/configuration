@@ -1,0 +1,47 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: devfile-registry
+name: devfile-registry-2022-12-01
+app:
+  $ref: /services/devfile-registry/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/devfile/registry:
+    - branch: master
+      total: 23
+      success: 21
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: devfile-registry-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-03
+    namespace: devfile-registry-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: devfile-registry-stage
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 2
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 3
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 1
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 3
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 2
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 2
+  - cluster: app-sre-prod-03
+    namespace: devfile-registry-production
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 1
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 2
+  service_slo: null

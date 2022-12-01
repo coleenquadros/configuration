@@ -1,0 +1,49 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: insights
+name: insights-2022-12-01
+app:
+  $ref: /services/insights/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities: null
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: crcs02ue1
+    namespace: amq-streams
+    post_deploy_job: false
+  - cluster: insights-perf
+    namespace: insights-push-perf
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: amq-streams
+    post_deploy_job: false
+  - cluster: c-rh-c-eph
+    namespace: apicurio
+    post_deploy_job: false
+  - cluster: crcd01ue1
+    namespace: keda
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: insights-push-stage
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 1
+  - cluster: crcs02ue1
+    namespace: amq-streams
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_no_rolling_update_strategy:
+        Failed: 1
+  - cluster: crcp01ue1
+    namespace: amq-streams
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_no_rolling_update_strategy:
+        Failed: 1
+  service_slo: null

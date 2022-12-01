@@ -1,0 +1,64 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: host-inventory
+name: host-inventory-2022-12-01
+app:
+  $ref: /services/insights/host-inventory/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/insights-host-inventory:
+    - branch: master
+      total: 18
+      success: 18
+    - branch: master
+      total: 18
+      success: 18
+    https://github.com/RedHatInsights/insights-inventory-frontend:
+    - branch: master
+      total: 13
+      success: 13
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: host-inventory-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: host-inventory-prod
+    post_deploy_job: false
+  - cluster: insights-perf
+    namespace: host-inventory-devel-perf
+    post_deploy_job: false
+  - cluster: app-sre-stage-01
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcp01ue1
+    namespace: host-inventory-prod
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 10
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 11
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 11
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 6
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 6
+  - cluster: crcs02ue1
+    namespace: host-inventory-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+  service_slo: null
