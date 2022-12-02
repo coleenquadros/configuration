@@ -109,7 +109,7 @@ Those differences can then be used to implement dry-run and life-cycle managemen
 
 #### Life-cycle Management
 
-As of now CNA does not offer a mechanism for declarative life-cycle management of assets. It must be implemented on the client-side.
+As of now the [CNA API](https://gitlab.cee.redhat.com/service/cna-management/-/blob/main/openapi/openapi.yaml#/) does not offer a mechanism for **declarative** life-cycle management of assets. It must be implemented on the client-side.
 In the following we explain what we mean with declarative life-cycle management.
 
 ##### Decommissioning
@@ -178,6 +178,8 @@ the integration must be able to distinguish it.
 
 CNA does not provide a dry-run option. app-interface heavily relies on a dry-run
 mechanism in order to evaluate if a change can be considered safe.
+For that reason, we implement the concept of state on the client side, to compare
+current and desired state.
 
 #### Fetching CNA current state
 
