@@ -8,7 +8,7 @@ Jira: https://issues.redhat.com/browse/APPSRE-6651
 
 ## Problem statement
 
-`change-types` can not easily be reused in different contexts as they define the context within they can act with their `contextSchema` field. The mentioned schema restricts how ownership can be defined via the `self_service` section of an `/access/role-1.yml` and how ownership can be extended via `changes.context`.
+`change-types` can not easily be reused in different contexts as they define the context within they can act with their `contextSchema` field. The mentioned schema restricts how ownership can be defined via the `self_service` section of an `/access/role-1.yml` and how ownership can be expanded via `changes.context`.
 
 E.g. the following `change-types` operates on `/openshift/namespace-1.yml` and can be used on owned namespaces.
 
@@ -58,7 +58,7 @@ This is undesired duplication and makes [higher level concepts for ownership](ht
 
 ## Goals
 
-Make `change-types` reusable in different contexts and enable ownership extension.
+Make `change-types` reusable in different contexts and enable ownership expansion.
 
 ## Proposal
 
