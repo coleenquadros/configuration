@@ -31,7 +31,7 @@ self_service:
   - $ref: my-namespace-2.yml
 ```
 
-If we would like to define higher level concepts for ownership, e.g. allow management of namespaces that belong to an `/app-sre/app-1.yml`, this `change-type` can't be reused, and we would need to create a nearly identical one, one that defines `/app-sre/app-1.yml` as `contextSchema` and knows how to find that context in a namespace via `changes.context.selector` (see "indirect ownership" in the [change-type docs](/docs/app-sre/change-types.md).
+If we would like to define higher level concepts for ownership, e.g. allow management of namespaces that belong to an `/app-sre/app-1.yml`, this `change-type` can't be reused, and we would need to create a nearly identical one, one that defines `/app-sre/app-1.yml` as `contextSchema` and knows how to find that context in a namespace via `changes.context.selector` (see "indirect ownership" in the [change-type docs](/docs/app-sre/change-types.md)).
 
 ```yaml
 $schema: /app-interface/change-type-1.yml
