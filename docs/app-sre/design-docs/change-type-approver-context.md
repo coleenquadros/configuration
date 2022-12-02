@@ -29,12 +29,10 @@ $schema: /app-interface/change-type-1.yml
 ...
 ownership:
 - provider: jsonPath
-  approverSchema: .. /access/user-1.yml or /access/bot-1.yml
   jsonPath: .. jsonpath to select the approver
 ```
 
 The `ownership.jsonPath` field defines how to find an approver reference in a file.
-The `ownership.approverSchema` field declares what kind of approver we are looking for.
 
 ### Example 1
 
@@ -48,7 +46,6 @@ changes:
 - public_gpg_key
 ownership:
 - provider: jsonPath
-  approverSchema: /access/user-1.yml
   jsonPath: $
 ```
 
@@ -66,7 +63,6 @@ changes:
 - users
 ownership:
 - provider: jsonPath
-  approverSchema: /access/user-1.yml
   jsonPath: signoffManagers[*].'$ref'
 ```
 
