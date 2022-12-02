@@ -1,0 +1,54 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  provider: tekton
+
+name: hacbs-internal-services
+description: hacbs-internal-services namespace
+
+cluster:
+  $ref: /openshift/appsres03ue1/cluster.yml
+
+app:
+  $ref: /services/app-sre/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Secret
+- ClusterRole
+
+managedResourceNames:
+- resource: ClusterRole
+  resourceNames:
+    - tekton-trigger-access
+
+sharedResources:
+- $ref: /services/app-interface/shared-resources/app-sre-pipelines.yml
+
+openshiftResources:
+- provider: vault-secret
+  name: iib-production-services-url
+  path: hacbs/hacbs-internal-services/iib/iib-production-services-url
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  name: iib-service-account
+  path: hacbs/hacbs-internal-services/iib/iib-service-account
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  name: errata-service-account
+  path: hacbs/hacbs-internal-services/errata/errata-service-account
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
