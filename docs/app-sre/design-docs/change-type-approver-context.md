@@ -14,7 +14,7 @@ For example `/access/user-1.yml`. It is simply not feasible to grant each user p
 
 In other cases, the information about a natural owner is directly present or referenceable from the file, e.g. `/app-sre/gabi-instance-1.yml#signoffManagers`.
 
-Being forced to declare such ownerships explicitely is a scaling issue for the granular permission model and Hybrid SRE. It brings back toil through ownership management.
+Being forced to declare such ownerships explicitly is a scaling issue for the granular permission model and Hybrid SRE. It brings back toil through ownership management.
 
 ## Goals
 
@@ -89,4 +89,4 @@ self_service:
   - $ref: user_a.yml
 ```
 
-In a PR where more fields than just the `public_gpg_key` of a user are changed, multiple `change-types` would be able to cooporate to enable full-service and multiple teams (roles) would need to `/lgtm` before the PR would be considered approved. It does not matter where ownership comes from. As soon as ownership exists, all of them are treated equally.
+In a PR where more fields than just the `public_gpg_key` of a user are changed, multiple `change-types` would be able to cooperate to enable full-service and multiple teams (roles) would need to `/lgtm` before the PR would be considered approved. It does not matter where ownership comes from. As soon as ownership exists, all of them are treated equally.
