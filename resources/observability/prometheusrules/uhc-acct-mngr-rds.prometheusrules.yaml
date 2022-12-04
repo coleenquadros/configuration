@@ -1,0 +1,31 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: uhc-acct-mngr-rds-{{{environment}}}
+spec:
+  groups:
+  - name: uhc-acct-mngr-rds-{{{environment}}}
+    rules:
+      # RDS - CPU is too high
+      - alert: RDS CPU is too high - {{{environment}}}
+        expr: aws_rds_cpuutilization_average{dbinstance_identifier=~"uhc-acct-mngr-{{{environment}}}"} > 25
+        for: 1h
+        labels:
+          service: uhc-acct-mngr
+          severity: medium
+        annotations:
+          message: "UHC Account Manager in namespace {{{ environment }}}: RDS CPU is too high"
+      # RDS - Memory is too high
+      - alert: RDS Memory is too high - {{{environment}}}
+        expr: aws_rds_freeable_memory_average{dbinstance_identifier=~"uhc-acct-mngr-{{{environment}}}"} < 15e9
+        for: 1h
+        labels:
+          service: uhc-acct-mngr
+          severity: medium
+        annotations:
+          message: "UHC Account Manager in namespace {{{ environment }}}: RDS Memory is too high"

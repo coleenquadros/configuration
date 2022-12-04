@@ -1,0 +1,68 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /observability/prometheusrules/uhc-acct-mngr-rds.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: aws_rds_cpuutilization_average{container="cloudwatch-exporter", dbinstance_identifier="uhc-acct-mngr-{{{environment}}}", endpoint="prom", exported_job="aws_rds", instance="10.130.4.12:9106", job="cloudwatch-exporter", namespace="app-sre-observability-{{{environment}}}", pod="cloudwatch-exporter-dd6fcfd4f-497hf", service="cloudwatch-exporter"}
+        values: 0+0x59 30.5+0x1000
+    alert_rule_test:
+      - eval_time: 50m
+        alertname: RDS CPU is too high - {{{environment}}}
+        exp_alerts:
+          []
+      - eval_time: 70m
+        alertname: RDS CPU is too high - {{{environment}}}
+        exp_alerts:
+          []
+      - eval_time: 2h
+        alertname: RDS CPU is too high - {{{environment}}}
+        exp_alerts:
+          - exp_labels:
+              service: uhc-acct-mngr
+              severity: medium
+              dbinstance_identifier: uhc-acct-mngr-{{{environment}}}
+              container: cloudwatch-exporter
+              endpoint: prom
+              exported_job: aws_rds
+              instance: 10.130.4.12:9106
+              job: cloudwatch-exporter
+              namespace: app-sre-observability-{{{environment}}}
+              pod: cloudwatch-exporter-dd6fcfd4f-497hf
+            exp_annotations:
+              message: "UHC Account Manager in namespace {{{ environment }}}: RDS CPU is too high"
+
+  - interval: 1m
+    input_series:
+      - series: aws_rds_freeable_memory_average{container="cloudwatch-exporter", dbinstance_identifier="uhc-acct-mngr-{{{environment}}}", endpoint="prom", exported_job="aws_rds", instance="10.131.0.11:9106", job="cloudwatch-exporter", namespace="app-sre-observability-{{{environment}}}", pod="cloudwatch-exporter-dd6fcfd4f-cdd7w", service="cloudwatch-exporter"}
+        values: 16e9+0x59 14e9+0x59
+    alert_rule_test:
+      - eval_time: 50m
+        alertname: RDS Memory is too high - {{{environment}}}
+        exp_alerts:
+          []
+      - eval_time: 70m
+        alertname: RDS Memory is too high - {{{environment}}}
+        exp_alerts:
+          []
+      - eval_time: 2h
+        alertname: RDS Memory is too high - {{{environment}}}
+        exp_alerts:
+          - exp_labels:
+              service: uhc-acct-mngr
+              severity: medium
+              dbinstance_identifier: uhc-acct-mngr-{{{environment}}}
+              container: cloudwatch-exporter
+              endpoint: prom
+              exported_job: aws_rds
+              instance: 10.131.0.11:9106
+              job: cloudwatch-exporter
+              namespace: app-sre-observability-{{{environment}}}
+              pod: cloudwatch-exporter-dd6fcfd4f-cdd7w
+            exp_annotations:
+              message: "UHC Account Manager in namespace {{{ environment }}}: RDS Memory is too high"
