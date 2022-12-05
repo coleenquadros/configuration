@@ -1,0 +1,34 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: cos-fleet-manager
+
+name: saas-rhoc-observability
+description: SaaS tracking file for Observability resources, RHOC data and control planes
+
+app:
+  $ref: /services/managed-connectors/app.yaml
+
+pipelinesProvider:
+  $ref: /services/managed-connectors/pipelines/tekton.cos-fleet-manager-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: rhoc-api-alert
+
+imagePatterns: []
+
+managedResourceTypes:
+  - PrometheusRule
+
+resourceTemplates:
+  - name: rhoc-data-plane-rules
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/cos-observability-resources
+    path: /resources/prometheus/downstream
+    provider: directory
+    targets:
+      - namespace:
+          $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
+        ref: main
