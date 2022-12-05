@@ -105,4 +105,4 @@ The previous example assumes that any potential secret will be searched locally 
 
 ## Further documentation
 
-Writing tests can be difficult at the beginning. This [article](https://www.robustperception.io/unit-testing-rules-with-prometheus) is a nicer start than the official documentation.
+Writing tests can be difficult at the beginning. The articles [here](https://www.robustperception.io/unit-testing-rules-with-prometheus) and [here](https://howardburgess.github.io/prometheus-unit-testing/#/) are a nicer start than the official documentation.
