@@ -112,6 +112,8 @@ This step should be performed in a single merge request.
       path: app-sre/creds/kube-configs/<cluster_name>
       field: token
 
+    clusterAdmin: true # should enable cluster admin for this cluster via OCM
+
     machinePools: # optional, specify additional Machine Pools to be provisioned
     - id: (machine pool name, should be unique per cluster)
       instance_type: (desired instance type. m5.xlarge for example)
@@ -440,9 +442,7 @@ hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <
 
 ## Step 7 - Obtain cluster-admin
 
-1. Create an OHSS ticket to enable cluster-admin in the cluster. Examples: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302), [OHSS-5939](https://issues.redhat.com/browse/OHSS-5939). Be sure to mention in the ticket that this is an AppSRE cluster, which should grant approval (according to this [PR](https://github.com/openshift/ops-sop/pull/2297)).
-
-1. Once the ticket is Done, add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/administering_a_cluster/osd-admin-roles.html
+1. Add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/administering_a_cluster/osd-admin-roles.html
 
 1. Login to the cluster, create a cluster-admin ServiceAccount, grant it the cluster-admin role and obtain its token:
   ```sh
