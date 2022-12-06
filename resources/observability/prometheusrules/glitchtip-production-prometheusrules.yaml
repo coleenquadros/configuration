@@ -11,20 +11,6 @@ spec:
   groups:
   - name: glitchtip-production
     rules:
-    - alert: PrometheusFailedToScrapeGlitchTipWeb
-      annotations:
-        message: "Prometheus failed to scrape glitchtip-web: pod={{ $labels.pod }}, namespace={{ $labels.namespace }}"
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/prometheus-failed-to-scrape-glitchtip-web.md"
-      # Fire when prometheus failed to scrape glitchtip-web service. The right side of the and operator
-      # ensures that there is indeed an unscrapable prometheus target so that when up metric is missing
-      # for some reason (e.g. node restart) then we don't get a false-positive alert.
-      expr: |
-        absent(up{job="glitchtip-web"} == 1) and count(up{job="glitchtip-web"} == 0) > 0
-      for: 1m
-      labels:
-        service: glitchtip
-        severity: medium
-
     - alert: GlitchtipContainersDown
       expr: sum by(container) (kube_pod_container_status_ready{namespace="glitchtip-production"}) < 1
       for: 1m
@@ -33,7 +19,6 @@ spec:
         severity: medium
       annotations:
         message: "Glitchtip {{ $labels.container }} deployment is down."
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
 
     - alert: GlitchtipDeploymentUnderReplicated
       expr: kube_deployment_status_replicas_unavailable{namespace="glitchtip-production"} > 0
@@ -43,4 +28,3 @@ spec:
         severity: medium
       annotations:
         message: "Glitchtip deployment {{ $labels.deployment }} has {{ $value }} pods not running."
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
