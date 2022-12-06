@@ -288,3 +288,53 @@ tests:
   input_series:
   - series: kube_pod_container_status_restarts_total{namespace="assisted-installer-production",pod="assisted-image-service-123-456",container="assisted-image-service"}
     values: 0 0 0 1 2 2 2 2 2 2 2 2 2 2 2
+
+# Abnormal number of requests per second should trigger its z-score alert
+# Series values are in minutes, so we have enough datapoints to calulate hourly rate.
+# One day has 1440 minutes
+- interval: 1m
+  input_series:
+  - series: http_request_duration_seconds_count{endpoint="assisted-svc"}
+    values: 1+1x1440 1440+2x1440 4320+2x1440 5760+1x1440 7200+1x1440 1+2x1440 2880+1x1440 4320+2x1440 7200+2x1440 10080+2x1440 12960+2x1440 15840+1x1440 17280+200x1440 305280+200x1440 593280+10x1440 607680+10x1440 622080+10x1440 636480+10x1440 650880+10x1440 665280+1x1440 666720+10x144 681120+10x1440 695520+10x1440 709920+10x1440
+  alert_rule_test:
+  # flat rate, no alert
+  - eval_time: 3d12h
+    alertname: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
+    exp_alerts: []
+  # flat rate, restarted counter
+  - eval_time: 5d12h
+    alertname: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
+    exp_alerts: []
+  # flat rate, no alert
+  - eval_time: 9d12h
+    alertname: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
+    exp_alerts: []
+  # flat rate, no alert
+  - eval_time: 11d12h
+    alertname: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
+    exp_alerts: []
+  # peak requests, alert
+  - eval_time: 12d12h
+    alertname: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
+    exp_alerts:
+    - exp_labels:
+        service: assisted-installer
+        severity: warning
+      exp_annotations:
+        message: "Assisted Installer Incoming http requests z-score is 3.5874569003685353 <!subteam^S01TBNAAPRU>"
+  # going down, no alert
+  - eval_time: 13d12h
+    alertname: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
+    exp_alerts: []
+  # getting used to the new average
+  - eval_time: 14d12h
+    alertname: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
+    exp_alerts: []
+  # getting used to the new average
+  - eval_time: 15d12h
+    alertname: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
+    exp_alerts: []
+  # getting used to the new average
+  - eval_time: 16d12h
+    alertname: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
+    exp_alerts: []
