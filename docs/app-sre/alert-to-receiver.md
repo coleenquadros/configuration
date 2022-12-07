@@ -84,7 +84,6 @@ deadmanssnitch-app-sre-prod-01-url = "https://deadmanssnitch-app-sre-prod-01-url
 deadmanssnitch-app-sre-prod-03-url = "https://deadmanssnitch-app-sre-prod-03-url"
 deadmanssnitch-app-sre-prod-04-url = "https://deadmanssnitch-app-sre-prod-04-url"
 deadmanssnitch-app-sre-stage-01-url = "https://deadmanssnitch-app-sre-stage-01-url"
-deadmanssnitch-app-sre-stage-02-url = "https://deadmanssnitch-app-sre-stage-02-url"
 deadmanssnitch-appsrep05ue1-url = "https://deadmanssnitch-appsrep05ue1-url"
 deadmanssnitch-appsrep06ue2-url = "https://deadmanssnitch-appsrep06ue2-url"
 deadmanssnitch-appsres03ue1-url = "https://deadmanssnitch-appsres03ue1-url"
