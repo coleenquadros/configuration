@@ -4,12 +4,8 @@
 
 ## Overview
 
-Currently we have two Jenkins https://ci.int.devshift.net/ and https://ci.ext.devshift.net/(usually referred as ci-int and ci-ext), hosting and running CI pipelines that are both serving App SRE and as our service to tenants. ci-int can only be accessed through VPN, while ci-ext is public accessible(through Red Hat SSO).
+Currently we have two Jenkins https://ci.int.devshift.net/ and https://ci.ext.devshift.net/(usually referred as ci-int and ci-ext), hosting and running CI pipelines that are both serving App SRE and as our service to tenants. ci-int can only be accessed through VPN, while ci-ext is public accessible(through Red Hat SSO). They are both on AWS.
 
-## Architecture
-
-
-![AppSRE Jenkins](img/jenkins.png "App SRE Jenkins Architecture")
 
 
 ## Troubleshooting
