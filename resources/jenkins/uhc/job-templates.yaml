@@ -110,7 +110,25 @@
         - *ocm_selenium_tests
         - *quay_secret_pull
     - ansicolor
-    ci_cmd: ./smoke_trigger.sh
+    parameters:
+    - string:
+        name: ENVIRONMENT
+        default: 'staging'
+        description: 'Environment against test suite run. Ex: Staging/Production'
+    - string:
+        name: TESTCASE
+        default: '*'
+        description: 'Testcase(s)'
+    - string:
+        name: BROWSER
+        default: 'Chrome'
+        description: 'Browser to run the test case(s)'
+    - string:
+        name: BRANCH
+        default: '{default_branch}'
+        description: 'The branch of uhc-portal repo for pipeline scripts'
+    branch: '${{BRANCH}}'
+    ci_cmd: ./smoke_trigger.sh ${{TESTCASE}} ${{BROWSER}} ${{ENVIRONMENT}}
     cron_expression: '0 15 10 ? * *'
     publishers:
     - archive:
