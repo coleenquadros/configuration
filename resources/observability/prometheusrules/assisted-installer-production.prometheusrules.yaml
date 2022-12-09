@@ -379,23 +379,15 @@ spec:
         # return z-score value unless z-score value falls within -3 / +3 range
         expr: |
           (
-            (
-              sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))
-              -
-              avg_over_time(sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))[1w:10m])
-            )
+            (assisted_installer_http_requests:rate10m - assisted_installer_http_requests:rate1w)
             /
-            stddev_over_time(sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))[1w:10m])
+            assisted_installer_http_requests:stddev1w
           )
           unless (
             (
-              (
-                sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))
-                -
-                avg_over_time(sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))[1w:10m])
-              )
+              (assisted_installer_http_requests:rate10m - assisted_installer_http_requests:rate1w)
               /
-              stddev_over_time(sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))[1w:10m])
+              assisted_installer_http_requests:stddev1w
             )
             < 3 > -3
           )
