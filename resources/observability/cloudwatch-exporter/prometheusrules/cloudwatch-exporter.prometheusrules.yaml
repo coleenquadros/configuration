@@ -43,16 +43,6 @@ spec:
         message: 'The current free storage space of DB instance {{ $labels.dbinstance_identifier }} is under 1 GB.'
         runbook: "https://github.com/rhobs/configuration/tree/main/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
-    - alert: RDSPredictOutOfStorage
-      labels:
-        service: app-sre-observability
-        severity: high
-      expr: predict_linear(aws_rds_free_storage_space_average{dbinstance_identifier!~".*-(?:stage|staging|integration).*"}[1h], 3600 * 9) < 0
-      for: 1h
-      annotations:
-        message: 'DB instance {{ $labels.dbinstance_identifier }} storage will be full within 8 hours.'
-        runbook: "https://github.com/rhobs/configuration/tree/main/docs/sop"
-        dashboard: "https://grafana.app-sre.devshift.net"
   - name: cloudwatch-exporter-ec2.rules
     rules:
     - alert: EC2HighCPUUtilization
