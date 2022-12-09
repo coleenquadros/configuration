@@ -335,6 +335,7 @@ spec:
           severity: warning
           service: assisted-installer
 
+      # http requests rate recorded metrics. Useful to calculate z-score
       - expr: |
           sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))
         labels:
@@ -352,6 +353,25 @@ spec:
         labels:
           service: assisted-installer
         record: assisted_installer_http_requests:stddev1w
+
+      # CPU recorded metrics. Useful to calculate z-score
+      - expr: |
+          avg(rate(container_cpu_usage_seconds_total{namespace="assisted-installer-production",pod=~"assisted-service-.*"}[10m]))
+        labels:
+          service: assisted-installer
+        record: assisted_installer_cpu_usage:rate10m
+
+      - expr: |
+          avg_over_time(avg(rate(container_cpu_usage_seconds_total{namespace="assisted-installer-production",pod=~"assisted-service-.*"}[10m]))[1w:10m])
+        labels:
+          service: assisted-installer
+        record: assisted_installer_cpu_usage:rate1w
+
+      - expr: |
+          stddev_over_time(avg(rate(container_cpu_usage_seconds_total{namespace="assisted-installer-production",pod=~"assisted-service-.*"}[10m]))[1w:10m])
+        labels:
+          service: assisted-installer
+        record: assisted_installer_cpu_usage:stddev1w
 
       - alert: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
         annotations:
