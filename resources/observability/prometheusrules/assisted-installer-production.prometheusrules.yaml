@@ -334,3 +334,34 @@ spec:
         labels:
           severity: warning
           service: assisted-installer
+
+      - alert: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
+        annotations:
+          message: Assisted Installer Incoming http requests z-score is {{ $value }} <!subteam^S01TBNAAPRU>
+        # return z-score value unless z-score value falls within -3 / +3 range
+        expr: |
+          (
+            (
+              sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))
+              -
+              avg_over_time(sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))[1w:10m])
+            )
+            /
+            stddev_over_time(sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))[1w:10m])
+          )
+          unless (
+            (
+              (
+                sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))
+                -
+                avg_over_time(sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))[1w:10m])
+              )
+              /
+              stddev_over_time(sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))[1w:10m])
+            )
+            < 3 > -3
+          )
+        for: 10m
+        labels:
+          severity: warning
+          service: assisted-installer
