@@ -395,3 +395,13 @@ spec:
         labels:
           severity: warning
           service: assisted-installer
+
+      - alert: "Assisted Installer - Container restarted"
+        annotations:
+          message: "Assisted Installer container {{ $labels.container }} in pod {{ $labels.pod }} restarted due to {{ $labels.reason }} <!subteam^S01TBNAAPRU>"
+        expr: |
+          increase(kube_pod_container_status_restarts_total{namespace="assisted-installer-production"}[10m]) * on(namespace, container, pod) group_left(reason) topk by (pod, container) (1, kube_pod_container_status_last_terminated_reason{namespace="assisted-installer-production"}) > 0
+        for: 1m
+        labels:
+          severity: warning
+          service: assisted-installer
