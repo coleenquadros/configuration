@@ -96,6 +96,7 @@ The steps below are followed for new accounts whether there is an existing user 
   - Go to "API Tokens"
   - Click "Create Token"
   - Set up the token with the following permissions:
+    - Account: Account Settings: Edit
     - Account: Billing: Edit
     - Account: Worker Scripts: Edit
     - Zone: Zone: Edit
