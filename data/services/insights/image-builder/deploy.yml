@@ -33,6 +33,7 @@ managedResourceTypes:
   - Service
   - ServiceAccount
   - FloorPlan
+  - ClowdApp
 
 # For integrity purposes, we enumerate here what container image registry path
 # patterns we are expecting to exist in our OpenShift template. Usually you
@@ -76,14 +77,11 @@ resourceTemplates:
           $ref: /dependencies/ci-ext/ci-ext.yml
         name: osbuild-image-builder-gh-build-main
       parameters:
-        # Parameters for the OpenShift template processing. These also inherit
-        # all values from the environment you're deploying into as well as a
-        # special IMAGE_TAG parameter matching the first 7 characters of the
-        # revision ID in the repository referenced by url above. You can override
-        # any of those if you must
-        ALLOWED_ORG_IDS: "*"
         COMPOSER_URL: "https://api.stage.openshift.com"
         FLOORIST_QUERY_PREFIX: "hms_analytics/image-builder/stage"
+        PGSSLMODE: "require"
+        QUOTA_FILE: "/app/config/quotas.json"
+        ALLOW_FILE: "/app/config/allow_list.json"
       promotion:
         publish:
           - image-builder-stage-deploy-success-channel
