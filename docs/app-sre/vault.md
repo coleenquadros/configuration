@@ -203,7 +203,7 @@ This SOP explains the process of recycling the Vault RDS DB password.
 2. Submit a MR to app-interface to update the vault-secret to the new version:
     - stage: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/vault.devshift.net/namespaces/vault-stage-internal.yml#L41
         * example: https://gitlab.cee.redhat.com/service/app-interface/merge_requests/4321
-    - production: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/vault.devshift.net/namespaces/vault-prod.yml#L41
+    - production: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/vault.devshift.net/namespaces/vault-prod-internal.yml#L41
         * example: https://gitlab.cee.redhat.com/service/app-interface/merge_requests/4323
 3. After the Secret was updated, update the password using terraform (init, plan, apply):
     - stage: https://gitlab.cee.redhat.com/app-sre/infra/tree/master/terraform/app-sre/vault-staging
