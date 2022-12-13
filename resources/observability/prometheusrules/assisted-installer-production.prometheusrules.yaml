@@ -396,6 +396,29 @@ spec:
           severity: warning
           service: assisted-installer
 
+      - alert: "Assisted Installer - Anomaly detected: CPU usage z-score outside normal range"
+        annotations:
+          message: Assisted Installer Incoming CPU usage z-score is {{ $value }} <!subteam^S01TBNAAPRU>
+        # return z-score value unless z-score value falls within -3 / +3 range
+        expr: |
+          (
+            (assisted_installer_cpu_usage:rate10m - assisted_installer_cpu_usage:rate1w)
+            /
+            assisted_installer_cpu_usage:stddev1w
+          )
+          unless (
+            (
+              (assisted_installer_cpu_usage:rate10m - assisted_installer_cpu_usage:rate1w)
+              /
+              assisted_installer_cpu_usage:stddev1w
+            )
+            < 3 > -3
+          )
+        for: 1h
+        labels:
+          severity: warning
+          service: assisted-installer
+
       - alert: "Assisted Installer - Container restarted"
         annotations:
           message: "Assisted Installer container {{ $labels.container }} in pod {{ $labels.pod }} restarted due to {{ $labels.reason }} <!subteam^S01TBNAAPRU>"

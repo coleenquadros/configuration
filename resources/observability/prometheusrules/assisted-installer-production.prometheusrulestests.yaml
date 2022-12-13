@@ -322,6 +322,38 @@ tests:
     alertname: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
     exp_alerts: []
 
+# Abnormal cpu usage should trigger its z-score alert
+# One day has 1440 minutes
+- interval: 1m
+  input_series:
+  - series: assisted_installer_cpu_usage:rate10m
+    values: 0.1+0x1440 1.0+0x120 1.1+0x120 0.8+0x1200 0.8+0x1440
+  - series: assisted_installer_cpu_usage:rate1w
+    values: 0.1+0x1440 0.1+0x1440 0.6+0x1440
+  - series: assisted_installer_cpu_usage:stddev1w
+    values: 0.1+0x1440 0.1+0x1440 0.4+0x1440
+  alert_rule_test:
+  # flat rate, no alert
+  - eval_time: 12h
+    alertname: "Assisted Installer - Anomaly detected: CPU usage z-score outside normal range"
+    exp_alerts: []
+  # rate raising but below z-score 3 (2.0), no alert
+  - eval_time: 1d1h
+    alertname: "Assisted Installer - Anomaly detected: CPU usage z-score outside normal range"
+    exp_alerts: []
+  # rate raising and z-score just outside acceptable range (3.0), alert
+  - eval_time: 1d3h
+    alertname: "Assisted Installer - Anomaly detected: CPU usage z-score outside normal range"
+    exp_alerts:
+    - exp_labels:
+        service: assisted-installer
+        severity: warning
+      exp_annotations:
+        message: "Assisted Installer Incoming CPU usage z-score is 10 <!subteam^S01TBNAAPRU>"
+  # rate returning in range, no alert
+  - eval_time: 2d5h
+    alertname: "Assisted Installer - Anomaly detected: CPU usage z-score outside normal range"
+    exp_alerts: []
 
 - interval: 1m
   input_series:
