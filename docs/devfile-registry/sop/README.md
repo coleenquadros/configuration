@@ -53,7 +53,7 @@ Users interacting with the registry through tools like odo or Eclipse Che will s
 
 - Access to the clusters that run the Devfile Registry, namespaces:
     - devfile-registry-stage (app-sre-stage-01)
-    - devfile-registry-production (app-sre-prod-03)
+    - devfile-registry-production (app-sre-prod-04)
 
 ### Steps:
 
@@ -79,7 +79,7 @@ Users trying to retrieve devfile stacks from the registry will see an increased 
 
 - Access to the clusters that run the Devfile Registry, namespaces:
     - devfile-registry-stage (app-sre-stage-01)
-    - devfile-registry-production (app-sre-prod-03)
+    - devfile-registry-production (app-sre-prod-04)
 
 ### Steps:
 
