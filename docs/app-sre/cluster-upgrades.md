@@ -112,12 +112,6 @@ The first clusters to be upgraded belong to the stage environment (app-sre-stage
 
 Once a version has soaked for 7 days, the production clusters will be upgraded (app-sre-prod-01, appsrep05ue1).
 
-### CodeReady Dependency Analytics (CRDA)
-
-The first cluster to be upgraded belongs to the stage environment (app-sre-stage-01).
-
-Once a version has soaked for 3 days, the production cluster will be upgraded (app-sre-prod-03).
-
 ### console.redhat.com (CRC)
 
 The first cluster to be upgraded belongs to the stage environment (crcs02ue1). It is upgraded once a week.
