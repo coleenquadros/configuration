@@ -349,11 +349,22 @@ resourceTemplates:
                   limit: 7
                 developer:
                   limit: 30
+        - name: gcp
+          default: false
+          regions:
+            - name: us-east1
+              default: true
+              supported_instance_type:
+                standard:
+                  limit: 7
+                developer:
+                  limit: 30
+        
 
       #manual: use data plane config file, auto: use kas-fleet-shard
-      DATAPLANE_CLUSTER_SCALING_TYPE: auto
+      DATAPLANE_CLUSTER_SCALING_TYPE: manual
       DYNAMIC_SCALING_CONFIG:
-        new_data_plane_openshift_version: "4.10.15"
+        new_data_plane_openshift_version: openshift-v4.10.15
         enable_dynamic_data_plane_scale_up: false # temporarily disabled until https://issues.redhat.com/browse/MGDSTRM-10047 is fixed
         enable_dynamic_data_plane_scale_down: false # temporarily disabled until https://issues.redhat.com/browse/MGDSTRM-10047 is fixed
         compute_machine_per_cloud_provider:
@@ -382,7 +393,7 @@ resourceTemplates:
                 max_compute_nodes: 18
             kafka_workload_per_instance_type:
               standard:
-                compute_machine_type: custom-4-32768
+                compute_machine_type: custom-4-32768-ext
                 compute_node_autoscaling:
                   min_compute_nodes: 3
                   max_compute_nodes: 21
@@ -398,6 +409,14 @@ resourceTemplates:
           cluster_id: 1lfl3g1vdea86ghh26vkmbqjkain900q
           cloud_provider: aws
           region: us-east-1
+          multi_az: true
+          schedulable: true
+          kafka_instance_limit: 37
+          supported_instance_type: standard,developer
+        - name: Stage Cluster (In GCP Prod)
+          cluster_id: 20j0bm8rbqedso2qbvn5vvguthulsoci
+          cloud_provider: gcp
+          region: us-east1
           multi_az: true
           schedulable: true
           kafka_instance_limit: 37
