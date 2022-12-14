@@ -2345,7 +2345,7 @@ To manage a User group via App-Interface:
 2. **Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).**
 **Note:** Skip this step if the user group is not populated based on app-interface. i.e. if it is populated based on an external source of truth, such as an OWNERS file or PagerDuty.
 
-3. **Add the group in the `managedUsergroups` section of the** [coreos slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/coreos.yml) **dependency file**
+3. **Add the group in the `managedUsergroups` section of the** [redhat-internal slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/redhat-internal.yml) **dependency file**
 
 Examples:
 * An example for the `app-sre-team` User group permission can be found [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml)
