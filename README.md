@@ -2876,6 +2876,40 @@ This will result in a Secret being created in the consuming namespace. The Secre
 - `client_id` - Client ID to use for authentication
 - `client_secret` - Client Secret to use for authentication
 
+### Enable GitLab repo synchronization
+There are instances when it is desired to maintain an exact copy of a GitLab repository within a network-isolated environment (ex: FedRamp).
+
+For these instances, the optional `gitlabSync` attribute can be added within the `codeComponents` for the relevant repository:
+```yaml
+codeComponents:
+- name: homeless-templates
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/app-sre/homeless-templates
+  gitlabSync:
+    sourceProject:
+      name: homeless-templates
+      group: app-sre
+      branch: main
+    destinationProject:
+      name: homeless-templates-sync
+      group: app-sre-services
+      branch: main
+
+```
+`sourceProject` specifies the project to target within `gitlab.cee.redhat.com`
+
+`destinationProject` specifies where to maintain the copy in FedRamp GitLab instance.
+
+Once a `gitlabSync` is merged, the source project/branch will be monitored for any commits. When commits are detected, a sync process will be triggered. Updates are visible on the destination project within 10 minutes.
+
+**Considerations:** 
+* synchronizing from `gitlab.cee.redhat.com` to the primary GitLab instance within FedRamp is the only supported pairing at this time. If you desire to utilize this functionality for another GitLab instance, please reach out within #sd-app-sre
+* the destination project must already exist
+* the AppSRE bot (@app-sre-bot) must be a member of both projects and be assigned the `maintainer` role
+* if the branch specified for destination project is `Protected` (default branch) the destination project must allow force pushes from maintainers to the specified branch  
+  * This can be adjusted by navigating to: `Settings > Repository > Protected branches` in the destination project
+
+
 ### Write and run Prometheus rules tests
 
 Please follow [this guide](/docs/app-sre/prometheus-rules-tests-in-app-interface.md) to know to do it.
