@@ -8,7 +8,7 @@ Severity: Pagerduty
 
 ## Impact
 
-- Edge Fleet Management is a Service that provides Management and Automation for RHEL for Edge. This includes provisioning, lifecycle management, custom image creation, upgrade deployment, upgrade validation, canary roll-outs, and inventory management. If there are no pods up in the production environment, customers aren't being able to use the fleet management product at all.
+- Edge Fleet Management is a Service that provides Management and Automation for RHEL for Edge. This includes provisioning, lifecycle management, custom image creation, upgrade deployment, upgrade validation, canary roll-outs, and inventory management. If there are no pods up in the production environment, customers won't be able to use the fleet management product at all.
 
 ## Summary
 
