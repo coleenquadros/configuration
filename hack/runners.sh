@@ -143,6 +143,7 @@ run_git_partition_sync_integration() {
 
   STARTTIME=$(date +%s)
   docker run --rm -t \
+    -v /etc/pki:/etc/pki:z \
     -e AWS_ACCESS_KEY_ID=${GIT_SYNC_AWS_ACCESS_KEY_ID} \
     -e AWS_SECRET_ACCESS_KEY=${GIT_SYNC_AWS_SECRET_ACCESS_KEY} \
     -e AWS_REGION=${GIT_SYNC_AWS_REGION} \
