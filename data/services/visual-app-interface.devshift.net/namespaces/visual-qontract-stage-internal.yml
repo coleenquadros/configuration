@@ -1,0 +1,45 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: visual-qontract-stage
+description: staging namespace for visual-qontract
+
+cluster:
+  $ref: /openshift/appsres03ue1/cluster.yml
+
+app:
+  $ref: /services/visual-app-interface.devshift.net/app.yml
+
+environment:
+  $ref: /products/app-interface/environments/stage.yml
+
+managedRoles: true
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsres03ue1.yml
+
+managedResourceTypes:
+- ConfigMap
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/app-sre-stage/visual-qontract-stage/oauth2-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/visual-qontract-stage/visual-qontract
+  version: 2
+- provider: resource
+  path: /app-sre-stage/visual-qontract-stage/visual-qontract.oauth2-proxy.configmap.yaml
+- provider: resource
+  path: /app-sre-stage/visual-qontract-stage/visual-qontract.configmap.yaml
+- provider: resource
+  path: /app-sre-stage/visual-qontract-stage/visual-qontract.oauth-authz-map.configmap.yaml
+- provider: route
+  path: /app-sre-stage/visual-qontract-stage/visual-qontract.route.yaml
+- provider: resource-template
+  path: /services/common/serviceaccount.yaml
+  variables:
+    name: visual-qontract
