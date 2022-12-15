@@ -53,6 +53,25 @@ Public-facing OpenAPI Form: [OpenAPI form](https://console.redhat.com/docs/api/e
 
 Public-facing OpenAPI file: [OpenAPI file](https://console.redhat.com/api/edge/v1/openapi.json)
 
+
+#### Smoke Test
+
+The Edge API can be checked to ensure it is running and functional, at least for the most common views, via a curl command. This requires the bearer token provided after authentication.
+
+`
+curl -X ‘GET’ \
+ ‘https://console.redhat.com/api/edge/v1/images’ \
+ -H ‘accept: application/json’ \
+ -H ’Authorization: Bearer <TOKEN>
+ `
+
+You can execute the same command via web browser by logging into consoledot and browsing to [list images endpoint on the OpenAPI form](https://console.redhat.com/docs/api/edge/v1#operations-default-listImages).
+
+Click the "Try It Out" button at the top right of the section and then the "Execute" button at the bottom of the optional fields.
+
+It should return the curl command used, the request URL, and a 200 result with output.
+
+
 ### Edge Frontend
 Edge Frontend is a ReactJS web application served over Akamai as a static site, managed by the [Cloud Service Config](https://github.com/RedHatInsights/cloud-services-config). Using Patternfly 4 and platform chrome to provide the top banner and left hand navigation. The Edge Frontend also makes use of common components like the host based inventory device view for managing edge devices.
 
@@ -104,7 +123,7 @@ The edge-api-service is the only app with ports exposed internal and external to
 
 **Ingress** - Service that accepts generic authenticated uploads from various Red Hat clients and services, then routes the upload payload to the corresponding endpoint in cloud.redhat.com
 
-**Red Hat OpenShift Streams for Apache Kafka (RHOSAK)** -  The message bus over which events are consumed from Playbook Dispatcher and Hosted Inventory. It also serves as the primary bus as Edge Management moves to an Event-Driven Architecure in the future.
+**Apache Kafka (Strimzi/RHOSAK)** -  The message bus over which events are consumed from Playbook Dispatcher and Hosted Inventory. It also serves as the primary bus as Edge Management moves to an Event-Driven Architecure in the future.
 
 ### Image Builder
 
@@ -150,7 +169,7 @@ The Ingress service is designed to receive payloads from clients and distribute 
 
 *Impact if Unavailable*: Nothing can be done with the application. Any updates already in progress will work on the devices, but not update in the Edge Management DB. We're essentially down.
 
-**Red Hat OpenShift Streams for Apache Kafka (RHOSAK)** - Kafka message bus for events from Playbook Dispatcher and Host Inventory.
+**Apache Kafka (Strimzi/RHOSAK)** - Kafka message bus for events from Playbook Dispatcher and Host Inventory.
 
 The list of topics we consume from other applications as well as produce and consume within the Edge Management apps are listed in the [clowdapp.yaml file in the Edge API repo](https://github.com/RedHatInsights/edge-api/blob/main/deploy/clowdapp.yaml).
 
