@@ -157,19 +157,50 @@ The Ingress service is designed to receive payloads from clients and distribute 
 
 ## State: 
 
-**Github** for Edge source code
+### **Github**
+Source code repository
 
-*Impact if Unavailable*: New Edge API application container cannot be deployed and will be stuck on the image version currently deployed in OpenShift.
+#### Impact if Unavailable
+New Edge API application container cannot be deployed and will be stuck on the image version currently deployed in OpenShift.
 
-**Amazon S3** - Data store for Image installer ISOs, Image update tarfiles, and ostree repos.
+### **Amazon S3**
+Data store for Image installer ISOs, Image update tarfiles, and ostree repos.
 
-*Impact if Unavailable*: Image ISOs, Image tarfiles for updates, and ostree repos will be unavailable. Features involving any of those will be limited to standard CRUD database viewing via the UI or API.
+#### Impact if Unavailable
+Image ISOs, Image tarfiles for updates, and ostree repos will be unavailable. Features involving any of those will be limited to standard CRUD database viewing via the UI or API.
 
-**RDS** - PostgreSQL database for storing application data and state.
+#### Impact of Unrecoverable Data Loss
 
-*Impact if Unavailable*: Nothing can be done with the application. Any updates already in progress will work on the devices, but not update in the Edge Management DB. We're essentially down.
+There are three main types of data stored in the Edge Management AWS S3 buckets: Image ISOs, Image tarfiles, and ostree repos.
 
-**Apache Kafka (Strimzi/RHOSAK)** - Kafka message bus for events from Playbook Dispatcher and Host Inventory.
+If **ostree repos** are lost, they can be recreated from Image tarfiles. There currently is not an automatic process to recover repos from tarfiles, but those can be scripted as needed.
+
+If **Image tarfiles** are lost, they can be recreated from corresponding ostree repos. There currently is not an automatic process to recover repos from tarfiles, but those can be scripted as needed.
+
+If **Image ISOs** are lost, they can be recreated from corresponding Image tarfiles. There currently is not an automatic process to recover repos from tarfiles, but those can be scripted as needed.
+
+If combinations or all of the above data types are lost, they can be recreated using data from the database, but older images might be updated to the latest RPMs. This may or may not cause compatibility problems in Image versions within an Imageset between RHEL RPMs and and customer RPMs and applications. We will not know that impact until we experience the outage and can make an assessment.
+
+### **RDS**
+PostgreSQL database for storing application data and state.
+
+#### Impact if Unavailable
+Nothing can be done with the application. Any updates already in progress will work on the devices, but not update in the Edge Management DB. We're essentially down.
+
+#### Impact of Unrecoverable Data Loss
+
+If Image data is lost and unrecoverable, there is no way to easily recreate ALL data.
+- Image updates cannot be created via Edge Management.
+- Edge devices already running an image created via Edge Management cannot be updated directly through Edge Management.
+
+If Device data is lost and unrecoverable and Image data is intact...
+- Device data will be re-populated the next time Insights data collection occurs on the device
+
+If both Device data and Image data is lost and unrecoverable...
+- There is no automated method to reproduce Image data as it was originally created.
+- As a result, Device data will NOT be repopulated at the time of the next Insights collection.
+
+### **Apache Kafka (Strimzi/RHOSAK)** - Kafka message bus for events from Playbook Dispatcher and Host Inventory.
 
 The list of topics we consume from other applications as well as produce and consume within the Edge Management apps are listed in the [clowdapp.yaml file in the Edge API repo](https://github.com/RedHatInsights/edge-api/blob/main/deploy/clowdapp.yaml).
 
@@ -177,9 +208,12 @@ The list of topics we consume from other applications as well as produce and con
 
 ## Load Testing: 
 
-The Performance/Scale Team has tested and updated plans for ongoing testing.
+The Performance & Scale Team has tested and updated plans for ongoing testing.
 
-For reference, see [2021-04-29 RHEL Edge perf&scale notes](https://docs.google.com/document/d/1VMg_TC-ican_NDrg4cfpbeohgtYKKhFD7r0sSyqeck8/edit%23heading%3Dh.muehff6ryz4&sa=D&source=docs&ust=1670796512789632&usg=AOvVaw2DktfkeLaHtuyhg0On9hXZ)
+For more information on test process and results, see [RHEL Edge perf&scale notes](https://docs.google.com/document/d/1VMg_TC-ican_NDrg4cfpbeohgtYKKhFD7r0sSyqeck8/edit%23heading%3Dh.muehff6ryz4&sa=D&source=docs&ust=1670796512789632&usg=AOvVaw2DktfkeLaHtuyhg0On9hXZ)
+
+The perf environment is configured in app-interface with the [Edge Management application](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/data/services/insights/edge).
+
 
 ## Capacity: 
 
@@ -196,6 +230,7 @@ Microservices will replace functionality in the main Edge API application so Edg
 | Edge API      | Init Container       | 500m | 512Mi | 6 non-persistant |
 | Edge API      | edge-api-ibvents       | 250m | 256Mi | 1 |
 
+**NOTE:** The edge-api-ibvents app only requires a single replica. It is a utility application that does periodic queries of the database and cleans up stale builds. It is designed to require a single pod and on failure only requires a restart to resume where it left off. It does not expose external routes and relies on consuming and producing events from Kafka and outgoing REST API request/response.
 
 #### Future Microservices
 (feature-flagged estimates and subject to change)
