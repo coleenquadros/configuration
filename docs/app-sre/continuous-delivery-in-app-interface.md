@@ -55,6 +55,8 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         - `events` - publish the events that were carried out in the job as slack messages
     * `workspace` - a reference to a slack workspace
     * `channel` - channel to send notifications to
+    * `notification` - notification options
+        - `start` - true/false - send a slack notification an the beginning of a deployment
 * `managedResourceTypes` - a list of resource types to deploy (indicates that any other type is filtered out)
 * `takeover` - (optional) if set to true, the resource types declared in `managedResourceTypes` will be managed exclusively by the integration, meaning **ONLY** resources declared in the saas file will be kept and all others will be **DELETED**. **This is dangerous and probably not want you want in most cases. Use with caution!**
 * `deprecated` - (optional) if set to true, resource templates can be migrated to different saas files.
