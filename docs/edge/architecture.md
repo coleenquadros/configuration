@@ -210,9 +210,11 @@ The list of topics we consume from other applications as well as produce and con
 
 The Performance & Scale Team has tested and updated plans for ongoing testing.
 
-For more information on test process and results, see [RHEL Edge perf&scale notes](https://docs.google.com/document/d/1VMg_TC-ican_NDrg4cfpbeohgtYKKhFD7r0sSyqeck8/edit%23heading%3Dh.muehff6ryz4&sa=D&source=docs&ust=1670796512789632&usg=AOvVaw2DktfkeLaHtuyhg0On9hXZ)
-
 The perf environment is configured in app-interface with the [Edge Management application](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/data/services/insights/edge).
+
+Tests are run via the [InsightsEdge_runner Jenkins Pipeline](https://master-jenkins-csb-perf.apps.ocp-c1.prod.psi.redhat.com/view/Insights_CPT/job/InsightsEdge_runner/). Please contact the Perf & Scale team for more information on access to running Jenkins jobs in the Perf environment.
+
+For more information on test process and results, see [RHEL Edge perf&scale notes](https://docs.google.com/document/d/1VMg_TC-ican_NDrg4cfpbeohgtYKKhFD7r0sSyqeck8/edit%23heading%3Dh.muehff6ryz4&sa=D&source=docs&ust=1670796512789632&usg=AOvVaw2DktfkeLaHtuyhg0On9hXZ)
 
 
 ## Capacity: 
