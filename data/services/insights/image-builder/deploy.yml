@@ -61,7 +61,10 @@ resourceTemplates:
   # The path in the repository where the OpenShift template can be found
   path: /templates/image-builder.yml
   targets:
-  # For each namespace we want to deploy this app into, create a target
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+      disable: true # do not create an app-sre deploy job for ephemeral namespace
+      ref: internal # populated by bonfire
     - namespace:
         $ref: /services/insights/image-builder/namespaces/stage-image-builder-stage.yml
       # The ref in the Git repo from which to find the version of the template to
@@ -108,3 +111,11 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: 975e5c1405f68f92465bf456cb9c629aee304816
+- name: image-builder-frontend
+  url: https://github.com/RedHatInsights/image-builder-frontend
+  path: /deploy/frontend-clowder.yml
+  targets:
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+      disable: true # do not create an app-sre deploy job for ephemeral namespace
+      ref: internal # populated by bonfire
