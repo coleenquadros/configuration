@@ -151,18 +151,13 @@ That Vault approle has access to anything under `app-sre/ansible`. A good practi
 
 # Vault User Guide
 ## Initial Login
-- Login to GitHub
-- Go to Settings
-- Go to Developer Settings
-- Create [Personal Account Token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/), with org:read access
-- Copy access token
-- Browse to https://vault.devshift.net/ui/vault/auth?with=github
-- Apply token
+- Browse to https://vault.devshift.net/ui/vault/auth?with=oidc
+- Leave Role as `Default`
 ## Set up CLI
 - Download Vault CLI https://www.vaultproject.io/downloads.html and unzip to a binath path
-- Set env var: export VAULT_ADDR="https://vault.devshift.net/"
-- Login: vault login -method=github using your github access token
-- Test listing key names: vault list devtools-osio-ci
+- Set env var: export VAULT_ADDR="https://vault.devshift.net"
+- Login: `vault login -method=oidc`
+- Test listing key names: `vault list devtools-osio-ci`
 ## Set a secret
 vault kv put foopath1/foopath2/fooname @data.json
 or
@@ -172,10 +167,10 @@ echo -n '{"value":"asecret"}' | vault kv put foopath1/fooname -
 ## Get a secret
 vault kv get foopath1/foopath2/fooname
 
-## Login to Vault when GitHub is down
-We use GitHub as the authentication method for Vault for user access.  Different automations use the AppRole authentication method, so if GitHub is down - they are not affected.
+## Login to Vault when RH SSO is down
+We use OIDC (backed by RH SSO) as the authentication method for Vault for user access.  Different automations use the AppRole authentication method, so if RH SSO is down - they are not affected.
 
-As an App SRE team member, if you urgently require to login to Vault while GitHub is down, follow these steps:
+As an App SRE team member, if you urgently require to login to Vault while RH SSO is down, follow these steps:
 
 1. Clone the vault-locker repository:
 ```
