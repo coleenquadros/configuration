@@ -14,7 +14,7 @@ Prerequisite: Make sure you can ssh into Jenkins workers by first following all 
 ```
 Host ci-ext-jenkins-worker-*
     User     yourremoteusername
-    ProxyCommand ssh -W %h:%p yourremoteusername@bastion.ci.int.devshift.net
+    ProxyCommand ssh -W %h:%p yourremoteusername@ci.ext.ssh.devshift.net
     # Change if different private key file:
     IdentityFile ~/.ssh/id_rsa
 Host ci-int-aws-jenkins-worker-*
