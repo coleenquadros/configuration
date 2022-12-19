@@ -44,7 +44,7 @@ This section describes which files need to be updated in order to deploy to
 a certain environment. This also serves as documentation for what
 `make qr-promote` is automating for you.
 
-* To promote integrations-manager and managed integrations running in the app-sre-prod-01 cluster, update `ref` in [saas-qontract-manager](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-manager.yaml).
+* To promote grafana dashboards, update `ref` in [saas-qontract-dashboards](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-dashboards.yaml).
 * To promote integrations running in the app-interface pr-check job running in ci-int, update `RECONCILE_IMAGE_TAG` in [.env](/.env).
 * To promote integrations-manager and managed integrations running in appsrep05ue1 (internal cluster), update `ref` in [saas-qontract-manager-internal](data/services/app-interface/cicd/ci-int/saas-qontract-manager-int.yaml).
 * To promote integrations running in the app-interface pr-check job running in ci-int, update `RECONCILE_IMAGE_TAG` in [.env](/.env).
