@@ -216,7 +216,7 @@ This step should be performed in a single merge request.
 
 1. If your cluster is private, you should first make sure you can access it through ci.ext via VPC peering.
 
-    1. Configure VPC peering to jumphost (ci.ext) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md).
+    1. Configure VPC peering to jumphost (ci.int) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md).
 
         ```yaml
         peering:
@@ -224,10 +224,10 @@ This step should be performed in a single merge request.
           - provider: account-vpc
             name: <cluster_name>_app-sre
             vpc:
-              $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
+              $ref: /aws/app-sre/vpcs/ci-int.yml
             manageRoutes: true
+            manageAccountRoutes: true
         ```
-    1. Once the above is merged and deployed, you should add a route in app-sre vpc. This is achieved in [app-sre/infra](https://gitlab.cee.redhat.com/app-sre/infra) repo. See this [MR](https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/79) as an example. You can get VPC peering connection name from the app-sre AWS account.
 
 ## Step 2 - Bot access and App SRE project template
 
