@@ -273,16 +273,6 @@ At this point you should be able to access the cluster via the console / `oc` cl
           $ref: /openshift/bastion.ci.int.devshift.net.jumphost.yml
         ```
 
-    1. Request vpc peering config to `app-sre-ci-int` to your `cluster.yml` file:
-
-        ```yaml
-        - provider: account-vpc
-          name: <cluster_name>_app-sre-ci-int
-          vpc:
-            $ref: /aws/app-sre/vpcs/ci-int.yml
-          manageRoutes: true
-        ```
-
     1. Request vpc peering config to `app-sre-prod-01` to your `cluster.yml` file:
 
         ```yaml
