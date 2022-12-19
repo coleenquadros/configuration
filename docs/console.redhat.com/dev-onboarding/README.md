@@ -187,30 +187,7 @@ Before you can update your Vault secrets, you need to get proper access, and the
 ### Getting access to Vault
 
 1. Check the vault policies located at `data/services/vault.devshift.net/config/policies/insights`. If there isn't one for your team, copy an existing policy (such as `advisor-policy.yml`) and modify it to give you access to the correct Vault namespace. Name it "{TEAM_NAME}-policy.yml`.
-2. Check `data/services/vault.devshift.net/config/auth-backends/github-auth.yml`. If you don't see your vault policy file from step 1, add an entry that associates your policy file with your GitHub team, eg:
-
-```yml
-  - github_team:
-      $ref: /teams/insights/github-teams/{TEAM_NAME}.yml
-    policies:
-      - $ref: /services/vault.devshift.net/config/policies/insights/{TEAM_NAME}-policy.yml
-```
-
-3. Check `data/teams/insights/github-teams` and ensure there's a GitHub team created for your team. If not, copy one of the existing files, such as `advisor.yml`, and modify it for your team.
-
-4. Check /data/teams/insights/roles` and ensure there's a role created for your team. In your team file, under "permissions", you should see a reference to your GitHub team file, e.g.:
-
-```yml
-permissions:
-- $ref: /teams/insights/github-teams/{TEAM_NAME}.yml
-```
-
-5. Finally, edit your user file at `data/teams/insights/users` and make sure you have the role from Step 4 assigned to you, e.g.:
-
-```yml
-roles:
-- $ref: /teams/insights/roles/{TEAM_NAME}.yml
-```
+2. Follow the instructions in [Vault Entities and Groups](https://gitlab.cee.redhat.com/service/app-interface#manage-vault-entities-and-groups)
 
 ### Logging into Vault
 
