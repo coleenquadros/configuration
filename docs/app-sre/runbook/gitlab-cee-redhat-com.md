@@ -1,4 +1,4 @@
-# Gitlab.cee Escalation
+# GitLab (gitlab.cee.redhat.com)
 
 [TOC]
 
@@ -28,6 +28,16 @@ In the event of significant GitLab.cee issues, your contact point is the IT ALM 
 - [Additional GitLab Dashboards](https://grafana.engineering.redhat.com/dashboards/f/SSVDIpiGk/cip)
 - [AppSRE Integrations](https://grafana.app-sre.devshift.net/d/Integrations/integrations?orgId=1)
     - The MR queue depth may reflect a degradation of GitLab performance if too many MRs are not being processed correctly
+
+## Known Issues
+
+### Merge requests not merging with lgtm label (incomplete label issue)
+
+The team has observed some cases where incomplete labels are returned by the GitLab merge requests API. This has been observed in the past when a `lgtm` label is added to a MR, but `gitlab-housekeeping` never merges it.
+
+Adding comments, rebasing the MR, or just waiting long enough typically resolves the issue. It is suspected that this could be a caching issue in GitLab, but it is difficult to reproduce and typically resolves itself quickly enough that it's difficult to debug further.
+
+Potential mitigations are being tracked here: APPSRE-6722
 
 ## More Information
 - [GitLab Down SOP](./../sop/app-interface-gitlab-down.md)
