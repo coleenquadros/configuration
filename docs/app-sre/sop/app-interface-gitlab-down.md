@@ -8,7 +8,7 @@ Given AppSRE's substantial reliance on GitLab, this document attempts to contemp
 
 This SOP is the result of a discussion recorded in https://issues.redhat.com/browse/APPSRE-4097
 
-GitLab escalation information is detailed in [this runbook](./../runbook/gitlab-escalation.md).
+GitLab escalation information is detailed in [this runbook](./../runbook/gitlab-cee-redhat-com.md).
 
 ## Content
 
