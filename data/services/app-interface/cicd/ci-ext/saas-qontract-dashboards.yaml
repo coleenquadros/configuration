@@ -4,7 +4,7 @@ $schema: /app-sre/saas-file-2.yml
 labels:
   service: app-interface
 
-name: saas-qontract-manager
+name: saas-qontract-dashboards
 description: 'SaaS tracking file for App-interface'
 
 app:
@@ -19,32 +19,11 @@ slack:
   channel: sd-app-sre-info
 
 managedResourceTypes:
-- Deployment
 - ConfigMap
 
-imagePatterns:
-- quay.io/app-sre/qontract-reconcile
-- quay.io/app-sre/fluentd
-- quay.io/app-sre/ubi8-ubi-minimal
+imagePatterns: []
 
 resourceTemplates:
-- name: qontract-manager
-  url: https://github.com/app-sre/qontract-reconcile
-  path: /openshift/qontract-manager.yaml
-  parameters:
-    # the manager needs to create integrations in stage.
-    # the integrations get their DRY_RUN settings from the environment parameters.
-    MANAGER_DRY_RUN: --no-dry-run
-  targets:
-  - namespace:
-      $ref: /services/app-interface/namespaces/app-interface-stage.yml
-    ref: master
-    delete: true
-  - namespace:
-      $ref: /services/app-interface/namespaces/app-interface-production.yml
-    ref: 1d9d354d3d3bbcaa2b22792861076dbb4f1cdc0f
-    delete: true
-
 - name: grafana-qontract-reconcile
   url: https://github.com/app-sre/qontract-reconcile
   path: /grafana-dashboards
