@@ -270,7 +270,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     1. Jump host configuration to your `cluster.yml` file:
         ```yaml
         jumpHost:
-          $ref: /openshift/bastion.ci.ext.devshift.net.jumphost.yml
+          $ref: /openshift/bastion.ci.int.devshift.net.jumphost.yml
         ```
 
     1. Request vpc peering config to `app-sre-ci-int` to your `cluster.yml` file:
