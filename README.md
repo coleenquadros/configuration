@@ -2271,10 +2271,6 @@ Example:
 ...
 peering:
   connections:
-  - provider: account-vpc
-    name: hive-stage-01_app-sre
-    vpc:
-      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
   - provider: cluster-vpc-requester
     name: hive-stage-01_app-sre-stage-01
     cluster:
