@@ -152,6 +152,28 @@
     <<: *gh_build_master
 
 - job-template:
+    id: 'insights-tower-analytics-frontend-clamscan-gh-pr-check'
+    name: '{gh_org}-{gh_repo}-clamscan-pr-check'
+    status_context: "ci.int.devshift.net clamscan PR build"
+    branch: "devel"
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+        - *insightsdroid_github
+        - *insights_tower_analytics_frontend_sonarqube_token
+        - *insights_tower_analytics_frontend_rh_it_root_ca
+    <<: *insights_gh_pr_check
+
+- job-template:
     id: 'insights-automation-analytics-clamscan-gl-pr-check'
     name: 'AA-{gl_project}-clamscan-pr-check'
     success_note: false
