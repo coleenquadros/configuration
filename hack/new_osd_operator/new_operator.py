@@ -194,7 +194,7 @@ def update_saas_approver_yml(operator_name):
 
 def update_slack_user_groups_yml(operator_name):
     """Idempotently registers the operator's slack user group in
-    slack/coreos.yml.
+    slack/redhat-internal.yml.
     """
     fpath = os.path.join("data", "dependencies", "slack", "coreos.yml")
     yml = load_yml(fpath)
