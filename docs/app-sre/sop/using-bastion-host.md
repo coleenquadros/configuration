@@ -21,8 +21,7 @@ Once the infra MR is merged, there is no need to do anything manual. This [job](
 
 ## Use 'sshuttle' for tunelling to private cluster from your PC
 1. Make sure you have package 'sshuttle' installed.
-1. `sshuttle -r bastion.ci.int.devshift.net <network.vpc>`
-* Note: You can specify several ranges like: `sshuttle -r bastion.ci.int.devshift.net <network.vpc>  <network.vpc> ...  <network.vpc>`
-
 1. If you are using mac run: 
 ` sudo route add -net <network.vpc> -interface en0`
+1. `sshuttle -r bastion.ci.int.devshift.net <network.vpc>`
+* Note: You can specify several ranges like: `sshuttle -r bastion.ci.int.devshift.net <network.vpc>  <network.vpc> ...  <network.vpc>`
