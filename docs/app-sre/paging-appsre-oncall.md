@@ -9,12 +9,15 @@ AppSRE team provides round the clock support for services it manages. During bus
 **In the event AppSRE is paged for something that oncall determines is NOT a high severity issue, no immediate action will be taken.**
 
 To trigger an incident, type `/pd trigger` in the [#sd-app-sre-oncall](https://app.slack.com/client/T027F3GAJ/CKN746TDW) slack channel. You will get a `Create New Incident` popup.
+1. Select `RedHat` account.
 1. Select `App SRE Interrupts` as `Impacted Service`.
 1. `Assign To` should be `empty`. (Incident will be assigned to oncall on rotation)
 1. `Title` should be set to service that is having issues.
 1. `Description` should have a brief note about the issue and contact information such as slack channel, etc.
 
 ![](images/pd.gif)
+
+If PagerDuty slack integration is not working, a page can also be triggered by sending a mail to `app-sre-interrupts@redhat.pagerduty.com`.
 
 For non-emergency and during regular business hours, you can reach AppSRE team in [#sd-app-sre](https://app.slack.com/client/T027F3GAJ/CCRND57FW) slack channel or by emailing us at sd-app-sre@redhat.com.
 
