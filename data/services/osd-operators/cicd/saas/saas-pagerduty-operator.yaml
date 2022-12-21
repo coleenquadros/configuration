@@ -23,7 +23,6 @@ managedResourceTypes:
 - OperatorGroup
 - Subscription
 - PagerDutyIntegration
-- ConfigMap
 
 imagePatterns:
 - quay.io/app-sre/pagerduty-operator-registry
@@ -42,32 +41,6 @@ parameters:
   SCALE_TEST_LEGALENTITY_IDS: ["1ep4WsPDKikDQCFLsi2yKdzH8xB"]
   SERVICE_ORCHESTRATION_ENABLED: 'false'
   SERVICE_ORCHESTRATION_RULE_CONFIGMAP: osd-serviceorchestration
-  SERVICE_ORCHESTRATION_RULES: |
-    {
-    "orchestration_path": {
-    "catch_all": {
-        "actions": {}
-    },
-    "sets": [
-    {
-        "id": "start",
-        "rules": [
-        {     
-            "actions": {
-            "suppress": true
-            },
-            "conditions": [
-            {
-            "expression": "event.severity matches 'Warning'"
-            }
-            ]
-        }
-        ]
-    }
-    ],
-    "type": "service"
-    }
-    }
 
 use_channel_in_image_tag: true
 
@@ -86,18 +59,6 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: openshift-pagerduty-operator-gh-build-master
-- name: pagerduty-service-orchestration-osdint
-  url: https://github.com/openshift/pagerduty-operator
-  path: /hack/templates/00-osd-serviceorchestration.configmap.yaml.tmpl
-  targets:
-  - namespace:
-      $ref: /services/osd-operators/namespaces/hivei01ue1/pagerduty-operator.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: openshift-pagerduty-operator-gh-build-master
-
 
 - name: pagerduty-operator-osdstage
   url: https://github.com/openshift/pagerduty-operator
@@ -105,32 +66,6 @@ resourceTemplates:
   parameters:
     SERVICE_PREFIX: osdstage
     SERVICE_ORCHESTRATION_ENABLED: 'false'
-  targets:
-  - namespace:
-      $ref: /services/osd-operators/namespaces/hive-stage-01/pagerduty-operator.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: openshift-pagerduty-operator-gh-build-master    
-  - namespace:
-      $ref: /services/osd-operators/namespaces/hives02ue1/pagerduty-operator.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: openshift-pagerduty-operator-gh-build-master    
-  - namespace:
-      $ref: /services/osd-operators/namespaces/ssotest01ue1/pagerduty-operator.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: openshift-pagerduty-operator-gh-build-master    
-
-- name: pagerduty-service-orchestration-osdstage
-  url: https://github.com/openshift/pagerduty-operator
-  path: /hack/templates/00-osd-serviceorchestration.configmap.yaml.tmpl
   targets:
   - namespace:
       $ref: /services/osd-operators/namespaces/hive-stage-01/pagerduty-operator.yml
