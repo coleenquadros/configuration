@@ -13,6 +13,7 @@ spec:
     rules:
     {{%- for cluster in query('/queries/cluster-namespace-onboarding-status.graphql', name=resource.namespace.cluster.name) %}}
     {{%- for namespace in cluster.namespaces %}}
+    {{%- if not namespace.name.startswith('openshift-') %}}
     {{%- if namespace.app.onboardingStatus == 'OnBoarded' %}}
     {{%- if "kube_metrics_pod_crashlooping_alert" not in namespace.app.labels %}}
     - alert: KubePodCrashLooping
@@ -24,6 +25,7 @@ spec:
       labels:
         service: openshift
         severity: high
+    {{%- endif %}}
     {{%- endif %}}
     {{%- endif %}}
     {{%- endfor %}}
