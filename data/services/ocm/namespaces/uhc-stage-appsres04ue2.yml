@@ -71,3 +71,29 @@ openshiftResources:
 - provider: vault-secret
   path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/uhc-stage/route53-creds
   version: 1
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+    - provider: rds
+      identifier: uhc-acct-mngr-staging-readonly-ue2
+      region: us-east-2
+      defaults: /terraform/resources/app-sre/staging/rds-1-readonly-us-east-2.yml
+      parameter_group: /terraform/resources/ocm/ocm-stage-rds-parameter-group-pg12.yml
+      output_resource_name: uhc-acct-mngr-rds-readonly-ue2
+      replica_source: uhc-acct-mngr-staging
+      overrides:
+        engine_version: '12.9'
+    - provider: rds
+      identifier: uhc-clusters-service-staging-readonly-ue2
+      region: us-east-2
+      defaults: /terraform/resources/app-sre/staging/rds-1-readonly-us-east-2.yml
+      parameter_group: /terraform/resources/ocm/clusters-service-stage-rds-parameter-group-pg12.yml
+      output_resource_name: uhc-clusters-service-rds-readonly-ue2
+      replica_source: clusters-service-staging
+      overrides:
+        engine_version: '12.9'
