@@ -775,3 +775,25 @@ spec:
       expr: "90"
       labels:
         exported_service: vulnerability
+
+  #### malware-detection ####
+  - name: malware-detection-sli
+    rules:
+    # Proportion of requests allowed to be over latency threshold in a given period
+    - record: malware_detection:constant:sli:pctlatency
+      expr: "10"
+      labels:
+        exported_service: malware-detection
+
+     # For slower services like malware-detection, use rules for latencies less than 4000ms (instead of 2000ms)
+    - record: malware_detection:latency_le_4000:rate5m
+      expr: sum(rate(api_3scale_gateway_api_time_bucket{le="4000.0", exported_service="malware-detection" }[5m]))
+
+    - record: malware_detection:request_count:rate5m
+      expr: sum(rate(api_3scale_gateway_api_time_count{exported_service="malware-detection"}[5m])) > 0
+
+    - record: malware_detection:proportion:latency_gt_4000:rate5m
+      expr: 1 - (malware_detection:latency_le_4000:rate5m / malware_detection:request_count:rate5m)
+
+    - record: malware_detection:sli:latency_gt_4000:pctl10rate5m
+      expr: malware_detection:proportion:latency_gt_4000:rate5m * 100 < bool malware_detection:constant:sli:pctlatency
