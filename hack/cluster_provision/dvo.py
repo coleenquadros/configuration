@@ -16,14 +16,12 @@ from .common import (
 log = logging.getLogger(__name__)
 
 DVO_FILENAME = (
-    "openshift/{cluster}/namespaces/" "deployment-validation-operator-per-cluster.yml"
+    "openshift/{cluster}/namespaces/" "openshift-deployment-validation-operator.yml"
 )
 
 CUSTOMER_MON_FILENAME = (
     "services/observability/namespaces/" "openshift-customer-monitoring.{cluster}.yml"
 )
-
-SAAS_FILENAME = "services/deployment-validation-operator/cicd/saas.yaml"
 
 MON_NAMESPACES_FILENAME = "services/observability/roles/" "monitored-dvo-namespaces.yml"
 
@@ -33,8 +31,8 @@ $schema: /openshift/namespace-1.yml
 
 labels: {{}}
 
-name: deployment-validation-operator
-description: namespace for the app-sre per-cluster Deployment Validation Operator
+name: openshift-deployment-validation-operator
+description: namespace for the OSD Deployment Validation Operator
 
 cluster:
   $ref: /openshift/{cluster}/cluster.yml
@@ -45,41 +43,22 @@ app:
 environment:
   $ref: /products/app-sre/environments/production.yml
 
-networkPoliciesAllow:
-- $ref: /openshift/{cluster}/namespaces/openshift-operator-lifecycle-manager.yml
-- $ref: /services/observability/namespaces/openshift-customer-monitoring.{cluster}.yml
+clusterAdmin: true
 
 managedRoles: true
 
-managedResourceTypes:
-- ConfigMap
-- Service
-
-sharedResources:
-- $ref: /services/deployment-validation-operator/shared-resources/dvo.yml
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.{cluster}.yml
 """
 
 SERVICE_MONITOR = """
-- $ref: /services/observability/shared-resources/dvo.yml
+- $ref: /services/observability/shared-resources/dvo-openshift.yml
 - $ref: /services/observability/shared-resources/dvo-alerts.yml
-"""
-
-SAAS_TARGET_TEMPLATE = """
-namespace:
-  $ref: /openshift/{cluster}/namespaces/deployment-validation-operator-per-cluster.yml
-ref: {commit_hash}
-"""
-
-SAAS_TARGET_STAGE_UPSTREAM = """\
-upstream:
-  instance:
-    $ref: /dependencies/ci-int/ci-int.yml
-  name: app-sre-deployment-validation-operator-gh-build-master
 """
 
 MON_NAMESPACES_ACCESS = """
 namespace:
-  $ref: /openshift/{cluster}/namespaces/deployment-validation-operator-per-cluster.yml
+  $ref: /openshift/{cluster}/namespaces/openshift-deployment-validation-operator.yml
 role: view
 """
 
@@ -123,52 +102,6 @@ def add_dvo_service_monitor(data: Mapping) -> bool:
     return added
 
 
-def add_saas_target(data: Mapping, cluster: str) -> bool:
-    """
-    Adds a target to the DVO SaaS configuration.
-    :param data: SaaS configuration data
-    :param cluster: cluster name
-    :return: whether the data change or not
-    """
-    yaml = get_base_yaml()
-
-    targets = data["resourceTemplates"][0]["targets"]
-
-    template = SAAS_TARGET_TEMPLATE
-    commit_hashes = {t["ref"] for t in targets if t["ref"] != "master"}
-
-    # Currently production uses the same commit hash and stage uses
-    # 'master', so we can easily detect this. New logic will need to be
-    # implemented in the future if this isn't a safe assumption.
-    if len(commit_hashes) > 1:
-        raise ValueError(
-            "Could not determine which commit to use for "
-            "the SaaS target, more than one option: "
-            f"{commit_hashes}"
-        )
-
-    commit_hash = commit_hashes.pop()
-
-    saas_target_entry = yaml.load(
-        template.format(cluster=cluster, commit_hash=commit_hash)
-    )
-
-    if saas_target_entry in targets:
-        log.info("No action required, SaaS target entry already exists")
-        return False
-    else:
-        log.info("Adding SaaS target entry")
-        targets.append(saas_target_entry)
-
-        # Sort the targets now that the new entry has been added. This
-        # shouldn't harm formatting because there aren't any commented
-        # blocks in the list.
-        data["resourceTemplates"][0]["targets"] = sorted(
-            targets, key=lambda k: k["namespace"]["$ref"]
-        )
-        return True
-
-
 def grant_service_account_perms(data: MutableMapping, cluster: str) -> bool:
     """
     Grant the required permissions to the appropriate service accounts.
@@ -205,9 +138,9 @@ def main(data_dir: str, cluster: str) -> None:
             f"mistyped"
         )
 
-    # Create the deployment-validation-operator-per-cluster.yml namespace file
+    # Create the openshift-deployment-validation-operator.yml namespace file
     # for the cluster.
-    log.info("Creating deployment-validation-operator-per-cluster.yml")
+    log.info("Creating openshift-deployment-validation-operator.yml")
     dvo_per_cluster = create_dvo_per_cluster(cluster)
     dvo_cluster_path = Path(data_dir, DVO_FILENAME.format(cluster=cluster))
     write_yaml_to_file(str(dvo_cluster_path), dvo_per_cluster)
@@ -217,13 +150,6 @@ def main(data_dir: str, cluster: str) -> None:
     customer_mon_data = read_yaml_from_file(str(customer_mon_path))
     if add_dvo_service_monitor(customer_mon_data):
         write_yaml_to_file(str(customer_mon_path), customer_mon_data)
-
-    # Update the DVO SaaS file to add the new namespace to the target
-    # namespaces.
-    saas_path = Path(data_dir, SAAS_FILENAME)
-    saas_data = read_yaml_from_file(str(saas_path))
-    if add_saas_target(saas_data, cluster):
-        write_yaml_to_file(str(saas_path), saas_data)
 
     # Grant view permissions to the appropriate service accounts.
     mon_namespace_path = Path(data_dir, MON_NAMESPACES_FILENAME)
