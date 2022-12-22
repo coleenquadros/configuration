@@ -54,7 +54,7 @@ if [ "$NEW_COMMIT" != "$OLD_COMMIT" ]; then
 fi
 
 if [ -n "$DO_COMMIT" ]; then
-    git add $ENV_FILE $JENKINS_FILE $SAAS_FILE_MANAGER $SAAS_FILE_MANAGER_INT $TEKTON_GLOBAL_DEFAULTS
+    git add $ENV_FILE $JENKINS_FILE $SAAS_FILE_MANAGER_INT $TEKTON_GLOBAL_DEFAULTS $SAAS_FILE_DASHBOARDS
     git commit -m "qontract production promotion ${OLD_COMMIT} to ${NEW_COMMIT}"
     git --no-pager show -U0 HEAD
 fi
