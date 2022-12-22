@@ -20,10 +20,12 @@ networkPoliciesAllow:
 
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+- $ref: /services/observability/shared-resources/grafana.yml
 
 managedRoles: true
 
 managedResourceTypes:
+- ConfigMap
 - Secret
 
 openshiftResources:
@@ -36,6 +38,22 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /observability/signalfx-exporter/signalfx-exporter-config.secret.yaml
+## Grafana
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-stage/app-sre-observability-htpasswd
+  version: 1
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/grafana/grafana-config.secret.yaml
+  variables:
+    auto_assign_org_role: Editor
+    external_url: https://grafana.stage.int.devshift.net
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-stage/grafana/grafana-proxy-config-int
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-stage/grafana/grafana-proxy-config-openshift
+  version: 2
 
 managedExternalResources: true
 
