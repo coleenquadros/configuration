@@ -41,6 +41,11 @@
     - [Summary](#summary-7)
     - [Access required](#access-required-7)
     - [Steps](#steps-7)
+  - [ACS Central timeout](#acs-central-timeout)
+    - [Impact](#impact-8)
+    - [Summary](#summary-8)
+    - [Access required](#access-required-8)
+    - [Steps](#steps-8)
   - [Escalations](#escalations)
 
 ---
@@ -312,6 +317,28 @@ ACS Fleet Manager service is experiencing issue while deleting ACS centrals.
 ### Summary
 
 ACS Fleet Manager is not able to performing ACS central deletion correctly.
+
+### Access required
+
+- OSD Console access to the cluster that runs the ACS Fleet Manager.
+- OSD Console access to the cluster that runs the Fleetshard-sync service.
+- Access to cluster resources: Pods/Deployments
+
+### Steps
+
+refer to the steps [ACS Central provisioning latency](#acs-central-provisioning-latency)
+
+---
+
+## ACS Central timeout
+
+### Impact
+
+ACS Fleet Manager service couldn't provision central before the timeout.
+
+### Summary
+
+ACS Fleet Manager service couldn't provision central before the timeout.
 
 ### Access required
 

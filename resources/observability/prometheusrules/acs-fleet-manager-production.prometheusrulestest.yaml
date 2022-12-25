@@ -565,3 +565,31 @@ tests:
               message: "The maximum reconciler duration was 50s over the last 15 minutes."
               dashboard: "https://grafana.prod.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-reconciler-long-duration"
+
+  # Timeout failure
+  - interval: 1m
+    input_series:
+      # 0m    - 15m   all good
+      # 15m   - 45m   failure rate of 1/minute
+      - series: 'acs_fleet_manager_central_timeout_total_count{job="fleet-manager-metrics",namespace="acs-fleet-manager-prod",id="id", cluster_id="cluster_id"}'
+        values: "0+0x15   0+1x30"
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: ACS Fleet Manager central request timeout
+        exp_alerts: []
+      - eval_time: 25m
+        alertname: ACS Fleet Manager central request timeout
+        exp_alerts:
+          - exp_labels:
+              alertname: ACS Fleet Manager central request timeout
+              job: fleet-manager-metrics
+              namespace: acs-fleet-manager-production
+              service: acs-fleet-manager
+              severity: critical
+              team: acs
+              id: id
+              cluster_id: cluster_id
+            exp_annotations:
+              message: "Central request id reached a timeout."
+              dashboard: "https://grafana.prod.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-central-timeout"
