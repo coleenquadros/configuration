@@ -1,0 +1,23 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-prod-http
+    haproxy.router.openshift.io/timeout: "15m"
+  labels:
+    app: observatorium-querier-cache
+  name: observatorium-thanos-querier-cache
+spec:
+  host: infogw-proxy.api.integration.devshift.net # infogw-proxy.api.integration.openshift.com
+  port:
+    targetPort: https
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: reencrypt
+  to:
+    kind: Service
+    name: telemeter-token-refresher
+    weight: 100
+  wildcardPolicy: None
