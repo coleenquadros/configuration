@@ -75,7 +75,6 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=latest-tag
 #### deployment_validation_operator_minimum_three_replicas
 
 Excluded resource kinds: ReplicaSet
-Excluded resource names: openshift-acme
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=minimum-three-replicas
 
@@ -86,14 +85,12 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=privileged-po
 #### deployment_validation_operator_no_liveness_probe
 
 Excluded resource kinds: CronJob, Job, ReplicaSet
-Excluded resource names: openshift-acme
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=no-liveness-probe
 
 #### deployment_validation_operator_no_readiness_probe
 
 Excluded resource kinds: CronJob, Job, ReplicaSet
-Excluded resource names: openshift-acme
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=no-readiness-probe
 
