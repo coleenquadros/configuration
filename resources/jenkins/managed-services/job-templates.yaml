@@ -23,8 +23,53 @@
         allow-empty: true
 
 - job-template:
+    id: gl-pr-check-managed-services-frontend
+    name: "{gl_group}-{gl_project}-gl-pr-check-frontend"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_interface_creds
+            - *quay_secret_push
+            - *ci_ocm_token
+            - *ci_aws_keys
+    <<: *gl_pr_check
+    artifacts_path: 'test-results/**'
+    publishers:
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
+
+- job-template:
     id: gl-build-master-managed-services
     name: "{gl_group}-{gl_project}-gl-build-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *ci_jenkins_token
+          - *cpaas_rhosak_token
+          - *gitlab_token
+          - *backup_ecr_push_creds
+          - *quay_secret_push
+          - *app_sre_bot_push_token
+          - *app_interface_creds
+          - *managed_services_github_deploy_key
+          - *rhoas-quay-access
+          - *ci_cd_quay
+    <<: *gl_build_master
+
+- job-template:
+    id: gl-build-master-managed-services-frontend
+    name: "{gl_group}-{gl_project}-gl-build-frontend-{branch}"
     wrappers:
       - timeout_wrapper:
           timeout: "{timeout}"
