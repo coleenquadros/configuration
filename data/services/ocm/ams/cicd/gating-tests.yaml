@@ -1,0 +1,67 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: uhc
+name: saas-ams-gating-tests
+description: SaaS deployment for AMS testing
+
+app:
+  $ref: /services/ocm/ams/app.yml
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+deployResources:
+  requests:
+    cpu: 600m
+    memory: 2000Mi
+  limits:
+    cpu: 600m
+    memory: 2000Mi
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-uhc-info
+managedResourceTypes:
+  - Pod
+imagePatterns:
+  - quay.io/app-sre/uhc-account-manager
+  - quay.io/centos/centos
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+resourceTemplates:
+  - name: uhc-account-manager
+    url: https://gitlab.cee.redhat.com/service/uhc-account-manager
+    path: /templates/gating-tests-template.yml
+    parameters:
+      ENVIRONMENT: production
+      DEPLOYMENT_RING: blue
+      IMAGE_REGISTRY: quay.io
+      IMAGE_REPOSITORY: app-sre/uhc-account-manager
+      UHC_DEBUG: true
+      GLOG_V: 10
+    targets:
+      - namespace:
+          $ref: /services/ocm/namespaces/uhc-integration.yml
+        ref: 3628a953b7a39dab480fc852c8746fd670b7d651
+        promotion:
+          auto: true
+          subscribe:
+            - ocm-ams-deployed-int
+          publish:
+            - ocm-ams-test-int-ok
+        parameters:
+          DEPLOYMENT_NAME: ams-gate-int
+          UHC_BASE_URL: ${OCM_BASE_URL}
+      - namespace:
+          $ref: /services/ocm/namespaces/uhc-stage.yml
+        ref: 3628a953b7a39dab480fc852c8746fd670b7d651
+        promotion:
+          auto: true
+          subscribe:
+            - ocm-ams-deployed-stage
+          publish:
+            - ocm-ams-test-stage-ok
+        parameters:
+          DEPLOYMENT_NAME: ams-gate-stage
+          UHC_BASE_URL: ${OCM_BASE_URL}
