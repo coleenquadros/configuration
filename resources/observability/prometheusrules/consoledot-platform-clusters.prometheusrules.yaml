@@ -11,7 +11,7 @@ spec:
   groups:
   - name: consoledot-platform-clusters.rules
     rules:
-    - alert: Ephemeral cluster CPU utilization is higher than normal
+    - alert: Cluster CPU utilization is higher than normal
       annotations:
         message: Cluster CPU utilization is over 85%
         dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
@@ -23,7 +23,7 @@ spec:
         severity: medium
         env: ephemeral
         app_team: devprod
-    - alert: Ephemeral cluster CPU is reaching its limit
+    - alert: Cluster CPU is reaching its limit
       annotations:
         message: Cluster CPU utilization is over 95%
         dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
@@ -36,7 +36,7 @@ spec:
         env: ephemeral
         app_team: devprod
 
-    - alert: Ephemeral cluster memory utilization is higher than normal
+    - alert: Cluster memory utilization is higher than normal
       annotations:
         message: Cluster memory utilization is over 85%
         dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
@@ -48,7 +48,7 @@ spec:
         severity: medium
         env: ephemeral
         app_team: devprod
-    - alert: Ephemeral cluster memory is reaching its limit
+    - alert: Cluster memory is reaching its limit
       annotations:
         message: Cluster memory utilization is over 95%
         dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
@@ -61,4 +61,77 @@ spec:
         env: ephemeral
         app_team: devprod
 
+    # RHCLOUD-23406
+    - alert: Cluster node's TCP_mem is abnormally high
+      annotations:
+        message: Cluster node's TCP_mem is above 
+        dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
+      expr: |
+        node_sockstat_TCP_mem > 60000
+      for: 5m
+      labels:
+        service: insights
+        severity: medium
+        env: ephemeral
+        app_team: devprod
+    - alert: Cluster node's TCP_mem is abnormally high
+      annotations:
+        message: Cluster node's TCP_mem is above 
+        dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
+      expr: |
+        node_sockstat_TCP_mem > 60000
+      for: 5m
+      labels:
+        service: insights
+        severity: medium
+        env: stage
+        app_team: devprod
+    - alert: Cluster node's TCP_mem is abnormally high
+      annotations:
+        message: Cluster node's TCP_mem is above 
+        dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
+      expr: |
+        node_sockstat_TCP_mem > 60000
+      for: 5m
+      labels:
+        service: insights
+        severity: medium
+        env: prod
+        app_team: devprod
 
+    # RHCLOUD-23407
+    - alert: Cluster node's API latency is abnormally high
+      annotations:
+        message: Cluster node's API latency is above 
+        dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
+      expr: |
+        sum(rate(http_request_duration_seconds_sum[5m])) / sum(rate(http_request_duration_seconds_count[5m])) > 0.300
+      for: 5m
+      labels:
+        service: insights
+        severity: medium
+        env: ephemeral
+    - alert: Cluster node's API latency is abnormally high
+      annotations:
+        message: Cluster node's API latency is above 
+        dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
+      expr: |
+        sum(rate(http_request_duration_seconds_sum[5m])) / sum(rate(http_request_duration_seconds_count[5m])) > 0.300
+      for: 5m
+      labels:
+        service: insights
+        severity: medium
+        env: stage
+        app_team: devprod
+    - alert: Cluster node's API latency is abnormally high
+      annotations:
+        message: Cluster node's API latency is above 
+        dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
+      expr: |
+        sum(rate(http_request_duration_seconds_sum[5m])) / sum(rate(http_request_duration_seconds_count[5m])) > 0.300
+      for: 5m
+      labels:
+        service: insights
+        severity: medium
+        env: prod
+        app_team: devprod
