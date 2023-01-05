@@ -10,7 +10,7 @@ This SOP explains how to setup a local development environment for app-interface
 1. qontract-server - this is the component that exposes the data from app-interface.
 1. qontract-reconcile - this is the main component that acts on data from app-interface.
 
-This guide assums that you are setting up a development environment to use with the real [app-interface](https://gitlab.cee.redhat.com/service/app-interface) data.
+Unless specified, this guide assumes that you are setting up a development environment to use with the real [app-interface](https://gitlab.cee.redhat.com/service/app-interface) data.
 
 ## Install basic tools (MacOs, optional)
 
@@ -106,9 +106,7 @@ Your Qontract GraphQL server will be available at `http://localhost:4000/graphql
 
 ## Configure qontract-reconcile
 
-1. Generate a new Github [Personal access tokens](https://github.com/settings/tokens) for [Vault](https://vault.devshift.net) access. Only `read:org` is required for scopes.
-1. Make sure to copy and save the new personal access token right after generation. You won’t be able to see it again!
-1. Sign in to Vault with Github Token. Copy the value of `data_base64` in [ci-int/qontract-reconcile-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml).
+1. Sign in to Vault through OIDC. Copy the value of `data_base64` in [ci-int/qontract-reconcile-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml).
 1. Decode the content to create a `config.debug.toml` file in `qontract-reconcile` directory with command `echo <content> | base64 -d > config.debug.toml`
 1. Set graphql server in `config.debug.toml` to `http://localhost:4000/graphql`.
 
