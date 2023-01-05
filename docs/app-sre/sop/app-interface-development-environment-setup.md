@@ -96,6 +96,14 @@ Your Qontract GraphQL server will be available at `http://localhost:4000/graphql
     $ pip install -e . && pip install -r requirements/requirements-dev.txt
     ```
 
+4. Use GitHub Mirror as default GitHub API url:
+
+    ```sh
+    $ export GITHUB_API=https://github-mirror.devshift.net
+    ```
+    or you can choose to add it in your *profile or *rc files but be aware it take effect on the whole system.
+
+
 ## Configure qontract-reconcile
 
 1. Generate a new Github [Personal access tokens](https://github.com/settings/tokens) for [Vault](https://vault.devshift.net) access. Only `read:org` is required for scopes.
