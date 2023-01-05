@@ -1,4 +1,4 @@
-# Design doc: AWS resource sharing
+# Design doc: Automatically trigger tests upon a complete upgrade of the ACM Addon
 
 ## Author/date
 
