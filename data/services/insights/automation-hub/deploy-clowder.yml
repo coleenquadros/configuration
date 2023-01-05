@@ -24,7 +24,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -33,6 +33,7 @@ managedResourceTypes:
 - Service
 - ConfigMap
 - Job
+- Frontend
 
 imagePatterns:
 - quay.io/cloudservices
@@ -59,7 +60,7 @@ resourceTemplates:
         REPLICAS: 1
     - namespace:
         $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-      ref: 0e3ce96e6aca3acd473d11aeafd1141fde71af60
+      ref: 805197784aa52300451d67c53fea1631be18861f
       # upstream:
       #   instance:
       #     $ref: /dependencies/ci-ext/ci-ext.yml
@@ -74,14 +75,14 @@ resourceTemplates:
 
         CONTENT_ORIGIN: 'https://console.stage.redhat.com/'
         IMPORTER_JOB_NAMESPACE: automation-hub-jobs-stage
-        IMPORTER_IMAGE_TAG: '475c6a0'
+        IMPORTER_IMAGE_TAG: 'eb5ead4'
         REDIS_SSL: 'true'
         ENABLE_SIGNING: "2"
         GALAXY_SIGNATURE_UPLOAD_ENABLED: 'true'
         GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'true'
         GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
         GALAXY_COLLECTION_SIGNING_SERVICE: ""
-        GALAXY_FEATURE_FLAGS_DISPLAY_SIGNATURES: 'false'  # temporary until AAH-1794 resolved
+        GALAXY_FEATURE_FLAGS_DISPLAY_SIGNATURES: 'true'
 
         NGINX_REPLICAS: '3'
         GALAXY_API_REPLICAS: '3'
@@ -92,7 +93,7 @@ resourceTemplates:
         - automation-hub-stage-deploy-success-channel
     - namespace:
         $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-      ref: 14f148a699b42ba380f85af1ffea9f7c75a183bb
+      ref: 6c3678b4dd14ea8a3cc7fa7be0b95ad753827fb0
       parameters:
         REPLICAS: 1
         SUFFIX: '-cwa'
@@ -108,17 +109,17 @@ resourceTemplates:
 
         CONTENT_ORIGIN: 'https://console.redhat.com/'
         IMPORTER_JOB_NAMESPACE: automation-hub-jobs-prod
-        IMPORTER_IMAGE_TAG: '475c6a0'
+        IMPORTER_IMAGE_TAG: 'eb5ead4'
         REDIS_SSL: 'true'
         ENABLE_SIGNING: "2"
         GALAXY_SIGNATURE_UPLOAD_ENABLED: 'true'
         GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL: 'true'
         GALAXY_AUTO_SIGN_COLLECTIONS: 'false'
         GALAXY_COLLECTION_SIGNING_SERVICE: ""
-        GALAXY_FEATURE_FLAGS_DISPLAY_SIGNATURES: 'false'
+        GALAXY_FEATURE_FLAGS_DISPLAY_SIGNATURES: 'true'
 
         NGINX_REPLICAS: '3'
-        GALAXY_API_REPLICAS: '6'
+        GALAXY_API_REPLICAS: '3'
         PULP_CONTENT_APP_REPLICAS: '3'
         PULP_WORKER_REPLICAS: '6'
         TRIGGER_RESTART: '1'
@@ -130,6 +131,11 @@ resourceTemplates:
         $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
       disable: true  # do not create an app-sre deploy job for ephemeral namespace
       ref: internal  # populated by bonfire
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+      ref: c50acc1fc67157dd8987c7c8aa8473ac3ff103d0
+      parameters:
+        ENV_NAME: env-stage
   - name: automation-hub-job
     path: /openshift/clowder/run-job.yaml
     url: https://github.com/ansible/galaxy_ng
@@ -142,7 +148,7 @@ resourceTemplates:
         RERUN: 3
     - namespace:
         $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-      ref: 14f148a699b42ba380f85af1ffea9f7c75a183bb
+      ref: d4f8456422e5be3e76c8cf40be20de1fe91013ef
       parameters:
-        ARGS: django-admin shell -c 'from pulpcore.app.models import RepositoryVersion; from pulp_ansible.app.models import AnsibleRepository, AnsibleDistribution; print("synclist distro count=%s" % AnsibleDistribution.objects.filter(name__endswith="-synclist").count()); print("repoversion count=%s" % RepositoryVersion.objects.all().count()); repo_info = [(r.name, r.versions.count(), r.retain_repo_versions) for r in AnsibleRepository.objects.all()]; print(repo_info);'
-        RERUN: 10
+        ARGS: django-admin shell -c 'from django.db import connection; cursor = connection.cursor(); cursor.execute("ALTER FUNCTION update_collection_ts_vector OWNER to postgres;"); cursor.close();'
+        RERUN: 0

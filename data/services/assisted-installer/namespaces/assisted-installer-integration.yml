@@ -24,15 +24,14 @@ managedResourceTypes:
 - Role
 - RoleBinding
 
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
 openshiftResources:
 - provider: route
   path: /services/assisted-installer/kibana-integration.route.yaml
 - provider: resource
   path: /services/assisted-installer/assisted-service.serviceaccount.yaml
-- provider: resource
-  path: /services/assisted-installer/assisted-service-job-creator.rolebinding.yaml
-- provider: resource
-  path: /services/assisted-installer/job-creator.role.yaml
 - provider: resource
   path: /services/assisted-installer/assisted-service-leader-election.rolebinding.yaml
 - provider: resource
@@ -69,6 +68,18 @@ openshiftResources:
   name: auto-report-slack-webhook
   path: app-interface/assisted-installer/auto-report-slack-webhook/production
   version: 1
+- provider: vault-secret
+  name: jobs-auto-report-slack-channel-id
+  path: app-interface/assisted-installer/jobs-auto-report-slack-channel-id/integration
+  version: 1
+- provider: vault-secret
+  name: jobs-auto-report-slack-bot-token
+  path: app-interface/assisted-installer/jobs-auto-report-slack-bot-token/integration
+  version: 1
+- provider: vault-secret
+  name: insights-kafka-auth
+  path: insights/secrets/insights-stage/strimzi-stage/mk-oauth-secret
+  version: 5
 
 managedRoles: true
 
@@ -79,6 +90,10 @@ externalResources:
   provisioner:
     $ref: /aws/app-sre-stage/account.yml
   resources:
+  - provider: s3
+    identifier: ai-events-tfstate-integration
+    defaults: /terraform/resources/assisted-installer/s3-no-lifecycle.yml
+    output_resource_name: ai-events-tfstate
   - provider: s3
     identifier: assisted-installer-integration-v4
     defaults: /terraform/resources/assisted-installer/s3-backup-1.yml

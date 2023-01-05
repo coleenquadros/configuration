@@ -10,7 +10,7 @@ service: slack-usergroup
 handle: {operator_name}
 
 workspace:
-  $ref: /dependencies/slack/coreos.yml
+  $ref: /dependencies/slack/redhat-internal.yml
 
 ownersFromRepos:
   - https://github.com/openshift/{operator_name}

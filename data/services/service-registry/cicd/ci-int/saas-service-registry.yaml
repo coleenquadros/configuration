@@ -15,7 +15,7 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: service-registry
 
 managedResourceTypes:
@@ -56,34 +56,8 @@ resourceTemplates:
       publish:
       - service-registry-stage-deploy-success-channel
     parameters:
-      #TODO move this to prod when promoting to prod
       TENANT_MANAGER_URL: https://tenant-manager-envoy.service-registry-stage.svc:9001
-      TENANT_MANAGER_CA_BUNDLE: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
-      REGISTRY_LOG_LEVEL: INFO
-      REGISTRY_QUARKUS_LOG_LEVEL: INFO
-      AUTH_ENABLED: "true"
-      KEYCLOAK_URL: https://sso.redhat.com:443/auth
-      KEYCLOAK_REALM: redhat-external
       KEYCLOAK_API_CLIENT_ID: registry-api-stage
-      REGISTRY_AUTH_RBAC_ENABLED: "true"
-      REGISTRY_AUTH_ROLE_SOURCE: "application"
-      REGISTRY_AUTH_TENANT_OWNER_IS_ADMIN: "true"
-      REGISTRY_AUTH_ADMIN_OVERRIDE_ENABLED: "true"
-      REGISTRY_AUTH_ADMIN_OVERRIDE_FROM: "token"
-      REGISTRY_AUTH_ADMIN_OVERRIDE_TYPE: "claim"
-      REGISTRY_AUTH_ADMIN_OVERRIDE_CLAIM: "is_org_admin"
-      REGISTRY_AUTH_ADMIN_OVERRIDE_CLAIM_VALUE: "true"
-      REGISTRY_DOWNLOAD_HREF_TTL_DYNAMIC_ALLOW: "false"
-      REGISTRY_AUTH_OWNER_ONLY_AUTHORIZATION_DYNAMIC_ALLOW: "true"
-      REGISTRY_AUTH_OWNER_ONLY_AUTHORIZATION_LIMIT_GROUP_ACCESS_DYNAMIC_ALLOW: "false"
-      REGISTRY_AUTH_ANONYMOUS_READ_ACCESS_ENABLED_DYNAMIC_ALLOW: "false"
-      REGISTRY_AUTH_AUTHENTICATED_READ_ACCESS_ENABLED_DYNAMIC_ALLOW: "true"
-      REGISTRY_AUTH_BASIC_AUTH_CLIENT_CREDENTIALS_ENABLED_DYNAMIC_ALLOW: "true"
-      REGISTRY_CCOMPAT_LEGACY_ID_MODE_ENABLED_DYNAMIC_ALLOW: "true"
-      REGISTRY_UI_FEATURES_READONLY_DYNAMIC_ALLOW: "false"
-      IDENTITY_SERVER_RESOLVER_ENABLED: "false"
-      IDENTITY_SERVER_RESOLVER_PATH: "https://api.stage.openshift.com"
-      IDENTITY_SERVER_RESOLVER_CACHE_EXPIRATION: "1"
   - namespace:
       $ref: /services/service-registry/namespaces/service-registry-production.yml
     # This is the SHA256 of the commit that will be deployed,
@@ -121,6 +95,28 @@ resourceTemplates:
       IDENTITY_SERVER_RESOLVER_PATH: "https://api.openshift.com"
       IDENTITY_SERVER_RESOLVER_CACHE_EXPIRATION: "1"
   parameters:
+    TENANT_MANAGER_CA_BUNDLE: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+    REGISTRY_LOG_LEVEL: INFO
+    REGISTRY_QUARKUS_LOG_LEVEL: INFO
+    AUTH_ENABLED: "true"
+    KEYCLOAK_URL: https://sso.redhat.com:443/auth
+    KEYCLOAK_REALM: redhat-external
+    REGISTRY_AUTH_RBAC_ENABLED: "true"
+    REGISTRY_AUTH_ROLE_SOURCE: "application"
+    REGISTRY_AUTH_TENANT_OWNER_IS_ADMIN: "true"
+    REGISTRY_AUTH_ADMIN_OVERRIDE_ENABLED: "true"
+    REGISTRY_AUTH_ADMIN_OVERRIDE_FROM: "token"
+    REGISTRY_AUTH_ADMIN_OVERRIDE_TYPE: "claim"
+    REGISTRY_AUTH_ADMIN_OVERRIDE_CLAIM: "is_org_admin"
+    REGISTRY_AUTH_ADMIN_OVERRIDE_CLAIM_VALUE: "true"
+    REGISTRY_DOWNLOAD_HREF_TTL_DYNAMIC_ALLOW: "false"
+    REGISTRY_AUTH_OWNER_ONLY_AUTHORIZATION_DYNAMIC_ALLOW: "true"
+    REGISTRY_AUTH_OWNER_ONLY_AUTHORIZATION_LIMIT_GROUP_ACCESS_DYNAMIC_ALLOW: "false"
+    REGISTRY_AUTH_ANONYMOUS_READ_ACCESS_ENABLED_DYNAMIC_ALLOW: "false"
+    REGISTRY_AUTH_AUTHENTICATED_READ_ACCESS_ENABLED_DYNAMIC_ALLOW: "true"
+    REGISTRY_AUTH_BASIC_AUTH_CLIENT_CREDENTIALS_ENABLED_DYNAMIC_ALLOW: "true"
+    REGISTRY_CCOMPAT_LEGACY_ID_MODE_ENABLED_DYNAMIC_ALLOW: "true"
+    REGISTRY_UI_FEATURES_READONLY_DYNAMIC_ALLOW: "false"
     TENANT_MANAGER_CLIENT_SECRET_NAME: srs-tenant-manager-credentials
     APICURIO_REGISTRY_IMAGE_REPOSITORY: rhoas/srs-service-registry
     DATABASE_SECRET_NAME: srs-service-registry-rds
@@ -178,9 +174,6 @@ resourceTemplates:
     ENABLE_SENTRY: "true"
     SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
     CORS_ALLOWED_ORIGINS: /(https?:\/\/localhost(:\\d*)?)|(https:\/\/(qaprodauth\.)?(cloud|console)\.redhat\.com)|(https:\/\/(prod|qa|ci|stage)\.foo\.redhat\.com:1337)/
-    IDENTITY_SERVER_RESOLVER_ENABLED: "false"
-    IDENTITY_SERVER_RESOLVER_PATH: "https://api.openshift.com"
-    IDENTITY_SERVER_RESOLVER_CACHE_EXPIRATION: "1"
 
 - name: srs-fleet-manager
   url: https://gitlab.cee.redhat.com/service-registry/srs-fleet-manager
@@ -194,30 +187,13 @@ resourceTemplates:
         $ref: /dependencies/quay/managedservices-rhoas.yml
       name: srs-fleet-manager
     parameters:
-      LOG_LEVEL: INFO
-      SRS_LOG_LEVEL: INFO
-      REPLICAS: 3
-      TENANT_MANAGER_CA_BUNDLE: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
-      TENANT_MANAGER_AUTH_SERVER_URL: https://sso.redhat.com/auth
-      TENANT_MANAGER_AUTH_SERVER_REALM: redhat-external
-      TENANT_MANAGER_AUTH_SECRET_NAME: srs-tenant-manager-credentials
-      FLEET_MANAGER_AUTH_SECRET_NAME: srs-fleet-manager-credentials
       AMS_URL: https://api.stage.openshift.com
-      SSO_TOKEN_ENDPOINT: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
-      EVAL_RESOURCE_NAME: rhosr
-      EVAL_PRODUCT_ID: RHOSRTrial
-      REGISTRY_INSTANCES_EVAL_LIFETIME_SECONDS: 5356800 # 2 months = 2 * 31 * 24 * 60 * 60 = 5356800 seconds
       REGISTRY_BROWSER_URL: "https://qaprodauth.cloud.redhat.com/application-services/service-registry/t/TENANT_ID"
-      REGISTRY_INSTANCES_EVAL_ONLY: "false"
       # List of static service-registry deployments, will be used as target to provision registry tenants
       REGISTRY_DEPLOYMENTS_LIST:
         - name: registry-stage-1
           registryDeploymentUrl: https://bu98.serviceregistry-stage.rhcloud.com
           tenantManagerUrl: https://tenant-manager-envoy.service-registry-stage.svc:9001
-      REST_API_DISABLED_PATHS_PATTERNS: "/api/serviceregistry_mgmt/v1/admin/tasks.*,/api/serviceregistry_mgmt/v1/admin/registryDeployments.*"
-      IDENTITY_SERVER_RESOLVER_ENABLED: "false"
-      IDENTITY_SERVER_RESOLVER_PATH: "https://api.stage.openshift.com"
-      IDENTITY_SERVER_RESOLVER_CACHE_EXPIRATION: "1"
   - namespace:
       $ref: /services/service-registry/namespaces/service-registry-production.yml
     # This is the SHA256 of the commit that will be deployed,
@@ -251,9 +227,22 @@ resourceTemplates:
       IDENTITY_SERVER_RESOLVER_PATH: "https://api.openshift.com"
       IDENTITY_SERVER_RESOLVER_CACHE_EXPIRATION: "1"
   parameters:
+    LOG_LEVEL: INFO
+    SRS_LOG_LEVEL: INFO
+    REPLICAS: 3
+    REGISTRY_INSTANCES_EVAL_ONLY: "false"
+    TENANT_MANAGER_CA_BUNDLE: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+    TENANT_MANAGER_AUTH_SERVER_URL: https://sso.redhat.com/auth
+    TENANT_MANAGER_AUTH_SERVER_REALM: redhat-external
+    TENANT_MANAGER_AUTH_SECRET_NAME: srs-tenant-manager-credentials
+    FLEET_MANAGER_AUTH_SECRET_NAME: srs-fleet-manager-credentials
     IMAGE_REPOSITORY: rhoas/srs-fleet-manager
     DATABASE_SECRET_NAME: srs-fleet-manager-rds
     ENVOY_CONFIG_CM_NAME: srs-fleet-manager-envoy-config
+    SSO_TOKEN_ENDPOINT: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+    EVAL_RESOURCE_NAME: rhosr
+    EVAL_PRODUCT_ID: RHOSRTrial
+    REGISTRY_INSTANCES_EVAL_LIFETIME_SECONDS: 5356800 # 2 months = 2 * 31 * 24 * 60 * 60 = 5356800 seconds
     # Auth config
     AUTH_ENABLED: "true"
     KEYCLOAK_REALM: redhat-external
@@ -267,4 +256,5 @@ resourceTemplates:
     # rds ssl
     DATABASE_SSL_CA_SECRET_NAME: rds-ssl-ca
     CORS_ALLOWED_ORIGINS: /(https?:\/\/localhost(:\\d*)?)|(https:\/\/(qaprodauth\.)?(cloud|console)\.redhat\.com)|(https:\/\/(prod|qa|ci|stage)\.foo\.redhat\.com:1337)/
+    REST_API_DISABLED_PATHS_PATTERNS: "/api/serviceregistry_mgmt/v1/admin/tasks.*,/api/serviceregistry_mgmt/v1/admin/registryDeployments.*"
 

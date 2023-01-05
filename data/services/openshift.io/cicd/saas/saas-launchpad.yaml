@@ -1,0 +1,66 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels: {}
+
+name: saas-launchpad
+description: SaaS tracking file for launchpad
+
+app:
+  $ref: /services/openshift.io/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: dev-null
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/openshiftio/rhel-fabric8-launcher-backend
+- quay.io/openshiftio/rhel-fabric8-launcher-documentation
+
+authentication:
+  image:
+    path: app-sre/quay/openshiftio-pull
+    field: all
+
+resourceTemplates:
+- name: launcher-application
+  url: https://github.com/fabric8-launcher/launcher-application
+  path: /openshift/template.yaml
+  parameters:
+    CPU_REQUEST: 0.25
+    CPU_LIMIT: 1
+    MEMORY_REQUEST: 768M
+    MEMORY_LIMIT: 2G
+    IMAGE: quay.io/openshiftio/rhel-fabric8-launcher-backend
+  targets:
+  - namespace:
+      $ref: /services/openshift.io/namespaces/launchpad-preview.yml
+    ref: 4dbc9e04bddaf31e045701a8d89e518f3425aaff
+    parameters:
+      IMAGE_TAG: b8a1af4
+  - namespace:
+      $ref: /services/openshift.io/namespaces/launchpad-production.yml
+    ref: 4dbc9e04bddaf31e045701a8d89e518f3425aaff
+    parameters:
+      IMAGE_TAG: 74716d8
+- name: launcher-documentation
+  url: https://github.com/fabric8-launcher/launcher-documentation
+  path: /openshift/template.yaml
+  parameters:
+    IMAGE: quay.io/openshiftio/rhel-fabric8-launcher-documentation
+    MEMORY_LIMIT: 64M
+  targets:
+  - namespace:
+      $ref: /services/openshift.io/namespaces/launchpad-preview.yml
+    ref: 16ee082285cd19295b527db86d01ab3c54a347bd
+  - namespace:
+      $ref: /services/openshift.io/namespaces/launchpad-production.yml
+    ref: 16ee082285cd19295b527db86d01ab3c54a347bd

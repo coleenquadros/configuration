@@ -90,3 +90,65 @@ tests:
   - eval_time: 69m
     alertname: RhsmLatency
     exp_alerts: []
+
+# RhsmRdsFreeSpaceLow
+- interval: 1h
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="rhsm-prod"}
+    values: 0+0.5x96
+  alert_rule_test:
+  - eval_time: 4d
+    alertname: RhsmRdsFreeSpaceLow
+    exp_alerts:
+    - exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: rhsm
+        exported_instance: rhsm-prod
+        mount_point: /rdsdbdata
+      exp_annotations:
+        message: "DB instance rhsm-prod is about to run out of storage within 2 weeks."
+        link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=rhsm-prod;is-cluster=false;tab=monitoring"
+        dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1&viewPanel=52"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/RhsmRdsFreeSpaceLow.md'
+
+# Check that the crashing alert fires when there are restarts
+- interval: 30m
+  input_series:
+    - series: kube_pod_container_status_restarts_total{job="kube-state-metrics",namespace="rhsm-prod",pod="swatch-tally-service-87c578764-q7pd6" }
+      values: 0 5 10 15 20 25 30
+  alert_rule_test:
+    - eval_time: 3h
+      alertname: SwatchKubePodCrashLooping
+      exp_alerts:
+      - exp_annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+          message: "RHSM: more than 3 restarts in prod happened in that last 3 hours"
+          runbook: 'https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubePodCrashLooping.md'
+        exp_labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: rhsm
+          exported_service: rhsm-subscriptions
+
+- interval: 5m
+  input_series:
+    - series: inventory_ingress_add_host_failures_total{cause="ValidationException", reporter="rhsm-conduit", namespace="host-inventory-prod"}
+      values: 0 5 10 15 20 25 30
+  alert_rule_test:
+    - eval_time: 10m
+      alertname: RhsmConduitValidationErrors
+      exp_alerts:
+      - exp_annotations:
+          dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus&refresh=5m&viewPanel=68
+          link_url: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-12h,mode:quick,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:lucene,query:'@log_stream:%20%22host-inventory-mq-*%22%20AND%20message:%20%22Validation%20error%20while%20adding%20or%20updating%20host%20%22%20AND%20host.reporter:%20%22rhsm-conduit%22'),sort:!('@timestamp',desc))
+          message: Validation errors for rhsm-conduit messages in host-inventory-prod
+          runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/RhsmConduitValidationErrors.md'
+        exp_labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: rhsm

@@ -24,7 +24,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -38,6 +38,7 @@ managedResourceTypes:
 - Job
 - PersistentVolumeClaim
 - Service
+- Frontend
 
 imagePatterns:
 - quay.io/cloudservices
@@ -76,7 +77,7 @@ resourceTemplates:
       MIN_REPLICAS: 1
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 8d86c9026e5bb5df781acf37a25f96d9556602b5
+    ref: f18bc8f9a5a90de4f75e23b360c4fdf812b962b9
     parameters:
       MIN_REPLICAS: 1
 - name: compliance
@@ -115,7 +116,7 @@ resourceTemplates:
       QE_ACCOUNTS: '13438478|12383032|11789772|13456124|12383032|13460159'
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 4c987523f26cc300e248e29164599ac4b88e22f3
+    ref: ae3aff06bf30c7a9139d5df5c2776983e77954cf
     parameters:
       SETTINGS__FORCE_IMPORT_SSGS: 'false'
       REPLICAS_BACKEND: 6
@@ -134,6 +135,11 @@ resourceTemplates:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+    ref: 42741e06b9404b1efc079c731c54464dedb7868c
+    parameters:
+      ENV_NAME: env-stage
 - name: compliance-dashboards
   url: https://github.com/RedHatInsights/compliance-backend
   path: /dashboards/grafana-dashboard-insights-compliance-general.template.yaml
@@ -142,13 +148,11 @@ resourceTemplates:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: master
     parameters:
-      QE_ACCOUNTS: '13438478|12383032|11789772|13456124|12383032|13460159'
       DEFAULT_DATASOURCE: 'crcs02ue1-prometheus'
       DEFAULT_RDS_DATASOURCE: 'app-sre-stage-01-prometheus'
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 4c987523f26cc300e248e29164599ac4b88e22f3
+    ref: ae3aff06bf30c7a9139d5df5c2776983e77954cf
     parameters:
-      QE_ACCOUNTS: '11789772|12383032'
       DEFAULT_DATASOURCE: 'crcp01ue1-prometheus'
       DEFAULT_RDS_DATASOURCE: 'app-sre-prod-01-prometheus'

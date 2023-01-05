@@ -1,0 +1,158 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: tower-analytics
+
+name: ci-int-automation-analytics-jobs
+description: automation analytics ci int jobs
+
+app:
+  $ref: /services/insights/tower-analytics/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: automation-analytics-ci
+    label: insights
+    node: insights
+    gl_group: automation-analytics
+    gl_project: automation-analytics-backend
+    quay_org: cloudservices
+    jobs:
+    - 'insights-gl-build-master':
+        display_name: 'automation analytics gl-build-main'
+        branch: main
+        name: 'aa-qe'
+    - 'insights-gl-pr-check':
+        display_name: 'automation analytics gl-pr-check'
+        name: 'aa-qe'
+    - "insights-automation-analytics-backend-sonarqube-gl-pr-check":
+        display_name: insights automation analytics sonarqube pr security scan
+        pr_check_script_path: 'make scan_project'
+        slack_channel_notification: automation-analytics-sonarr-prcheck
+        name: "aa-sonarr"
+    - "insights-automation-analytics-backend-cypress-gl-pr-check":
+        display_name: insights automation analytics cypress pr security scan
+        pr_check_script_path: 'make cypress'
+        slack_channel_notification: automation-analytics-cypress
+        name: "aa-cypress"
+    - "insights-automation-analytics-clamscan-gl-pr-check":
+        display_name: insights automation analytics clamscan pr security scan
+        pr_check_script_path: 'make clamscan'
+        slack_channel_notification: automation-analytics-clamscan
+        name: "aa-clamscan"
+
+- project:
+    name: insights-platform-cypress-ci
+    label: insights
+    node: insights
+    gl_group: insights-platform
+    gl_project: cicd-cypress
+    quay_org: cloudservices
+    jobs:
+    - "insights-platform-gl-build-cicd-cypress":
+        name: "cicd-cypress"
+        display_name: insight platform cicd cypress
+        branch: main
+        build_deploy_script_path: 'build_deploy.sh'
+        slack_channel_notification: insights-platform-cicd-cypress
+        image: "quay.io/cloudservices/insights-platform-cicd-cypress"
+        image_tag: latest
+
+- project:
+    name: insights-platform-clamscan-ci
+    label: insights
+    node: insights
+    gl_group: insights-platform
+    gl_project: cicd-clamscan
+    quay_org: cloudservices
+    jobs:
+    - "insights-platform-gl-build-cicd-clamscan":
+        name: "cicd-clamscan"
+        display_name: insight platform cicd clamscan
+        branch: main
+        build_deploy_script_path: 'build_deploy.sh'
+        slack_channel_notification: insights-platform-cicd-clamscan
+        image: "quay.io/cloudservices/insights-platform-cicd-clamscan"
+        image_tag: latest
+
+- project:
+    name: automation-analytics-cypress-ci
+    label: insights
+    node: insights
+    gl_group: automation-analytics
+    gl_project: automation-analytics-cypress-image
+    quay_org: cloudservices
+    jobs:
+    - "insights-gl-build-cypress-image":
+        display_name: automation analytics cypress image ephemeral
+        image: "quay.io/cloudservices/automation-analytics-cypress-image"
+        image_tag: latest
+
+- project:
+    name: automation-analytics-clamscan-ci
+    label: insights
+    node: insights
+    gl_group: automation-analytics
+    gl_project: automation-analytics-clamscan-image
+    quay_org: cloudservices
+    jobs:
+    - "insights-automation-analytics-clamscan-gl-build-master":
+        display_name: automation analytics clamscan image ephemeral
+        image: "quay.io/cloudservices/automation-analytics-clamscan-image"
+        image_tag: latest
+
+- project:
+    name: automation-analytics-iqe-debug-image-ci
+    label: insights
+    node: insights
+    gl_group: automation-analytics
+    gl_project: automation-analytics-iqe-debug-image
+    quay_org: cloudservices
+    jobs:
+    - "insights-gl-build-iqe-debug-image":
+        display_name: automation analytics iqe debug image ephemeral
+        image: "quay.io/cloudservices/automation-analytics-iqe-debug-image"
+        image_tag: latest
+
+- project:
+    name: automation-analytics
+    label: insights
+    node: insights
+    app_name: tower-analytics
+    component_name: tower-analytics-clowdapp
+    image: "quay.io/cloudservices/automation-analytics-api"
+    git_commit: main
+    image_tag: qa
+    components_w_resources: all
+    include_ui: true
+    post_deployment_script: "aa.sh"
+    jobs:
+    - "insights-deploy-ephemeral":
+        display_name: Automation Analytics ephemeral-deployment
+
+- project:
+    name: automation-analytics-frontend-ci
+    label: insights
+    node: insights
+    gh_org: RedHatInsights
+    gh_repo: tower-analytics-frontend
+    quay_org: cloudservices
+    jobs:
+    - 'insights-gh-build-master':
+        display_name: 'automation analytics frontend gh-build-main'
+        branch: devel
+    - "insights-gh-pr-check":
+        display_name: automation-analytics-frontend pr-check
+        branch: devel
+    - "insights-tower-analytics-frontend-sonarqube-gh-pr-check":
+        display_name: tower analytics frontend sonarqube pr security scan
+        pr_check_script_path: 'make scan_project'
+    - "insights-tower-analytics-frontend-clamscan-gh-pr-check":
+        display_name: tower analytics frontend clamscan pr security scan
+        pr_check_script_path: 'make clamscan'

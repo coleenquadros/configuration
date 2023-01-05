@@ -11,7 +11,7 @@ alertmanagerUrl: https://alertmanager.appsres04ue2.devshift.net
 serverUrl: https://api.appsres04ue2.n4k3.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.appsres04ue2.n4k3.p1.openshiftapps.com
 auth:
-  service: github-org-team
+- service: github-org-team
   org: app-sre
   team: appsres04ue2-cluster
 observabilityNamespace:
@@ -28,7 +28,7 @@ spec:
   provider: aws
   region: us-east-2
   channel: candidate
-  version: 4.11.10
+  version: 4.12.0-rc.4
   initial_version: 4.5.7-fast
   multi_az: false
   nodes: 4
@@ -66,6 +66,12 @@ peering:
     vpc:
       $ref: /aws/app-sre-stage/vpcs/app-sre-stage-vpc.yml
     manageRoutes: true
+  - provider: account-vpc
+    name: appsres04ue2_app-sre-stage-us-east-2
+    vpc:
+      $ref: /aws/app-sre-stage/vpcs/app-sre-stage-vpc-us-east-2.yml
+    manageRoutes: true
+    manageAccountRoutes: true
   - provider: cluster-vpc-accepter
     name: appsres04ue2_hive-stage-01
     cluster:
@@ -79,6 +85,7 @@ peering:
 automationToken:
   path: app-sre/creds/kube-configs/appsres04ue2
   field: token
+clusterAdmin: true
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/appsres04ue2-cluster-admin
   field: token
@@ -100,10 +107,4 @@ awsInfrastructureAccess:
   accessLevel: network-mgmt
 - awsGroup:
     $ref: /aws/app-sre-stage/groups/App-SRE-admin.yml
-  accessLevel: read-only
-- awsGroup:
-    $ref: /aws/app-sre/groups/Log-consumers.yml
-  accessLevel: read-only
-- awsGroup:
-    $ref: /aws/app-sre-logs/groups/Log-consumers.yml
   accessLevel: read-only

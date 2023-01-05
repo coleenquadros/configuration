@@ -23,7 +23,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-monitoring-info
 
 authentication:
@@ -54,8 +54,6 @@ imagePatterns:
 - quay.io/openshift/origin-configmap-reloader
 - quay.io/prometheus/alertmanager
 - quay.io/openshift-logging/loki
-  # This should be deleted upon completion of https://issues.redhat.com/browse/RHOBS-112
-- quay.io/philipgough/envoy
 
 resourceTemplates:
 - name: observatorium-metrics
@@ -132,7 +130,7 @@ resourceTemplates:
       SERVICE_ACCOUNT_NAME: observatorium-metrics
   - namespace:
       $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
-    ref: 7f413d44040edf89bf3fb6b6450c21b89e55ae39
+    ref: 5863b85340961d06312bd6e3f8216114e44b57bf
     parameters:
       NAMESPACE: observatorium-metrics-stage
       OBSERVATORIUM_NAMESPACE: observatorium-stage
@@ -141,7 +139,7 @@ resourceTemplates:
       OBSERVATORIUM_ALERTMANAGER_IMAGE_TAG: v0.21.0
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-stage-s3
-      THANOS_IMAGE_TAG: v0.29.0-rc.0
+      THANOS_IMAGE_TAG: v0.29.0
       THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
       THANOS_QUERIER_REPLICAS: 2
       THANOS_QUERIER_CPU_REQUEST: '500m'
@@ -149,6 +147,7 @@ resourceTemplates:
       THANOS_QUERIER_MEMORY_REQUEST: '4Gi'
       THANOS_QUERIER_MEMORY_LIMIT: '8Gi'
       THANOS_QUERIER_FILE_SD_TARGETS: '["dnssrv+_grpc._tcp.observatorium-thanos-metric-federation-rule.observatorium-metrics-stage.svc.cluster.local"]'
+      THANOS_QUERIER_PROXY_STRATEGY: 'lazy'
       THANOS_VOLCANO_IMAGE_TAG: main-2022-10-07-a4e33415
       THANOS_VOLCANO_IMAGE: quay.io/thanos/thanos
       THANOS_VOLCANO_LOG_LEVEL: debug
@@ -171,8 +170,8 @@ resourceTemplates:
       THANOS_RECEIVE_REPLICAS: 3
       THANOS_RECEIVE_CPU_REQUEST: '700m'
       THANOS_RECEIVE_CPU_LIMIT: '700m'
-      THANOS_RECEIVE_MEMORY_REQUEST: '5Gi'
-      THANOS_RECEIVE_MEMORY_LIMIT: '5Gi'
+      THANOS_RECEIVE_MEMORY_REQUEST: '8Gi'
+      THANOS_RECEIVE_MEMORY_LIMIT: '8Gi'
       THANOS_RECEIVE_PVC_STORAGE: '100Gi'
       THANOS_RECEIVE_LOG_LEVEL: 'debug'
       THANOS_RECEIVE_DEBUG_ENV: '1'
@@ -204,12 +203,7 @@ resourceTemplates:
       - observatorium-metrics-stage-deploy-success-channel
   - namespace:
       $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
-
-    ## While this comment is here, do not alter the ref for this target without speaking to @pgough :)
-    ## There is a breaking change on the ref below which is living on a temp branch until all migrations
-    ## are complete. Once all migrations are complete, the branch will be merged to main and
-    # this comment can be removed
-    ref: a98a5028b676f039d491ac9c5ee3e7828f0ca13c
+    ref: 5863b85340961d06312bd6e3f8216114e44b57bf
     parameters:
       NAMESPACE: observatorium-metrics-production
       OBSERVATORIUM_NAMESPACE: observatorium-production
@@ -217,7 +211,7 @@ resourceTemplates:
       OBSERVATORIUM_ALERTMANAGER_IMAGE_TAG: v0.21.0
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-production-s3
-      THANOS_IMAGE_TAG: v0.28.0
+      THANOS_IMAGE_TAG: v0.29.0
       THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
       THANOS_QUERIER_REPLICAS: 6
       THANOS_RECEIVE_REPLICAS: 9
@@ -227,6 +221,7 @@ resourceTemplates:
       THANOS_QUERIER_MEMORY_REQUEST: '10Gi'
       THANOS_QUERIER_MEMORY_LIMIT: '32Gi'
       THANOS_QUERIER_FILE_SD_TARGETS: '["dnssrv+_grpc._tcp.observatorium-thanos-metric-federation-rule.observatorium-metrics-production.svc.cluster.local"]'
+      THANOS_QUERIER_PROXY_STRATEGY: 'lazy'
       THANOS_QUERY_FRONTEND_REPLICAS: 3
       THANOS_QUERY_FRONTEND_CPU_REQUEST: '100m'
       THANOS_QUERY_FRONTEND_CPU_LIMIT: '1'
@@ -284,7 +279,7 @@ resourceTemplates:
       NAMESPACE: observatorium-metrics-stage
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-stage-s3
-      THANOS_IMAGE_TAG: v0.29.0-rc.0
+      THANOS_IMAGE_TAG: v0.29.0
       THANOS_QUERIER_NAMESPACE: observatorium-mst-stage
       THANOS_RULER_LOG_LEVEL: 'debug'
       THANOS_RULER_REPLICAS: 2
@@ -303,7 +298,7 @@ resourceTemplates:
       NAMESPACE: observatorium-metrics-production
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-production-s3
-      THANOS_IMAGE_TAG: v0.28.0
+      THANOS_IMAGE_TAG: v0.29.0
       THANOS_QUERIER_NAMESPACE: observatorium-mst-production
       THANOS_RULER_LOG_LEVEL: 'debug'
       THANOS_RULER_REPLICAS: 2
@@ -320,23 +315,9 @@ resourceTemplates:
   url: https://github.com/rhobs/configuration
   targets:
     - namespace:
-        $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
-      ref: c5e3d686d95dba479499f462cdd3bee25040d3a7
-      delete: true # deleting from the namespace - will remove in followup MR.
-      parameters:
-        NAMESPACE: observatorium-metrics-stage
-        PRIMARY_UPSTREAM_HOST: 'observatorium-thanos-receive-router.observatorium-metrics-stage.svc.cluster.local'
-        MIRROR_HOST: 'observatorium-thanos-receive.observatorium-metrics-stage.svc.cluster.local'
-        RECEIVER_KETAMA_REPLICAS: '3'
-        RECEIVER_KETAMA_CPU_REQUEST: '700m'
-        RECEIVER_KETAMA_CPU_LIMIT: '700m'
-        RECEIVER_KETAMA_MEMORY_REQUEST: '5Gi'
-        RECEIVER_KETAMA_MEMORY_LIMIT: '5Gi'
-        THANOS_CONFIG_SECRET: thanos-objectstorage
-        THANOS_S3_SECRET: telemeter-thanos-stage-s3
-    - namespace:
         $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
       ref: 9a05873e125cbe1f1829e9cc244c25f5fa4653a6
+      delete: true
       parameters:
         NAMESPACE: observatorium-metrics-production
         PRIMARY_UPSTREAM_HOST: 'observatorium-thanos-receive-router.observatorium-metrics-production.svc.cluster.local'

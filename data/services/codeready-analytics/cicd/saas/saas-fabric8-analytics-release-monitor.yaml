@@ -1,0 +1,61 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: codeready-analytics
+  component: fabric8-analytics-release-monitor
+
+name: saas-crda-release-monitor
+description: SaaS tracking file for codeready-analytics fabric8-analytics-release-monitor
+
+app:
+  $ref: /services/codeready-analytics/app.yml
+
+pipelinesProvider:
+  $ref: /services/codeready-analytics/pipelines/tekton.codeready-analytics-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-codeready-analytics-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/openshiftio/fabric8-analytics-release-monitor
+- quay.io/openshiftio/rhel-fabric8-analytics-release-monitor
+
+authentication:
+  image:
+    path: app-sre/quay/openshiftio-pull
+    field: all
+
+resourceTemplates:
+- name: fabric8-analytics-release-monitor
+  url: https://github.com/fabric8-analytics/fabric8-analytics-release-monitor
+  path: /openshift/template.yaml
+  parameters:
+    NPM_URL: https://registry.npmjs.org/
+    PYPI_URL: https://pypi.org/
+    DOCKER_REGISTRY: quay.io
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: 5ab96d093d71655d5130b8c9c3639fed364a54f7
+    parameters:
+      IMAGE_TAG: b4bb654
+      ENABLE_SCHEDULING: 0
+      DOCKER_IMAGE: openshiftio/fabric8-analytics-release-monitor
+      REPLICAS: 1
+      SLEEP_INTERVAL: 30
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 5ab96d093d71655d5130b8c9c3639fed364a54f7
+    parameters:
+      IMAGE_TAG: b4bb654
+      ENABLE_SCHEDULING: 1
+      DOCKER_IMAGE: openshiftio/rhel-fabric8-analytics-release-monitor
+      REPLICAS: 1
+      SLEEP_INTERVAL: 5

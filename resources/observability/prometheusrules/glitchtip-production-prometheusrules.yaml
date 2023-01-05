@@ -1,0 +1,30 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: glitchtip-production
+spec:
+  groups:
+  - name: glitchtip-production
+    rules:
+    - alert: GlitchtipContainersDown
+      expr: sum by(container) (kube_pod_container_status_ready{namespace="glitchtip-production"}) < 1
+      for: 1m
+      labels:
+        service: glitchtip
+        severity: medium
+      annotations:
+        message: "Glitchtip {{ $labels.container }} deployment is down."
+
+    - alert: GlitchtipDeploymentUnderReplicated
+      expr: kube_deployment_status_replicas_unavailable{namespace="glitchtip-production"} > 0
+      for: 5m
+      labels:
+        service: glitchtip
+        severity: medium
+      annotations:
+        message: "Glitchtip deployment {{ $labels.deployment }} has {{ $value }} pods not running."

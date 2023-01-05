@@ -1,0 +1,56 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: codeready-analytics
+  component: f8a-emr-deployment
+
+name: saas-crda-f8a-emr-deployment
+description: SaaS tracking file for codeready-analytics f8a-emr-deployment
+
+app:
+  $ref: /services/codeready-analytics/app.yml
+
+pipelinesProvider:
+  $ref: /services/codeready-analytics/pipelines/tekton.codeready-analytics-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-codeready-analytics-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/openshiftio/rhel-fabric8-analytics-f8a-emr-deployment
+
+authentication:
+  image:
+    path: app-sre/quay/openshiftio-pull
+    field: all
+
+resourceTemplates:
+- name: f8a-emr-deployment
+  url: https://github.com/fabric8-analytics/f8a-emr-deployment
+  path: /openshift/template.yaml
+  parameters:
+    CPU_REQUEST: 125m
+    CPU_LIMIT: 250m
+    MEMORY_REQUEST: 125Mi
+    MEMORY_LIMIT: 250Mi
+    REPLICAS: 1
+    DOCKER_REGISTRY: quay.io
+    DOCKER_IMAGE: openshiftio/rhel-fabric8-analytics-f8a-emr-deployment
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: 250dbd64f827b30eb10edb77fd0b505ab2cab3ad
+    parameters:
+      IMAGE_TAG: 389aa76
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 250dbd64f827b30eb10edb77fd0b505ab2cab3ad
+    parameters:
+      IMAGE_TAG: 9de4454

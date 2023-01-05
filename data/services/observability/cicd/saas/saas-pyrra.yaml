@@ -15,21 +15,21 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: sd-app-sre-info
 
 managedResourceTypes:
 - ServiceAccount
-- Role
-- RoleBinding
-- DeploymentConfig
 - Deployment
 - Service
 - ClusterRole
+- ClusterRoleBinding
 - CustomResourceDefinition
+- PersistentVolumeClaim
 
 imagePatterns:
 - quay.io/app-sre/pyrra
+- quay.io/app-sre/pyrra-snesic-test
 
 clusterAdmin: true
 
@@ -44,8 +44,16 @@ resourceTemplates:
   url: https://github.com/app-sre/pyrra-template
   targets:
   - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+      $ref: /services/observability/namespaces/pyrra.app-sre-stage-01.yml
+      # $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
     ref: main
     parameters:
-      IMAGE: quay.io/app-sre/pyrra
-      RELEASE: v0.4.4
+      IMAGE_TEST: quay.io/app-sre/pyrra-snesic-test
+      RELEASE_TEST: v0.0.2-test
+      PROMETHEUS_URL: http://prometheus-app-sre.openshift-customer-monitoring.svc.cluster.local:9090
+      # PROMETHEUS_URL: https://prometheus.app-sre-stage-01.devshift.net
+      # PROM_EXT_URL: http://prometheus-app-sre.openshift-customer-monitoring.svc.cluster.local:9090
+      PROM_EXT_URL: https://prometheus.app-sre-stage-01.devshift.net
+      API_URL: http://pyrra-kubernetes.pyrra.svc.cluster.local:9444
+      # IMAGE: quay.io/app-sre/pyrra
+      # RELEASE: v0.4.0

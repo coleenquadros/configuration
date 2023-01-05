@@ -24,7 +24,16 @@ If your MR is urgent or time sensitive requests, see [contacting AppSRE](#contac
 
 You can catch the AppSRE team in the `#sd-app-sre` channel of `coreos.slack.com`.
 
-To create a request, please open an issue in the [APPSRE Project](https://issues.redhat.com/projects/APPSRE/issues) in JIRA.
+To create a request, please open an issue in one of the following Jira projects:
+
+* [APPSRE](https://issues.redhat.com/projects/APPSRE/issues) for feature requests or other consultation with the AppSRE team
+  * Example(s):
+    * Request to support a new cloud resource type in app-interface
+    * Propose an enhancement to an existing app-interface integration
+* [ASIC](https://issues.redhat.com/projects/ASIC/issues) for issues requiring the attention of the AppSRE interrupt catcher, but aren't impacting production services
+  * Example(s):
+    * A build job is failing for a reason believed to be related to the build infrastructure
+    * Need assistance troubleshooting a failed deployment
 
 For *time sensitive* requests, please ping `@app-sre-ic` in the `#sd-app-sre` channel.
 
@@ -37,7 +46,7 @@ If you have an urgent matter affecting production that needs to be addressed as 
 
 Start by accessing the Visual App-Interface at https://visual-app-interface.devshift.net.  Using the side bar, navigate to the [Permissions](https://visual-app-interface.devshift.net/permissions) section.
 
-Find a permission that matches the access you require. For this example, choose [ci-ext](https://visual-app-interface.devshift.net/permissions#/dependencies/ci-ext/permissions/ci-ext.yml)
+Find a permission that matches the access you require. For this example, choose [ci-ext-read-only](https://visual-app-interface.devshift.net/permissions#/dependencies/ci-ext/permissions/ci-ext-read-only.yml)
 
 choosing a permission will take you to the Permission's page, in which you can view a list of `Roles` who grant this permission.  Choose the role that best matches your requirement and submit a merge request to app-interface adding that role to your user file.
 
@@ -60,16 +69,16 @@ Problem: I Can not log in to https://ci.ext.devshift.net.
 
 Managed to log in but having issues? Maybe even seeing this error message? `"Access denied: <your-red-hat-username> is missing the Overall/Read permission"`
 
-Access is managed via app-interface. The role that grants access is [ci-ext-ro-access](/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml).
+Access is managed via app-interface. The role that grants access is [ci-ext-access](/data/dependencies/ci-ext/roles/ci-ext-access.yml).
 
 If you don't have a user file on app-interface:
 
 1. Submit a MR to app-interface adding your user file
-1. Add the [ci-ext-ro-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml) role to your user file in the same MR.
+1. Add the [ci-ext-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-access.yml) role to your user file in the same MR.
 
 If you already have a user file
 
-1. Make sure that your user has the [ci-ext-ro-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml) role assigned, if it's not the case, submit a MR adding the role to your user file.
+1. Make sure that your user has the [ci-ext-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-access.yml) role assigned, if it's not the case, submit a MR adding the role to your user file.
 
 *Note that the permission could be granted to your user via a role that has the permission assigned, check if any of the roles assigned to your user have the access to ci-ext*
 
@@ -145,7 +154,6 @@ To know if your cluster uses the new cluster-logging operator deployment and cen
 
 To get access to the `app-sre-logs` account:
 1. Submit a MR to app-interface to add the [log-consumer](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-logs/roles/log-consumer.yml) role to your user file. You will also need to [add your public GPG key](https://gitlab.cee.redhat.com/service/app-interface#adding-your-public-gpg-key) (if you havn't already) in the same MR.
-    * For console.redhat.com use the [log-consumer-crc](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-logs/roles/log-consumer-crc.yml) role.
 1. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre-logs` account). Follow the instructions in the email to login to the account.
     * Note: in case you did not get an invitation, the login details can be obtained from the [Terraform-users Credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) page.
     * Note: to decrypt the password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret) 
@@ -160,7 +168,6 @@ During the CLO Addon decommission period (see [email](https://gitlab.cee.redhat.
 To get access to CloudWatch on a cluster's AWS account, follow these steps (examples for `app-sre-stage-01`):
 
 1. Submit a MR to app-interface to add the [log-consumer](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-logs/roles/log-consumer.yml) role to your user file. You will also need to [add your public GPG key](https://gitlab.cee.redhat.com/service/app-interface#adding-your-public-gpg-key) (if you havn't already) in the same MR.
-    * For console.redhat.com use the [log-consumer-crc](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-logs/roles/log-consumer-crc.yml) role.
 2. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre-logs` account). Follow the instructions in the email to login to the account.
     * Note: in case you did not get an invitation, the login details can be obtained from the [Terraform-users Credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) page.
     * Note: to decrypt the password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret) 
@@ -176,6 +183,10 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
 ### User unable to assume IAM role in the AWS Console
 
 If the `Invalid information in one or more fields. Check your information or contact your administrator.` error is displayed when trying to assume a different IAM role, make sure [to enable MFA on your user AWS Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html). After MFA is enabled, log out and back in. 
+
+### User can access AWS console but can't view resources
+
+If an error  message like this, `User: arn:aws:iam::<account_id>:user/<your_user> is not authorized to perform: <service>:<action> on resource: * with an explicit deny in an identity-based policy`, is displayed in your console make sure [to enable MFA on your user AWS Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html). After MFA is enabled, log out and back in.
 
 ### What environments are supported by AppSRE?
 

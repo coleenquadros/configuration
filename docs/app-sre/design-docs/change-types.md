@@ -102,7 +102,7 @@ $schema: /app-interface/change-type-1.yml
 name: change-role-members
 
 contextType: datafile
-contextSchema: /access/roles-1.yml
+contextSchema: /access/role-1.yml
 
 changes:
 - type: jsonPath

@@ -1,0 +1,42 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: pyrra
+description: staging namespace for the pyrra deployment
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+managedResourceTypes:
+- Route
+- ServiceLevelObjective
+- ServiceAccount
+
+clusterAdmin: true
+
+openshiftResources:
+- provider: resource-template
+  type: jinja2
+  path: /observability/pyrra.route.yaml
+  variables:
+    environment: -stage
+    host: pyrra.stage.devshift.net
+- provider: resource
+  path: /observability/pyrra-slo/pyrra-slo-test-apiserver-read.yaml
+- provider: resource
+  path: /observability/pyrra-slo/pyrra-slo-test-apiserver-write.yaml
+- provider: resource
+  path: /observability/pyrra/pyrra.serviceaccount.yaml
+
+openshiftServiceAccountTokens:
+- namespace:
+    $ref: /services/observability/namespaces/pyrra.app-sre-stage-01.yml
+  serviceAccountName: pyrra-kubernetes

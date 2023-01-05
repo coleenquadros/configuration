@@ -1,0 +1,59 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: fedramp-tools
+
+name: fedramp-tools
+
+description: |
+  Quay images that are unique to FedRAMP.
+
+dependencies:
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/ci-int/service.yml
+
+codeComponents:
+- name: goalert
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service/goalert
+  gitlabRepoOwners:
+    enabled: true
+  gitlabHousekeeping:
+    enabled: true
+    rebase: false
+  gitlabSync:
+    sourceProject:
+      name: goalert
+      group: service
+      branch: main
+    destinationProject:
+      name: goalert
+      group: service
+      branch: main
+
+escalationPolicy:
+  $ref: /teams/sd-sre/escalation-policies/general.yaml
+
+onboardingStatus: InProgress
+
+serviceOwners:
+- name: SRE Platform team
+  email: sd-sre-fedramp@redhat.com
+
+grafanaUrls:
+- title: TODOREPLACE
+  url: https://TODO
+
+sopsUrl: 'https://github.com/openshift/ops-sop'
+
+architectureDocument: ''
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: goalert
+    description: Goalert image used in FedRAMP
+    public: true

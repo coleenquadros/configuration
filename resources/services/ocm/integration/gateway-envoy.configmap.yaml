@@ -78,6 +78,21 @@ data:
                   socket_address:
                     address: gateway-site
                     port_value: 8000
+
+      # Cluster for the `cna-management` service:
+      - name: cna-management
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: cna-management
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: a5df8sfd7k.api.openshift.com
+                    port_value: 443
         transport_socket:
           name: envoy.transport_sockets.tls
           typed_config:
@@ -268,6 +283,10 @@ data:
                                 "name": "Service logs"
                               },
                               {
+                                "id": "cna-management",
+                                "name": "CNA management service"
+                              },
+                              {
                                 "id": "upgrades_info",
                                 "version": "",
                                 "name": "Upgrades information service"
@@ -305,6 +324,15 @@ data:
                       cluster: osd_fleet_mgmt
                       auto_host_rewrite: true
                       timeout: 30s    
+
+                  # Route for the `cna-manager` service:
+                  - name: cna-manager
+                    match:
+                      prefix: /api/cna-management
+                    route:
+                      cluster: cna-management
+                      auto_host_rewrite: true
+                      timeout: 30s
 
                   # Routes for the `assisted-install` service. Note that we
                   # have two separate routes: one for POST requests that we

@@ -98,6 +98,56 @@
     <<: *gl_pr_check
 
 - job-template:
+    id: 'ocm-cypress-smoke'
+    name: '{gl_group}-{gl_project}-ocm-cypress-smoke'
+    environment: staging
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *ocm_selenium_tests
+        - *quay_secret_pull
+    - ansicolor
+    parameters:
+    - string:
+        name: ENVIRONMENT
+        default: 'staging'
+        description: 'Environment against test suite run. Ex: Staging/Production'
+    - string:
+        name: TESTCASE
+        default: '*'
+        description: 'Testcase(s)'
+    - string:
+        name: BROWSER
+        default: 'Chrome'
+        description: 'Browser to run the test case(s)'
+    - string:
+        name: BRANCH
+        default: '{default_branch}'
+        description: 'The branch of uhc-portal repo for pipeline scripts'
+    branch: '${{BRANCH}}'
+    ci_cmd: ./smoke_trigger.sh
+    cron_expression: '0 15 10 ? * *'
+    publishers:
+    - archive:
+        artifacts: '*.log, run/output/embedded_files/**'
+        allow-empty: 'true'
+    - junit:
+        results: 'run/output/junit-report/*.xml'
+        test-stability: true
+        claim-build: true
+        measurement-plots: true
+        flaky-test-reports: true
+        junit-attachments: true
+        allow-empty-results: true
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier
+    <<: *gl_timed
+
+- job-template:
     id: 'ocm-pr-check'
     name: '{gl_group}-{gl_project}-ocm-pr-check'
     environment: production
@@ -229,3 +279,47 @@
         - *quay_secret_push
         - *api_tests_sentry_dsn
     <<: *gl_build_master
+
+- job-template:
+    id: 'ocm-backend-ci'
+    name: 'ocm-backend-ci-tests'
+    node: '{node}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *ocm_backend_tests
+    parameters:
+    - string:
+        name: ENVIRONMENT
+        default: 'staging'
+        description: 'Environment against test suite run. Ex: staging/production'
+    - string:
+        name: PROFILES
+        default: '{default_profiles}'
+        description: 'Profiles you want to run in multi processes, like rosa-hypershift,osd-standard'
+    - string:
+        name: VERSION
+        default: 'latest'
+        description: 'Specify a version you want to test like openshift-v4.12.0'
+    - string:
+        name: CHANNEL_GROUP
+        default: '{default_channel}'
+        description: 'The channel group you want to use for cluster creation default stable'
+    branch: master
+    ci_cmd: ./run_profile.py --env ${{ENVIRONMENT}} --version ${{VERSION}} --profiles ${{PROFILES}} --channel-group ${{CHANNEL_GROUP}}
+    cron_expression: '0 0 * * *'
+    publishers:
+    - archive:
+        artifacts: 'output/**'
+        allow-empty: 'true'
+    - junit:
+        results: '**/junit.xml'
+        test-stability: true
+        claim-build: true
+        measurement-plots: true
+        flaky-test-reports: true
+        junit-attachments: true
+    <<: *gl_timed

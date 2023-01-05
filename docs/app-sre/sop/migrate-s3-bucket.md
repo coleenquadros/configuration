@@ -5,7 +5,7 @@ This SOP documents steps to migrate an S3 bucket from source AWS account to a de
 ## Considerations
 The data transfer from bucket to bucket is a repeatable process. Considering the amount of data to be transfered, it will be meaningful to do an initial sync while the service using the bucket is still running. A differential resync after the service shutdown will be a lot faster.
 
-Also consider data transfer costs. Keeping data transfer within a region reduces cost. Using a Pod on a cluster or an EC2 instance (e.g. ssh bastion.ci.ext.devshift.net) is a valid way to achieve that.
+Also consider data transfer costs. Keeping data transfer within a region reduces cost. Using a Pod on a cluster or an EC2 instance (e.g. ssh bastion.ci.int.devshift.net) is a valid way to achieve that.
 
 If you are migrating a bucket from one account to another and decide to keep the same bucket name, there is a AWS deletion queue that happens in the background once you remove a bucket. That name is part of this queue and it can take anywhere from a few minutes to a couple of hours for that name to be out of the queue and ready to be reused again.
 

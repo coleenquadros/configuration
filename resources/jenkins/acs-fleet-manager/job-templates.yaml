@@ -1,4 +1,28 @@
 - job-template:
+    id: gh-build-main-acs
+    name: '{gh_org}-{gh_repo}-build-and-push-{branch}'
+    wrappers:
+      - timeout_wrapper:
+          timeout: '{timeout}'
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *backup_ecr_push_creds
+            - *quay_secret_push
+            - *app_sre_bot_push_token
+            - *app_interface_creds
+            - *pypi
+    publishers:
+      - slack:
+          room: "{slack_channel_notification}"
+          notify-start: False
+          notify-success: True
+          notify-failure: True
+          notify-repeated-failure: True
+    <<: *gh_build_master
+
+- job-template:
     id: acs-fleet-manager-e2e
     name: "{gh_repo}-e2e-{branch}"
     wrappers:
@@ -14,4 +38,11 @@
       - reverse:
           jobs: '{upstream}'
           results: 'success'
+    publishers:
+      - slack:
+          room: "{slack_channel_notification}"
+          notify-start: False
+          notify-success: True
+          notify-failure: True
+          notify-repeated-failure: True
     <<: *gh_build_master

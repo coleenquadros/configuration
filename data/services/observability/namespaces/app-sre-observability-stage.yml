@@ -57,7 +57,7 @@ openshiftResources:
 ## Hypershift-platform Observatorium Credentials
 - provider: vault-secret
   path: osd-sre/rhobs-hypershift-platform-staging
-  version: 2
+  version: 3
   name: hypershift-token-refresher
   annotations:
     qontract.recycle: "true"
@@ -106,6 +106,9 @@ openshiftResources:
   validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-appsre-aws-waf.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-appsre-cloudflare.configmap.yaml
   validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-appsre-rds.configmap.yaml
@@ -186,9 +189,6 @@ openshiftResources:
   path: /observability/grafana/grafana-dashboard-uhc-gateway.configmap.yaml
   validate_json: true
 - provider: resource
-  path: /observability/grafana/grafana-dashboard-job-queue.configmap.yaml
-  validate_json: true
-- provider: resource
   path: /observability/grafana/stage/grafana-dashboard-bayesian-monitoring.configmap.yaml
   validate_json: true
 - provider: resource
@@ -219,7 +219,10 @@ openshiftResources:
   path: /observability/grafana/grafana-dashboard-devfile-registry-redhat.configmap.yaml
   validate_json: true
 - provider: resource
-  path: /observability/grafana/grafana-dashboard-ephemeral-cluster.configmap.yaml
+  path: /observability/grafana/grafana-dashboard-osd-network-verifier.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-consoledot-platform-clusters.configmap.yaml
   validate_json: true
 - provider: resource-template
   path: /observability/grafana/grafana-dashboard-network-observability.configmap.yaml
@@ -284,8 +287,6 @@ openshiftResources:
   path: /observability/grafana/grafana-dashboard-kas-fleet-manager-stage-slos.configmap.yaml
 - provider: resource
   path: /observability/grafana/grafana-dashboard-kas-fleet-manager-metrics.configmap.yaml
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-kas-fleet-manager-kafka-and-strimzi-version-upgrade-information.configmap.yaml
 ### MAS-SSO
 - provider: resource
   path: /observability/grafana/grafana-dashboard-sso-mas-monitoring.configmap.yaml
@@ -306,6 +307,7 @@ openshiftResources:
   path: /observability/grafana/grafana-config.secret.yaml
   variables:
     auto_assign_org_role: Editor
+    external_url: https://grafana.stage.devshift.net
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-stage/grafana/grafana-proxy-config
   version: 2
@@ -445,6 +447,15 @@ externalResources:
     output_resource_name: grafana-db
     overrides:
       snapshot_identifier: grafana-stage-20220217
+  - provider: aws-iam-service-account
+    identifier: aws-resource-exporter-cluster-scraper-stage-01
+    output_resource_name: aws-resource-exporter-cluster-scraper-app-sre
+    policies:
+    - AmazonVPCReadOnlyAccess
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/app-sre-stage-01/cluster.yml
+      access_level: read-only
 - provider: aws
   provisioner:
     $ref: /aws/quayio-stage/account.yml

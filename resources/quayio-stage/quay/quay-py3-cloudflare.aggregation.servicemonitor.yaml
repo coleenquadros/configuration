@@ -1,0 +1,30 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: quay-aggregation
+    quay-component: metrics-aggregation
+  name: quay-py3-cloudflare-aggregation-service-monitor
+spec:
+  endpoints:
+  - interval: 60s
+    path: /metrics
+    port: metrics
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: 'quay_request_duration_seconds_bucket'
+      action: keep
+  - interval: 30s
+    path: /metrics
+    port: metrics
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: 'quay_request_duration_seconds_count'
+      action: keep
+  namespaceSelector:
+    matchNames:
+    - {{ quay_app_namespace | default('quay') }}
+  selector:
+    matchLabels:
+      quay-py3-component: app-py3-cloudflare

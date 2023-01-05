@@ -15,18 +15,18 @@ import yaml
 
 filename = sys.argv[1]
 
-if __name__ == '__main__':
-    with tempfile.TemporaryDirectory() as d, \
-         open(filename) as f:
+if __name__ == "__main__":
+    with tempfile.TemporaryDirectory() as d, open(filename) as f:
         user = os.path.split(filename)[-1]
         # Remove the .yml suffix
         user = user[:-4]
         data = yaml.safe_load(f)
-        key = base64.b64decode(data['public_gpg_key'])
-        subprocess.run('gpg --import --homedir'.split() + [d],
-                        input=key)
+        key = base64.b64decode(data["public_gpg_key"])
+        subprocess.run("gpg --import --homedir".split() + [d], input=key)
 
-        out = subprocess.run(['gpg', '-r', user, '-e', '--homedir', d],
-                             input=sys.stdin.buffer.read(),
-                             capture_output=True)
+        out = subprocess.run(
+            ["gpg", "-r", user, "-e", "--homedir", d],
+            input=sys.stdin.buffer.read(),
+            capture_output=True,
+        )
         print(base64.b64encode(out.stdout).decode())

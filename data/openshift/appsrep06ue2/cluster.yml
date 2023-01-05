@@ -11,7 +11,7 @@ elbFQDN: elb.apps.appsrep06ue2.ohlz.p1.openshiftapps.com
 prometheusUrl: https://prometheus.appsrep06ue2.devshift.net
 alertmanagerUrl: https://alertmanager.appsrep06ue2.devshift.net
 auth:
-  service: github-org-team
+- service: github-org-team
   org: app-sre
   team: appsrep06ue2-cluster
 observabilityNamespace:
@@ -30,7 +30,7 @@ spec:
   provider: aws
   region: us-east-2
   channel: fast
-  version: 4.11.5
+  version: 4.11.18
   initial_version: 4.9.10
   multi_az: true
   nodes: 9
@@ -54,9 +54,18 @@ network:
   vpc: 10.121.0.0/16
   service: 172.30.0.0/16
   pod: 10.128.0.0/14
+peering:
+  connections:
+  - provider: account-vpc
+    name: appsrep06ue2_app-sre-us-east-2
+    vpc:
+      $ref: /aws/app-sre/vpcs/app-sre-vpc-01-us-east-2.yml
+    manageAccountRoutes: true
+    manageRoutes: true
 automationToken:
   path: app-sre/creds/kube-configs/appsrep06ue2
   field: token
+clusterAdmin: true
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/appsrep06ue2-cluster-admin
   field: token
@@ -73,9 +82,3 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
-- awsGroup:
-    $ref: /aws/app-sre/groups/Log-consumers.yml
-  accessLevel: read-only
-- awsGroup:
-    $ref: /aws/app-sre-logs/groups/Log-consumers.yml
-  accessLevel: read-only

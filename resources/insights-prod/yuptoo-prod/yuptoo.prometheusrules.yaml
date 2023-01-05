@@ -1,0 +1,60 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: insights-yuptoo
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: insights-yuptoo-prod
+    rules:
+    - alert: InsightsYuptooPodDown
+      expr: |
+        sum(up{service="yuptoo-service", namespace="yuptoo-prod"}) == 0
+      for: 2m
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: yuptoo
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/pGzJEgoGf/yuptoo?orgId=1&var-datasource=crcp01ue1-prometheus&var-namespace=yuptoo-prod"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/yuptoo-prod/deployments"
+        message: "Insights Yuptoo Alert. Yuptoo pod has been down for two minutes."
+    - alert: ReportProcessingException
+      expr: |
+        sum(increase(yuptoo_report_processing_exceptions_total[10m])) / sum(increase(yuptoo_archive_downloaded_success_total[10m])) > 0.05
+      labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: yuptoo
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/pGzJEgoGf/yuptoo?orgId=1&var-datasource=crcp01ue1-prometheus&var-namespace=yuptoo-prod"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/yuptoo-prod/deployments"
+        message: "Insights Yuptoo Alert. Getting expections while processing reports."
+    - alert: Inventory-Validation-Errors
+      expr: sum(increase(inventory_ingress_add_host_failures_total{cause="ValidationException", reporter="yuptoo", namespace=~"host-inventory-.*"}[5m])) > 0
+      labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: yuptoo
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/pGzJEgoGf/yuptoo?orgId=1&var-datasource=crcp01ue1-prometheus&var-namespace=yuptoo-prod"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/yuptoo-prod/deployments"
+        message: "Host validation failed on HBI side"
+    - alert: Yuptoo-Kafka-Errors
+      expr: rate(yuptoo_kafka_failures_total{namespace="yuptoo-prod"}[5m]) > 0
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: yuptoo
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/pGzJEgoGf/yuptoo?orgId=1&var-datasource=crcp01ue1-prometheus&var-namespace=yuptoo-prod"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/yuptoo-prod/deployments"
+        message: "Insights Yuptoo Alert. Getting expections while processing reports."

@@ -51,20 +51,13 @@ sentryProjects:
     email_prefix: '[saas-exporter]'
     platform: python
 
-
-glitchtipProjects:
-- name: app-sre
-  description: Playground to test glitchtip configurations
-  platform: python
-  teams:
-  - $ref: /dependencies/glitchtip/teams/app-sre.yml
-  organization:
-    $ref: /dependencies/glitchtip/organizations/app-sre-stage.yml
-
-
 quayRepos:
 - org:
     $ref: /dependencies/quay/app-sre.yml
+  teams:
+  - permissions:
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-assisted-installer.yml
+    role: read
   items:
   - name: git-keeper
     description: 'Git backup tool: S3, gpg'
@@ -72,9 +65,6 @@ quayRepos:
   - name: s3-reload
     description: Simple binary to trigger a reload when an object in an S3 bucket
       is updated
-    public: true
-  - name: openshift-acme
-    description: ''
     public: true
   - name: diag-container
     description: ''
@@ -168,6 +158,9 @@ quayRepos:
     public: true
     mirror:
       $ref: /dependencies/image-mirrors/ghcr.io/openshift-cert-manager-routes.yml
+  - name: skupper-prometheus-collector
+    description: skupper-prometheus-collector project
+    public: true
 
 codeComponents:
 - name: housekeeping
@@ -187,6 +180,7 @@ codeComponents:
 - name: dev-guidelines
   resource: other
   url: https://gitlab.cee.redhat.com/service/dev-guidelines
+  showInReviewQueue: true
   jira:
     $ref: /dependencies/jira/issues-redhat-com.yaml
 - name: git-keeper
@@ -209,6 +203,15 @@ codeComponents:
   url: https://gitlab.cee.redhat.com/service/clusterimagesets
   jira:
     $ref: /dependencies/jira/issues-redhat-com.yaml
+  gitlabSync:
+    sourceProject:
+      name: clusterimagesets
+      group: service
+      branch: master
+    destinationProject:
+      name: clusterimagesets
+      group: service
+      branch: master
 - name: csnotify
   resource: upstream
   url: https://github.com/app-sre/csnotify
@@ -239,9 +242,6 @@ codeComponents:
 - name: rds-enhanced-metrics-exporter
   resource: upstream
   url: https://github.com/app-sre/rds-enhanced-metrics-exporter
-- name: openshift-acme-templates
-  resource: upstream
-  url: https://github.com/app-sre/openshift-acme-templates
 - name: logs-to-elasticsearch-lambda
   resource: upstream
   url: https://github.com/app-sre/logs-to-elasticsearch-lambda
@@ -286,22 +286,27 @@ codeComponents:
 - name: homeless-templates
   resource: upstream
   url: https://gitlab.cee.redhat.com/app-sre/homeless-templates
+  gitlabSync:
+    sourceProject:
+      name: homeless-templates
+      group: app-sre
+      branch: main
+    destinationProject:
+      name: homeless-templates-sync
+      group: app-sre
+      branch: main
 - name: test-saas-deployments
   resource: upstream
   url: https://github.com/app-sre/test-saas-deployments
-# temporary until sig-sre has an app
-- name: osd-ocp-dashboards
+- name: selectorsyncset-sector-demo
   resource: upstream
-  url: https://gitlab.cee.redhat.com/service/osd-ocp-dashboards
-# Taken to fix urgent security issues
-- name: openshift-acme
-  resource: upstream
-  url: https://github.com/app-sre/openshift-acme
+  url: https://gitlab.cee.redhat.com/service/selectorsyncset-sector-demo
 
 - name: openshift-cert-manager-routes-templates
   resource: upstream
   url: https://github.com/app-sre/openshift-cert-manager-routes-templates
-# temporary test for Product Security's Offering Registry
+
+# test environment for Product Security
 - name: prodsec-app-sre-test
   resource: upstream
   url: https://gitlab.cee.redhat.com/product-security/app-sre-test
@@ -311,6 +316,21 @@ codeComponents:
     enabled: true
     rebase: true          # always rebase Merge Requests
     days_interval: 1      # when to consider MRs stale
+    enable_closing: true  # close MRs after 2 stale periods
+    pipeline_timeout: 60  # cancel a pipeline taking longer than this many minutes
+  jira:                   # enable automatic linking of MRs to Jira tickets they name
+    $ref: /dependencies/jira/issues-redhat-com.yaml
+
+# Product Security's Offering Registry - production
+- name: prodsec-offering-registry
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/product-security/offering-registry-reports
+  gitlabRepoOwners:
+    enabled: true
+  gitlabHousekeeping:
+    enabled: true
+    rebase: true          # always rebase Merge Requests
+    days_interval: 7      # when to consider MRs stale
     enable_closing: true  # close MRs after 2 stale periods
     pipeline_timeout: 60  # cancel a pipeline taking longer than this many minutes
   jira:                   # enable automatic linking of MRs to Jira tickets they name

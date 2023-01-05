@@ -4,8 +4,7 @@ $schema: /access/role-1.yml
 labels: {}
 name: osd-fleet-manager-dev
 
-permissions:
-  - $ref: /dependencies/vault/permissions/app-interface-osd-fleet-manager.yml
+permissions: []
 
 oidc_permissions:
 - $ref: /dependencies/vault/permissions/oidc/prod/app-interface-osd-fleet-manager.yml
@@ -16,7 +15,24 @@ access:
     $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
   role: edit
 - namespace:
+    $ref: /services/ocm/osd-fleet-manager/namespaces/aao-integration.yml
+  role: edit
+- cluster:
+    $ref: /openshift/hivei01ue1/cluster.yml
+  group: aws-account-operator-client
+## stage
+- namespace:
     $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
+  role: view
+- namespace:
+    $ref: /services/ocm/osd-fleet-manager/namespaces/aao-stage.yml
+  role: view
+## prod
+- namespace:
+    $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
+  role: view
+- namespace:
+    $ref: /services/ocm/osd-fleet-manager/namespaces/aao-production.yml
   role: view
 
 self_service:
@@ -24,3 +40,38 @@ self_service:
     $ref: /app-interface/changetype/saas-file-self-service.yml
   datafiles:
   - $ref: /services/ocm/osd-fleet-manager/cicd/deploy.yaml
+- change_type:
+    $ref: /app-interface/changetype/app-owner.yml
+  datafiles:
+  - $ref: /services/ocm/osd-fleet-manager/app.yml
+- change_type:
+    $ref: /app-interface/changetype/namespace-owner.yml
+  datafiles:
+  - $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
+  - $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
+  - $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
+- change_type:
+    $ref: /app-interface/changetype/resource-owner.yml
+  resources:
+  - /services/ocm/integration/osd-fleet-manager-envoy.configmap.yaml
+  - /services/ocm/stage/osd-fleet-manager-envoy.configmap.yaml
+  - /services/ocm/production/osd-fleet-manager-envoy.configmap.yaml
+  - /services/ocm/integration/osd-fleet-manager.route.yaml
+  - /services/ocm/stage/osd-fleet-manager.route.yaml
+  - /services/ocm/production/osd-fleet-manager.route.yaml
+  - /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
+  - /services/ocm/common/osd-fleet-manager/aws-account-operator-consumer-serviceaccount.yaml
+  - /services/ocm/common/osd-fleet-manager/aws-account-operator-consumer-role.yaml
+  - /services/ocm/common/osd-fleet-manager/aws-account-operator-consumer-rolebinding.yaml
+  - /services/ocm/integration/aws-account-operator-consumer-credentials.secret.yaml
+  - /services/ocm/stage/aws-account-operator-consumer-credentials.secret.yaml
+  - /services/ocm/production/aws-account-operator-consumer-credentials.secret.yaml
+  - /services/ocm/osd-fleet-manager/integration/hypershift-override-images.yaml
+  - /services/ocm/osd-fleet-manager/stage/hypershift-override-images.yaml
+  - /services/ocm/osd-fleet-manager/production/hypershift-override-images.yaml
+- change_type:
+    $ref: /app-interface/changetype/ocm-org-owner.yml
+  datafiles:
+  - $ref: /dependencies/ocm/osd-fleet-manager/integration.yml
+  - $ref: /dependencies/ocm/osd-fleet-manager/stage.yml
+  - $ref: /dependencies/ocm/osd-fleet-manager/production.yml

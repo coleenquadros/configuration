@@ -82,6 +82,7 @@
     id: 'insights-gh-pr-check'
     job_type: ''
     name: '{gh_org}-{gh_repo}-pr-check{job_type}'
+    slack_channel_notification: 'consoledot-development-fails'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -89,6 +90,7 @@
     - vault-secrets:
         <<: *vault_defaults
         secrets:
+        - *insights_crcd_oc_login
         - *insights_ephemeral_oc_login
         - *app_interface_creds
         - *insights_rh_registry_pull_secret
@@ -96,6 +98,17 @@
         - *quay_api_token
         - *insightsdroid_github
         - *ibutsu
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
     <<: *insights_gh_pr_check
 
 - job-template:
@@ -150,6 +163,7 @@
 - job-template:
     id: 'insights-gh-build-master'
     name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    slack_channel_notification: 'consoledot-development-fails'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -160,6 +174,15 @@
         - *insights_rh_registry_pull_secret
         - *quay_secret_push
         - *quay_api_token
+    publishers:
+    - slack: 
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
+    - naginator:
+        max-failed-builds: 3
     <<: *gh_build_master
 
 

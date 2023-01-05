@@ -1,0 +1,60 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: chrome-service
+
+name: chrome-service-stage
+
+description: Chrome service persister app on stage
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+app:
+  $ref: /services/insights/chrome-service/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 5
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: chrome-service-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-1.yml
+    overrides:
+      username: "insights"
+      name: "chrome_service"
+      engine_version: '13.7'
+      apply_immediately: true
+      auto_minor_version_upgrade: false
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-chrome-service-stage.yml
+    output_resource_name: chrome-service-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: chrome-service-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

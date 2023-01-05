@@ -1,24 +1,18 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: advisor
   platform: insights
-
 name: advisor
 description: advisor app on the Insights Platform
-
 app:
   $ref: /services/insights/advisor/app.yml
-
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
-
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
-  channel: team-clouddot-info
-
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: advisor-cicd-events
 managedResourceTypes:
 - Deployment
 - DeploymentConfig
@@ -42,7 +36,6 @@ authentication:
   code:
     path: app-sre/creds/github-app-sre-bot
     field: openshift-saas-deploy
-
 resourceTemplates:
 - name: tasks-frontend
   path: /deploy/frontend.yml
@@ -50,35 +43,33 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true  # do not create an app-sre deploy job for ephemeral namespace
-    ref: internal  # populated by bonfire
-
+    disable: true
+    ref: internal
 - name: advisor-frontend
   path: /deploy/frontend.yaml
   url: https://github.com/RedHatInsights/insights-advisor-frontend
   targets:
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true  # do not create an app-sre deploy job for ephemeral namespace
-    ref: internal  # populated by bonfire
+    disable: true
+    ref: internal
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
     ref: 9d8e61d0ac649f8f46af7ab5c7290ef78a2be1de
     parameters:
-      ENV_NAME: "env-stage"
-
+      ENV_NAME: env-stage
 - name: advisor-backend
   path: /clowdapp.yml
   url: https://gitlab.cee.redhat.com/insights-platform/advisor-backend
   parameters:
     CONTENT_IMAGE_TAG: 37a1444
-    CONTENT_PUSH_JOB_SCHEDULE: '45 23,5,11,17 * * *'
-    ADVISOR_ENV: prod  # impacts logging behavior
+    CONTENT_PUSH_JOB_SCHEDULE: 45 23,5,11,17 * * *
+    ADVISOR_ENV: prod
     USE_CLOUDWATCH_LOGGING: 'true'
-    API_CPU_REQUEST: '200m'
+    API_CPU_REQUEST: 200m
     API_CPU_LIMIT: '1'
-    API_MEMORY_REQUEST: '256Mi'
-    API_MEMORY_LIMIT: '512Mi'
+    API_MEMORY_REQUEST: 256Mi
+    API_MEMORY_LIMIT: 512Mi
     INVENTORY_CONCURRENCY_LEVEL: 20
     API_MIN_REPLICAS: 5
     SVC_MIN_REPLICAS: 5
@@ -90,38 +81,38 @@ resourceTemplates:
     USE_NEWRELIC: 'true'
     USE_PROMETHEUS: 'true'
     THREAD_POOL_SIZE: '2'
-    SVC_CPU_REQUEST: '200m'
+    SVC_CPU_REQUEST: 200m
     SVC_CPU_LIMIT: '1'
-    SVC_MEMORY_REQUEST: '256Mi'
-    SVC_MEMORY_LIMIT: '1Gi'
-    TASKS_CPU_REQUEST: '200m'
+    SVC_MEMORY_REQUEST: 256Mi
+    SVC_MEMORY_LIMIT: 1Gi
+    TASKS_CPU_REQUEST: 200m
     TASKS_CPU_LIMIT: '1'
-    TASKS_MEMORY_REQUEST: '256Mi'
-    TASKS_MEMORY_LIMIT: '1Gi'
+    TASKS_MEMORY_REQUEST: 256Mi
+    TASKS_MEMORY_LIMIT: 1Gi
     NOTIFICATIONS_TOPIC: platform.notifications.ingress
-    PLATFORM_HOSTNAME_URL: "cert.${PLATFORM_HOSTNAME}"
-    ENABLE_INIT_CONTAINER_MIGRATIONS: 'true'  # set to false when using RUN_DJANGO_MIGRATION_NUM
+    PLATFORM_HOSTNAME_URL: cert.${PLATFORM_HOSTNAME}
+    ENABLE_INIT_CONTAINER_MIGRATIONS: 'true'
   targets:
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true  # do not create an app-sre deploy job for ephemeral namespace
-    ref: internal  # populated by bonfire
+    disable: true
+    ref: internal
     parameters:
       API_MIN_REPLICAS: 1
       SVC_MIN_REPLICAS: 1
       TASKS_MIN_REPLICAS: 1
-      TASKS_CPU_REQUEST: '500m'
+      TASKS_CPU_REQUEST: 500m
       TASKS_CPU_LIMIT: '1'
-      TASKS_MEMORY_REQUEST: '512Mi'
-      TASKS_MEMORY_LIMIT: '1Gi'
-      SVC_CPU_REQUEST: '500m'
+      TASKS_MEMORY_REQUEST: 512Mi
+      TASKS_MEMORY_LIMIT: 1Gi
+      SVC_CPU_REQUEST: 500m
       SVC_CPU_LIMIT: '1'
-      SVC_MEMORY_REQUEST: '512Mi'
-      SVC_MEMORY_LIMIT: '1Gi'
-      API_CPU_REQUEST: '500m'
+      SVC_MEMORY_REQUEST: 512Mi
+      SVC_MEMORY_LIMIT: 1Gi
+      API_CPU_REQUEST: 500m
       API_CPU_LIMIT: '1'
-      API_MEMORY_REQUEST: '512Mi'
-      API_MEMORY_LIMIT: '1Gi'
+      API_MEMORY_REQUEST: 512Mi
+      API_MEMORY_LIMIT: 1Gi
       USE_CLOUDWATCH_LOGGING: 'false'
       USE_NEWRELIC: 'false'
       USE_PROMETHEUS: 'false'
@@ -134,20 +125,32 @@ resourceTemplates:
       name: insights-platform-advisor-backend-gl-build-master
     parameters:
       ENV_NAME: stage
-      API_MIN_REPLICAS: 5
-      SVC_MIN_REPLICAS: 5
+      API_MIN_REPLICAS: 12
+      SVC_MIN_REPLICAS: 6
       TASKS_MIN_REPLICAS: 3
       FLOORIST_SUSPEND: 'false'
       FLOORIST_IMAGE_TAG: d2fb0c4
       FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage
-      FLOORIST_SCHEDULE: '40 0 * * *'
+      FLOORIST_SCHEDULE: 40 0 * * *
       RBAC_ENABLED: 'true'
-      USE_DJANGO_WEBSERVER: 'false'  # Set to false to use Gunicorn instead
       LOG_LEVEL: INFO
       RUN_DJANGO_MIGRATION_NUM: 10
+    promotion:
+      publish:
+      - advisor-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
-    ref: d998ca662727a2471265c086e87ea4eb9e5dec72
+    ref: 6e4c8f94b211a7fe7065c0d4cd558ccc6e7950ed
+    promotion:
+      auto: true
+      subscribe:
+      - advisor-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: advisor-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: advisor-test
+          target_config_hash: 476637ceee43c44d
+          type: parent_saas_config
     parameters:
       ENV_NAME: prod
       API_MIN_REPLICAS: 12
@@ -155,11 +158,11 @@ resourceTemplates:
       TASKS_MIN_REPLICAS: 3
       SUSPEND_WEEKLY_REPORT_JOB: 'false'
       MIDDLEWARE_HOST_URL: https://${BACKOFFICE_HOST}/v1
-      WEEKLY_REPORT_JOB_SCHEDULE: "11 11 * * 1"
-      CONTENT_PUSH_JOB_SCHEDULE: "30 8,14,20 * * *"
+      WEEKLY_REPORT_JOB_SCHEDULE: 11 11 * * 1
+      CONTENT_PUSH_JOB_SCHEDULE: 30 8,14,20 * * *
       FLOORIST_SUSPEND: 'false'
       FLOORIST_IMAGE_TAG: d2fb0c4
       FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-prod
-      FLOORIST_SCHEDULE: '40 0 * * *'
+      FLOORIST_SCHEDULE: 40 0 * * *
       RBAC_ENABLED: 'true'
       RUN_DJANGO_MIGRATION_NUM: 8

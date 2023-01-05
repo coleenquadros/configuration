@@ -14,7 +14,7 @@ managedClusterRoles: true
 observabilityNamespace:
   $ref: /services/observability/namespaces/openshift-customer-monitoring.hivep04ew2.yml
 auth:
-  service: github-org-team
+- service: github-org-team
   org: app-sre
   team: hivep04ew2-cluster
 ocm:
@@ -40,7 +40,7 @@ spec:
   provider: aws
   region: eu-west-2
   channel: fast
-  version: 4.11.5
+  version: 4.11.18
   initial_version: 4.6.8-fast
   multi_az: true
   autoscale:
@@ -75,11 +75,12 @@ internal: false
 automationToken:
   path: app-sre/creds/kube-configs/hivep04ew2
   field: token
+clusterAdmin: true
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/hivep04ew2-cluster-admin
   field: token
 jumpHost:
-  $ref: /openshift/bastion.ci.ext.devshift.net.jumphost.yml
+  $ref: /openshift/bastion.ci.int.devshift.net.jumphost.yml
 awsInfrastructureManagementAccounts:
 - account:
     $ref: /aws/app-sre/account.yml
@@ -98,35 +99,18 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
-- awsGroup:
-    $ref: /aws/app-sre/groups/Log-consumers.yml
-  accessLevel: read-only
-- awsGroup:
-    $ref: /aws/app-sre-logs/groups/Log-consumers.yml
-  accessLevel: read-only
 peering:
   connections:
   - provider: account-vpc
-    name: hivep04ew2_app-sre
+    name: hivep04ew2_app-sre-ci-int_app-sre-vpc-0931f724085025405
     vpc:
-      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
-    manageRoutes: true
-  - provider: account-vpc-mesh
-    name: hivep04ew2_app-sre-ci-int
-    account:
-      $ref: /aws/app-sre/account.yml
-    tags:
-      Name: ci.int
+      $ref: /aws/app-sre/vpcs/ci-int.yml
+    manageAccountRoutes: true
     manageRoutes: true
   - provider: cluster-vpc-requester
     name: hivep04ew2_app-sre-prod-04
     cluster:
       $ref: /openshift/app-sre-prod-04/cluster.yml
-    manageRoutes: true
-  - provider: cluster-vpc-requester
-    name: hivep04ew2_app-sre-prod-01
-    cluster:
-      $ref: /openshift/app-sre-prod-01/cluster.yml
     manageRoutes: true
   - provider: account-tgw
     name: hivep04ew2

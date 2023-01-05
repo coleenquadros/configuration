@@ -1,0 +1,35 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: uhc
+
+name: saas-uhc-clusters-service-monitoring
+description: SaaS Monitoring tracking file for UHC clusters service
+
+app:
+  $ref: /services/ocm/cs/app.yml
+
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-uhc-info
+
+imagePatterns: []
+
+managedResourceTypes:
+- AlertingRule.loki.grafana.com
+- RecordingRule.loki.grafana.com
+
+resourceTemplates:
+- name: uhc-clusters-service-rules
+  url: https://gitlab.cee.redhat.com/service/uhc-clusters-service
+  path: /rules
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
+    ref: master

@@ -23,7 +23,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: oncall-quay
 
 managedResourceTypes:
@@ -33,6 +33,7 @@ managedResourceTypes:
 - Role
 - RoleBinding
 - Job
+- CronJob
 
 imagePatterns:
 - quay.io/app-sre/flush-redis
@@ -41,6 +42,7 @@ imagePatterns:
 - quay.io/app-sre/quay-service-tool
 - quay.io/app-sre/quayio-update-py2-db
 - quay.io/app-sre/quayio-update-ro-keys-job
+- quay.io/app-sre/osa-openshift-analytics
 
 resourceTemplates:
 - name: quayio-service-tool
@@ -108,7 +110,7 @@ resourceTemplates:
     QUAY_APP_COMPONENT_LABEL_VALUE: app-recovery
     QUAY_APP_CONFIG_SECRET: quay-config-recovery-secret
     DEBUGLOG: "true"
-    QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v2"
+    QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v3"
     QUAY_WORKER_MULTIPLIER_REGISTRY: 1
     QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 80
     SYSLOG_IMAGE: quay.io/app-sre/syslog-cloudwatch-bridge
@@ -116,10 +118,10 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/quayio/namespaces/quays02ue1.yml
-    ref: 9d8ff6b1c109fdc285298d32ec2a83069bd90556
+    ref: 04358d26af974da57b627ab186137a091668fff7
   - namespace:
       $ref: /services/quayio/namespaces/quayp05ue1.yml
-    ref: 9d8ff6b1c109fdc285298d32ec2a83069bd90556
+    ref: 04358d26af974da57b627ab186137a091668fff7
 
 - name: quayio-update-py2-db
   path: /openshift.yml
@@ -158,3 +160,14 @@ resourceTemplates:
       QUAY_APP_CONFIG_SECRET: "quay-config-secret"
       DB_HOST_SECRET: "quayio-stage-57-py3-rds"
       EXPIRY_DATE: "2022-10-13"
+
+- name: quayio-osa-openshift-analytics
+  path: /openshift.yml
+  url: https://github.com/quay/osa-openshift-analytics
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp05ue1.yml
+    ref: main
+    parameters:
+      OSA_QUAY_JOB_SECRET: quayio-osa-analytics-job-config
+

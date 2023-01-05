@@ -13,13 +13,13 @@ elbFQDN: elb.apps.hives02ue1.j5l5.p1.openshiftapps.com
 observabilityNamespace:
   $ref: /services/observability/namespaces/openshift-customer-monitoring.hives02ue1.yml
 auth:
-  service: github-org-team
+- service: github-org-team
   org: app-sre
   team: hives02ue1-cluster
 ocm:
   $ref: /dependencies/ocm/production.yml
 jumpHost:
-  $ref: /openshift/bastion.ci.ext.devshift.net.jumphost.yml
+  $ref: /openshift/bastion.ci.int.devshift.net.jumphost.yml
 managedClusterRoles: true
 managedGroups:
 - dedicated-admins
@@ -40,7 +40,7 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.11.5
+  version: 4.11.18
   initial_version: 4.4.11
   multi_az: false
   autoscale:
@@ -72,16 +72,10 @@ machinePools: []
 peering:
   connections:
   - provider: account-vpc
-    name: hives02ue1_app-sre
+    name: hives02ue1_app-sre-ci-int_app-sre-vpc-0931f724085025405
     vpc:
-      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
-    manageRoutes: true
-  - provider: account-vpc-mesh
-    name: hives02ue1_app-sre-ci-int
-    account:
-      $ref: /aws/app-sre/account.yml
-    tags:
-      Name: ci.int
+      $ref: /aws/app-sre/vpcs/ci-int.yml
+    manageAccountRoutes: true
     manageRoutes: true
   - provider: cluster-vpc-requester
     name: hives02ue1_app-sre-stage-01
@@ -115,6 +109,11 @@ peering:
       osd: backplane
     manageRoutes: true
   - provider: cluster-vpc-requester
+    name: hives02ue1_appsres03ue1
+    cluster:
+      $ref: /openshift/appsres03ue1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-requester
     name: hives02ue1_appsrep05ue1
     cluster:
       $ref: /openshift/appsrep05ue1/cluster.yml
@@ -122,6 +121,7 @@ peering:
 automationToken:
   path: app-sre/creds/kube-configs/hives02ue1
   field: token
+clusterAdmin: true
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/hives02ue1-cluster-admin
   field: token
@@ -144,9 +144,3 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
-- awsGroup:
-    $ref: /aws/app-sre/groups/Log-consumers.yml
-  accessLevel: read-only
-- awsGroup:
-    $ref: /aws/app-sre-logs/groups/Log-consumers.yml
-  accessLevel: read-only

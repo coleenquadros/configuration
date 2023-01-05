@@ -24,7 +24,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -67,11 +67,12 @@ resourceTemplates:
       RETURN_URL: https://cert.${PLATFORM_HOSTNAME}/api/ingress/v1/upload
   - namespace:
       $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
-    ref: 80d20f0fa420a3ff21dcfb73e5f25db3010b19f1
+    ref: 01f91293e762df5d42dbeec88dfe6b8df57920c0
     parameters:
       LOG_LEVEL: info
       RETURN_URL: https://cert.${PLATFORM_HOSTNAME}/api/ingress/v1/upload
       POPULATOR_RUN_NUMBER: "2"
+      REPLICAS_API: 3
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -106,19 +107,19 @@ resourceTemplates:
     secretParameters:
       - name: KAFKA_BOOTSTRAP_HOST
         secret:
-          path: insights/secrets/insights-stage/strimzi-stage/clowder-oauth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: hostname
-          version: 6 
+          version: 1
       - name: KAFKA_BOOTSTRAP_PORT
         secret:
-          path: insights/secrets/insights-stage/strimzi-stage/clowder-oauth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: port
-          version: 6
+          version: 1
       - name: KAFKA_USERNAME
         secret:
-          path: insights/secrets/insights-stage/strimzi-stage/clowder-oauth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: username
-          version: 6
+          version: 1
       - name: KAFKA_SASL_MECHANISM
         secret:
           path: insights/secrets/insights-stage/strimzi-stage/client-config
@@ -131,36 +132,14 @@ resourceTemplates:
           version: 3
   - namespace:
       $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
-    ref: 80d20f0fa420a3ff21dcfb73e5f25db3010b19f1
+    ref: 047e256da507f29d0e0ae803a4b1d688eb74a2cb
+    # NOTE:  The ref above "pins" the deployment config to an older version of the config
+    # which is NOT configured to use managed kakfa.
     parameters:
+      IMAGE_TAG: 01f9129
+      # NOTE:  The IMAGE_TAG allows us to use a newer image, while the ref above allows
+      # us to use an older config (which is not configured to use managed kafka).
       EVENT_CONSUMER_REPLICAS: 0
-      KAFKA_TOPIC_PREFIX: "platform-mq-prod."
-    secretParameters:
-      - name: KAFKA_BOOTSTRAP_HOST
-        secret:
-          path: insights/secrets/insights-prod/strimzi-prod/clowder-oauth
-          field: hostname
-          version: 3
-      - name: KAFKA_BOOTSTRAP_PORT
-        secret:
-          path: insights/secrets/insights-prod/strimzi-prod/clowder-oauth
-          field: port
-          version: 3
-      - name: KAFKA_USERNAME
-        secret:
-          path: insights/secrets/insights-prod/strimzi-prod/clowder-oauth
-          field: username
-          version: 3
-      - name: KAFKA_SASL_MECHANISM
-        secret:
-          path: insights/secrets/insights-prod/strimzi-prod/client-config
-          field: sasl_mechanism
-          version: 3
-      - name: KAFKA_SASL_SECURITY_PROTOCOL
-        secret:
-          path: insights/secrets/insights-prod/strimzi-prod/client-config
-          field: security_protocol
-          version: 3
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true
@@ -190,19 +169,19 @@ resourceTemplates:
     secretParameters:
       - name: KAFKA_BOOTSTRAP_HOST
         secret:
-          path: insights/secrets/insights-stage/strimzi-stage/clowder-oauth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: hostname
-          version: 4
+          version: 1
       - name: KAFKA_BOOTSTRAP_PORT
         secret:
-          path: insights/secrets/insights-stage/strimzi-stage/clowder-oauth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: port
-          version: 4
+          version: 1
       - name: KAFKA_USERNAME
         secret:
-          path: insights/secrets/insights-stage/strimzi-stage/clowder-oauth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: username
-          version: 4
+          version: 1
       - name: KAFKA_SASL_MECHANISM
         secret:
           path: insights/secrets/insights-stage/strimzi-stage/client-config
@@ -224,4 +203,4 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 80d20f0fa420a3ff21dcfb73e5f25db3010b19f1
+    ref: 01f91293e762df5d42dbeec88dfe6b8df57920c0

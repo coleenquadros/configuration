@@ -171,6 +171,29 @@ data:
                 trusted_ca:
                   filename: /etc/ssl/certs/ca-certificates.crt
 
+      # Cluster for the `osd_fleet_mgmt` service:
+      - name: osd_fleet_mgmt
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: osd_fleet_mgmt
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: mizg8z5wj7s6cpn.api.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
       # Cluster for the `kafkas_mgmt` service:
       - name: kafkas_mgmt
         connect_timeout: 2s
@@ -442,6 +465,10 @@ data:
                                 "name": "Service Registry service fleet manager service"
                               },
                               {
+                                "id": "osd_fleet_mgmt",
+                                "name": "OSD Fleet Manager service"
+                              },
+                              {
                                 "id": "image-builder-composer",
                                 "version": "v2",
                                 "name": "Image Builder service"
@@ -463,6 +490,15 @@ data:
                       prefix: /api/status-board
                     route:
                       cluster: status-board
+                      auto_host_rewrite: true
+                      timeout: 30s
+
+                  # Route for the `osd_fleet_mgmt` service:
+                  - name: osd_fleet_mgmt
+                    match:
+                      prefix: /api/osd_fleet_mgmt
+                    route:
+                      cluster: osd_fleet_mgmt
                       auto_host_rewrite: true
                       timeout: 30s
 

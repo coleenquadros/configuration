@@ -69,6 +69,7 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
+    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -85,6 +86,7 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
+    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -101,6 +103,7 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
+    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -117,6 +120,24 @@ openshiftResources:
     enable_clair: true
     region: us-east-1
     log_producer: kinesis_stream
+    enable_cloudflare: false
+
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-config.secret.yaml
+  variables:
+    name: quay-py3-cloudflare-config-secret
+    vault_secret_version: 62
+    version_label: v62
+    enable_redis_modelcache: true
+    readonly: false
+    account_recovery_mode: false
+    read_from_rds_replica: false
+    enable_builders: true
+    enable_clair: true
+    region: us-east-1
+    log_producer: kinesis_stream
+    enable_cloudflare: true
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -133,6 +154,7 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
+    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -149,6 +171,7 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
+    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -165,6 +188,7 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
+    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -183,6 +207,10 @@ openshiftResources:
     qontract.ignore_reconcile_time: "true"
 - provider: resource
   path: /quayio-stage/quay/quay.web-allow-external.networkpolicy.yaml
+- provider: resource
+  path: /quayio-stage/quay/quay-py3.web-allow-external.networkpolicy.yaml
+- provider: resource
+  path: /quayio-stage/quay/quay-py3-cloudflare.web-allow-external.networkpolicy.yaml
 - provider: resource
   path: /quayio-stage/quay/quay-recovery.web-allow-external.networkpolicy.yaml
 - provider: route
@@ -210,6 +238,14 @@ externalResources:
       domain_name: '*.stage.quay.io'
       alternate_names:
       - 'stage.quay.io'
+  - provider: acm
+    identifier: wildcard-stage-quay-redhat-io
+    domain:
+      domain_name: '*.stage.quay.io'
+      alternate_names:
+      - '*.stage.quay.redhat.io'
+      - 'stage.quay.io'
+      - 'stage.quay.redhat.io'
   - provider: rds
     identifier: quayio-stage-57-py3
     availability_zone: us-east-1a
@@ -266,15 +302,22 @@ externalResources:
     idle_timeout: 3600
     vpc:
       $ref: /aws/quayio-stage/vpcs/default.yml
-    certificate_arn: arn:aws:acm:us-east-1:019044362261:certificate/565164ca-935a-4d65-b92f-fce85cc794ba
+    certificate_arn: arn:aws:acm:us-east-1:019044362261:certificate/8e2e34fa-7227-4561-9d7d-d364871f4352
     targets:
-    - name: quayio-stage-py2
-      default: false
-      openshift_service: quay-load-balancer-service
     - name: quayio-stage-py3
       default: true
       openshift_service: quay-py3-load-balancer-service
-    rules: []
+    - name: quayio-stage-cf
+      default: false
+      openshift_service: quay-py3-cloudflare-load-balancer-service
+    rules:
+    - condition:
+        path: /v2/cloudflare-test/*
+      action:
+        - target: quayio-stage-cf
+          weight: 100
+        - target: quayio-stage-py3
+          weight: 0
   - provider: s3
     identifier: quayio-stage-cloudfront-logs
     defaults: /terraform/resources/s3-all-expires-90-days-external-acl.yml
@@ -325,6 +368,7 @@ externalResources:
       settings:
         always_use_https: 'on'
         min_tls_version: '1.2'
+        security_level: 'off'
       records:
         - name: cdn03
           type: CNAME
@@ -351,9 +395,15 @@ externalResources:
       content_from_github:
         repo: https://github.com/quay/quay-cloudflare-cdn-worker
         path: index.js
-        ref: a0a3796e139c982eb948e585520f757216a0293e
+        ref: 51ced4cea5ff9a06227ef40d2f4bb02784379908
       vars:
-        - name: QUAY_S3_BUCKET
+        - name: QUAY_PRIMARY_REGION
+          text: us-east-1
+        - name: QUAY_PRIMARY_S3_BUCKET
+          text: quayio-stage-s3
+        - name: QUAY_SECONDARY_REGION
+          text: us-east-1
+        - name: QUAY_SECONDARY_S3_BUCKET
           text: quayio-stage-s3
         - name: CACHE_TTL
           text: "60"

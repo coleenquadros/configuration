@@ -11,7 +11,7 @@ alertmanagerUrl: ''
 serverUrl: https://api.ssotest01ue1.a7a5.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.ssotest01ue1.a7a5.p1.openshiftapps.com
 auth:
-  service: github-org-team
+- service: github-org-team
   org: app-sre
   team: ssotest01ue1-cluster
 ocm:
@@ -19,11 +19,12 @@ ocm:
 automationToken:
   path: app-sre/creds/kube-configs/ssotest01ue1
   field: token
+clusterAdmin: true
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/ssotest01ue1-cluster-admin
   field: token
 jumpHost:
-  $ref: /openshift/bastion.ci.ext.devshift.net.jumphost.yml
+  $ref: /openshift/bastion.ci.int.devshift.net.jumphost.yml
 managedGroups:
 - dedicated-admins
 - dedicated-readers
@@ -46,7 +47,7 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.11.10
+  version: 4.12.0-rc.3
   initial_version: 4.4.11
   multi_az: false
   nodes: 4
@@ -77,21 +78,16 @@ peering:
     name: ssotest01ue1_app-sre-rds
     vpc:
       $ref: /aws/app-sre/vpcs/app-sre-vpc-01.yml
-  - provider: account-vpc-mesh
-    name: ssotest01ue1_app-sre-ci-int
-    account:
-      $ref: /aws/app-sre/account.yml
-    tags:
-      Name: ci.int
-    manageRoutes: true
   - provider: account-vpc
-    name: ssotest01ue1_app-sre
+    name: ssotest01ue1_app-sre-ci-int_app-sre-vpc-0931f724085025405
     vpc:
-      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
+      $ref: /aws/app-sre/vpcs/ci-int.yml
+    manageAccountRoutes: true
+    manageRoutes: true
   - provider: cluster-vpc-requester
-    name: ssotest01ue1_app-sre-prod-01
+    name: ssotest01ue1_appsres03ue1
     cluster:
-      $ref: /openshift/app-sre-prod-01/cluster.yml
+      $ref: /openshift/appsres03ue1/cluster.yml
     manageRoutes: true
   - provider: cluster-vpc-requester
     name: ssotest01ue1_appsrep05ue1

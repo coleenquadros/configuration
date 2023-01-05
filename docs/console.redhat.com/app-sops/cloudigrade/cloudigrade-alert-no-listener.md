@@ -12,7 +12,7 @@ cloudigrade inspects images in public clouds to identify RHEL presense and track
 
 ## Summary
 
-This alert fires when there has been no `cloudigrade-listener` pod with a ready status for 5 minutes.
+This alert fires when there has been no `cloudigrade-listener` pod with a ready status for an extended period of time.
 
 At the time of this writing, there are no known causes for `cloudigrade-listener` to be absent, and this should never happen under normal circumstances. It may indicate underlying infrastructure problems (Clowder, OpenShift, etc.).
 

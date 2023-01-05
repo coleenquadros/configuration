@@ -3,19 +3,54 @@ $schema: /app-interface/change-type-1.yml
 
 labels: {}
 
-name: cluser-owner
+name: cluster-owner
 description: |
-  allow all actions in namespaces of a cluster
+  Allow all actions in namespaces of a cluster.
 
 priority: high
 
 contextType: datafile
 contextSchema: /openshift/cluster-1.yml
 
+inherit:
+- $ref: /app-interface/changetype/saas-file-target-cluster-owner.yml
+
 changes:
 - provider: jsonPath
   changeSchema: /openshift/namespace-1.yml
   jsonPathSelectors:
-  - $
+  - labels
+  - name
+  - description
+  - app
+  - environment
+  - grafanaUrl
+  - limitRanges
+  - quota
+  - networkPoliciesAllow
+  - managedRoles
+  - managedResourceTypes
+  - openshiftResources
+  - externalResources[*].resources
   context:
     selector: cluster.'$ref'
+- provider: jsonPath
+  changeSchema: /openshift/namespace-1.yml
+  jsonPathSelectors:
+  - labels
+  - name
+  - description
+  - cluster
+  - app
+  - environment
+  - grafanaUrl
+  - limitRanges
+  - quota
+  - networkPoliciesAllow
+  - managedRoles
+  - managedResourceTypes
+  - openshiftResources
+  - externalResources[*].resources
+  context:
+    selector: cluster.'$ref'
+    when: added

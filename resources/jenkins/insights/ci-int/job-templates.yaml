@@ -1,6 +1,7 @@
 - job-template:
     id: 'insights-gl-pr-check'
     name: '{gl_group}-{gl_project}-pr-check'
+    slack_channel_notification: 'consoledot-development-fails'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -8,6 +9,7 @@
     - vault-secrets:
         <<: *vault_defaults
         secrets:
+        - *insights_crcd_oc_login
         - *insights_ephemeral_oc_login
         - *app_interface_creds
         - *insights_rh_registry_pull_secret
@@ -29,6 +31,12 @@
         failure-only: true
         name: '{name}'
         mark-unstable-as-success: false
+    - slack: 
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
     <<: *gl_pr_check
 
 - job-template:
@@ -86,6 +94,7 @@
 - job-template:
     id: 'insights-gl-build-master'
     name: '{gl_group}-{gl_project}-gl-build-{branch}'
+    slack_channel_notification: 'consoledot-development-fails'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -96,51 +105,13 @@
         - *insights_rh_registry_pull_secret
         - *quay_secret_push
         - *quay_api_token
-    <<: *gl_build_master
-
-- job-template:
-    id: 'insights-platform-gl-build-cicd-cypress'
-    name: '{gl_group}-{gl_project}-gl-build-{branch}'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - ansicolor
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *insights_rh_registry_pull_secret
-        - *quay_secret_push
-        - *quay_api_token
-    <<: *gl_build_master
-
-- job-template:
-    id: 'insights-gl-build-cypress-image'
-    name: '{gl_group}-{gl_project}-gl-build-{branch}'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - ansicolor
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *insights_rh_registry_pull_secret
-        - *quay_secret_push
-        - *quay_api_token
-    <<: *gl_build_master
-
-- job-template:
-    id: 'insights-gl-build-iqe-debug-image'
-    name: '{gl_group}-{gl_project}-gl-build-{branch}'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - ansicolor
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *insights_rh_registry_pull_secret
-        - *quay_secret_push
-        - *quay_api_token
+    publishers:
+    - slack: 
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
     <<: *gl_build_master
 
 - job-template:
@@ -197,6 +168,69 @@
     <<: *gl_timed
 
 - job-template:
+    id: 'run-iqe'
+    name: "{display_name}"
+    gl_group: insights-platform
+    gl_project: cicd-common
+    branch: master
+    ci_cmd: 'run_iqe/run_iqe.sh'
+    iqe_marker_expression: ""
+    iqe_filter_expression: ""
+    iqe_requirements: ""
+    iqe_requirements_priority: ""
+    iqe_test_importance: ""
+    iqe_plugins: ""
+    iqe_env: ""
+    iqe_selenium: "false"
+    iqe_image: ""
+    selenium_image: ""
+    parameters:
+    - string:
+        name: IQE_MARKER_EXPRESSION
+        default: "{iqe_marker_expression}"
+    - string:
+        name: IQE_FILTER_EXPRESSION
+        default: "{iqe_filter_expression}"
+    - string:
+        name: IQE_REQUIREMENTS
+        default: "{iqe_requirements}"
+    - string:
+        name: IQE_REQUIREMENTS_PRIORITY
+        default: "{iqe_requirements_priority}"
+    - string:
+        name: IQE_TEST_IMPORTANCE
+        default: "{iqe_test_importance}"
+    - string:
+        name: IQE_PLUGINS
+        default: "{iqe_plugins}"
+    - string:
+        name: IQE_ENV
+        default: "{iqe_env}"
+    - string:
+        name: IQE_SELENIUM
+        default: "{iqe_selenium}"
+    - string:
+        name: IQE_IMAGE
+        default: "{iqe_image}"
+    - string:
+        name: SELENIUM_IMAGE
+        default: "{selenium_image}"
+    wrappers:
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *iqe_vault
+        - *quay_secret_pull
+        - *ibutsu
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    <<: *gl_timed
+
+- job-template:
     id: 'insights-engine-gl-pr-check'
     name: '{gl_group}-{gl_project}-pr-check'
     wrappers:
@@ -247,6 +281,7 @@
 - job-template:
     id: 'insights-gh-build-master'
     name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    slack_channel_notification: 'consoledot-development-fails'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -257,12 +292,22 @@
         - *insights_rh_registry_pull_secret
         - *quay_secret_push
         - *quay_api_token
+    publishers:
+    - slack: 
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
+    - naginator:
+        max-failed-builds: 3
     <<: *gh_build_master
 
 - job-template:
     id: 'insights-gh-pr-check'
     name: '{gh_org}-{gh_repo}-pr-check'
     branch: "master"
+    slack_channel_notification: 'consoledot-development-fails'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -270,6 +315,7 @@
     - vault-secrets:
         <<: *vault_defaults
         secrets:
+        - *insights_crcd_oc_login
         - *insights_ephemeral_oc_login
         - *app_interface_creds
         - *insights_rh_registry_pull_secret
@@ -279,6 +325,17 @@
         - *hac_keycloak_secret
         - *ibutsu
         - *hac_prcheck_secret
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
     <<: *insights_gh_pr_check
 
 - job-template:
@@ -312,6 +369,7 @@
     gl_project: cicd-common
     app_name: ""
     ui_ref: ""
+    ui_image: ""
     component_name: ""
     image: ""
     git_commit: ""
@@ -359,7 +417,11 @@
     - string:
         name: UI_REF
         default: '{ui_ref}'
-        description: "(optional, default: prod-beta) git ref of the component's UI deployment repo to deploy front-end assets from. Only used if INCLUDE_UI is also true."
+        description: "(optional) If INCLUDE_UI is set to AGGREGATOR: (default: prod-beta) git ref of the component's UI deployment repo to deploy front-end assets from. If INCLUDE_UI is set to OPERATOR: (default: latest) image tag for the UI/front-end to deploy."
+    - string:
+        name: UI_IMAGE
+        default: '{ui_image}'
+        description: "(optional) image location of the UI/front-end on quay. Only used if INCLUDE_UI is set to OPERATOR."
     - string:
         name: COMPONENT_NAME
         default: '{component_name}'
@@ -413,3 +475,19 @@
     builders:
     - shell:
         command: "{ci_cmd}"
+
+- job-template:
+    id: 'prune-deployed-events-db'
+    name: 'prune-deployed-events-db'
+    gl_group: insights-platform
+    gl_project: cicd-common
+    branch: master
+    ci_cmd: 'app_scripts/remove_old_deployed_events.sh'
+    wrappers:
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *prune_deploy_events_db_secrets
+    <<: *gl_timed
+

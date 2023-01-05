@@ -21,42 +21,61 @@
     - [Access required](#access-required-2)
     - [Relevant secrets](#relevant-secrets-2)
     - [Steps](#steps-2)
-  - [OSD Cluster provisioning latency](#osd-cluster-provisioning-latency)
+  - [Kafka Service Fleet Manager federate metrics endpoint latency](#kafka-service-fleet-manager-federate-metrics-endpoint-latency)
     - [Impact](#impact-3)
     - [Summary](#summary-3)
     - [Access required](#access-required-3)
     - [Relevant secrets](#relevant-secrets-3)
     - [Steps](#steps-3)
-  - [OSD Cluster provisioning correctness](#osd-cluster-provisioning-correctness)
+  - [OSD Cluster provisioning latency](#osd-cluster-provisioning-latency)
     - [Impact](#impact-4)
     - [Summary](#summary-4)
     - [Access required](#access-required-4)
     - [Relevant secrets](#relevant-secrets-4)
     - [Steps](#steps-4)
-  - [Kafka Cluster provisioning latency](#kafka-cluster-provisioning-latency)
+  - [OSD Cluster provisioning correctness](#osd-cluster-provisioning-correctness)
     - [Impact](#impact-5)
     - [Summary](#summary-5)
     - [Access required](#access-required-5)
     - [Relevant secrets](#relevant-secrets-5)
     - [Steps](#steps-5)
-  - [Kafka Cluster provisioning correctness](#kafka-cluster-provisioning-correctness)
+  - [Kafka Cluster provisioning latency](#kafka-cluster-provisioning-latency)
     - [Impact](#impact-6)
     - [Summary](#summary-6)
     - [Access required](#access-required-6)
     - [Relevant secrets](#relevant-secrets-6)
     - [Steps](#steps-6)
-  - [Kafka Cluster deletion correctness](#kafka-cluster-deletion-correctness)
+  - [Kafka Cluster provisioning correctness](#kafka-cluster-provisioning-correctness)
     - [Impact](#impact-7)
     - [Summary](#summary-7)
     - [Access required](#access-required-7)
     - [Relevant secrets](#relevant-secrets-7)
     - [Steps](#steps-7)
-  - [Kas Fleet Manager Version Mismatch](#kas-fleet-manager-version-mismatch)
+  - [Kafka Cluster deletion correctness](#kafka-cluster-deletion-correctness)
     - [Impact](#impact-8)
     - [Summary](#summary-8)
     - [Access required](#access-required-8)
     - [Relevant secrets](#relevant-secrets-8)
-    - [Steps](#steps-7)
+    - [Steps](#steps-8)
+  - [Kas Fleet Manager Version Mismatch](#kas-fleet-manager-version-mismatch)
+    - [Impact](#impact-9)
+    - [Summary](#summary-9)
+    - [Access required](#access-required-9)
+    - [Relevant secrets](#relevant-secrets-9)
+    - [Steps](#steps-9)
+  - [Kas Fleet Manager Kafkas Stuck in Suspending State](#kas-fleet-manager-kafkas-stuck-in-suspending-status)
+    - [Impact](#impact-10)
+    - [Summary](#summary-10)
+    - [Access required](#access-required-10)
+    - [Relevant secrets](#relevant-secrets-10)
+    - [Steps](#steps-10)
+  - [Kas Fleet Manager Kafkas Stuck in Resuming State](#kas-fleet-manager-kafkas-stuck-in-resuming-status)
+    - [Impact](#impact-11)
+    - [Summary](#summary-11)
+    - [Access required](#access-required-11)
+    - [Relevant secrets](#relevant-secrets-11)
+    - [Steps](#steps-11)
+
   - [Escalations](#escalations)
 
 <!-- /TOC -->
@@ -170,6 +189,31 @@ Kafka Service Fleet Manager is not performing normally and is not able to handle
 ### Steps
 
 refer to the steps in [Kafka Service Fleet Manager availability](#kafka-service-fleet-manager-availability)
+
+---
+
+## Kafka Service Fleet Manager federate metrics endpoint latency
+
+### Impact
+
+Kafka Service Fleet Manager /metrics/federate endpoint is experiencing high latency, or has been downgraded.
+
+### Summary
+
+Kafka Service Fleet Manager /metrics/federate endpoint is not performing normally and is not able to handle the load within [agreed SLOs](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/managed-services/slos/kas-fleet-manager-api-latency.md)
+
+### Access required
+
+- OSD Console access to the cluster that runs the Kafka Service Fleet Manager .
+- Access to cluster resources: Pods/Deployments
+
+### Relevant secrets
+
+### Steps
+
+Check observatorium for [production](https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADX/api?orgId=1&refresh=1m) or [stage](https://grafana.stage.devshift.net/d/Tg-mH0rizaSJDKSADX/api?orgId=1&refresh=1m) to see if there are any issues indicating the cause of the high latency.
+
+Otherwise refer to the steps in [Kafka Service Fleet Manager availability](#kafka-service-fleet-manager-availability)
 
 ---
 
@@ -439,7 +483,55 @@ kas-fleet-manager-rds
 
 Check the status of relevant kafka (by its id returned in the alert) and see if its failed. Check if there is a reason for failure. Find the relevant kafka in [this dashboard](https://grafana.app-sre.devshift.net/d/viefn9LMz/mk-fleet-links?orgId=1&refresh=1m) to see more information about not matching kafka versions.
 If unsure about the reason or how to resolve the issue, refer to [Escalations](#escalations) section below.
- 
+
+---
+
+## Kas Fleet Manager Kafkas Stuck In Suspending State
+
+### Impact
+
+Kafka cluster stuck in suspending state for more than 5 minutes
+
+### Summary
+
+Kafka cluster is stuck in suspending state for more than 5 minutes. The transition from suspending to suspended status should normally be a fast process and if it exceeds 5 minutes, it indicates that there is an issue that requires investigation
+
+### Access required
+
+- OSD Console access to the cluster that runs the Kas Service Fleet Manager.
+- Access to cluster resources: Pods/Deployments
+
+### Relevant secrets
+
+### Steps
+
+Check the relevant kafka(s) (by the id(s) returned in the alert) on the dataplane cluster. Check if there are any errors in the kas-fleetshard operator logs.
+If unsure about the reason or how to resolve the issue, refer to [Escalations](#escalations) section below.
+
+---
+
+## Kas Fleet Manager Kafkas Stuck In Resuming State
+
+### Impact
+
+Kafka cluster stuck in resuming state for more than 15 minutes
+
+### Summary
+
+Kafka cluster is stuck in resuming state for more than 15 minutes. The transition from resuming to ready status should normally be similar to kafka request creation time. If it takes much longer, it might indicate that there is an issue that requires investigation.
+
+### Access required
+
+- OSD Console access to the cluster that runs the Kas Service Fleet Manager.
+- Access to cluster resources: Pods/Deployments
+
+### Relevant secrets
+
+### Steps
+
+Check the relevant kafka(s) (by the id(s) returned in the alert) on the dataplane cluster. Check if there are any errors in the kas-fleetshard operator logs, running pods or if any pods are crashlooping.
+If unsure about the reason or how to resolve the issue, refer to [Escalations](#escalations) section below.
+
 ---
 
 ## Escalations

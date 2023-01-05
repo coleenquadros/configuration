@@ -1,0 +1,29 @@
+- job-template:
+    id: 'gh-pr-check-git-partition-sync'
+    name: '{gh_org}-{gh_repo}-gh-pr-check'
+    environment: production
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_interface_basic_auth
+        - *quay_secret_pull
+    <<: *gh_pr_check
+
+- job-template:
+    id: 'gh-build-master-git-partition-sync'
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    environment: production
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *quay_secret_push
+        - *app_interface_basic_auth
+    <<: *gh_build_master

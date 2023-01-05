@@ -133,9 +133,6 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-kafkaCluster:
-  $ref: /kafka/crcs02ue1k/cluster.yml
-
 managedExternalResources: true
 
 externalResources:
@@ -165,10 +162,19 @@ externalResources:
         - deletion
         - failover
         - maintenance
-        - backup
     parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-cost-management-stage.yml
     annotations:
       clowder/database: "koku"
+    # Replica instance for Gabi.
+  - provider: rds
+    identifier: cost-management-stage-readonly
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-cost-management-stage-1.yml
+    overrides:
+      username: "insights"
+      name: "koku"
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-cost-management-stage.yml
+    replica_source: koku-stage
+    output_resource_name: cost-stage-db-ro
   - provider: cloudwatch
     identifier: hccm-stage
     defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml

@@ -25,6 +25,7 @@ environment:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
 - $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+- $ref: /services/insights/crc-pdf-generator/namespaces/crc-pdf-generator-stage.yml
 
 managedRoles: true
 
@@ -50,10 +51,14 @@ externalResources:
   resources:
   - provider: rds
     identifier: ros-stage
-    defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
-    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-ros-stage.yml
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-ros-stage.yml
+    old_parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-ros-stage.yml
     output_resource_name: ros-db
     enhanced_monitoring: true
+    overrides:
+      engine_version: "13.4"
+      apply_immediately: true
   - provider: cloudwatch
     identifier: ros-stage
     defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml

@@ -15,18 +15,20 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: rhose-rts
   notifications:
-    start: true
+    start: false
 
 managedResourceTypes:
   - Deployment
   - Service
   - ConfigMap
+  - CronJob
 
 imagePatterns:
   - quay.io/app-sre/rhose-fleet-manager
+  - quay.io/app-sre/ubi8-ubi
 
 authentication:
   image:
@@ -58,10 +60,10 @@ resourceTemplates:
           RDS_SECRET_NAME: rhosedb-rds
       - namespace:
           $ref:  /services/rhose/namespaces/production.yml
-        ref: e5f95c4fb5691526865cc0630baa30629c7aeeda
+        ref: 41eb3cf808b854020199f33c2d1540306a84a60d
         parameters:
           FLEET_MANAGER_IMAGE: quay.io/app-sre/rhose-fleet-manager
-          FLEET_MANAGER_IMAGE_TAG: f0f98b90e982804805f71a3529038d30c43b8ede
+          FLEET_MANAGER_IMAGE_TAG: cbdfa9a1e29e726cd7dbb23e8eff483ebe26879d
           FLEET_MANAGER_LIMITS_CPU: "2"
           FLEET_MANAGER_LIMITS_MEMORY: "4000Mi"
           FLEET_MANAGER_REQUESTS_CPU: "1"
@@ -76,6 +78,15 @@ resourceTemplates:
     path: /app-interface/dashboards
     provider: directory
     targets:
-    - namespace:
-        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
-      ref: main
+      - namespace:
+          $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+        ref: main
+
+  - name: rhose-cronjobs
+    url: https://github.com/5733d9e2be6485d52ffa08870cabdee0/sandbox
+    path: /app-interface/cronjobs
+    provider: directory
+    targets:
+      - namespace:
+          $ref: /services/rhose/namespaces/stage.yml
+        ref: main

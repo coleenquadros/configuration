@@ -1,0 +1,51 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: configuration-anomaly-detection
+name: configuration-anomaly-detection-2022-12-01
+app:
+  $ref: /services/configuration-anomaly-detection/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/openshift/configuration-anomaly-detection:
+    - branch: master
+      total: 3
+      success: 3
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: configuration-anomaly-detection-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: configuration-anomaly-detection-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 21
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 21
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 22
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 22
+  - cluster: app-sre-prod-01
+    namespace: configuration-anomaly-detection-production
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 21
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 21
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 22
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 22
+  service_slo: null

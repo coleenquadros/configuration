@@ -17,17 +17,17 @@ pipelinesProvider:
 deployResources:
   requests:
     cpu: "1"
-    memory: 2000Mi
+    memory: 2500Mi
   limits:
     cpu: "1"
-    memory: 2000Mi
+    memory: 2500Mi
 
 clusterAdmin: true
 compare: false
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-consoledot-devprod
 
 managedResourceTypes:
@@ -63,7 +63,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/clowder/namespaces/ephem.yml
-    ref: d5a82dadc03b01242ac74e420ec1c7dc2fd89041
+    ref: d33e59ea0bfa413b75b2f21b145756323fc6fa50
     # upstream:
     #   instance:
     #     $ref: /dependencies/ci-ext/ci-ext.yml
@@ -84,9 +84,10 @@ resourceTemplates:
       WATCH_STRIMZI_RESOURCES: "true"
       CREATE_SERVICE_MONITORS: "true"
       TARGET_NAMESPACE: "clowder-system"
+      MANAGED_EPHEM_DELETE_REGEX: ".*ephemeral.*"
   - namespace:
       $ref: /services/insights/clowder/namespaces/stage.yml
-    ref: d5a82dadc03b01242ac74e420ec1c7dc2fd89041
+    ref: d33e59ea0bfa413b75b2f21b145756323fc6fa50
     # upstream:
     #   instance:
     #     $ref: /dependencies/ci-ext/ci-ext.yml
@@ -94,6 +95,7 @@ resourceTemplates:
     parameters:
       PER_PROVIDER_METRICS: "true"
       TARGET_NAMESPACE: "clowder-system"
+      RECONCILIATION_METRICS: "true"
   - namespace:
       $ref: /services/insights/clowder/namespaces/prod.yml
     ref: d5a82dadc03b01242ac74e420ec1c7dc2fd89041
@@ -106,22 +108,29 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/clowder/namespaces/ephem.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-clowder-plugin-gh-build-master
+    ref: 7f985a8e1f86af5afc8c90105aa521c7ab12bb25
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-clowder-plugin-gh-build-master
   - namespace:
       $ref: /services/insights/clowder/namespaces/stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-clowder-plugin-gh-build-master
+    ref: 7f985a8e1f86af5afc8c90105aa521c7ab12bb25
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-clowder-plugin-gh-build-master
   - namespace:
       $ref: /services/insights/clowder/namespaces/crcd01ue1.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-clowder-plugin-gh-build-master
+    ref: 5f2f064de1f490c3508c65643e36bd840bcf5efc
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-clowder-plugin-gh-build-master
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/prod.yml
+    ref: 7f985a8e1f86af5afc8c90105aa521c7ab12bb25
+    # upstream:
+    #   instance:
+    #     $ref: /dependencies/ci-ext/ci-ext.yml
+    #   name: RedHatInsights-clowder-plugin-gh-build-master

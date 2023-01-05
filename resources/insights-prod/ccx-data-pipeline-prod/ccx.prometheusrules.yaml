@@ -15,9 +15,10 @@ spec:
         expr: sum(increase(kube_pod_container_status_restarts_total{container="insights-results-aggregator"}[5m])) by (container) > 1
         for: 30m
         labels:
-          severity: medium
+          severity: high
           service: insights
           env: prod
+          app_team: ccx-data-pipeline
         annotations:
           dashboard: "https://grafana.openshift-app-sre.devshift.net/d/ruvKwhqWk/ccx-insights-results-aggregator"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
@@ -27,9 +28,10 @@ spec:
         expr: sum(increase(kube_pod_container_status_restarts_total{container="insights-results-db-writer"}[5m])) by (container) > 1
         for: 30m
         labels:
-          severity: medium
+          severity: high
           service: insights
           env: prod
+          app_team: ccx-data-pipeline
         annotations:
           dashboard: "https://grafana.openshift-app-sre.devshift.net/d/C4vK5h2Wk/ccx-insights-results-db-writer"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
@@ -41,6 +43,7 @@ spec:
           severity: medium
           service: insights
           env: prod
+          app_team: ccx-data-pipeline
         annotations:
           dashboard: "https://grafana.openshift-app-sre.devshift.net/d/jRluM4NMz/ccx-data-pipeline"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
@@ -53,6 +56,7 @@ spec:
           severity: medium
           service: insights
           env: prod
+          app_team: ccx-data-pipeline
         annotations:
           dashboard: "https://grafana.openshift-app-sre.devshift.net/d/C4vK5h2Wk/ccx-insights-results-db-writer"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
@@ -62,9 +66,10 @@ spec:
         expr: sum(up{service="ccx-smart-proxy"}) by (service) == 0
         for: 2m
         labels:
-          severity: medium
+          severity: critical
           service: insights
           env: prod
+          app_team: ccx-data-pipeline
         annotations:
           dashboard: "https://grafana.openshift-app-sre.devshift.net/d/5RvvwGqW0/ccx-smart-proxy"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
@@ -73,9 +78,10 @@ spec:
         expr: sum(up{service="ccx-insights-content-service"}) by (service) == 0
         for: 2m
         labels:
-          severity: medium
+          severity: critical
           service: insights
           env: prod
+          app_team: ccx-data-pipeline
         annotations:
           dashboard: "https://grafana.openshift-app-sre.devshift.net/d/i7kJG7vGz/ccx-insights-content-service"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
@@ -84,9 +90,10 @@ spec:
         expr: sum(up{service="ccx-data-pipeline"}) by (service) == 0
         for: 2m
         labels:
-          severity: medium
+          severity: critical
           service: insights
           env: prod
+          app_team: ccx-data-pipeline
         annotations:
           dashboard: "https://grafana.openshift-app-sre.devshift.net/d/jRluM4NMz/ccx-data-pipeline"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
@@ -95,10 +102,24 @@ spec:
         expr: sum(up{service="insights-results-aggregator"}) by (service) == 0
         for: 2m
         labels:
-          severity: medium
+          severity: critical
           service: insights
           env: prod
+          app_team: ccx-data-pipeline
         annotations:
           message: "insights-results-aggregator backend service has been down for two minutes <!subteam^S043UGRST2L>"
           dashboard: "https://grafana.openshift-app-sre.devshift.net/d/ruvKwhqWk/ccx-insights-results-aggregator"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+      - alert: CCXNotificationDBLowStorageSpace
+        expr: aws_rds_free_storage_space_average{container="cloudwatch-exporter", dbinstance_identifier="ccx-notification-prod", namespace="app-sre-observability-production"} offset 10m < (40 * 1024^3)
+        for: 30m
+        labels:
+          severity: high
+          service: insights
+          namespace: app-sre-observability-production
+          app_team: ccx-data-pipeline
+          env: prod
+        annotations:
+          message: "The current free storage space of DB instance {{ $labels.dbinstance_identifier }} is less than 20%."
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
+          dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20insights-prod&var-region=default&var-dbinstanceidentifier=ccx-notification-prod&from=now-7d&to=now"

@@ -12,7 +12,7 @@ Incident Response Plan
 Impact
 ------
 
--  The Cost Management APP provide cost data around OpenShift clustes and public cloud infrastructure.
+-  The Cost Management APP provide cost data around OpenShift clustes and public cloud infrastructure. These failure reponses would result in missing data from the user experience.
 
 Summary
 -------
@@ -37,7 +37,6 @@ Steps
 Escalations
 -----------
 
--  Ping more team members if available
--  Ping the engineering team that owns the APP
+-  https://visual-app-interface.devshift.net/services#/services/insights/hccm/app.yml
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1ztiNN7PiAsbr0GUSKjiLiS1_TGVpw7nd_OFWMskWD8w/edit?usp=sharing

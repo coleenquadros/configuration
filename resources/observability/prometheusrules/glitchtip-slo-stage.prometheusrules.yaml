@@ -12,29 +12,15 @@ spec:
     # generated from https://promtools.dev/alerts/errors
     - name: SLOs-haproxy_backend_http_responses_total
       rules:
-        - alert: ErrorBudgetBurn5mto1h
-          annotations:
-            message: 'High error budget burn for http responses on exported_namespace=glitchtip-stage (current value: {{ $value }})'
-            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
-            dashboard: "https://grafana.stage.devshift.net/d/8hKIWxr7z/glitchtip-slo"
-          expr: |
-            sum(haproxy_backend_http_responses_total:burnrate5m{exported_namespace="glitchtip-stage"}) > (14.40 * (1-0.90000))
-            and
-            sum(haproxy_backend_http_responses_total:burnrate1h{exported_namespace="glitchtip-stage"}) > (14.40 * (1-0.90000))
-          for: 2m
-          labels:
-            service: glitchtip
-            exported_namespace: glitchtip-stage
-            severity: medium
         - alert: ErrorBudgetBurn30mto6h
           annotations:
-            message: 'High error budget burn for http responses on exported_namespace=glitchtip-stage (current value: {{ $value }})'
-            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
+            message: "High 6h error budget burn for http responses on exported_namespace=glitchtip-stage (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/8hKIWxr7z/glitchtip-slo"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
           expr: |
-            sum(haproxy_backend_http_responses_total:burnrate30m{exported_namespace="glitchtip-stage"}) > (6.00 * (1-0.90000))
+            sum(haproxy_backend_http_responses_total:all:errorrate30m{exported_namespace="glitchtip-stage"}) > (6.00 * (1-0.95000))
             and
-            sum(haproxy_backend_http_responses_total:burnrate6h{exported_namespace="glitchtip-stage"}) > (6.00 * (1-0.90000))
+            sum(haproxy_backend_http_responses_total:all:errorrate6h{exported_namespace="glitchtip-stage"}) > (6.00 * (1-0.95000))
           for: 15m
           labels:
             service: glitchtip
@@ -42,88 +28,74 @@ spec:
             severity: medium
         - alert: ErrorBudgetBurn2hto1d
           annotations:
-            message: 'High error budget burn for http responses on exported_namespace=glitchtip-stage (current value: {{ $value }})'
+            message: 'High 1d error budget burn for http responses on exported_namespace=glitchtip-stage (current value: {{ $value | humanize }})'
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
             dashboard: "https://grafana.stage.devshift.net/d/8hKIWxr7z/glitchtip-slo"
           expr: |
-            sum(haproxy_backend_http_responses_total:burnrate2h{exported_namespace="glitchtip-stage"}) > (3.00 * (1-0.90000))
+            sum(haproxy_backend_http_responses_total:all:errorrate2h{exported_namespace="glitchtip-stage"}) > (3.00 * (1-0.95000))
             and
-            sum(haproxy_backend_http_responses_total:burnrate1d{exported_namespace="glitchtip-stage"}) > (3.00 * (1-0.90000))
+            sum(haproxy_backend_http_responses_total:all:errorrate1d{exported_namespace="glitchtip-stage"}) > (3.00 * (1-0.95000))
           for: 1h
           labels:
             service: glitchtip
             exported_namespace: glitchtip-stage
+            # TODO: will adjust the severity to critical after glitchtip is onboarded
             severity: medium
         - alert: ErrorBudgetBurn6hto3d
           annotations:
-            message: 'High error budget burn for http responses on exported_namespace=glitchtip-stage (current value: {{ $value }})'
+            message: 'High 3d error budget burn for http responses on exported_namespace=glitchtip-stage (current value: {{ $value | humanize }})'
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
             dashboard: "https://grafana.stage.devshift.net/d/8hKIWxr7z/glitchtip-slo"
           expr: |
-            sum(haproxy_backend_http_responses_total:burnrate6h{exported_namespace="glitchtip-stage"}) > (1.00 * (1-0.90000))
+            sum(haproxy_backend_http_responses_total:all:errorrate6h{exported_namespace="glitchtip-stage"}) > (1.00 * (1-0.95000))
             and
-            sum(haproxy_backend_http_responses_total:burnrate3d{exported_namespace="glitchtip-stage"}) > (1.00 * (1-0.90000))
+            sum(haproxy_backend_http_responses_total:all:errorrate3d{exported_namespace="glitchtip-stage"}) > (1.00 * (1-0.95000))
           for: 3h
           labels:
             service: glitchtip
             exported_namespace: glitchtip-stage
+            # TODO: will adjust the severity to critical after glitchtip is onboarded
             severity: medium
         - expr: |
-            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code=~"5.."}[1d]))
+            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code="5xx"}[30m]))
             /
-            sum(rate(haproxy_backend_connections_total{exported_namespace="glitchtip-stage", backend=~".*https.*"}[1d]))
+            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage"}[30m]))
           labels:
             service: glitchtip
             exported_namespace: glitchtip-stage
-          record: haproxy_backend_http_responses_total:burnrate1d
+          record: haproxy_backend_http_responses_total:all:errorrate30m
         - expr: |
-            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code=~"5.."}[1h]))
+            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code="5xx"}[6h]))
             /
-            sum(rate(haproxy_backend_connections_total{exported_namespace="glitchtip-stage", backend=~".*https.*"}[1h]))
+            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage"}[6h]))
           labels:
             service: glitchtip
             exported_namespace: glitchtip-stage
-          record: haproxy_backend_http_responses_total:burnrate1h
+          record: haproxy_backend_http_responses_total:all:errorrate6h
         - expr: |
-            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code=~"5.."}[2h]))
+            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code="5xx"}[2h]))
             /
-            sum(rate(haproxy_backend_connections_total{exported_namespace="glitchtip-stage", backend=~".*https.*"}[2h]))
+            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage"}[2h]))
           labels:
             service: glitchtip
             exported_namespace: glitchtip-stage
-          record: haproxy_backend_http_responses_total:burnrate2h
+          record: haproxy_backend_http_responses_total:all:errorrate2h
         - expr: |
-            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code=~"5.."}[30m]))
+            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code="5xx"}[1d]))
             /
-            sum(rate(haproxy_backend_connections_total{exported_namespace="glitchtip-stage", backend=~".*https.*"}[30m]))
+            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage"}[1d]))
           labels:
             service: glitchtip
             exported_namespace: glitchtip-stage
-          record: haproxy_backend_http_responses_total:burnrate30m
+          record: haproxy_backend_http_responses_total:all:errorrate1d
         - expr: |
-            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code=~"5.."}[3d]))
+            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code="5xx"}[3d]))
             /
-            sum(rate(haproxy_backend_connections_total{exported_namespace="glitchtip-stage", backend=~".*https.*"}[3d]))
+            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage"}[3d]))
           labels:
             service: glitchtip
             exported_namespace: glitchtip-stage
-          record: haproxy_backend_http_responses_total:burnrate3d
-        - expr: |
-            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code=~"5.."}[5m]))
-            /
-            sum(rate(haproxy_backend_connections_total{exported_namespace="glitchtip-stage", backend=~".*https.*"}[5m]))
-          labels:
-            service: glitchtip
-            exported_namespace: glitchtip-stage
-          record: haproxy_backend_http_responses_total:burnrate5m
-        - expr: |
-            sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage",code=~"5.."}[6h]))
-            /
-            sum(rate(haproxy_backend_connections_total{exported_namespace="glitchtip-stage", backend=~".*https.*"}[6h]))
-          labels:
-            service: glitchtip
-            exported_namespace: glitchtip-stage
-          record: haproxy_backend_http_responses_total:burnrate6h
+          record: haproxy_backend_http_responses_total:all:errorrate3d
     
     # generated from https://promtools.dev/alerts/latency
     - name: SLOs-RequestLatency
@@ -173,71 +145,71 @@ spec:
             severity: medium
         - expr: |
             1 - (
-              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_bucket{job="glitchtip-web",le="0.5"}[5m]))
+              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{job="glitchtip-web",le="0.5"}[5m]))
               /
               sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_count{job="glitchtip-web", le="+Inf"}[5m]))
             )
           labels:
             service: glitchtip
             job: glitchtip-web
-          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket_bucket:rate5m
+          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket:rate5m
         - expr: |
             1 - (
-              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_bucket{job="glitchtip-web",le="0.5"}[30m]))
+              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{job="glitchtip-web",le="0.5"}[30m]))
               /
               sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_count{job="glitchtip-web", le="+Inf"}[30m]))
             )
           labels:
             service: glitchtip
             job: glitchtip-web
-          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket_bucket:rate30m
+          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket:rate30m
         - expr: |
             1 - (
-              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_bucket{job="glitchtip-web",le="0.5"}[1h]))
+              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{job="glitchtip-web",le="0.5"}[1h]))
               /
               sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_count{job="glitchtip-web", le="+Inf"}[1h]))
             )
           labels:
             service: glitchtip
             job: glitchtip-web
-          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket_bucket:rate1h
+          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket:rate1h
         - expr: |
             1 - (
-              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_bucket{job="glitchtip-web",le="0.5"}[2h]))
+              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{job="glitchtip-web",le="0.5"}[2h]))
               /
               sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_count{job="glitchtip-web", le="+Inf"}[2h]))
             )
           labels:
             service: glitchtip
             job: glitchtip-web
-          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket_bucket:rate2h
+          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket:rate2h
         - expr: |
             1 - (
-              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_bucket{job="glitchtip-web",le="0.5"}[6h]))
+              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{job="glitchtip-web",le="0.5"}[6h]))
               /
               sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_count{job="glitchtip-web", le="+Inf"}[6h]))
             )
           labels:
             service: glitchtip
             job: glitchtip-web
-          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket_bucket:rate6h
+          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket:rate6h
         - expr: |
             1 - (
-              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_bucket{job="glitchtip-web",le="0.5"}[1d]))
+              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{job="glitchtip-web",le="0.5"}[1d]))
               /
               sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_count{job="glitchtip-web", le="+Inf"}[1d]))
             )
           labels:
             service: glitchtip
             job: glitchtip-web
-          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket_bucket:rate1d
+          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket:rate1d
         - expr: |
             1 - (
-              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_bucket{job="glitchtip-web",le="0.5"}[3d]))
+              sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{job="glitchtip-web",le="0.5"}[3d]))
               /
               sum(rate(django_http_requests_latency_seconds_by_view_method_bucket_count{job="glitchtip-web", le="+Inf"}[3d]))
             )
           labels:
             service: glitchtip
             job: glitchtip-web
-          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket_bucket:rate3d
+          record: latencytarget:django_http_requests_latency_seconds_by_view_method_bucket:rate3d

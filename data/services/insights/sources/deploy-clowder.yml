@@ -16,7 +16,7 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -52,16 +52,17 @@ resourceTemplates:
       name: RedHatInsights-sources-api-go-gh-build-main
     parameters:
       SOURCES_ENV: stage
-      AVAILABILITY_MIN_REPLICAS: 1
       KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-stage.svc.cluster.local
       KOKU_SOURCES_API_PORT: "10000"
       CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-stage.svc.cluster.local
       CLOUD_CONNECTOR_CHECK_PATH: /api/cloud-connector/v1/connection_status
+      PROVISIONING_HOST: provisioning-backend-api.provisioning-stage.svc.cluster.local
+      PROVISIONING_CHECK_PATH: /api/provisioning/v1/availability_status/sources
       LOG_LEVEL: DEBUG
       RBAC_PORT: "8080"
   - namespace:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
-    ref: 05a4be00e896050bc5d71f040d92a6655a3af9ac
+    ref: 850b550b0c7425787ee45d5d54199c3ff093e68f
     parameters:
       SOURCES_ENV: prod
       MIN_REPLICAS: 3
@@ -111,7 +112,6 @@ resourceTemplates:
       name: RedHatInsights-sources-superkey-worker-gh-build-master
     parameters:
       LOG_LEVEL: INFO
-      MIN_REPLICAS: 1
       MEMORY_LIMIT: 150Mi
       DISABLE_RESOURCE_CREATION: "false"
       DISABLE_RESOURCE_DELETION: "false"
@@ -136,7 +136,11 @@ resourceTemplates:
 #      IMAGE_TAG: xxxxxx
   - namespace:
       $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
-    ref: 1845313ddfa6b4092957794542fa4f2480fd066c
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-sources-satellite-gh-build-master
     parameters:
       RECEPTOR_CONTROLLER_SECRET_NAME: sources-psk
       RECEPTOR_CONTROLLER_SECRET_KEY_PSK: client-psk

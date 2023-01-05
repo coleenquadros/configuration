@@ -24,6 +24,9 @@ managedResourceTypes:
 - Role
 - RoleBinding
 
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
 openshiftResources:
 - provider: route
   path: /services/assisted-installer/kibana-stage.route.yaml
@@ -35,10 +38,6 @@ openshiftResources:
   path: /services/assisted-installer/assisted-image-service-boot-artifacts-stage.route.yaml
 - provider: resource
   path: /services/assisted-installer/assisted-service.serviceaccount.yaml
-- provider: resource
-  path: /services/assisted-installer/assisted-service-job-creator.rolebinding.yaml
-- provider: resource
-  path: /services/assisted-installer/job-creator.role.yaml
 - provider: resource
   path: /services/assisted-installer/assisted-service-leader-election.rolebinding.yaml
 - provider: resource
@@ -79,6 +78,18 @@ openshiftResources:
   name: auto-report-slack-webhook
   path: app-interface/assisted-installer/auto-report-slack-webhook/stage
   version: 1
+- provider: vault-secret
+  name: jobs-auto-report-slack-channel-id
+  path: app-interface/assisted-installer/jobs-auto-report-slack-channel-id/stage
+  version: 2
+- provider: vault-secret
+  name: jobs-auto-report-slack-bot-token
+  path: app-interface/assisted-installer/jobs-auto-report-slack-bot-token/stage
+  version: 2
+- provider: vault-secret
+  name: insights-kafka-auth
+  path: insights/secrets/insights-stage/strimzi-stage/mk-oauth-secret
+  version: 5
 
 managedRoles: true
 
@@ -89,6 +100,10 @@ externalResources:
   provisioner:
     $ref: /aws/app-sre-stage/account.yml
   resources:
+  - provider: s3
+    identifier: ai-events-tfstate-stage
+    defaults: /terraform/resources/assisted-installer/s3-no-lifecycle.yml
+    output_resource_name: ai-events-tfstate
   - provider: s3
     identifier: ai-ccx-integration-stage
     defaults: /terraform/resources/assisted-installer/s3-expire-now.yml
@@ -148,3 +163,7 @@ externalResources:
     identifier: ai-stage-es
     defaults: /terraform/resources/assisted-installer/elasticsearch-stage-1.yml
     output_resource_name: assisted-installer-elasticsearch
+
+glitchtipProjects:
+- $ref: /dependencies/glitchtip/projects/glitchtip-production/assisted-service-stage.yml
+- $ref: /dependencies/glitchtip/projects/glitchtip-production/assisted-events-scrape-stage.yml

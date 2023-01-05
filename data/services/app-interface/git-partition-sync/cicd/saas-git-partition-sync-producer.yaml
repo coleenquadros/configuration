@@ -1,0 +1,62 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-interface
+
+name: saas-git-partition-sync-producer
+description: 'SaaS tracking file for git-partition-sync-producer'
+
+app:
+  $ref: /services/app-interface/git-partition-sync/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: sd-app-sre-info
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+managedResourceTypes:
+- ServiceAccount
+- Deployment
+
+imagePatterns:
+- quay.io/app-sre/git-partition-sync-producer
+- quay.io/app-sre/internal-redhat-ca
+
+resourceTemplates:
+- name: git-partition-sync-producer
+  url: https://github.com/app-sre/git-partition-sync-producer
+  path: /openshift/producer.yaml
+  targets:
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-stage-int.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-git-partition-sync-producer-gh-build-master
+    parameters:
+      DRY_RUN: true
+      RUN_ONCE: false
+      VAULT_SECRET_NAME: git-partition-sync-producer
+      RECONCILE_SLEEP_TIME: 15m
+      GQL_SECRET_NAME: gql-creds
+      GRAPHQL_QUERY_FILE: /query.graphql
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-production-int.yml
+    ref: e62c983591daef71b7a443ee7e24c3b07b0f76e1
+    parameters:
+      DRY_RUN: false
+      RUN_ONCE: false
+      VAULT_SECRET_NAME: git-partition-sync-producer
+      RECONCILE_SLEEP_TIME: 5m
+      GQL_SECRET_NAME: gql-creds
+      GRAPHQL_QUERY_FILE: /query.graphql

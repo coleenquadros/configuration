@@ -28,8 +28,14 @@ GH_OPENSHIFT = "https://github.com/openshift/"
 def parse_args():
     parser = argparse.ArgumentParser(description="Register a new OSD operator.")
     parser.add_argument("operator_name", help="The name of the operator to register.")
-    parser.add_argument("--prod", help="add to deploy your operator in production", action="store_true")
-    parser.add_argument("-l", "--local-operator", help="path to local operator 'repo'. Useful for testing")
+    parser.add_argument(
+        "--prod", help="add to deploy your operator in production", action="store_true"
+    )
+    parser.add_argument(
+        "-l",
+        "--local-operator",
+        help="path to local operator 'repo'. Useful for testing",
+    )
     return parser.parse_args()
 
 
@@ -188,7 +194,7 @@ def update_saas_approver_yml(operator_name):
 
 def update_slack_user_groups_yml(operator_name):
     """Idempotently registers the operator's slack user group in
-    slack/coreos.yml.
+    slack/redhat-internal.yml.
     """
     fpath = os.path.join("data", "dependencies", "slack", "coreos.yml")
     yml = load_yml(fpath)
@@ -241,7 +247,8 @@ def update_cicd_saas_yml(operator_name, config):
         "cicd-saas.tpl",
         os.path.join(CICD_DIR, "saas", "saas-%s.yaml"),
         operator_name,
-        managed_resource_types=list(config['resource_types']))
+        managed_resource_types=list(config["resource_types"]),
+    )
 
     # Then, we update the resourceTemplates section
     fpath = os.path.join(CICD_DIR, "saas", "saas-{}.yaml".format(operator_name))
@@ -250,7 +257,11 @@ def update_cicd_saas_yml(operator_name, config):
 
     # Get all current hives instances
     # Every new hive instance will have a folder in "data/services/osd-operators/namespaces"
-    hive_instances = [entry.name for entry in os.scandir(os.path.join(SVC_DIR, 'namespaces')) if entry.is_dir()]
+    hive_instances = [
+        entry.name
+        for entry in os.scandir(os.path.join(SVC_DIR, "namespaces"))
+        if entry.is_dir()
+    ]
 
     for hive_instance in hive_instances:
         # we will only specify the commit to deploy in Production if the --prod option is provided
@@ -258,10 +269,16 @@ def update_cicd_saas_yml(operator_name, config):
         if hive_instance.startswith("hivep") and not config["prod_commit"]:
             continue
 
-        tpl_ending = "prd.yml.tpl" if hive_instance.startswith("hivep") else "staging.yml.tpl"
+        tpl_ending = (
+            "prd.yml.tpl" if hive_instance.startswith("hivep") else "staging.yml.tpl"
+        )
         refs = load_yml(
             os.path.join(TPL_DIR, "cicd-saas-namespace-{}".format(tpl_ending)),
-            subs={"operator_name": operator_name, "hive_instance_name": hive_instance, "commit": config['prod_commit']},
+            subs={
+                "operator_name": operator_name,
+                "hive_instance_name": hive_instance,
+                "commit": config["prod_commit"],
+            },
         )
         seq_inject(resource_templates, refs)
 
@@ -272,7 +289,11 @@ def update_operator_yml(operator_name):
     """
     Create the operator_name.yml in data/services/osd-operators/namespaces/{hive_instance} for hive operators
     """
-    hive_instances = [entry.name for entry in os.scandir(os.path.join(SVC_DIR, 'namespaces')) if entry.is_dir()]
+    hive_instances = [
+        entry.name
+        for entry in os.scandir(os.path.join(SVC_DIR, "namespaces"))
+        if entry.is_dir()
+    ]
     for hive_instance in hive_instances:
         if hive_instance.startswith("hivep"):
             environment = "production-{}".format(hive_instance)
@@ -280,13 +301,24 @@ def update_operator_yml(operator_name):
             environment = "integration-{}".format(hive_instance)
         elif hive_instance.startswith("hives"):
             environment = "stage-{}".format(hive_instance)
-        elif hive_instance == "ssotest01ue1":  # special case 1. Naming doesn't match convention
+        elif (
+            hive_instance == "ssotest01ue1"
+        ):  # special case 1. Naming doesn't match convention
             environment = "ssotest01ue1"
         elif hive_instance == "hive-stage-01":  # special case 2.
             environment = "stage-01"
         else:
-            print("Unknown hive instance type for {}. Skipping {}"
-                  .format(hive_instance, os.path.join(SVC_DIR, "namespaces", hive_instance, "{}.yml".format(operator_name))))
+            print(
+                "Unknown hive instance type for {}. Skipping {}".format(
+                    hive_instance,
+                    os.path.join(
+                        SVC_DIR,
+                        "namespaces",
+                        hive_instance,
+                        "{}.yml".format(operator_name),
+                    ),
+                )
+            )
             continue
 
         write_from_template(
@@ -295,7 +327,7 @@ def update_operator_yml(operator_name):
             operator_name,
             label="{}",
             hive_instance_name=hive_instance,
-            environment=environment
+            environment=environment,
         )
 
 
@@ -321,22 +353,33 @@ def prerequisites(args, local_folder=None):
                 # Clone the operator repo to a temporary directory
                 repo_url = "{}/{}.git".format(GH_OPENSHIFT, args.operator_name)
                 repo = Repo.clone_from(repo_url, operator_folder)
-                prod_commit = repo.head.commit  # latest commit to be added to saas-{operator_name}.yaml
+                prod_commit = (
+                    repo.head.commit
+                )  # latest commit to be added to saas-{operator_name}.yaml
             except Exception as e:
                 err("Cloning {} failed. Is it public?: ".format(repo_url))
 
         # Check if operator was created with boilerplate
-        if not os.path.isdir(os.path.join(operator_folder, 'boilerplate')):
-            err("Missing folder {}. The automation only supports operators created with boilerpate"
-                .format(os.path.join(operator_folder, 'boilerplate')))
+        if not os.path.isdir(os.path.join(operator_folder, "boilerplate")):
+            err(
+                "Missing folder {}. The automation only supports operators created with boilerpate".format(
+                    os.path.join(operator_folder, "boilerplate")
+                )
+            )
 
         # ask if the user wants to use a different commit than the latest one for production
         # we only ask for the commit is the option --prod was passed as parameter of the script
         if args.prod:
-            config['prod_commit'] = input("Please provide commit to deploy to Hive Production. default [{}]"
-                                          .format(prod_commit)) or prod_commit
+            config["prod_commit"] = (
+                input(
+                    "Please provide commit to deploy to Hive Production. default [{}]".format(
+                        prod_commit
+                    )
+                )
+                or prod_commit
+            )
         else:
-            config['prod_commit'] = None
+            config["prod_commit"] = None
 
         # retrieve managedResourceTypes from the hack/olm-registry/olm-artifacts-template.yaml
         olm_tpl_path = os.path.join(operator_folder, OLM_TPL_FILE)
@@ -345,16 +388,28 @@ def prerequisites(args, local_folder=None):
 
         # using a set guarantees that resources are only declared onces
         olm_tpl = load_yml(olm_tpl_path, skip_format=True)
-        config['resource_types'] = {item['kind'] for item in olm_tpl['objects']}
+        config["resource_types"] = {item["kind"] for item in olm_tpl["objects"]}
 
-        if olm_tpl['metadata']['name'] == 'olm-artifacts-template':
-            print("Found {} in metadata =>  Hive operator".format(olm_tpl['metadata']['name']))
-            config['operator_type'] = 'hive'
-        elif olm_tpl['metadata']['name'] == 'selectorsyncset-template':
-            print("Found {} in metadata => Cluster operator.".format(olm_tpl['metadata']['name']))
-            config['operator_type'] = 'cluster'
+        if olm_tpl["metadata"]["name"] == "olm-artifacts-template":
+            print(
+                "Found {} in metadata =>  Hive operator".format(
+                    olm_tpl["metadata"]["name"]
+                )
+            )
+            config["operator_type"] = "hive"
+        elif olm_tpl["metadata"]["name"] == "selectorsyncset-template":
+            print(
+                "Found {} in metadata => Cluster operator.".format(
+                    olm_tpl["metadata"]["name"]
+                )
+            )
+            config["operator_type"] = "cluster"
         else:
-            err('Found {} in metadata. Unsupported OLM template.'.format(olm_tpl['metadata']['name']))
+            err(
+                "Found {} in metadata. Unsupported OLM template.".format(
+                    olm_tpl["metadata"]["name"]
+                )
+            )
 
     return config
 
@@ -373,9 +428,11 @@ def main():
     write_from_template(
         "ci-int-jobs.tpl",
         os.path.join(CICD_DIR, "ci-int", "jobs-%s.yaml"),
-        args.operator_name
+        args.operator_name,
     )
-    current_repo.git.add(os.path.join(CICD_DIR, "ci-int", "jobs-{}.yaml".format(args.operator_name)))
+    current_repo.git.add(
+        os.path.join(CICD_DIR, "ci-int", "jobs-{}.yaml".format(args.operator_name))
+    )
 
     # Add cicd/saas file
     update_cicd_saas_yml(args.operator_name, config)
@@ -386,7 +443,11 @@ def main():
         os.path.join(TEAM_DIR, "permissions", "%s-coreos-slack.yml"),
         args.operator_name,
     )
-    current_repo.git.add(os.path.join(TEAM_DIR, "permissions", "{}-coreos-slack.yml".format(args.operator_name)))
+    current_repo.git.add(
+        os.path.join(
+            TEAM_DIR, "permissions", "{}-coreos-slack.yml".format(args.operator_name)
+        )
+    )
 
     # Add quayRepos and codeComponents entries
     update_app_yml(args.operator_name)
@@ -403,7 +464,7 @@ def main():
     update_slack_user_groups_yml(args.operator_name)
 
     # Add namespace resources: for hive operators only
-    if config['operator_type'] == 'hive':
+    if config["operator_type"] == "hive":
         update_operator_yml(args.operator_name)
 
 

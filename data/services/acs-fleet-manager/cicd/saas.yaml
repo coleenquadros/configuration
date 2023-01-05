@@ -15,7 +15,7 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: acs-fleet-manager
 
 managedResourceTypes:
@@ -47,6 +47,9 @@ resourceTemplates:
       - namespace:
           $ref: /services/acs-fleet-manager/namespaces/acs-fleet-manager-stage.yml
         ref: main
+        promotion:
+          publish:
+            - acs-fleet-manager
         parameters:
           ENVIRONMENT: stage
           DATAPLANE_CLUSTER_CONFIG_FILE: /config/dataplane-cluster-configuration-staging.yaml
@@ -55,32 +58,34 @@ resourceTemplates:
           OCM_URL: https://api.stage.openshift.com
           AMS_URL: https://api.stage.openshift.com
           CLUSTER_LIST:
-            - name: default/api-acs-stage-dp-01-blbk-p1-openshiftapps-com:6443/acsms-admin
-              cluster_id: 1ujvmrppj7au6cvjps6dj6mlechenrl1
+            # To update: maintain ordering, get information (e.g. `cluster_id`) from `$ ocm list clusters`
+            # Remember to add the cluster to the `kubeconfig` secret and bump version in
+            # namespaces/acs-fleet-manager-stage.yml
+            # Important: The `name` field must match a context name in the `kubeconfig` secret
+            - name: default/api-acs-stage-dp-02-8csb-p1-openshiftapps-com:6443/notarealuser
+              cluster_id: 201t7gancnqq4t82rmnjm2239stvdj6r
               cloud_provider: aws
               region: us-east-1
-              schedulable: true
+              schedulable: true  # This is a no-op (not wired up in ACSCS)
               status: ready
               central_instance_limit: 1000
               provider_type: standalone
-              supported_instance_type: "standard"
-              cluster_dns: apps.acs-stage-dp-01.blbk.p1.openshiftapps.com
+              supported_instance_type: "eval,standard"
+              cluster_dns: apps.acs-stage-dp-02.8csb.p1.openshiftapps.com
               available_central_operator_versions:
-                - version: "3.72.0"
+                - version: "3.73.0"
                   ready: true
                   central_versions:
-                    - version: "3.72.0"
+                    - version: "3.73.0"
         upstream:
           instance:
             $ref: /dependencies/ci-ext/ci-ext.yml
-          name: stackrox-acs-fleet-manager-gh-build-main
+          name: stackrox-acs-fleet-manager-build-and-push-main
       - namespace:
           $ref: /services/acs-fleet-manager/namespaces/acs-fleet-manager-production-app-sre-prod-04.yml
-        ref: 6da74ac801707501cac75db73a40b3ab6e16e13e
+        ref: 351e2ed8d7c109479bb2ce4784733e90dc6af1db
         parameters:
           ENVIRONMENT: production
-          CENTRAL_IDP_CLIENT_ID: rhacs-ms-qaprod
-          CENTRAL_IDP_ISSUER: https://sso.redhat.com/auth/realms/redhat-external
           DATAPLANE_CLUSTER_CONFIG_FILE: /config/dataplane-cluster-configuration.yaml
           PROVIDERS_CONFIG_FILE: /config/provider-configuration.yaml
           QUOTA_TYPE: ams
@@ -88,15 +93,16 @@ resourceTemplates:
           AMS_URL: https://api.openshift.com
           CENTRAL_DOMAIN_NAME: acs.rhcloud.com
           CLUSTER_LIST:
+            # To update: maintain ordering, get information (e.g. `cluster_id`) from `$ ocm list clusters`
             - name: /api-acs-prod-dp-01-pnz3-p1-openshiftapps-com:6443/acsms-prod-admin
               cluster_id: 1u4i1u6p38ho2fpgfq0p8iejfdkpvqin
               cloud_provider: aws
               region: us-east-1
               schedulable: true
               status: ready
-              central_instance_limit: 42
+              central_instance_limit: 100
               provider_type: standalone
-              supported_instance_type: "standard"
+              supported_instance_type: "eval,standard"
               cluster_dns: apps.acs-prod-dp-01.pnz3.p1.openshiftapps.com
               available_central_operator_versions:
                 - version: "3.72.0"

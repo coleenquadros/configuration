@@ -4,15 +4,20 @@ metadata:
   annotations:
     cert-manager.io/issuer-kind: ClusterIssuer
     cert-manager.io/issuer-name: letsencrypt-prod-http
+    haproxy.router.openshift.io/balance: source
+    haproxy.router.openshift.io/timeout: 5m
   labels:
     glitchtip: glitchtip-web
   name: glitchtip-route
 spec:
-  host: "glitchtip.production.devshift.net"
+  host: "glitchtip.devshift.net"
   port:
     targetPort: "8000"
   to:
     kind: Service
     name: glitchtip-web
     weight: 100
+  tls:
+    insecureEdgeTerminationPolicy: Redirect # redirect http to https
+    termination: edge
   wildcardPolicy: None

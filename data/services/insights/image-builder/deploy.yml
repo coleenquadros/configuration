@@ -21,7 +21,7 @@ pipelinesProvider:
 # in the #osbuild-image-builder-service channel.
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: osbuild-image-builder-service
 
 # Like in the namespace definition, for integrity purposes, we enumerate what
@@ -32,6 +32,8 @@ managedResourceTypes:
   - DeploymentConfig
   - Service
   - ServiceAccount
+  - FloorPlan
+  - ClowdApp
 
 # For integrity purposes, we enumerate here what container image registry path
 # patterns we are expecting to exist in our OpenShift template. Usually you
@@ -59,7 +61,10 @@ resourceTemplates:
   # The path in the repository where the OpenShift template can be found
   path: /templates/image-builder.yml
   targets:
-  # For each namespace we want to deploy this app into, create a target
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+      disable: true # do not create an app-sre deploy job for ephemeral namespace
+      ref: internal # populated by bonfire
     - namespace:
         $ref: /services/insights/image-builder/namespaces/stage-image-builder-stage.yml
       # The ref in the Git repo from which to find the version of the template to
@@ -75,21 +80,23 @@ resourceTemplates:
           $ref: /dependencies/ci-ext/ci-ext.yml
         name: osbuild-image-builder-gh-build-main
       parameters:
-        # Parameters for the OpenShift template processing. These also inherit
-        # all values from the environment you're deploying into as well as a
-        # special IMAGE_TAG parameter matching the first 7 characters of the
-        # revision ID in the repository referenced by url above. You can override
-        # any of those if you must
-        ALLOWED_ORG_IDS: "*"
         COMPOSER_URL: "https://api.stage.openshift.com"
+        FLOORIST_QUERY_PREFIX: "hms_analytics/image-builder/stage"
+        PGSSLMODE: "require"
+        QUOTA_FILE: "/app/config/quotas.json"
+        ALLOW_FILE: "/app/config/allow_list.json"
       promotion:
         publish:
           - image-builder-stage-deploy-success-channel
     - namespace:
         $ref: /services/insights/image-builder/namespaces/prod-image-builder-prod.yml
-      ref: 08df70bd15f1acfc4a0a50741c304f04d37d0b73 
+      ref: 97ad6ca6d92043c2a0818d1ca31e3fc59f2300a9
       parameters:
         COMPOSER_URL: "https://api.openshift.com"
+        FLOORIST_QUERY_PREFIX: "hms_analytics/image-builder/prod"
+        PGSSLMODE: "require"
+        QUOTA_FILE: "/app/config/quotas.json"
+        ALLOW_FILE: "/app/config/allow_list.json"
       promotion:
         publish:
           - image-builder-prod-deploy-success-channel
@@ -104,3 +111,11 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: 975e5c1405f68f92465bf456cb9c629aee304816
+- name: image-builder-frontend
+  url: https://github.com/RedHatInsights/image-builder-frontend
+  path: /deploy/frontend-clowder.yml
+  targets:
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+      disable: true # do not create an app-sre deploy job for ephemeral namespace
+      ref: internal # populated by bonfire

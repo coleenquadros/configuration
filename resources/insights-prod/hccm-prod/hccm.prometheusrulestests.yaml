@@ -118,6 +118,47 @@ tests:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-koku-5xx-In-hccm.rst"
 
 
+# Tests App-koku-api-latency
+- interval: 1m
+  input_series:
+  # 0m  - 9m    0% too slow, 100% ok
+  # 10m - 19m   1% too slow, 99% ok
+  # 20m - 29m   9% too slow, 91% ok
+  # 30m - 49m   25% too slow, 75% ok  <-- we should see alerts start in here
+  # 50m - 70m   0% too slow, 100% ok  <-- we should see alerts stop in here
+  - series: 'api_3scale_gateway_api_time_count{exported_service="cost-management"}'
+    values: "0+100x9 1000+100x9 2000+100x9 3000+100x19 5000+100x19"
+  - series: 'api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="cost-management"}'
+    # these effectively expand to
+    # (0..900)(100%) (999..1890)(99%) (1981..2800)(91%) (2875..4300)(75%) (4400..6300)(100%)
+    values: "0+100x9 999+99x9 1981+91x9 2875+75x19 4400+100x29"
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: App-koku-api-latency
+    exp_alerts: []
+  - eval_time: 10m
+    alertname: App-koku-api-latency
+    exp_alerts: []
+  - eval_time: 15m
+    alertname: App-koku-api-latency
+    exp_alerts: []
+  - eval_time: 46m
+    alertname: App-koku-api-latency
+    exp_alerts:
+    - exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=cost-management"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/hccm-prod/deployments"
+        message: "Insights Cost Management: slow responses observed; more than 10% of requests with response time > 2 seconds for the last 15 minutes in prod"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-koku-api-latency.md'
+      exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: costmanagement
+  - eval_time: 69m
+    alertname: App-koku-api-latency
+    exp_alerts: []
+
 - interval: 1m
   input_series:
   - series: celery_errors_total{namespace="hccm-prod"}

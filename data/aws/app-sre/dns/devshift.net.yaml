@@ -9,15 +9,6 @@ description: devshift.net
 account:
   $ref: /aws/app-sre/account.yml
 
-unmanaged_record_names:
-# Allow Let's Encrypt records for cloudflare-dev.app-sre.devshift.net because
-# it's used in the Cloudflare integration which doesn't create these DNS records
-# automatically.
-#
-# APPSRE-6393 will investigate removing unmanaged_record_names altogether
-#
-- '^_acme-challenge\.(?!(?:cdn01\.)?cloudflare-dev\.app-sre).*'
-
 records:
 # ; KB
 - name: kb
@@ -79,7 +70,7 @@ records:
   records:
   - 6mnsgwsjqzpcg8t5lv418gt3f711z17h
 
-- {name: vault, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
+- {name: vault, type: CNAME, _target_cluster: {$ref: /openshift/appsrep05ue1/cluster.yml}, ttl: 30}
 - {name: vault.ci.ext, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 - {name: vault.stage, type: CNAME, _target_cluster: {$ref: /openshift/appsres03ue1/cluster.yml}}
 - {name: app-interface, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
@@ -97,17 +88,15 @@ records:
 - {name: managed-services.unleash.stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
 
 - {name: visual-app-interface, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
-- {name: visual-app-interface.stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
+- {name: visual-app-interface.stage, type: CNAME, _target_cluster: {$ref: /openshift/appsres03ue1/cluster.yml}}
 
 - {name: prometheus.app-sre-prod-01, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
-- {name: prometheus.app-sre-prod-03, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-03/cluster.yml}}
 - {name: prometheus.app-sre-prod-04, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-04/cluster.yml}}
 - {name: prometheus.appsrep05ue1, type: CNAME, _target_cluster: {$ref: /openshift/appsrep05ue1/cluster.yml}}
 - {name: grafana.app-sre, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 - {name: grafana.openshift-app-sre, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 - {name: promlens, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 - {name: alertmanager.app-sre-prod-01, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
-- {name: alertmanager.app-sre-prod-03, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-03/cluster.yml}}
 - {name: alertmanager.app-sre-prod-04, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-04/cluster.yml}}
 - {name: alertmanager.appsrep05ue1, type: CNAME, _target_cluster: {$ref: /openshift/appsrep05ue1/cluster.yml}}
 - {name: pushgateway.app-sre, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
@@ -120,11 +109,11 @@ records:
 - name: _acme-challenge.cloudflare-dev.app-sre
   type: TXT
   records:
-  - 0OXHql9KYiAKVZmWBRz0jG7OmselHLhFGLv05zk8BZU
+  - 55f1t17X93zVQ1IlUhKLfExZs8_Ub5Ws9oYWasIQcMU
 - name: _acme-challenge.cdn01.cloudflare-dev.app-sre
   type: TXT
   records:
-  - ujT2aTdS9PgVLEoA7RK-1W7L6kRVQ0csxiEMVULVlR4
+  - fFqOILCwuk7PTSvFUj0gye8fvnm0gKmn6CaHa3HZfbE
 - {name: cdn01.cloudflare-dev.app-sre, type: CNAME, records: [cdn01.cloudflare-dev.app-sre.devshift.net.cdn.cloudflare.net]}
 
 - {name: prometheus.telemeter-prod-01, type: CNAME, _target_cluster: {$ref: /openshift/telemeter-prod-01/cluster.yml}}
@@ -132,6 +121,8 @@ records:
 
 - {name: web-rca.stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
 - {name: web-rca, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-04/cluster.yml}}
+
+- {name: cna, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
 
 - {name: registry.quarkus, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 
@@ -153,6 +144,7 @@ records:
 
 ### GlitchTip
 - {name: glitchtip.stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
+- {name: glitchtip, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-04/cluster.yml}}
 
 ### CAD - Configuration Anomaly Detection
 - {name: configuration-anomaly-detection.stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
@@ -209,16 +201,15 @@ records:
 - {name: dashdotdb, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 
 - {name: grafana.stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
+- {name: grafana.stage.int, type: CNAME, _target_cluster: {$ref: /openshift/appsres03ue1/cluster.yml}}
 - {name: promlens.stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
 - {name: pushgateway.app-sre-stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
 - {name: jiralert.app-sre-stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
 
 - {name: prometheus.app-sre-stage-01, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
-- {name: prometheus.app-sre-stage-02, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-02/cluster.yml}}
 - {name: prometheus.appsres03ue1, type: CNAME, _target_cluster: {$ref: /openshift/appsres03ue1/cluster.yml}}
 - {name: prometheus.appsres04ue2, type: CNAME, _target_cluster: {$ref: /openshift/appsres04ue2/cluster.yml}}
 - {name: alertmanager.app-sre-stage-01, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
-- {name: alertmanager.app-sre-stage-02, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-02/cluster.yml}}
 - {name: alertmanager.appsres03ue1, type: CNAME, _target_cluster: {$ref: /openshift/appsres03ue1/cluster.yml}}
 - {name: alertmanager.appsres04ue2, type: CNAME, _target_cluster: {$ref: /openshift/appsres04ue2/cluster.yml}}
 
@@ -256,6 +247,7 @@ records:
 - {name: ci.ext, type: CNAME, records: [ci-ext-alb-1356770065.us-east-1.elb.amazonaws.com], ttl: 60}
 - {name: ci.ext.ssh, type: A, records: [18.214.51.196]}
 - {name: bastion.ci.ext, type: CNAME, records: [ec2-54-224-238-24.compute-1.amazonaws.com]}
+- {name: bastion.ci.int, type: A, records: [10.29.88.149]}
 
 # ;;;
 # ;; INT
@@ -335,22 +327,6 @@ records:
   type: CNAME
   _target_cluster:
     $ref: /openshift/appsrep06ue2/cluster.yml
-- name: prometheus.hshifti01ue1
-  type: CNAME
-  _target_cluster:
-    $ref: /openshift/hshifti01ue1/cluster.yml
-- name: alertmanager.hshifti01ue1
-  type: CNAME
-  _target_cluster:
-    $ref: /openshift/hshifti01ue1/cluster.yml
-- name: prometheus.hsservicei01ue1
-  type: CNAME
-  _target_cluster:
-    $ref: /openshift/hsservicei01ue1/cluster.yml
-- name: alertmanager.hsservicei01ue1
-  type: CNAME
-  _target_cluster:
-    $ref: /openshift/hsservicei01ue1/cluster.yml
 - name: prometheus.rhobs-testing
   type: CNAME
   _target_cluster:

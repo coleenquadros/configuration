@@ -1,3 +1,5 @@
+# <!subteam^S01T3MZGJ9M> is @edge-cloud-team
+# https://api.slack.com/reference/surfaces/formatting#mentioning-groups
 ---
 $schema: /openshift/prometheus-rule-1.yml
 apiVersion: monitoring.coreos.com/v1
@@ -294,7 +296,7 @@ spec:
           service: assisted-installer
       - alert: Assisted Installer - Memory usage is above 90%
         annotations:
-          message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} usages is above 90%({{ $value }})
+          message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} usages is above 90%({{ $value }}) <!subteam^S01T3MZGJ9M>
         expr: sum(container_memory_working_set_bytes{namespace="assisted-installer-stage", container="assisted-service"}) by (pod, namespace) / sum(kube_pod_container_resource_limits{namespace="assisted-installer-stage", container="assisted-service", resource="memory"}) BY (pod, namespace) * 100 > 90
         for: 1m
         labels:
@@ -310,8 +312,42 @@ spec:
           service: assisted-installer
       - alert: Assisted Installer - CPU usage is above 90%
         annotations:
-          message: Assisted Installer Container CPU usages (pod {{ $labels.pod }}, namespace {{ $labels.namespace }}) is above 90%({{ $value | printf "%.2f" }}%)
+          message: Assisted Installer Container CPU usages (pod {{ $labels.pod }}, namespace {{ $labels.namespace }}) is above 90%({{ $value | printf "%.2f" }}%) <!subteam^S01T3MZGJ9M>
         expr: rate(container_cpu_usage_seconds_total{namespace="assisted-installer-stage", container="assisted-service"}[90s]) * 100 > 90
+        labels:
+          severity: warning
+          service: assisted-installer
+
+      - alert: Assisted Installer - Service is crashing
+        annotations:
+          message: Assisted Installer container '{{ $labels.container }}' of pod '{{ $labels.pod }}' is crashing <!subteam^S01T3MZGJ9M>
+        expr: |
+          sum(increase(kube_pod_container_status_restarts_total{namespace="assisted-installer-stage",pod=~"^assisted-service-.*$"}[10m]))
+          by (pod,container)
+          >= 2
+        for: 1m
+        labels:
+          severity: warning
+          service: assisted-installer
+
+      - alert: Assisted Installer - Image service is crashing
+        annotations:
+          message: Assisted Installer container '{{ $labels.container }}' of pod '{{ $labels.pod }}' is crashing <!subteam^S01T3MZGJ9M>
+        expr: |
+          sum(increase(kube_pod_container_status_restarts_total{namespace="assisted-installer-stage",pod=~"^assisted-image-service-.*$"}[10m]))
+          by (pod,container)
+          >= 2
+        for: 1m
+        labels:
+          severity: warning
+          service: assisted-installer
+
+      - alert: "Assisted Installer - Container restarted"
+        annotations:
+          message: "Assisted Installer container {{ $labels.container }} in pod {{ $labels.pod }} restarted due to {{ $labels.reason }} <!subteam^S01TBNAAPRU>"
+        expr: |
+          increase(kube_pod_container_status_restarts_total{namespace="assisted-installer-stage"}[10m]) * on(namespace, container, pod) group_left(reason) topk by (pod, container) (1, kube_pod_container_status_last_terminated_reason{namespace="assisted-installer-stage"}) > 0
+        for: 1m
         labels:
           severity: warning
           service: assisted-installer

@@ -15,7 +15,7 @@ pipelinesProvider:
 
 slack: # configure where to send notifications of success/failure of deployments
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: sd-ops-services-dev
 
 managedResourceTypes:
@@ -24,6 +24,7 @@ managedResourceTypes:
 - ConfigMap
 - ServiceAccount
 - CronJob
+- Task
 
 imagePatterns:
 - quay.io/app-sre/cna
@@ -47,7 +48,6 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
     SENTRY_ENABLE: true
     SENTRY_PROJECT: 35
     SENTRY_URL: https://sentry.stage.devshift.net
-    CNA_MODULES_TAG: latest
     ENABLE_OCM_MOCK: false
   targets:
   - namespace:
@@ -62,23 +62,24 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
   - namespace:
       $ref: /services/cna/namespaces/integration.yml
     ref: main
-    # upstream:
-    #   instance:
-    #     $ref: /dependencies/ci-int/ci-int.yml
-    #   name: service-cna-management-gl-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-cna-management-gl-build-main
     parameters:
       DATABASE_SECRET_NAME: cna-integration-rds
       IAM_SECRET_NAME: cna-service-integration-iam
       KUBE_NAMESPACE_NAME: /secrets/runtime/kube.namespace
-    #  - namespace:
-    #      $ref: /services/cna/namespaces/production.yml
-    #    ref: FIXME
-    #    parameters:
-    #      DATABASE_SECRET_NAME: cna-production-rds
-    #      OCM_BASE_URL: https://api.openshift.com
-    #      SENTRY_PROJECT: FIXME
-    #      SENTRY_URL: https://sentry.devshift.net
-    #      REPLICAS: 3
+  - namespace:
+      $ref: /services/cna/namespaces/prod.yml
+    ref: f08c967bbafa8ac9da75ebbf52015f72297abcbe
+    parameters:
+      DATABASE_SECRET_NAME: cna-production-rds
+      IAM_SECRET_NAME: cna-service-iam
+      OCM_BASE_URL: https://api.openshift.com
+      SENTRY_PROJECT: 1027
+      SENTRY_URL: https://sentry.devshift.net
+      REPLICAS: 1
 - name: cna-dashboards
   url: https://gitlab.cee.redhat.com/service/cna-management
   path: /dashboards

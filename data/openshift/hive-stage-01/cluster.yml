@@ -11,7 +11,7 @@ alertmanagerUrl: https://alertmanager.hive-stage-01.devshift.net
 serverUrl: https://api.hive-stage-01.n1u3.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.hive-stage-01.n1u3.p1.openshiftapps.com
 auth:
-  service: github-org-team
+- service: github-org-team
   org: app-sre
   team: hive-stage-01-cluster
 ocm:
@@ -19,7 +19,7 @@ ocm:
 observabilityNamespace:
   $ref: /services/observability/namespaces/openshift-customer-monitoring.hive-stage-01.yml
 jumpHost:
-  $ref: /openshift/bastion.ci.ext.devshift.net.jumphost.yml
+  $ref: /openshift/bastion.ci.int.devshift.net.jumphost.yml
 managedGroups:
 - dedicated-admins
 - dedicated-readers
@@ -42,7 +42,7 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.11.5
+  version: 4.11.18
   initial_version: 4.3.18
   multi_az: false
   autoscale:
@@ -72,15 +72,10 @@ machinePools: []
 peering:
   connections:
   - provider: account-vpc
-    name: hive-stage-01_app-sre
+    name: hive-stage-01_app-sre-ci-int_app-sre-vpc-0931f724085025405
     vpc:
-      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
-  - provider: account-vpc-mesh
-    name: hive-stage-01_app-sre-ci-int
-    account:
-      $ref: /aws/app-sre/account.yml
-    tags:
-      Name: ci.int
+      $ref: /aws/app-sre/vpcs/ci-int.yml
+    manageAccountRoutes: true
     manageRoutes: true
   - provider: cluster-vpc-requester
     name: hive-stage-01_app-sre-stage-01
@@ -95,6 +90,7 @@ peering:
     name: hive-stage-01_app-sre-prod-01
     cluster:
       $ref: /openshift/app-sre-prod-01/cluster.yml
+    manageRoutes: true
   - provider: account-tgw
     name: hive-stage-01
     account:
@@ -112,6 +108,11 @@ peering:
       osd: backplane
     manageRoutes: true
   - provider: cluster-vpc-requester
+    name: hive-stage-01_appsres03ue1
+    cluster:
+      $ref: /openshift/appsres03ue1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-requester
     name: hive-stage-01_appsrep05ue1
     cluster:
       $ref: /openshift/appsrep05ue1/cluster.yml
@@ -119,6 +120,7 @@ peering:
 automationToken:
   path: app-sre/creds/kube-configs/hive-stage-01
   field: token
+clusterAdmin: true
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/hive-stage-01-cluster-admin
   field: token
@@ -141,9 +143,3 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
-- awsGroup:
-    $ref: /aws/app-sre/groups/Log-consumers.yml
-  accessLevel: read-only
-- awsGroup:
-    $ref: /aws/app-sre-logs/groups/Log-consumers.yml
-  accessLevel: read-only

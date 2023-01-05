@@ -2,7 +2,7 @@
 
 ## Web RCA Low Availability
 
-### Severity: Medium
+### Severity: High 
 
 ### Impact
 Users are getting errors on API requests.

@@ -1,0 +1,61 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: osd-operators
+
+name: saas-obo # saas-observability-operator
+description: SaaS tracking file for observability-operator
+
+app:
+  $ref: /services/osd-operators/observability-operator/app.yaml
+
+pipelinesProvider:
+  $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: observability-operator-users
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns:
+- quay.io/rhobs/observability-operator-catalog
+
+resourceTemplates:
+- name: observability-operator
+  url: https://github.com/rhobs/observability-operator
+  path: /deploy/olm/syncselector-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/rhobs/observability-operator-catalog
+  hash_length: 8
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hivei01ue1/cluster-scope.yml
+    ref: main
+    parameters:
+      CHANNEL: candidate
+    image:
+      org:
+        $ref: /dependencies/quay/rhobs.yml
+      name: observability-operator-catalog
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
+    ref: main
+    parameters:
+      CHANNEL: candidate
+    image:
+      org:
+        $ref: /dependencies/quay/rhobs.yml
+      name: observability-operator-catalog
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
+    ref: main
+    parameters:
+      CHANNEL: candidate
+    image:
+      org:
+        $ref: /dependencies/quay/rhobs.yml
+      name: observability-operator-catalog

@@ -1,0 +1,36 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: vault-prod
+description: production namespace for vault
+
+cluster:
+  $ref: /openshift/appsrep05ue1/cluster.yml
+
+app:
+  $ref: /services/vault.devshift.net/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsrep05ue1.yml
+
+managedRoles: true
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/app-sre/vault-prod/vault
+  version: 2
+- provider: vault-secret
+  path: app-interface/app-sre/vault-prod/vault-tls
+  version: 1
+- provider: route
+  path: /app-sre/vault-prod/vault-internal.route.yaml
+  vault_tls_secret_path: app-interface/app-sre/vault-prod/routes/vault-prod
+  vault_tls_secret_version: 1

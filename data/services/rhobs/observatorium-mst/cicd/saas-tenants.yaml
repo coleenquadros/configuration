@@ -15,7 +15,7 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-monitoring-info
 
 imagePatterns: []
@@ -127,14 +127,6 @@ resourceTemplates:
                 clientSecret: ${CLIENT_SECRET}
                 issuerURL: https://sso.redhat.com/auth/realms/redhat-external
                 redirectURL: https://observatorium-mst.api.stage.openshift.com/oidc/reference-addon/callback
-                usernameClaim: preferred_username
-            - id: 5cbac548-1546-438e-ba85-ff2c73b81afc
-              name: hypershift-platform
-              oidc:
-                clientID: ${CLIENT_ID}
-                clientSecret: ${CLIENT_SECRET}
-                issuerURL: https://sso.redhat.com/auth/realms/redhat-external
-                redirectURL: https://observatorium-mst.api.stage.openshift.com/oidc/hypershift-platform/callback
                 usernameClaim: preferred_username
             - id: AC879303-C60F-4D0D-A6D5-A485CFD638B8
               name: dptp
@@ -318,6 +310,22 @@ resourceTemplates:
                 issuerURL: https://sso.redhat.com/auth/realms/redhat-external
                 redirectURL: https://rhobs.rhobsp02ue1.api.openshift.com/oidc/hypershift-platform/callback
                 usernameClaim: preferred_username
+              rateLimits:
+                - endpoint: '/api/metrics/v1/hypershift-platform/api/v1/receive'
+                  limit: 10000
+                  window: 30s
+            - id: 0c8fdeba-3488-43bb-95ee-ca57ba5aaaa7
+              name: hypershift-platform-staging
+              oidc:
+                clientID: ${CLIENT_ID}
+                clientSecret: ${CLIENT_SECRET}
+                issuerURL: https://sso.redhat.com/auth/realms/redhat-external
+                redirectURL: https://rhobs.rhobsp02ue1.api.openshift.com/oidc/hypershift-platform-staging/callback
+                usernameClaim: preferred_username
+              rateLimits:
+                - endpoint: '/api/metrics/v1/hypershift-platform-staging/api/v1/receive'
+                  limit: 10000
+                  window: 30s
       secretParameters:
         - name: CLIENT_ID
           secret:

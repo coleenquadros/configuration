@@ -14,7 +14,7 @@ elbFQDN: elb.apps.appsres03ue1.5nvu.p1.openshiftapps.com
 ocm:
   $ref: /dependencies/ocm/production.yml
 auth:
-  service: github-org-team
+- service: github-org-team
   org: app-sre
   team: appsres03ue1-cluster
 observabilityNamespace:
@@ -29,7 +29,7 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.11.10
+  version: 4.12.0-rc.4
   initial_version: 4.7.0-candidate
   multi_az: false
   autoscale:
@@ -61,6 +61,7 @@ internal: true
 automationToken:
   path: app-sre/creds/kube-configs/appsres03ue1
   field: token
+clusterAdmin: true
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/appsres03ue1-cluster-admin
   field: token
@@ -69,6 +70,9 @@ awsInfrastructureManagementAccounts:
     $ref: /aws/app-sre/account.yml
   accessLevel: network-mgmt
   default: true
+- account:
+    $ref: /aws/app-sre-stage/account.yml
+  accessLevel: network-mgmt
 awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
@@ -78,20 +82,24 @@ awsInfrastructureAccess:
   accessLevel: network-mgmt
 peering:
   connections:
-  - provider: account-vpc-mesh
-    name: appsres03ue1_app-sre_mesh
-    account:
-      $ref: /aws/app-sre/account.yml
-    tags:
-      Name: app-sre vpc 01 - peered
+  - provider: account-vpc
+    name: appsres03ue1_app-sre_mesh_app-sre-vpc-0e9fbceea37f50cc8
+    vpc:
+      $ref: /aws/app-sre/vpcs/app-sre-vpc-01.yml
     manageRoutes: true
-  - provider: account-vpc-mesh
-    name: appsres03ue1_app-sre2_mesh
-    account:
-      $ref: /aws/app-sre/account.yml
-    tags:
-      Name: app-sre vpc 02 - peered
+    manageAccountRoutes: true
+  - provider: account-vpc
+    name: appsres03ue1_app-sre2_mesh_app-sre-vpc-0e3cd01521be5489e
+    vpc:
+      $ref: /aws/app-sre/vpcs/app-sre-vpc-02.yml
     manageRoutes: true
+    manageAccountRoutes: true
+  - provider: account-vpc
+    name: appsres03ue1_app-sre-stage
+    vpc:
+      $ref: /aws/app-sre-stage/vpcs/app-sre-stage-vpc.yml
+    manageRoutes: true
+    manageAccountRoutes: true
   - provider: account-tgw
     name: appsres03ue1
     account:
@@ -100,3 +108,23 @@ peering:
       service: ci-int
     manageRoutes: true
     cidrBlock: 10.0.0.0/8
+  - provider: cluster-vpc-accepter
+    name: appsres03ue1_hivei01ue1
+    cluster:
+      $ref: /openshift/hivei01ue1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-accepter
+    name: appsres03ue1_hive-stage-01
+    cluster:
+      $ref: /openshift/hive-stage-01/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-accepter
+    name: appsres03ue1_hives02ue1
+    cluster:
+      $ref: /openshift/hives02ue1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-accepter
+    name: appsres03ue1_ssotest01ue1
+    cluster:
+      $ref: /openshift/ssotest01ue1/cluster.yml
+    manageRoutes: true

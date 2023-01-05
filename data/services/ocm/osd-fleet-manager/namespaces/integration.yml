@@ -22,7 +22,7 @@ managedRoles: true
 
 managedResourceTypes:
 - ConfigMap
-# - Secret
+- Secret
 - ServiceAccount
 
 sharedResources:
@@ -31,12 +31,12 @@ sharedResources:
 openshiftResources:
 - provider: vault-secret
   path: app-interface/osd-fleet-manager/integration/fleet-manager
-  version: 6
+  version: 10
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
   path: app-interface/osd-fleet-manager/integration/fleet-manager-hacks
-  version: 1
+  version: 3
   annotations:
     qontract.recycle: "true"
 - provider: resource-template
@@ -45,6 +45,9 @@ openshiftResources:
     name: fleet-manager
 - provider: resource
   path: /services/ocm/integration/osd-fleet-manager-envoy.configmap.yaml
+- provider: resource-template
+  path: /services/ocm/integration/aws-account-operator-consumer-credentials.secret.yaml
+  type: extracurlyjinja2
 - provider: route
   path: /services/ocm/integration/osd-fleet-manager.route.yaml
 - provider: vault-secret
@@ -52,6 +55,13 @@ openshiftResources:
   version: 1
   annotations:
     qontract.recycle: "true"
+- provider: resource
+  path: /services/ocm/osd-fleet-manager/integration/hypershift-override-images.yaml
+
+openshiftServiceAccountTokens:
+- namespace:
+    $ref: /services/ocm/osd-fleet-manager/namespaces/aao-integration.yml
+  serviceAccountName: aws-account-operator-consumer
 
 managedExternalResources: true
 

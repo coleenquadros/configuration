@@ -21,10 +21,32 @@ config:
     label: insights
     node: insights
     name: 'insights-cicd-int'
+    quay_org: cloudservices
     jobs:
     - 'insights-saas-templates-sync':
         display_name: 'insights-saas-templates-sync'
         cron_expression: 'H/5 * * * *'
+    - 'prune-deployed-events-db':
+        display_name: 'prune-deployed-events-db'
+        cron_expression: '0 0 * * *'
+    - 'run-iqe':
+        node: rhel8
+        display_name: "run-iqe-advisor-stage-outage"
+        iqe_image: "quay.io/cloudservices/iqe-tests:advisor"
+        iqe_plugins: "advisor,advisor_frontend"
+        iqe_marker_expression: "outage"
+        iqe_env: "stage_proxy"
+        iqe_selenium: "true"
+        cron_expression: ""
+    - 'run-iqe':
+        node: rhel8
+        display_name: "run-iqe-rbac-stage-outage"
+        iqe_image: "quay.io/cloudservices/iqe-tests:rbac"
+        iqe_plugins: "rbac,rbac_frontend"
+        iqe_marker_expression: "outage"
+        iqe_env: "stage_proxy"
+        iqe_selenium: "true"
+        cron_expression: ""
     - 'insights-deploy-notifier':
         display_name: 'insights-deploy-notifier'
         # list saas jobs that should trigger a deploy notification below...

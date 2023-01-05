@@ -1,0 +1,24 @@
+$schema: /app-sre/saas-file-target-1.yml
+
+namespace:
+  $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
+ref: master
+upstream:
+  instance:
+    $ref: /dependencies/ci-ext/ci-ext.yml
+  name: openshift-assisted-service-gh-build-master
+promotion:
+  publish:
+  - assisted-installer-integration-deploy-success-channel
+parameters:
+  INSTALL_RH_CA: true
+  INSTALLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-rhel8:latest
+  CONTROLLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-reporter-rhel8:latest
+  AGENT_DOCKER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-agent-rhel8:latest
+  OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
+  PUBLIC_CONTAINER_REGISTRIES: quay.io,registry-proxy.engineering.redhat.com
+  RELEASE_TAG: master
+  REGISTRY_CREDS: qa@redhat.com:redhatqa
+  ENABLE_ORG_TENANCY: false  # not relevant, as feature is not supported in this env
+  IMAGE_SERVICE_BASE_URL: ${OCM_BASE_URL}/api/assisted-images
+  ENABLE_ORG_BASED_FEATURE_GATES: true

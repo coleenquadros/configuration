@@ -24,7 +24,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: ccx-dev-notifications
 
 managedResourceTypes:
@@ -32,6 +32,7 @@ managedResourceTypes:
 - ConfigMap
 - HorizontalPodAutoscaler
 - Service
+- Frontend
 
 imagePatterns:
 - quay.io/cloudservices
@@ -56,15 +57,15 @@ resourceTemplates:
         $ref: /dependencies/ci-int/ci-int.yml
       name: ccx-ccx-data-pipeline-gl-build-master
     parameters:
-      MIN_REPLICAS: "3"
-      MAX_REPLICAS: "3"
+      MIN_REPLICAS: "32"
+      MAX_REPLICAS: "32"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: cbe7f4a1b73927dbd8cf9f3b394882abc800b177
+    ref: e8b8f218add10f7dd492fd9e11fca8aa862a0c7e
     parameters:
-      MIN_REPLICAS: "16"
-      MAX_REPLICAS: "16"
+      MIN_REPLICAS: "32"
+      MAX_REPLICAS: "32"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
       CPU_LIMIT: "1000m"
       MEMORY_LIMIT: "1024Mi"
@@ -110,12 +111,12 @@ resourceTemplates:
     parameters:
       MIN_REPLICAS: "3"
       MAX_REPLICAS: "6"
-      DB_WRITER_REPLICAS: "3"
+      DB_WRITER_REPLICAS: "16"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
     delete: false
-    ref: 4f135a881f4ff7fda25a203d1a09e6ee5a3fe8b5
+    ref: bd349f02cbfb512feee1958e036cbbea89fecbf9
     parameters:
       MIN_REPLICAS: "3"
       MAX_REPLICAS: "6"
@@ -175,7 +176,7 @@ resourceTemplates:
       IRSP_INTERNAL_RULES_ORGANIZATIONS_CSV_FILE: "/internal-rules-organizations/internal_rules_organizations.csv"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: f9e3f149431a254c976260a06a9da046dd894d06
+    ref: 7ffaa28bc34689a8bdcd66bc667222150ee60eb0
     delete: false
     parameters:
       MIN_REPLICAS: "3"
@@ -257,7 +258,7 @@ resourceTemplates:
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 7d5d23edeccf33394eee04e755a31afaa57a7b77
+    ref: 47a934ab3dfcd01362296f3428c6ab31f6e8fef1
     delete: false
     parameters:
       CPU_LIMIT: "250m"
@@ -298,8 +299,8 @@ resourceTemplates:
       name: RedHatInsights-insights-operator-gathering-conditions-service-gh-build-main
     parameters:
       IMAGE: "quay.io/cloudservices/io-gathering-conditions-service"
-      MIN_REPLICAS: "1"
-      MAX_REPLICAS: "1"
+      MIN_REPLICAS: "2"
+      MAX_REPLICAS: "6"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
     ref: 1f970aa11352d12a560575926e1fcd4b73155cb6
@@ -328,10 +329,10 @@ resourceTemplates:
     parameters:
       IMAGE: "quay.io/cloudservices/ccx-sha-extractor"
       MIN_REPLICAS: "3"
-      MAX_REPLICAS: "3"
+      MAX_REPLICAS: "6"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: e4686cab12d47eff7698d71d81f3ddd1cc67f7e3
+    ref: cfc2d57dd5a5a924cea6fd3de2db7f62cffcca4a
     parameters:
       MIN_REPLICAS: "3"
       MAX_REPLICAS: "6"
@@ -373,7 +374,7 @@ resourceTemplates:
       TABLES_TO_IGNORE: "report,consumer_error"
       ACTIVE_DEADLINE_SECONDS: "1200" # 20 minutes
       DB_NAME: ccx-insights-results
-      TEST_DATE: 27/09/2022
+      TEST_DATE: 08/11/2022
     promotion:
       publish:
       - insights-aggregator-exporter-prod-ready-channel
@@ -464,22 +465,23 @@ resourceTemplates:
       JOB_SCHEDULE__NOTIFICATION_BACKEND: "*/3 * * * *"
       JOB_SCHEDULE__SERVICE_LOG: "4-59/3 * * * *"
       NOTIFICATION_RESEND_COOLDOWN_NOTIFICATION_BACKEND: "29m"
-      NOTIFICATION_RESEND_COOLDOWN_SERVICE_LOG: "45m"
+      NOTIFICATION_RESEND_COOLDOWN_SERVICE_LOG: "1 months"
       PLATFORM_UI_HOSTNAME: console.stage.redhat.com
       TEMPLATE_RENDERER_SERVER: "http://insights-content-template-renderer-svc:8000/"
       SERVICE_LOG__URL: "https://api.stage.openshift.com/api/service_logs/v1/cluster_logs"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 4e3f5ba7a53e648d9c1f7ac17f0160adb6b00103
+    ref: ff593d7e9ca9893fafc9de81a204d740e6d5a804
     parameters:
       CONTENT_SERVICE_PORT: 10000
       JOB_SCHEDULE__NOTIFICATION_BACKEND: "*/15 * * * *"
       JOB_SCHEDULE__SERVICE_LOG: "8-59/15 * * * *"
+      NOTIFICATION_RESEND_COOLDOWN_SERVICE_LOG: "1 months"
       PLATFORM_UI_HOSTNAME: console.redhat.com
       TEMPLATE_RENDERER_SERVER: "http://insights-content-template-renderer-svc:8000/"
       SERVICE_LOG__URL: "https://api.openshift.com/api/service_logs/v1/cluster_logs"
       JOB_DEADLINE__SERVICE_LOG: "36000"
-      SUSPEND_JOB__SERVICE_LOG: "true"
+      SUSPEND_JOB__SERVICE_LOG: "false"
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true
@@ -562,7 +564,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: ca3cd20322cc64112e88e975eb6d935f4ae7965b
+    ref: 72f89aa04770793210ba3484aafc87218e5e788b
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true # TODO: enable when there is any test running in ephemeral
@@ -580,7 +582,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: b8416430db14828584cedf41e0a7690aad8a4c65
+    ref: a184631d730e17075298f49fb6b2061e694658dc
 
 - name: grafana-dashboard-insights-content-service
   url: https://github.com/RedHatInsights/insights-content-service
@@ -604,7 +606,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 8d37313b4aa2773457e18876c752859dee754037
+    ref: befd5f0b5f277d005558118fb1e9dbff2c930ef7
 
 - name: grafana-dashboard-insights-results-smart-proxy
   url: https://github.com/RedHatInsights/insights-results-smart-proxy
@@ -665,3 +667,19 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: ee1877e7d8f8d447522209bc9feb62a2ec11e394
+
+### OCP Advisor Frontend
+
+- name: ocp-advisor-frontend
+  path: /deploy/frontend.yml
+  url: https://github.com/RedHatInsights/ocp-advisor-frontend
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+    ref: b653a5fb4873330f236012069b1f64a2a6a96500
+    parameters:
+      ENV_NAME: env-stage

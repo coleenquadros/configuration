@@ -16,7 +16,7 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -175,7 +175,7 @@ resourceTemplates:
         }
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-operator-prod.yml
-    ref: 61d5ac9dd274cd5cfbcdba93d9cecb8425dcd0a2
+    ref: 5af581f6d5bc2d80dbfc6771e4fc3ef130c41e06
     parameters:
       HBI_DB_SSL_MODE: "disable"
       TARGET_NAMESPACE: xjoin-operator-prod
@@ -185,7 +185,7 @@ resourceTemplates:
       VALIDATION_ATTEMPTS_THRESHOLD: "2"
       VALIDATION_INTERVAL: "600"
       VALIDATION_INTERVAL_INIT: "120"
-      VALIDATION_ATTEMPTS_THRESHOLD_INIT: "100"
+      VALIDATION_ATTEMPTS_THRESHOLD_INIT: "60"
       LOG_LEVEL: "info"
       MANAGER_POD_MEM_LIMIT: "26Gi"
       MANAGER_POD_CPU_LIMIT: "4"
@@ -195,104 +195,6 @@ resourceTemplates:
       FULL_VALIDATION_NUM_THREADS: "25"
       FULL_VALIDATION_CHUNK_SIZE: "25"
       SCHEMA_REGISTRY_SECRET_NAME: "service-registry-prod"
-      KAFKA_TOPIC_PARTITIONS: "100"
-      DEBEZIUM_CONNECTOR_CONFIG: >-
-        { 
-          "tasks.max": "{{.DebeziumTasksMax}}",
-          "producer.override.max.request.size": "2097152",
-          "database.hostname": "${env:HOST_INVENTORY_DB_HOSTNAME}",
-          "database.port": "{{.HBIDBPort}}",
-          "database.user": "${env:HOST_INVENTORY_DB_USERNAME}",
-          "database.password": "${env:HOST_INVENTORY_DB_PASSWORD}",
-          "database.dbname": "${env:HOST_INVENTORY_DB_NAME}",
-          "database.server.name": "{{.ResourceNamePrefix}}.{{.Version}}",
-          "database.sslmode": "{{.HBIDBSSLMode}}",
-          "database.sslrootcert": "{{.HBIDBSSLRootCert}}",
-          "table.whitelist": "public.hosts",
-          "plugin.name": "pgoutput",
-          "transforms": "unwrap",
-          "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
-          "transforms.unwrap.delete.handling.mode": "rewrite",
-          "errors.log.enable": {{.DebeziumErrorsLogEnable}},
-          "errors.log.include.messages": true,
-          "slot.name": "{{.ReplicationSlotName}}",
-          "max.queue.size": {{.DebeziumQueueSize}},
-          "max.batch.size": {{.DebeziumMaxBatchSize}},
-          "poll.interval.ms": {{.DebeziumPollIntervalMS}},
-          "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-          "value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
-          "value.converter.apicurio.registry.url": "{{.SchemaRegistryUrl}}",
-          "value.converter.apicurio.auth.username": "{{.SchemaRegistryClientId}}",
-          "value.converter.apicurio.auth.password": "{{.SchemaRegistryClientSecret}}",
-          "value.converter.apicurio.registry.auto-register": "true",
-          "value.converter.apicurio.registry.find-latest": "true",
-          "value.converter.enhanced.avro.schema.support": "true"
-        }
-      ES_CONNECTOR_CONFIG: >-
-        { 
-          "tasks.max": "{{.ElasticSearchTasksMax}}",
-          "topics": "{{.Topic}}",
-          "key.ignore": "false",
-          "connection.url": "${env:ELASTICSEARCH_ENDPOINT}",
-          {{if .ElasticSearchUsername}}
-            "connection.username": "{{.ElasticSearchUsername}}",
-          {{end}}
-          {{if .ElasticSearchPassword}}
-            "connection.password": "{{.ElasticSearchPassword}}",
-          {{end}}
-          "type.name": "_doc",
-          "transforms": "valueToKey, extractKey, expandJSON, expandPRSJSON, deleteIf, flattenList, flattenListString, flattenPRS, renameTopic",
-          "transforms.valueToKey.type": "org.apache.kafka.connect.transforms.ValueToKey",
-          "transforms.valueToKey.fields": "id",
-          "transforms.extractKey.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
-          "transforms.extractKey.field": "id",
-          "transforms.expandJSON.type": "com.redhat.insights.expandjsonsmt.ExpandJSON$Value",
-          "transforms.expandJSON.sourceFields": "tags",
-          "transforms.expandPRSJSON.type": "com.redhat.insights.expandjsonsmt.ExpandJSON$Value",
-          "transforms.expandPRSJSON.sourceFields": "per_reporter_staleness",
-          "transforms.deleteIf.type": "com.redhat.insights.deleteifsmt.DeleteIf$Value",
-          "transforms.deleteIf.field": "__deleted",
-          "transforms.deleteIf.value": "true",
-          "transforms.flattenList.type": "com.redhat.insights.flattenlistsmt.FlattenList$Value",
-          "transforms.flattenList.sourceField": "tags",
-          "transforms.flattenList.outputField": "tags_structured",
-          "transforms.flattenList.mode": "keys",
-          "transforms.flattenList.keys": "namespace,key,value",
-          "transforms.flattenListString.type": "com.redhat.insights.flattenlistsmt.FlattenList$Value",
-          "transforms.flattenListString.sourceField": "tags",
-          "transforms.flattenListString.outputField": "tags_string",
-          "transforms.flattenListString.mode": "join",
-          "transforms.flattenListString.delimiterJoin": "/",
-          "transforms.flattenListString.encode": true,
-          "transforms.flattenPRS.type": "com.redhat.insights.flattenlistsmt.FlattenList$Value",
-          "transforms.flattenPRS.sourceField": "per_reporter_staleness",
-          "transforms.flattenPRS.outputField": "per_reporter_staleness_flat",
-          "transforms.flattenPRS.mode": "object",
-          "transforms.flattenPRS.rootKey": "reporter",
-          "transforms.renameTopic.type": "org.apache.kafka.connect.transforms.RegexRouter",
-          "transforms.renameTopic.regex": "{{.Topic}}",
-          "transforms.renameTopic.replacement": "{{.RenameTopicReplacement}}",
-          "behavior.on.null.values": "delete",
-          "behavior.on.malformed.documents": "warn",
-          "auto.create.indices.at.start": false,
-          "schema.ignore": true,
-          "max.in.flight.requests": {{.ElasticSearchMaxInFlightRequests}},
-          "errors.log.enable": {{.ElasticSearchErrorsLogEnable}},
-          "errors.log.include.messages": true,
-          "max.retries": {{.ElasticSearchMaxRetries}},
-          "retry.backoff.ms": {{.ElasticSearchRetryBackoffMS}},
-          "batch.size": {{.ElasticSearchBatchSize}},
-          "max.buffered.records": {{.ElasticSearchMaxBufferedRecords}},
-          "linger.ms": {{.ElasticSearchLingerMS}},
-          "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-          "value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
-          "value.converter.apicurio.registry.auto-register": "false",
-          "value.converter.apicurio.registry.find-latest": "true",
-          "value.converter.apicurio.registry.url": "{{.SchemaRegistryUrl}}",
-          "value.converter.apicurio.auth.username": "{{.SchemaRegistryClientId}}",
-          "value.converter.apicurio.auth.password": "{{.SchemaRegistryClientSecret}}",
-          "value.converter.enhanced.avro.schema.support": "true"
-        }
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-operator-perf.yml
     ref: master
@@ -416,13 +318,10 @@ resourceTemplates:
       name: RedHatInsights-xjoin-operator-gh-build-master
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-operator-prod.yml
-    ref: 61d5ac9dd274cd5cfbcdba93d9cecb8425dcd0a2
+    ref: 5af581f6d5bc2d80dbfc6771e4fc3ef130c41e06
     parameters:
       KAFKA_CLUSTER_NAMESPACE: "platform-mq-prod"
       CONNECT_CLUSTER_NAMESPACE: "xjoin-prod"
-      MANAGED_KAFKA: "true"
-      MANAGED_KAFKA_SECRET_NAME: "prod-managed-kafka"
-      MANAGED_KAFKA_SECRET_NAMESPACE: "xjoin-operator-prod"
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-operator-perf.yml
     ref: master

@@ -1,0 +1,138 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: quayio
+
+name: quayio-py3-cloudflare
+description: quayio py3 SaaS file for CloudFlare deployment
+
+app:
+  $ref: /services/quayio/app.yml
+
+pipelinesProvider:
+  $ref: /services/quayio/pipelines/tekton.quayio-pipelines.appsrep05ue1.yaml
+
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 600Mi
+  limits:
+    cpu: 300m
+    memory: 600Mi
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: oncall-quay
+  notifications:
+    start: false
+
+authentication:
+  image:
+    path: app-sre/integrations-output/aws-ecr-image-pull-secrets/quayio-prod/eu-central-1/basic-auth
+    field: all
+
+managedResourceTypes:
+- Deployment
+- Service
+- ServiceAccount
+- Role
+- RoleBinding
+- Job
+
+imagePatterns:
+- quay.io/app-sre
+- 206170669542.dkr.ecr.eu-central-1.amazonaws.com
+
+parameters:
+  IMAGE: 206170669542.dkr.ecr.eu-central-1.amazonaws.com/quayio-py3-backup
+  QUAY_ENTRYPOINT: registry
+  QUAY_APP_CPU_REQUEST: 9
+  QUAY_APP_CPU_LIMIT: 13
+  QUAY_APP_MEMORY_REQUEST: 16Gi
+  QUAY_APP_MEMORY_LIMIT: 56Gi
+  QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 2700
+  QUAY_APP_DEPLOYMENT_STRATEGY_TYPE: RollingUpdate
+  QUAY_APP_DEPLOYMENT_MIN_READY_SECONDS: 45
+  QUAY_APP_DEPLOYMENT_MAX_UNAVAILABLE: 0
+  QUAY_APP_DEPLOYMENT_MAX_SURGE: 3
+  QUAY_APP_READINESS_PROBE_INITIAL_DELAY_SECONDS: 30
+  QUAY_APP_READINESS_PROBE_PERIOD_SECONDS: 15
+  QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_INITIAL_DELAY_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 30
+  QUAY_APP_DEPLOYMENT_NAMESPACE: quay
+  DEBUGLOG: "false"
+  QUAY_APP_COMPONENT_ANNOTATIONS_KEY: "quay-py3-app-deployment"
+  IMAGE_PULL_POLICY: IfNotPresent
+  CLOUDWATCH_SECRET: quay-cloudwatch-iam-user
+  SYSLOG_PORT: "5014"
+  QUAY_SYSLOG_MEMORY_REQUEST: 1Gi
+  QUAY_SYSLOG_CPU_REQUEST: 1
+  QUAY_SYSLOG_MEMORY_LIMIT: 2Gi
+  QUAY_SYSLOG_CPU_LIMIT: 1
+  QUAY_SYSLOG_LIVENESS_PROBE_INITIAL_DELAY_SECONDS: 5
+  QUAY_SYSLOG_LIVENESS_PROBE_PERIOD_SECONDS: 15
+  QUAY_SYSLOG_LIVENESS_PROBE_TIMEOUT_SECONDS: 5
+  QUAY_SYSLOG_READINESS_PROBE_INITIAL_DELAY_SECONDS: 5
+  QUAY_SYSLOG_READINESS_PROBE_PERIOD_SECONDS: 10
+  QUAY_SYSLOG_READINESS_PROBE_TIMEOUT_SECONDS: 5
+  SYSLOG_SERVER: localhost
+  SYSLOG_PROTO: udp
+  QUAY_LOGGING: syslog
+  SYSLOG_IMAGE: 206170669542.dkr.ecr.eu-central-1.amazonaws.com/syslog-cloudwatch-bridge-backup
+  SYSLOG_IMAGE_TAG: c19d7d1
+  QUAY_WORKER_MULTIPLIER_REGISTRY: 1
+  QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 20
+
+resourceTemplates:
+- name: quayio-py3-cloudflare-app
+  path: /deploy/openshift/quay-py3-cloudflare-app.yaml
+  url: https://github.com/quay/quay
+  targets:
+  # Staging
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: quay-quay-gh-build-master
+    parameters:
+      QUAY_APP_DEPLOYMENT_REPLICAS: 1
+      QUAY_APP_CPU_REQUEST: 1
+      QUAY_APP_CPU_LIMIT: 5
+      QUAY_APP_MEMORY_REQUEST: 4Gi
+      QUAY_APP_MEMORY_LIMIT: 24Gi
+      QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 1800
+      QUAY_APP_DEPLOYMENT_MAX_SURGE: 1
+      QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 20
+      QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 20
+      QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 15
+      QUAY_APP_DEPLOYMENT_NAMESPACE: quay
+      QUAY_APP_CONFIG_SECRET: quay-py3-cloudflare-config-secret
+      DEBUGLOG: "true"
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "quay_py3_2022_04_21-1" # Bounce stage pod
+      QUAY_WORKER_MULTIPLIER_REGISTRY: 1
+      QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 80
+
+  # This is the primary region
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp05ue1.yml
+    ref: 04358d26af974da57b627ab186137a091668fff7
+    parameters:
+      QUAY_APP_DEPLOYMENT_REPLICAS: 15
+      QUAY_APP_CONFIG_SECRET: quay-py3-cloudflare-config-secret
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "quay_py3_2022_10_13-1" # Update image ref
+    # This is the backup region
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp04ue2.yml
+    ref: 04358d26af974da57b627ab186137a091668fff7
+    parameters:
+      QUAY_APP_DEPLOYMENT_REPLICAS: 15
+      QUAY_APP_CONFIG_SECRET: quay-py3-cloudflare-config-secret-readonly
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "quay_py3_2022_10_13-1" # Update image ref
+      IGNORE_VALIDATION: "true"
+

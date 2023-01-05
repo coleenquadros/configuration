@@ -1,0 +1,81 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-sre-observability-stage
+description: staging namespace for the app-sre observability stack
+
+cluster:
+  $ref: /openshift/appsres03ue1/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsres03ue1.yml
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+- $ref: /services/observability/shared-resources/grafana-empty.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- Secret
+- Route
+
+openshiftResources:
+# Secrets
+## Blackbox Exporter
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/blackbox-exporter/blackbox-exporter-config.secret.yaml
+## SignalFX Prometheus Exporter
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/signalfx-exporter/signalfx-exporter-config.secret.yaml
+## Grafana
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-stage/app-sre-observability-htpasswd
+  version: 1
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/grafana/grafana-config.secret.yaml
+  variables:
+    auto_assign_org_role: Editor
+    external_url: https://grafana.stage.int.devshift.net
+- provider: vault-secret
+  name: grafana-proxy-config
+  path: app-interface/app-sre/app-sre-observability-stage/grafana/grafana-proxy-config-int
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-stage/grafana/grafana-proxy-config-openshift
+  version: 2
+- provider: resource-template
+  type: jinja2
+  path: /observability/grafana.route.yaml
+  variables:
+    environment: -stage
+    host: grafana.stage.int.devshift.net
+    cert_manager_issuer_name: letsencrypt-devshiftnet-dns
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-playground.configmap.yaml
+  validate_json: true
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  ## Grafana database
+  - provider: rds
+    identifier: grafana-stage-int
+    defaults: /terraform/resources/grafana/rds-stage-1.yml
+    output_resource_name: grafana-db

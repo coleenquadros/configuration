@@ -54,13 +54,14 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         - `publish` - (default) publish jenkins job results using the slack publisher
         - `events` - publish the events that were carried out in the job as slack messages
     * `workspace` - a reference to a slack workspace
-        * currently only `/dependencies/slack/coreos.yml` is supported.
     * `channel` - channel to send notifications to
+    * `notification` - notification options
+        - `start` - true/false - send a slack notification an the beginning of a deployment
 * `managedResourceTypes` - a list of resource types to deploy (indicates that any other type is filtered out)
 * `takeover` - (optional) if set to true, the resource types declared in `managedResourceTypes` will be managed exclusively by the integration, meaning **ONLY** resources declared in the saas file will be kept and all others will be **DELETED**. **This is dangerous and probably not want you want in most cases. Use with caution!**
 * `deprecated` - (optional) if set to true, resource templates can be migrated to different saas files.
 * `compare` - (optional) if set to false, the job does not compare desired to current resource and applies all resources even if they have not changed
-* `timeout` - (optional) set a timeout in minutes for the deployment job ([default](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2581e30973e9ead6611d6fa1b0fa7dc34d41e63d/resources/jenkins/global/defaults.yaml#L24))
+* `timeout` - (optional) set a timeout for the deployment job. It defaults to `60m` for Tekton provider. It is expressed in Go's [`ParseDuration`](https://pkg.go.dev/time#ParseDuration) format (up to seconds). See this important [issue](https://github.com/tektoncd/pipeline/issues/4035) about Tekton timeouts.
 * `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](/docs/app-sre/continuous-testing-in-app-interface.md), set this to `true` to publish Job's pods logs as artifacts in the Jenkins job.
 * `clusterAdmin` - (optional) set this to `true` if the resources deployed in the saas file require cluster-admin permissions (CRDs for example).
 * `imagePatterns` - a list of strings specifying allowed images to deploy
@@ -252,18 +253,110 @@ Additional supported commands:
 
 MR is not being merged? [follow this SOP](/docs/app-sre/sop/app-interface-periodic-job-debug.md)
 
-## Automated/Gated promotions
 
-By defining `promotion.publish` and `promotion.subscribe` on deployment `targets` you can add a validation that the commit being promoted was previously successfully deployed.
+## Blue/Green Deployments and Canary Rollouts
 
-For example, define a `promotion.subscribe` to a production target and a `promotion.publish` to a stage post-deployment test target with a matching value (any unique string) to make the production deployment dependant on the success of the stage post-deployment tests.
+Having multiple named deployments of your application allows a single Route to act as a control knob for releases of new software.
+
+For example, the AMS application in app-interface is `uhc-acct-mngr`. By introducing `uhc-acct-mngr-green`, admins can control traffic between original Blue and the new Green instance using weights in Routes.
+
+Routes are self-service in app-interface. This is your control knob.
+
+The formula for canary traffic is `weight / sum_of_weights`. This is an example where 100% of traffic is sent to Blue and nothing to standby Green:
+
+```
+    spec:
+      host: api.openshift.com
+      to:
+        kind: Service
+        name: uhc-acct-mngr-envoy
+        weight: 100
+      alternateBackends:
+      - kind: Service
+        name: uhc-acct-mngr-green-envoy
+        weight: 0
+```
+
+By changing the weight to, say, 90 and 10, an admin can send 10% of production traffic to the new Green instance. After the admin is satisfied, all traffic can be handled by Green while Blue is updated. Traffic can be canary deployed back to Blue and the Green instance is reduced to 0 replicas.
+
+Example:
+
+* AMS: [Blue/Green and Canary rollout](https://gitlab.cee.redhat.com/service/uhc-account-manager/-/blob/master/docs/blue_green_deployments.md)
+* [AMS Green instance](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/ocm/ams/cicd/saas-uhc-account-manager.yaml#L47) 
+* [AMS Route with Weights](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/services/ocm/stage/accounts-mgmt.route.yaml) 
+
+## Progressive Rollouts and Gated Promotions
+
+Gated promotions and progressive rollouts through environments are accomplished using `promotion.publish` and `promotion.subscribe` to publish events after a successful deployment. Subsequent deployment targets can subscribe to these events and publish their own.
+
+### Progressive Rollouts
+
+Blue/Green deployments in _Integration_ and _Stage_ environments can be chained together into a single progressive rollout with gating tests at each step.
+
+This example shows AMS autodeploying to the green instance after any merge to the master branch. A successful deployment will publish the git sha on the channel `ocm-ams-deployed-int-green`.
+
+Use `promotion.publish` to specify the channel on which to publish the successful deployment.
+
+```
+resourceTemplates:
+- name: uhc-account-manager-green
+  url: https://gitlab.cee.redhat.com/service/uhc-account-manager
+  path: /templates/named-service-template.yml
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-uhc-account-manager-gl-build-master
+    promotion:
+      publish:
+      - ocm-ams-deployed-int-green
+```
+
+Use `promotion.subscribe` to specify the channel that's gating this deployment. The initial `ref` is the sha from which auto promotions will happen. This deployment also publishes its own deployment success, but on a new channel.
+
+Here the AMS Blue Integration only deploys what was successfully deployed to the canary green instance before it.
+
+```      
+resourceTemplates:
+- name: uhc-account-manager
+  url: https://gitlab.cee.redhat.com/service/uhc-account-manager
+  path: /templates/service-template.yml      
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration.yml
+    ref: eb732c_some_starting_sha_bdc3515
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-ams-deployed-int-green
+      publish:
+      - ocm-ams-deployed-int-blue
+```
+
+... and then the chain continues to Green Stage, then Blue Stage, then ... prod?
+
+```
+    promotion:
+      auto: true
+      subscribe:
+        - ocm-ams-deployed-stage-green
+      publish:
+        - ocm-ams-deployed-stage-blue
+```
+
+### Gated Promotions
+
+Other promotion subscribers may be automated tests. Failures act as gates and circuit breakers.
+
+Tests can be added to the promotion chain, by consuming from a channel and testing before publishing success to another channel.
 
 Examples:
 
 * Publish: [github-mirror stage post-deployment testing SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/fe22ed43d0cb46f1ac708cf86f9f569c1ffa5b68/data/services/github-mirror/cicd/test.yaml#L42-44)
 * Subscribe: [github-mirror production deployment](https://gitlab.cee.redhat.com/service/app-interface/-/blob/fe22ed43d0cb46f1ac708cf86f9f569c1ffa5b68/data/services/github-mirror/cicd/deploy.yaml#L49-51)
-
-To make the promotion process automated, set `promotion.auto` to `true`.
 
 ## Questions?
 

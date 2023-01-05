@@ -19,7 +19,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 162,
-      "iteration": 1624887681388,
+      "iteration": 1664872873933,
       "links": [],
       "panels": [
         {
@@ -193,13 +193,13 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",code!~\"5..\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.99, sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path!~\".*federate$\",code!~\"5..\"}[5m])) by (le))",
               "interval": "",
               "legendFormat": "p99",
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.90, sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",code!~\"5..\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.90, sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path!~\".*federate$\",code!~\"5..\"}[5m])) by (le))",
               "interval": "",
               "legendFormat": "p90",
               "refId": "B"
@@ -209,7 +209,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "API Latency",
+          "title": "API Latency (overall)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -349,7 +349,7 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "(sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",le=\"1\",code!~\"5..\"}[$__range]))/sum(rate(api_inbound_request_duration_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\"}[$__range]))) * 100",
+              "expr": "(sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path!~\".*federate$\",le=\"1\",code!~\"5..\"}[$__range]))/sum(rate(api_inbound_request_duration_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path!~\".*federate$\"}[$__range]))) * 100",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -357,7 +357,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "API Latency p99 < 1s",
+          "title": "API Latency (overall) p99 < 1s",
           "type": "gauge"
         },
         {
@@ -405,7 +405,7 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "(sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",le=\"0.1\",code!~\"5..\"}[$__range]))/sum(rate(api_inbound_request_duration_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\"}[$__range]))) * 100",
+              "expr": "(sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path!~\".*federate$\",le=\"0.1\",code!~\"5..\"}[$__range]))/sum(rate(api_inbound_request_duration_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path!~\".*federate$\"}[$__range]))) * 100",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -413,7 +413,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "API Latency p90 < 0.1s",
+          "title": "API Latency (overall) p90 < 0.1s",
           "type": "gauge"
         },
         {
@@ -547,7 +547,7 @@ data:
             "x": 9,
             "y": 15
           },
-          "id": 13,
+          "id": 21,
           "links": [],
           "options": {
             "reduceOptions": {
@@ -563,15 +563,15 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "sum(rate(kas_fleet_manager_kafka_operations_success_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",operation=~\"create\"}[28d]))/sum(rate(kas_fleet_manager_kafka_operations_total_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",operation=~\"create\"}[28d])) * 100",
+              "expr": "(sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path=~\"/api/kafkas_mgmt/v1/kafkas/-/metrics/federate\",le=\"5\",code!~\"5..\"}[$__range]))/sum(rate(api_inbound_request_duration_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path=~\"/api/kafkas_mgmt/v1/kafkas/-/metrics/federate\"}[$__range]))) * 100",
               "interval": "",
-              "legendFormat": "Create Operation",
+              "legendFormat": "",
               "refId": "A"
             }
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Kafka Correctness (Create)",
+          "title": "API Latency (/metrics/federate endpoint) p99 < 5s",
           "type": "gauge"
         },
         {
@@ -595,7 +595,7 @@ data:
             "y": 15
           },
           "hiddenSeries": false,
-          "id": 7,
+          "id": 20,
           "legend": {
             "avg": false,
             "current": false,
@@ -608,7 +608,7 @@ data:
           "lines": true,
           "linewidth": 1,
           "links": [],
-          "nullPointMode": "null",
+          "nullPointMode": "connected",
           "options": {
             "alertThreshold": true
           },
@@ -623,15 +623,15 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",jobType=\"kafka_create\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.99, sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path=~\"/api/kafkas_mgmt/v1/kafkas/-/metrics/federate\",code!~\"5..\"}[5m])) by (le))",
               "interval": "",
-              "legendFormat": "p99-create",
+              "legendFormat": "p99",
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.90, sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",jobType=\"kafka_create\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.90, sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path=~\"/api/kafkas_mgmt/v1/kafkas/-/metrics/federate\",code!~\"5..\"}[5m])) by (le))",
               "interval": "",
-              "legendFormat": "p90-create",
+              "legendFormat": "p90",
               "refId": "B"
             }
           ],
@@ -639,7 +639,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Kafka Cluster Provisioning Latency",
+          "title": "API Latency (/metrics/federate endpoint)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -656,7 +656,7 @@ data:
           "yaxes": [
             {
               "format": "s",
-              "label": null,
+              "label": "",
               "logBase": 1,
               "max": null,
               "min": null,
@@ -691,7 +691,7 @@ data:
                   },
                   {
                     "color": "green",
-                    "value": 99
+                    "value": 90
                   }
                 ]
               },
@@ -705,7 +705,7 @@ data:
             "x": 9,
             "y": 19
           },
-          "id": 15,
+          "id": 22,
           "links": [],
           "options": {
             "reduceOptions": {
@@ -721,15 +721,15 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "sum(rate(kas_fleet_manager_kafka_operations_success_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",operation=~\"delete\"}[28d]))/sum(rate(kas_fleet_manager_kafka_operations_total_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",operation=~\"delete\"}[28d])) * 100",
+              "expr": "(sum(rate(api_inbound_request_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path=~\"/api/kafkas_mgmt/v1/kafkas/-/metrics/federate\",le=\"2\",code!~\"5..\"}[$__range]))/sum(rate(api_inbound_request_duration_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",path=~\"/api/kafkas_mgmt/v1/kafkas/-/metrics/federate\"}[$__range]))) * 100",
               "interval": "",
-              "legendFormat": "Create Operation",
+              "legendFormat": "",
               "refId": "A"
             }
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Kafka Correctness (Delete)",
+          "title": "API Latency (/metrics/federate endpoint) p90 < 2s",
           "type": "gauge"
         },
         {
@@ -747,7 +747,7 @@ data:
                   },
                   {
                     "color": "green",
-                    "value": 90
+                    "value": 99
                   }
                 ]
               },
@@ -761,7 +761,7 @@ data:
             "x": 9,
             "y": 23
           },
-          "id": 16,
+          "id": 13,
           "links": [],
           "options": {
             "reduceOptions": {
@@ -777,7 +777,7 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "(sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",le=\"900\",jobType=\"kafka_create\"}[28d]))/sum(rate(kas_fleet_manager_worker_kafka_duration_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",jobType=\"kafka_create\"}[28d]))) * 100",
+              "expr": "sum(rate(kas_fleet_manager_kafka_operations_success_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",operation=~\"create\"}[28d]))/sum(rate(kas_fleet_manager_kafka_operations_total_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",operation=~\"create\"}[28d])) * 100",
               "interval": "",
               "legendFormat": "Create Operation",
               "refId": "A"
@@ -785,7 +785,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Kafka Latency p90 < 900s",
+          "title": "Kafka Correctness (Create)",
           "type": "gauge"
         },
         {
@@ -817,7 +817,7 @@ data:
             "x": 9,
             "y": 27
           },
-          "id": 17,
+          "id": 15,
           "links": [],
           "options": {
             "reduceOptions": {
@@ -833,7 +833,7 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "(sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",le=\"1800\",jobType=\"kafka_create\"}[28d]))/sum(rate(kas_fleet_manager_worker_kafka_duration_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",jobType=\"kafka_create\"}[28d]))) * 100",
+              "expr": "sum(rate(kas_fleet_manager_kafka_operations_success_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",operation=~\"delete\"}[28d]))/sum(rate(kas_fleet_manager_kafka_operations_total_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",operation=~\"delete\"}[28d])) * 100",
               "interval": "",
               "legendFormat": "Create Operation",
               "refId": "A"
@@ -841,7 +841,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Kafka Latency p99 < 1800s",
+          "title": "Kafka Correctness (Delete)",
           "type": "gauge"
         },
         {
@@ -955,10 +955,224 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 9,
+            "h": 14,
             "w": 9,
             "x": 13,
-            "y": 29
+            "y": 30
+          },
+          "hiddenSeries": false,
+          "id": 7,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",jobType=\"kafka_create\"}[5m])) by (le))",
+              "interval": "",
+              "legendFormat": "p99-create",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.90, sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",jobType=\"kafka_create\"}[5m])) by (le))",
+              "interval": "",
+              "legendFormat": "p90-create",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Kafka Cluster Provisioning Latency",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 9,
+            "y": 31
+          },
+          "id": 16,
+          "links": [],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "expr": "(sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",le=\"900\",jobType=\"kafka_create\"}[28d]))/sum(rate(kas_fleet_manager_worker_kafka_duration_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",jobType=\"kafka_create\"}[28d]))) * 100",
+              "interval": "",
+              "legendFormat": "Create Operation",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Kafka Latency p90 < 900s",
+          "type": "gauge"
+        },
+        {
+          "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 99
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 9,
+            "y": 35
+          },
+          "id": 17,
+          "links": [],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "expr": "(sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",le=\"1800\",jobType=\"kafka_create\"}[28d]))/sum(rate(kas_fleet_manager_worker_kafka_duration_count{job=\"kas-fleet-manager-metrics\",namespace=\"managed-services-stage\",jobType=\"kafka_create\"}[28d]))) * 100",
+              "interval": "",
+              "legendFormat": "Create Operation",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Kafka Latency p99 < 1800s",
+          "type": "gauge"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 9,
+            "w": 9,
+            "x": 0,
+            "y": 38
           },
           "hiddenSeries": false,
           "id": 9,
@@ -1073,7 +1287,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-3h",
+        "from": "now-28d",
         "to": "now"
       },
       "timepicker": {
@@ -1104,7 +1318,7 @@ data:
       "timezone": "",
       "title": "Kas Fleet Manager SLOs",
       "uid": "Tbw1EgoMz",
-      "version": 2
+      "version": 3
     }
 kind: ConfigMap
 metadata:

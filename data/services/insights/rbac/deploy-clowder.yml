@@ -16,7 +16,7 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -63,31 +63,6 @@ resourceTemplates:
     ROLE_SEEDING_ENABLED: 'False'
     GROUP_SEEDING_ENABLED: 'False'
   targets:
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/crcd01ue1.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-insights-rbac-gh-build-master
-    parameters:
-      ENV_NAME: canary
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
-      HABERDASHER_LABELS: {"app": "rbac"}
-      HABERDASHER_TAGS: ["rbac"]
-      DISABLE_MIGRATE: "False"
-      EPH_ENV: "True"
-      CLOWDER_ENABLED: "true"
-      PERMISSION_SEEDING_ENABLED: 'True'
-      ROLE_SEEDING_ENABLED: 'True'
-      GROUP_SEEDING_ENABLED: 'True'
-      CELERY_INITIAL_DELAY_SEC: 120
-      CELERY_PERIOD_SEC: 10
-      MIN_WORKER_REPLICAS: 0
-      MIN_SCHEDULER_REPLICAS: 0
-      MIN_REPLICAS: 1
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ocm.yml
     ref: master
@@ -172,6 +147,8 @@ resourceTemplates:
       CW_NULL_WORKAROUND: "False"
       GUNICORN_WORKER_MULTIPLIER: "4"
       KAFKA_ENABLED: "True"
+      MAX_REPLICAS: 25
+      MIN_REPLICAS: 6
   - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
     ref: 7d0e44e10ed8c1533aa49b9a3b8f6149cad3553b

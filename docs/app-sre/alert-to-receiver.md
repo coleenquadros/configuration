@@ -29,12 +29,10 @@ Options:
 
 ## Installation
 
-In order to use this tool, the easiest option is to clone the `qontract-reconcile` repository. You will need Python 3.9
+In order to use this tool, the easiest option is to use pip to install `qontract-reconcile`.
 
 ```
-$ git clone https://github.com/app-sre/qontract-reconcile
-$ cd qontract-reconcile
-$ python -m venv venv && source venv/bin/activate && pip install -e .
+$ $ pip install --user qontract-reconcile --upgrade
 ```
 
 and `amtool` version 0.24. You can find as part of the Alertmanager [distribution](https://github.com/prometheus/alertmanager/releases/tag/v0.24.0).
@@ -83,10 +81,8 @@ deadmanssnitch-centralci-url = "https://deadmanssnitch-centralci-url"
 deadmanssnitch-quay-builder-url = "https://deadmanssnitch-quay-builder-url"
 deadmanssnitch-ci-ext-url = "https://deadmanssnitch-ci-ext-url"
 deadmanssnitch-app-sre-prod-01-url = "https://deadmanssnitch-app-sre-prod-01-url"
-deadmanssnitch-app-sre-prod-03-url = "https://deadmanssnitch-app-sre-prod-03-url"
 deadmanssnitch-app-sre-prod-04-url = "https://deadmanssnitch-app-sre-prod-04-url"
 deadmanssnitch-app-sre-stage-01-url = "https://deadmanssnitch-app-sre-stage-01-url"
-deadmanssnitch-app-sre-stage-02-url = "https://deadmanssnitch-app-sre-stage-02-url"
 deadmanssnitch-appsrep05ue1-url = "https://deadmanssnitch-appsrep05ue1-url"
 deadmanssnitch-appsrep06ue2-url = "https://deadmanssnitch-appsrep06ue2-url"
 deadmanssnitch-appsres03ue1-url = "https://deadmanssnitch-appsres03ue1-url"
@@ -105,8 +101,6 @@ deadmanssnitch-hivep05ue1-url = "https://deadmanssnitch-hivep05ue1-url"
 deadmanssnitch-hivep06uw2-url = "https://deadmanssnitch-hivep06uw2-url"
 deadmanssnitch-hivep07ue2-url = "https://deadmanssnitch-hivep07ue2-url"
 deadmanssnitch-hives02ue1-url = "https://deadmanssnitch-hives02ue1-url"
-deadmanssnitch-hshifti01ue1-url = "https://deadmanssnitch-hshifti01ue1-url"
-deadmanssnitch-hsservicei01ue1-url = "https://deadmanssnitch-hsservicei01ue1-url"
 deadmanssnitch-ocmquayrop01ew1-url = "https://deadmanssnitch-ocmquayrop01ew1-url"
 deadmanssnitch-ocmquayrop01ue1-url = "https://deadmanssnitch-ocmquayrop01ue1-url"
 deadmanssnitch-ocmquayrop01uw2-url = "https://deadmanssnitch-ocmquayrop01uw2-url"

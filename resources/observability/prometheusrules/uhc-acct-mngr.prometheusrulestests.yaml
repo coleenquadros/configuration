@@ -7,67 +7,45 @@ rule_files:
 evaluation_interval: 1m
 
 tests:
-  - interval: 1h
+  - interval: 5m
     input_series:
-      # banned_users
-      - series: banned_users{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",pod="uhc-acct-mngr-7fccd765b-nscfn"}
-        values: 0+2x24 # 2 banned users per hour
-      - series: banned_users{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",pod="uhc-acct-mngr-7fccd765b-9nz6b"}
-        values: 0+2x24 # duplicate series
+      - series: certificate_lifespan{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",type="rhit"}
+        values: 30 30 30 29 29
     alert_rule_test:
-      - eval_time: 12h
-        alertname: UHC account manager too many banned users - {{{environment}}}
-        exp_alerts:
-      - eval_time: 24h
-        alertname: UHC account manager too many banned users - {{{environment}}}
+      - eval_time: 10m
+        alertname: AMS RHIT certificate expiring in less than 30 days - {{{environment}}}
+        exp_alerts: [ ]
+      - eval_time: 20m
+        alertname: AMS RHIT certificate expiring in less than 30 days - {{{environment}}}
         exp_alerts:
           - exp_labels:
+              type: rhit
               namespace: uhc-{{{environment}}}
               service: uhc-acct-mngr
-              severity: medium
+              severity: warning
             exp_annotations:
-              message: "UHC Account Manager in namespace uhc-{{{environment}}} has banned 48 users in 24 hours"
-              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#account-manager-client-certificate-expiring"
+              message: "AMS RHIT certificate will expire in less than 30 days - {{{environment}}}"
 
   - interval: 5m
     input_series:
-    - series: certificate_lifespan{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",type="rhit"}
-      values: 30 30 30 29 29
-    alert_rule_test:
-      - eval_time: 10m
-        alertname: AMS RHIT certificate expiring in less than 30 days - {{{environment}}}
-        exp_alerts: []
-      - eval_time: 20m
-        alertname: AMS RHIT certificate expiring in less than 30 days - {{{environment}}}
-        exp_alerts:
-        - exp_labels:
-            type: rhit
-            namespace: uhc-{{{environment}}}
-            service: uhc-acct-mngr
-            severity: warning
-          exp_annotations:
-            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#account-manager-client-certificate-expiring"
-            message: "AMS RHIT certificate will expire in less than 30 days - {{{environment}}}"
-
-  - interval: 5m
-    input_series:
-    - series: certificate_lifespan{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",type="rhit"}
-      values: 7 7 7 6 6
+      - series: certificate_lifespan{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",type="rhit"}
+        values: 7 7 7 6 6
     alert_rule_test:
       - eval_time: 10m
         alertname: AMS RHIT certificate expiring in less than 7 days - {{{environment}}}
-        exp_alerts: []
+        exp_alerts: [ ]
       - eval_time: 20m
         alertname: AMS RHIT certificate expiring in less than 7 days - {{{environment}}}
         exp_alerts:
-        - exp_labels:
-            type: rhit
-            namespace: uhc-{{{environment}}}
-            service: uhc-acct-mngr
-            severity: high
-          exp_annotations:
-            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#account-manager-client-certificate-expiring"
-            message: "AMS RHIT certificate will expire in less than 7 days - {{{environment}}}"
+          - exp_labels:
+              type: rhit
+              namespace: uhc-{{{environment}}}
+              service: uhc-acct-mngr
+              severity: high
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#account-manager-client-certificate-expiring"
+              message: "AMS RHIT certificate will expire in less than 7 days - {{{environment}}}"
 
   - interval: 1m
     input_series:
@@ -82,12 +60,12 @@ tests:
       - eval_time: 11m
         alertname: UHC account manager subscription labels 5xx Errors High - {{{environment}}}
         exp_alerts:
-        - exp_labels:
-            service: uhc-acct-mngr
-            severity: {{{severity_500_errors}}}
-          exp_annotations:
-            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#subscription-labels"
-            message: "UHC Account Manager subscription labels is returning code 5xx for 10% of requests."
+          - exp_labels:
+              service: uhc-acct-mngr
+              severity: {{{severity_500_errors}}}
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#subscription-labels"
+              message: "UHC Account Manager subscription labels is returning code 5xx for 10% of requests."
 
   - interval: 1m
     input_series:
@@ -95,26 +73,26 @@ tests:
       - series: up{job="uhc-acct-mngr-metrics",namespace="uhc-{{{environment}}}",pod="uhc-acct-mngr-7fccd765b-nscfn"}
         values: 1 1 1 1 1 0 0 0 0 0 # up for 5min then down
       # ams inbound request count
-      - series: api_inbound_request_count{code="500",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}
+      - series: api_inbound_request_count{code="500",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/labels"}
         values: 0+1x20 # http 500 (10%)
-      - series: api_inbound_request_count{code="403",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}
+      - series: api_inbound_request_count{code="403",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/labels"}
         values: 0+1x20 # http 403 (10%)
-      - series: api_inbound_request_count{code="200",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}
+      - series: api_inbound_request_count{code="200",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/labels"}
         values: 0+8x20 # http 200 (80%)
       # ams inbound request duration
-      - series: api_inbound_request_duration_bucket{le="0.1",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}
+      - series: api_inbound_request_duration_bucket{le="0.1",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/labels"}
         values: 0+1x20 # <= 0.1
-      - series: api_inbound_request_duration_bucket{le="1",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}
+      - series: api_inbound_request_duration_bucket{le="1",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/labels"}
         values: 0+2x20 # <= 1
-      - series: api_inbound_request_duration_bucket{le="2",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}
+      - series: api_inbound_request_duration_bucket{le="2",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/labels"}
         values: 0+3x20 # <= 2
-      - series: api_inbound_request_duration_bucket{le="5",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}
+      - series: api_inbound_request_duration_bucket{le="5",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/labels"}
         values: 0+4x20 # <= 5
-      - series: api_inbound_request_duration_bucket{le="10",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}
+      - series: api_inbound_request_duration_bucket{le="10",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/labels"}
         values: 0+5x20 # <= 10
-      - series: api_inbound_request_duration_bucket{le="30",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}
+      - series: api_inbound_request_duration_bucket{le="30",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/labels"}
         values: 0+6x20 # <= 30
-      - series: api_inbound_request_duration_bucket{le="+Inf",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}
+      - series: api_inbound_request_duration_bucket{le="+Inf",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",path="/labels"}
         values: 0+7x20 # <= inf (50% > 2s)
       #ams advisory lock duration
       - series: advisory_lock_duration_bucket{le="0.1",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",type="quota"}
@@ -227,30 +205,31 @@ tests:
               namespace: uhc-{{{environment}}}
               service: uhc-acct-mngr
               severity: medium
+              path: /labels
             exp_annotations:
-              message: "UHC Account Manager in namespace uhc-{{{environment}}} is returning 4xx errors for 10% of requests."
+              message: "UHC Account Manager in namespace uhc-{{{environment}}} endpoint /labels is returning 4xx errors for 10% of requests."
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
-      - eval_time: 10m
+      - eval_time: 5m
         alertname: UHC account manager Latency High - {{{environment}}}
         exp_alerts:
-      - eval_time: 20m
+      - eval_time: 10m
         alertname: UHC account manager Latency High - {{{environment}}}
         exp_alerts:
           - exp_labels:
               service: uhc-acct-mngr
-              severity: medium
+              severity: high
             exp_annotations:
               message: "UHC Account Manager in namespace uhc-{{{environment}}} 50th percentile latency is greater than 2s. Current value: 3.5"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
-      - eval_time: 10m
+      - eval_time: 5m
         alertname: UHC account manager Advisory Lock Duration High - {{{environment}}}
         exp_alerts:
-      - eval_time: 20m
+      - eval_time: 10m
         alertname: UHC account manager Advisory Lock Duration High - {{{environment}}}
         exp_alerts:
           - exp_labels:
               service: uhc-acct-mngr
-              severity: medium
+              severity: high
             exp_annotations:
               message: "UHC Account Manager Advisory Lock Duration in namespace uhc-{{{environment}}} 50th percentile latency is greater than 1s. Current value: 2"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#account-manager-advisory-lock-issues"
@@ -282,18 +261,6 @@ tests:
               message: "AMS is seeing a high rate of errors from Quay for 20% of requests."
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       - eval_time: 10m
-        alertname: OCM dependencies - Quay creating robot users slow - {{{environment}}}
-        exp_alerts:
-      - eval_time: 20m
-        alertname: OCM dependencies - Quay creating robot users slow - {{{environment}}}
-        exp_alerts:
-          - exp_labels:
-              service: uhc-acct-mngr
-              severity: medium
-            exp_annotations:
-              message: "AMS is seeing a high average latency creating robot accounts on Quay. The average response time over the last 5 minutes is 5 seconds"
-              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
-      - eval_time: 10m
         alertname: OCM dependencies - RHIT too many errors - {{{environment}}}
         exp_alerts:
       - eval_time: 20m
@@ -313,7 +280,7 @@ tests:
         exp_alerts:
           - exp_labels:
               service: uhc-acct-mngr
-              severity: {{{severity_terms_errors}}}
+              severity: info
             exp_annotations:
               message: "AMS is seeing a high rate of errors from Terms and Conditions for 20% of requests."
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
@@ -325,7 +292,7 @@ tests:
         exp_alerts:
           - exp_labels:
               service: uhc-acct-mngr
-              severity: medium
+              severity: info
             exp_annotations:
               message: "AMS is seeing a high average latency accessing Terms and Conditions. The average response time over the last 5 minutes is 5 seconds"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
@@ -352,7 +319,7 @@ tests:
               namespace: uhc-{{{environment}}}
               pod: uhc-acct-mngr-fetch-telemeter-metrics-1613509500-srnkx
               service: uhc-acct-mngr
-              severity: {{{severity_pod_restart_many_times}}}
+              severity: high
             exp_annotations:
               message: 'Observed pod (uhc-acct-mngr-fetch-telemeter-metrics-1613509500-srnkx) in namespace uhc-{{{environment}}} restart(s) (2)'
       - eval_time: 10m
@@ -375,7 +342,7 @@ tests:
         exp_alerts:
           - exp_labels:
               service: uhc-acct-mngr
-              severity: medium
+              severity: info
             exp_annotations:
               message: "AMS is seeing a high average latency accessing Hydra. 10% of the requests took more than 10s during the last 10 minutes."
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#hydra"
@@ -453,7 +420,7 @@ tests:
             exp_annotations:
               message: "UHC Account Manager is returning code 5xx for 20% of requests."
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
-   # All 500s come from the router, e.g. pods down
+  # All 500s come from the router, e.g. pods down
   - interval: 1m
     input_series:
       - series: haproxy_backend_http_responses_total{code="5xx",exported_namespace="uhc-{{{environment}}}",pod="router-default-69c7459f76-6qz58",route="accounts-mgmt"}
@@ -478,26 +445,3 @@ tests:
             exp_annotations:
               message: "UHC Account Manager is returning code 5xx for 20% of requests."
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
-  # TODO - interval: 5m
-  #   input_series:
-  #     # subscription labels
-  #     - series: api_inbound_request_duration_sum{namespace="uhc-production",service="uhc-acct-mngr-metrics",path="/api/accounts_mgmt/v1/subscriptions",method="GET",code="200"}
-  #       values:
-  #     - series: api_inbound_request_duration_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",path="/api/accounts_mgmt/v1/subscriptions",method="GET",code="200"}
-  #       values:
-  #   promql_expr_test:
-  #      - expr: max(subscriptions_request_duration_sum:z_score_prediction)
-  #        eval_time: 1d
-  #        exp_samples:
-  #          - labels: 'subscriptions_request_duration_sum:z_score'
-  #            value: 2
-  #   alert_rule_test:
-  #     - eval_time: 1d
-  #       alertname: Z-Score based Duration of requests for Subscriptions are outside of expected range - {{{environment}}}
-  #       exp_alerts:
-  #         - exp_labels:
-  #             service: uhc-acct-mngr
-  #             severity: warning
-  #           exp_annotations:
-  #             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
-  #             message: "UHC Account Manager in namespace {{{ environment }}}: Duration of requests for Subscriptions are outside of expected operating parameters"

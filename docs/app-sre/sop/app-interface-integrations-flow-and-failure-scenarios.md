@@ -132,4 +132,4 @@ If the queue becomes saturated, that typically means an issue with GitLab.cee pr
 In a past incident [APPSRE-5772](https://issues.redhat.com/browse/APPSRE-5772), 
 this was due to a code change causing QR to create a ton of MRs, overloading GitLab.cee.
 1. Check the [AppSRE Bot](https://gitlab.cee.redhat.com/devtools-bot) for an abnormal increase in MRs which may indicate a code error.
-2. Reach out to the IT ALM team as described in the [Gitlab.cee Escalation Runbook](/docs/app-sre/runbook/gitlab-escalation.md) to determine if there are issues with Gitlab itself.
+2. Reach out to the IT ALM team as described in the [Gitlab.cee Escalation Runbook](/docs/app-sre/runbook/gitlab-cee-redhat-com.md) to determine if there are issues with Gitlab itself.

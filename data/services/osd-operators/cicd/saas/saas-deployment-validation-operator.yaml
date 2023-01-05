@@ -1,28 +1,21 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: deployment-validation-operator
-
-name: saas-dvo-sss # Deployment Validation Operator (DVO) SelectorSyncSets
+name: saas-dvo-sss
 description: SaaS tracking file for Deployment Validation Operator
-
 app:
   $ref: /services/deployment-validation-operator/app.yml
-
 pipelinesProvider:
   $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
-
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: wg-dvo
-
 managedResourceTypes:
 - SelectorSyncSet
 
 imagePatterns: []
-
 resourceTemplates:
 - name: deployment-validation-operator
   url: https://github.com/app-sre/deployment-validation-operator
@@ -40,42 +33,140 @@ resourceTemplates:
   - namespace:
       $ref: /services/osd-operators/namespaces/hivei01ue1/cluster-scope.yml
     ref: master
+    promotion:
+      publish:
+      - dvo-sss-deployment-success-channel-hivei01ue1
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: app-sre-deployment-validation-operator-gh-build-master
   - namespace:
       $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: app-sre-deployment-validation-operator-gh-build-master
+    ref: 60c907248df8afb0d33a21f55df2933b9dc1de49
+    promotion:
+      auto: true
+      subscribe:
+      - dvo-sss-deployment-success-channel-hivei01ue1
+      publish:
+      - dvo-sss-deployment-success-channel-hive-stage-01
+      promotion_data:
+      - channel: dvo-sss-deployment-success-channel-hivei01ue1
+        data:
+        - parent_saas: saas-dvo-sss
+          target_config_hash: 46b28deaf355f268
+          type: parent_saas_config
   - namespace:
       $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: app-sre-deployment-validation-operator-gh-build-master
+    ref: 60c907248df8afb0d33a21f55df2933b9dc1de49
+    promotion:
+      auto: true
+      subscribe:
+      - dvo-sss-deployment-success-channel-hivei01ue1
+      publish:
+      - dvo-sss-deployment-success-channel-hives02ue1
+      promotion_data:
+      - channel: dvo-sss-deployment-success-channel-hivei01ue1
+        data:
+        - parent_saas: saas-dvo-sss
+          target_config_hash: 46b28deaf355f268
+          type: parent_saas_config
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml
-    ref: 3a0731e97f464685faaebd0169b764787c0b3323
+    ref: cb0fb0fca5f43f006ca80cda7bcbdf6ae2b6932d
+    promotion:
+      auto: false
+      subscribe:
+      - dvo-sss-deployment-success-channel-hive-stage-01
+      - dvo-sss-deployment-success-channel-hives02ue1
+      publish:
+      - dvo-sss-deployment-success-channel-hivep01ue1
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep02ue1/cluster-scope.yml
-    ref: 3a0731e97f464685faaebd0169b764787c0b3323
+    ref: cb0fb0fca5f43f006ca80cda7bcbdf6ae2b6932d
+    promotion:
+      auto: true
+      subscribe:
+      - dvo-sss-deployment-success-channel-hivep01ue1
+      publish:
+      - dvo-sss-deployment-success-channel-hivep02ue1
+      promotion_data:
+      - channel: dvo-sss-deployment-success-channel-hivep01ue1
+        data:
+        - parent_saas: saas-dvo-sss
+          target_config_hash: a25a4ba71b6c63cf
+          type: parent_saas_config
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep03uw1/cluster-scope.yml
-    ref: 3a0731e97f464685faaebd0169b764787c0b3323
+    ref: cb0fb0fca5f43f006ca80cda7bcbdf6ae2b6932d
+    promotion:
+      auto: true
+      subscribe:
+      - dvo-sss-deployment-success-channel-hivep01ue1
+      publish:
+      - dvo-sss-deployment-success-channel-hivep03uw1
+      promotion_data:
+      - channel: dvo-sss-deployment-success-channel-hivep01ue1
+        data:
+        - parent_saas: saas-dvo-sss
+          target_config_hash: a25a4ba71b6c63cf
+          type: parent_saas_config
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep04ew2/cluster-scope.yml
-    ref: 3a0731e97f464685faaebd0169b764787c0b3323
+    ref: cb0fb0fca5f43f006ca80cda7bcbdf6ae2b6932d
+    promotion:
+      auto: true
+      subscribe:
+      - dvo-sss-deployment-success-channel-hivep02ue1
+      publish:
+      - dvo-sss-deployment-success-channel-hivep04ew2
+      promotion_data:
+      - channel: dvo-sss-deployment-success-channel-hivep02ue1
+        data:
+        - parent_saas: saas-dvo-sss
+          target_config_hash: 62565cefb8273431
+          type: parent_saas_config
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep05ue1/cluster-scope.yml
-    ref: 3a0731e97f464685faaebd0169b764787c0b3323
+    ref: cb0fb0fca5f43f006ca80cda7bcbdf6ae2b6932d
+    promotion:
+      auto: true
+      subscribe:
+      - dvo-sss-deployment-success-channel-hivep03uw1
+      publish:
+      - dvo-sss-deployment-success-channel-hivep05ue1
+      promotion_data:
+      - channel: dvo-sss-deployment-success-channel-hivep03uw1
+        data:
+        - parent_saas: saas-dvo-sss
+          target_config_hash: f35fb8a17b6bee01
+          type: parent_saas_config
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep06uw2/cluster-scope.yml
-    ref: 3a0731e97f464685faaebd0169b764787c0b3323
+    ref: cb0fb0fca5f43f006ca80cda7bcbdf6ae2b6932d
+    promotion:
+      auto: true
+      subscribe:
+      - dvo-sss-deployment-success-channel-hivep04ew2
+      publish:
+      - dvo-sss-deployment-success-channel-hivep06uw2
+      promotion_data:
+      - channel: dvo-sss-deployment-success-channel-hivep04ew2
+        data:
+        - parent_saas: saas-dvo-sss
+          target_config_hash: edb9d99f4eada12a
+          type: parent_saas_config
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep07ue2/cluster-scope.yml
-    ref: 3a0731e97f464685faaebd0169b764787c0b3323
+    ref: cb0fb0fca5f43f006ca80cda7bcbdf6ae2b6932d
+    promotion:
+      auto: true
+      subscribe:
+      - dvo-sss-deployment-success-channel-hivep05ue1
+      publish:
+      - dvo-sss-deployment-success-channel-hivep07ue2
+      promotion_data:
+      - channel: dvo-sss-deployment-success-channel-hivep05ue1
+        data:
+        - parent_saas: saas-dvo-sss
+          target_config_hash: 4e4d3a1799e864cf
+          type: parent_saas_config

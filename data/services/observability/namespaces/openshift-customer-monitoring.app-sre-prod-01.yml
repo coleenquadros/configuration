@@ -111,9 +111,6 @@ openshiftResources:
 ### App-interface
 - provider: resource
   path: /observability/prometheusrules/app-interface-production.prometheusrules.yaml
-### Vault
-- provider: resource
-  path: /observability/prometheusrules/vault-production.prometheusrules.yaml
 ### AWS resource exporter checks
 - provider: resource
   path: /observability/aws-resource-exporter/prometheusrules/aws-resource-exporter.prometheusrules.yaml
@@ -155,26 +152,12 @@ openshiftResources:
     - cloudwatch-exporter-ocm-quay-us-east-1
     - cloudwatch-exporter-ocm-quay-eu-west-1
     - cloudwatch-exporter-ocm-quay-us-west-2
+### SignalFX Prometheus Exporter
+- provider: resource
+  path: /observability/prometheusrules/signalfx-prometheus-exporter.prometheusrules.yaml
 ### ci.ext.devshift.net
 - provider: resource
   path: /observability/prometheusrules/ci-ext.prometheusrules.yaml
-### Hive Capacity
-## hive-production
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /observability/prometheusrules/hive-production-capacity.prometheusrules.yaml
-  variables:
-    appsre_env: production
-    max_clusters_per_shard: 500
-    grafana_datasource: app-sre-prod-01-prometheus
-## hive-stage
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /observability/prometheusrules/hive-stage-capacity.prometheusrules.yaml
-  variables:
-    appsre_env: staging
-    max_clusters_per_shard: 500
-    grafana_datasource: app-sre-prod-01-prometheus
 ### Github Mirror Service
 - provider: resource
   path: /observability/prometheusrules/github-mirror-production.prometheusrules.yaml
@@ -205,13 +188,6 @@ openshiftResources:
   path: /observability/prometheusrules/container-security-operator.prometheusrules.yaml
 
 ## ServiceMonitors
-### Vault
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/vault.servicemonitor.yaml
-  variables:
-    environment: prod
-    namespace: vault-prod
 ### App-SRE PushGateway
 - provider: resource-template
   type: jinja2
@@ -362,6 +338,21 @@ openshiftResources:
 - provider: resource
   path: /observability/prometheusrules/registry-quarkus-redhat-production.prometheusrules.yaml
 
+### Hosted Che Servicemonitor
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/hosted-che.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: dsaas-production
+
+### Hosted bayesian Servicemonitor
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/bayesian.servicemonitor.yaml
+  variables:
+    namespace: bayesian-production
+
 ### Signalfx Prometheus Exporter
 - provider: resource-template
   type: jinja2
@@ -432,6 +423,24 @@ openshiftResources:
 - provider: resource
   path: /image-builder/production/db/image-builder-db-prometheusrules.yml
 
+### CloudFlare
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/cloudflare-exporter.servicemonitor.yaml
+  variables:
+    namespace: app-sre-observability-production
+
+## Quayio
+- provider: resource
+  path: /quay-p/quay/quay-catchpoint.alerts.prometheusrules.yaml
+
+### UHC Account Manager RDS
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheusrules/uhc-acct-mngr-rds.prometheusrules.yaml
+  variables:
+    environment: production
+
 sharedResources:
-- $ref: /services/observability/shared-resources/dvo.yml
+- $ref: /services/observability/shared-resources/dvo-openshift.yml
 - $ref: /services/observability/shared-resources/dvo-alerts.yml

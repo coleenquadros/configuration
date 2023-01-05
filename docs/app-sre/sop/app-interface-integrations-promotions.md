@@ -44,7 +44,7 @@ This section describes which files need to be updated in order to deploy to
 a certain environment. This also serves as documentation for what
 `make qr-promote` is automating for you.
 
-* To promote integrations-manager and managed integrations running in the app-sre-prod-01 cluster, update `ref` in [saas-qontract-manager](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-manager.yaml).
+* To promote grafana dashboards, update `ref` in [saas-qontract-dashboards](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-dashboards.yaml).
 * To promote integrations running in the app-interface pr-check job running in ci-int, update `RECONCILE_IMAGE_TAG` in [.env](/.env).
 * To promote integrations-manager and managed integrations running in appsrep05ue1 (internal cluster), update `ref` in [saas-qontract-manager-internal](data/services/app-interface/cicd/ci-int/saas-qontract-manager-int.yaml).
 * To promote integrations running in the app-interface pr-check job running in ci-int, update `RECONCILE_IMAGE_TAG` in [.env](/.env).
@@ -54,39 +54,44 @@ a certain environment. This also serves as documentation for what
 
 ## Updating specific shards
 
-If you want to promote a qontract-reconcile change for only one shard you can do this by adding a shardSpecOverride. Add it to the integration configuration in app-interface you changed. This will deploy the new change for the selected shard. In the MR process the integration will run with the image specified in shardSpecOverride and the image configured in `.env`. The change you test must be compatible to the old image (in reference to the schema). 
+> Note: there are some problems with the code that handles this approach. You should not use it until [APPSRE-6586](https://issues.redhat.com/browse/APPSRE-6586) is closed. Updates on this are coming.
 
-1. Create RC image, run `make rc` in the `qontract-reconcile` repository. (With your change checked out) The build output will tell you the image tag it created, i.e. `f929a38-rc`.
-2. Create an override to promote the change for one shard.:
-   ```
-   shardSpecOverride:
-      - shardingStrategy: per-aws-account
-         awsAccount:
-         $ref: /aws/ter-int-dev/account.yml
-         imageRef: f929a38-rc
-   ```
-3. This needs to be added in two places in the corresponding yaml file, example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/49014:
+If you want to promote a qontract-reconcile change for only one shard you can do this by adding a shardSpecOverride. Add it to the integration configuration in app-interface you changed. In the MR process the integration will run with the image specified in shardSpecOverride and the image configured in `.env`. The change you test must be compatible to the old image (in reference to the schema).
+
+1. Create an override to fix the current commit i.e. `f929a38` on the shards that you don't want to update, to simplify this example we are going to use only one:
+```yaml
+  shardSpecOverride:
+  - shardingStrategy: per-aws-account
+    awsAccount:
+      $ref: /aws/ter-int-dev/account.yml
+    imageRef: f929a38
+```
+2. This needs to be added in two places in the corresponding yaml file, example MR upgrading all but `app-sre-stage` shard: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/52065:
    1. `$.pr_check.shardSpecOverride`
    1. `$.managed.[prod].shardSpecOverride`
 4. Check the logs in the MR
    * It should contain reference to your changed image. i.e.:
    ```
    reconcile-terraform-resources_ter-int-dev.txt
-   Unable to find image 'quay.io/app-sre/qontract-reconcile:f929a38-rc' locally
-   f929a38-rc: Pulling from app-sre/qontract-reconcile
+   Unable to find image 'quay.io/app-sre/qontract-reconcile:f929a38' locally
+   f929a38: Pulling from app-sre/qontract-reconcile
    ...
-   Status: Downloaded newer image for quay.io/app-sre/qontract-reconcile:f929a38-rc
+   Status: Downloaded newer image for quay.io/app-sre/qontract-reconcile:f929a38
    ```
-   * The integration manager log should contain a new deployment for that shard:
+   * The integration manager log should not contain logs of your change.
+
+6. Promote `qontract-reconcile` as usual.
+7. Check the promotion MR logs:
+   * The integration manager log should contain the deployment for the new changes:
    ```
    [2022-09-26 11:28:50] [INFO] [openshift_base.py:apply:317] - ['apply', 'appsrep05ue1', 'app-interface-production', 'Deployment', 'qontract-reconcile-terraform-resources-ter-int-dev']
    ```
-5. After merging the MR check the deployments on the Cluster. The updated shard should run a different image than the others.:
+5. After merging the MR check the deployments on the Cluster. The fixed shards should run a the fixed image:
    ```
-   oc get pod  -o 'custom-columns=NAME:.metadata.name,CONTAINER:.spec.containers[0].name,IMAGE:.spec.containers[0].image' |grep terraform-resources
+   oc get pod  -o 'custom-columns=NAME:.metadata.name,CONTAINER:.spec.containers[0].name,IMAGE:.spec.containers[0].image' | grep terraform-resources
    ...
    qontract-reconcile-terraform-resources-app-sre-758584757c-fshtw   int                        quay.io/app-sre/qontract-reconcile:ed21267
    qontract-reconcile-terraform-resources-app-sre-ci-698889d692fxh   int                        quay.io/app-sre/qontract-reconcile:ed21267
-   qontract-reconcile-terraform-resources-ter-int-dev-c8fccdvg2x5   int                        quay.io/app-sre/qontract-reconcile:f929a38-rc
+   qontract-reconcile-terraform-resources-ter-int-dev-c8fccdvg2x5   int                        quay.io/app-sre/qontract-reconcile:f929a38
    ...
    ```

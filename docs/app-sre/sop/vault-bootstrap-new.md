@@ -13,13 +13,13 @@ Existing [Vault SOP](../vault.md) for reference
 
 1. [Template](https://gitlab.cee.redhat.com/service/vault-devshift-net)
 1. Secrets
-1.1. [Vault settings](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/namespaces/vault-prod.yml#L27)
-1.1. [Vault TLS](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/namespaces/vault-prod.yml#L30)
-1.1. [Route](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/namespaces/vault-prod.yml#L33)
+1.1. [Vault settings](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/namespaces/vault-prod-internal.yml#L27)
+1.1. [Vault TLS](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/namespaces/vault-prod-internal.yml#L30)
+1.1. [Route](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/namespaces/vault-prod-internal.yml#L33)
 
 ## App Interface resources
 
-1. [Namespace file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/namespaces/vault-prod.yml0) 
+1. [Namespace file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/namespaces/vault-prod-internal.yml0) 
 1. [SaaS-file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/cicd/saas.yaml)
 
 ## Steps for deploying new vault instance

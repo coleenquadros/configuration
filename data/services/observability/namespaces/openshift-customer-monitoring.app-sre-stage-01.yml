@@ -21,6 +21,9 @@ managedResourceTypes:
 - Prometheus
 - PrometheusRule
 - ServiceMonitor
+- ServiceLevelObjective
+
+clusterAdmin: true
 
 openshiftResources:
 # Observability
@@ -115,6 +118,10 @@ openshiftResources:
     - aws-resource-exporter-osd-privatelink-stage
     - aws-resource-exporter-osd-privatelink-int
 
+### SignalFX Prometheus Exporter
+- provider: resource
+  path: /observability/prometheusrules/signalfx-prometheus-exporter.prometheusrules.yaml
+
 ### AWS resource exporter privatelink-int alerts
 - provider: resource-template
   type: extracurlyjinja2
@@ -177,6 +184,12 @@ openshiftResources:
     severity_terms_errors: medium
     severity_pod_restart: info
     severity_pod_restart_many_times: medium
+### UHC Account Manager RDS
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheusrules/uhc-acct-mngr-rds.prometheusrules.yaml
+  variables:
+    environment: stage
 ### OCM Service Log
 - provider: resource-template
   type: extracurlyjinja2
@@ -269,6 +282,10 @@ openshiftResources:
   path: /observability/prometheusrules/kas-fleet-manager-cluster-capacity-stage.prometheusrules.yaml
 - provider: resource
   path: /observability/prometheusrules/kas-fleet-manager-kafka-version-mismatch-stage.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/kas-fleet-manager-kafkas-stuck-in-suspending-state-stage.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/kas-fleet-manager-kafkas-stuck-in-resuming-state-stage.prometheusrules.yaml
 ### COS Fleet Manager
 - provider: resource
   path: /observability/prometheusrules/cos-fleet-manager-slos-availability-stage.prometheusrules.yaml
@@ -389,6 +406,8 @@ openshiftResources:
 ## Glitchtip rules
 - provider: resource
   path: /observability/prometheusrules/glitchtip-slo-stage.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/glitchtip-stage-prometheusrules.yaml
 
 ## ServiceMonitors
 ### Vault
@@ -520,6 +539,19 @@ openshiftResources:
   variables:
     environment: integration
     namespace: uhc-integration
+#### OCM Addons Service
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-addons-service.servicemonitor.yaml
+  variables:
+    environment: integration
+    namespace: uhc-integration
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-addons-service-envoy.servicemonitor.yaml
+  variables:
+    environment: integration
+    namespace: uhc-integration
 #### Job Queue
 - provider: resource-template
   type: jinja2
@@ -590,6 +622,19 @@ openshiftResources:
 - provider: resource-template
   type: jinja2
   path: /observability/servicemonitors/ocm-managed-services-envoy.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: uhc-stage
+#### OCM Addons Service
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-addons-service.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: uhc-stage
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-addons-service-envoy.servicemonitor.yaml
   variables:
     environment: stage
     namespace: uhc-stage
@@ -962,6 +1007,30 @@ openshiftResources:
   variables:
     cluster: app-sre-stage-01
 
+#pyrra servicelevelobjective
+- provider: resource
+  path: /observability/pyrra-slo/pyrra-slo-test-apiserver-read.yaml
+- provider: resource
+  path: /observability/pyrra-slo/pyrra-slo-test-apiserver-write.yaml
+- provider: resource
+  path: /observability/pyrra-slo/pyrra-slo-test-prom-http.yaml
+- provider: resource
+  path: /observability/pyrra-slo/pyrra-slo-test-assisted-installer.yaml
+
+### Hosted Che Servicemonitor
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/hosted-che.servicemonitor.yaml
+  variables:
+    environment: preview
+    namespace: dsaas-preview
+### Hosted bayesian Servicemonitor
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/bayesian.servicemonitor.yaml
+  variables:
+    namespace: bayesian-preview
+
 sharedResources:
-- $ref: /services/observability/shared-resources/dvo.yml
+- $ref: /services/observability/shared-resources/dvo-openshift.yml
 - $ref: /services/observability/shared-resources/dvo-alerts.yml

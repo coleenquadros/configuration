@@ -11,7 +11,7 @@ alertmanagerUrl: https://alertmanager.hacbss02ue1.devshift.net
 serverUrl: https://api.hacbss02ue1.5sza.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.hacbss02ue1.5sza.p1.openshiftapps.com
 auth:
-  service: github-org-team
+- service: github-org-team
   org: app-sre
   team: hacbss02ue1-cluster
 ocm:
@@ -25,7 +25,7 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.11.10
+  version: 4.12.0-rc.3
   initial_version: 4.10.25-candidate
   multi_az: false
   nodes: 4
@@ -53,6 +53,7 @@ network:
 automationToken:
   path: app-sre/creds/kube-configs/hacbss02ue1
   field: token
+clusterAdmin: true
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/hacbss02ue1-cluster-admin
   field: token
@@ -75,21 +76,10 @@ awsInfrastructureManagementAccounts:
 peering:
   connections:
   - provider: account-vpc
-    name: hacbss02ue1_app-sre
+    name: hacbss02ue1_app-sre-ci-int_app-sre-vpc-0931f724085025405
     vpc:
-      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
-    manageRoutes: true
-  - provider: account-vpc-mesh
-    name: hacbss02ue1_app-sre-ci-int
-    account:
-      $ref: /aws/app-sre/account.yml
-    tags:
-      Name: ci.int
-    manageRoutes: true
-  - provider: cluster-vpc-requester
-    name: hacbss02ue1_app-sre-prod-01
-    cluster:
-      $ref: /openshift/app-sre-prod-01/cluster.yml
+      $ref: /aws/app-sre/vpcs/ci-int.yml
+    manageAccountRoutes: true
     manageRoutes: true
   - provider: cluster-vpc-requester
     name: hacbss02ue1_appsrep05ue1
@@ -97,7 +87,7 @@ peering:
       $ref: /openshift/appsrep05ue1/cluster.yml
     manageRoutes: true
 jumpHost:
-  $ref: /openshift/bastion.ci.ext.devshift.net.jumphost.yml
+  $ref: /openshift/bastion.ci.int.devshift.net.jumphost.yml
 managedClusterRoles: true
 observabilityNamespace:
   $ref: /services/observability/namespaces/openshift-customer-monitoring.hacbss02ue1.yml

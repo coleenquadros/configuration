@@ -1,18 +1,13 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: gabi
-
 name: saas-gabi
-description: 'SaaS file for Gabi'
-
+description: SaaS file for Gabi
 app:
   $ref: /services/gabi/app.yml
-
 pipelinesProvider:
-  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
-
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsres03ue1.yaml
 deployResources:
   requests:
     cpu: 1000m
@@ -20,12 +15,10 @@ deployResources:
   limits:
     cpu: 1000m
     memory: 4Gi
-
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: sd-app-sre-info
-
 managedResourceTypes:
 - Deployment
 - Service
@@ -52,7 +45,6 @@ secretParameters:
     field: Token
     path: app-sre/creds/splunk/app-sre-ext
     version: 1
-
 resourceTemplates:
 - name: gabi-performance-overview-dashboards-stage
   url: https://github.com/app-sre/gabi
@@ -75,12 +67,37 @@ resourceTemplates:
   path: /openshift/gabi.template.yaml
   parameters:
     SPLUNK_INDEX: rh_app_sre
-    OAUTH_PROXY_IMAGE_TAG: "4.10.0"
+    OAUTH_PROXY_IMAGE_TAG: 4.10.0
+    ENVIRONMENT: production
   targets:
-  # stage
+  - namespace:
+      $ref: /services/gabi/namespaces/gabi-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-gabi-gh-build-main
+    parameters:
+      HOST: gabi-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      NAMESPACE: gabi-stage
+      AWS_RDS_SECRET_NAME: gabi-stage-rds
+      GABI_INSTANCE: gabi-stage
+    promotion:
+      publish:
+      - github-gabi-stage-deploy-success-channel
   - namespace:
       $ref: /services/acs-fleet-manager/namespaces/acs-fleet-manager-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
       HOST: gabi-acs-fleet-manager-rds.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
       NAMESPACE: acs-fleet-manager-stage
@@ -88,262 +105,53 @@ resourceTemplates:
       GABI_INSTANCE: gabi-acs-fleet-manager-rds
   - namespace:
       $ref: /services/acs-fleet-manager/namespaces/acs-fleet-manager-production-app-sre-prod-04.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
       HOST: gabi-acs-fleet-manager-rds-prod.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
       NAMESPACE: acs-fleet-manager-production
       AWS_RDS_SECRET_NAME: acs-fleet-manager-rds-readonly
       GABI_INSTANCE: gabi-acs-fleet-manager-rds-prod
   - namespace:
-      $ref: /services/ocm/namespaces/uhc-stage.yml
-    name: gabi-ocm-account-manager-stage
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-ocm-account-manager-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
-      NAMESPACE: uhc-stage
-      AWS_RDS_SECRET_NAME: uhc-acct-mngr-rds
-      GABI_INSTANCE: gabi-ocm-account-manager
-  - namespace:
-      $ref: /services/ocm/namespaces/uhc-stage.yml
-    name: gabi-ocm-clusters-service-rds-stage
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-ocm-clusters-service-rds-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
-      NAMESPACE: uhc-stage
-      AWS_RDS_SECRET_NAME: uhc-clusters-service-rds-readonly
-      GABI_INSTANCE: gabi-ocm-clusters-service-rds
-  - namespace:
-      $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-cloudigrade-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: cloudigrade-stage
-      AWS_RDS_SECRET_NAME: cloudigrade-rds
-      GABI_INSTANCE: gabi-cloudigrade
-  - namespace:
-      $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-subscription-watch-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: rhsm-stage
-      AWS_RDS_SECRET_NAME: swatch-tally-db
-      GABI_INSTANCE: gabi-subscription-watch
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-cost-management-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: hccm-stage
-      AWS_RDS_SECRET_NAME: koku-db
-      GABI_INSTANCE: gabi-cost-management
-  - namespace:
-      $ref: /services/insights/system-baseline/namespaces/stage-system-baseline-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-system-baselines-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: system-baseline-stage
-      AWS_RDS_SECRET_NAME: system-baseline-db
-      GABI_INSTANCE: gabi-system-baselines
-  - namespace:
       $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
       HOST: gabi-advisor-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
       NAMESPACE: advisor-stage
       AWS_RDS_SECRET_NAME: advisor-db
       GABI_INSTANCE: gabi-advisor
   - namespace:
-      $ref: /services/insights/malware-detection/namespaces/stage-malware-detection-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-malware-detection-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: malware-detection-stage
-      AWS_RDS_SECRET_NAME: malware-detection-db
-      GABI_INSTANCE: gabi-malware-detection
-  - namespace:
-      $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-compliance-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: compliance-stage
-      AWS_RDS_SECRET_NAME: compliance-readonly-db
-      GABI_INSTANCE: gabi-compliance
-  - namespace:
-      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-host-inventory-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: host-inventory-stage
-      AWS_RDS_SECRET_NAME: host-inventory-db
-      GABI_INSTANCE: gabi-host-inventory
-  - namespace:
-      $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-notifications-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: notifications-stage
-      AWS_RDS_SECRET_NAME: notifications-backend-db
-      GABI_INSTANCE: gabi-notifications
-  - namespace:
-      $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-policies-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: policies-stage
-      AWS_RDS_SECRET_NAME: policies-ui-backend-db
-      GABI_INSTANCE: gabi-policies
-  - namespace:
-      $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-remediations-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: remediations-stage
-      AWS_RDS_SECRET_NAME: remediations-db
-      GABI_INSTANCE: gabi-remediations
-  - namespace:
-      $ref: /services/managed-connectors/namespaces/managed-connectors-stage.yaml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-managed-connectors.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
-      NAMESPACE: managed-connectors-stage
-      AWS_RDS_SECRET_NAME: cos-fleet-manager-rds
-      GABI_INSTANCE: gabi-managed-connectors
-      DB_DRIVER: pgx
-  - namespace:
-      $ref: /services/insights/cloud-connector/namespaces/stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-cloud-connector-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: cloud-connector-stage
-      AWS_RDS_SECRET_NAME: cloud-connector-db
-      GABI_INSTANCE: gabi-cloud-connector
-      DB_DRIVER: pgx
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-rbac-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: rbac-stage
-      AWS_RDS_SECRET_NAME: rbac-db
-      GABI_INSTANCE: gabi-rbac
-  - namespace:
-      $ref: /services/insights/config-manager/namespaces/config-manager-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-config-manager-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: config-manager-stage
-      AWS_RDS_SECRET_NAME: config-manager-db
-      GABI_INSTANCE: gabi-config-manager
-  - namespace:
-      $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-patchman-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: patchman-engine-stage
-      AWS_RDS_SECRET_NAME: patchman-db-readonly
-      GABI_INSTANCE: gabi-patchman
-  - namespace:
-      $ref: /services/insights/vulnerability/namespaces/stage-vulnerability-engine-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-vulnerability-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: vulnerability-engine-stage
-      AWS_RDS_SECRET_NAME: vulnerability-engine-db-readonly
-      GABI_INSTANCE: gabi-vulnerability
-  - namespace:
-      $ref: /services/insights/vulnerability/namespaces/stage-vmaas-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-vmaas-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: vmaas-stage
-      AWS_RDS_SECRET_NAME: vmaas-db-readonly
-      GABI_INSTANCE: gabi-vmaas
-  - namespace:
-      $ref: /services/insights/ocp-vulnerability/namespaces/stage-ocp-vulnerability-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-ocp-vulnerability-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: ocp-vulnerability-stage
-      AWS_RDS_SECRET_NAME: ocp-vulnerability-db-readonly
-      GABI_INSTANCE: gabi-ocp-vulnerability
-  - namespace:
-      $ref: /services/web-rca/namespaces/stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: web-rca-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
-      NAMESPACE: web-rca-stage
-      AWS_RDS_SECRET_NAME: web-rca-stage-rds
-      GABI_INSTANCE: gabi-sd-ops-dev
-  - namespace:
-      $ref: /services/status-board/namespaces/stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: status-board-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
-      NAMESPACE: status-board-stage
-      AWS_RDS_SECRET_NAME: status-board-stage-rds
-      GABI_INSTANCE: gabi-sd-ops-dev
-  - namespace:
-      $ref: /services/insights/module-update-router/namespaces/stage-module-update-router-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: module-update-router.stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: module-update-router-stage
-      AWS_RDS_SECRET_NAME: module-update-router-db
-      GABI_INSTANCE: gabi-module-update-router
-  # prod
-  - namespace:
-      $ref: /services/ocm/namespaces/uhc-production.yml
-    name: gabi-ocm-cluster-service-rds-production
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-ocm-clusters-service-rds-production.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
-      NAMESPACE: uhc-production
-      AWS_RDS_SECRET_NAME: uhc-clusters-service-rds-readonly
-      GABI_INSTANCE: gabi-ocm-clusters-service-rds
-  - namespace:
-      $ref: /services/ocm/namespaces/uhc-production.yml
-    name: gabi-ocm-account-manager-production
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-ocm-account-manager-production.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
-      NAMESPACE: uhc-production
-      AWS_RDS_SECRET_NAME: uhc-acct-mngr-rds
-      GABI_INSTANCE: gabi-ocm-account-manager
-  - namespace:
-      $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-cloudigrade-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: cloudigrade-prod
-      AWS_RDS_SECRET_NAME: cloudigrade-rds
-      GABI_INSTANCE: gabi-cloudigrade
-  - namespace:
-      $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-subscription-watch-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: rhsm-prod
-      AWS_RDS_SECRET_NAME: rhsm-db
-      GABI_INSTANCE: gabi-subscription-watch
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-cost-management-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: hccm-prod
-      AWS_RDS_SECRET_NAME: koku-db
-      GABI_INSTANCE: gabi-cost-management
-  - namespace:
-      $ref: /services/insights/system-baseline/namespaces/system-baseline-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-system-baselines-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: system-baseline-prod
-      AWS_RDS_SECRET_NAME: system-baseline-db
-      GABI_INSTANCE: gabi-system-baselines
-  - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
       HOST: gabi-advisor-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
       NAMESPACE: advisor-prod
@@ -351,117 +159,198 @@ resourceTemplates:
       GABI_INSTANCE: gabi-advisor
       SERVER_TIMEOUT: 600s
   - namespace:
-      $ref: /services/insights/malware-detection/namespaces/malware-detection-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+      $ref: /services/insights/cloud-connector/namespaces/stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
-      HOST: gabi-malware-detection-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: malware-detection
-      AWS_RDS_SECRET_NAME: malware-detection-db
-      GABI_INSTANCE: gabi-malware-detection
-      SERVER_TIMEOUT: 600s
+      HOST: gabi-cloud-connector-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: cloud-connector-stage
+      AWS_RDS_SECRET_NAME: cloud-connector-db
+      GABI_INSTANCE: gabi-cloud-connector
+  - namespace:
+      $ref: /services/insights/cloud-connector/namespaces/prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-cloud-connector-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: cloud-connector-prod
+      AWS_RDS_SECRET_NAME: cloud-connector-db
+      GABI_INSTANCE: gabi-cloud-connector
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-cloudigrade-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: cloudigrade-stage
+      AWS_RDS_SECRET_NAME: cloudigrade-rds
+      GABI_INSTANCE: gabi-cloudigrade
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-cloudigrade-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: cloudigrade-prod
+      AWS_RDS_SECRET_NAME: cloudigrade-rds
+      GABI_INSTANCE: gabi-cloudigrade
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-compliance-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: compliance-stage
+      AWS_RDS_SECRET_NAME: compliance-readonly-db
+      GABI_INSTANCE: gabi-compliance
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
       HOST: gabi-compliance-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
       NAMESPACE: compliance-prod
       AWS_RDS_SECRET_NAME: compliance-readonly-db
       GABI_INSTANCE: gabi-compliance
   - namespace:
-      $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+      $ref: /services/insights/config-manager/namespaces/config-manager-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
-      HOST: gabi-host-inventory-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: host-inventory-prod
-      AWS_RDS_SECRET_NAME: host-inventory-db
-      GABI_INSTANCE: gabi-host-inventory
+      HOST: gabi-config-manager-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: config-manager-stage
+      AWS_RDS_SECRET_NAME: config-manager-db
+      GABI_INSTANCE: gabi-config-manager
   - namespace:
-      $ref: /services/insights/notifications/namespaces/notifications-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+      $ref: /services/insights/edge/namespaces/stage-edge-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
-      HOST: gabi-notifications-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: notifications-prod
-      AWS_RDS_SECRET_NAME: notifications-backend-db
-      GABI_INSTANCE: gabi-notifications
+      HOST: gabi-edge-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: edge-stage
+      AWS_RDS_SECRET_NAME: edge-db
+      GABI_INSTANCE: gabi-edge
   - namespace:
-      $ref: /services/insights/policies/namespaces/policies-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
-      HOST: gabi-policies-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: policies-prod
-      AWS_RDS_SECRET_NAME: policies-ui-backend-db
-      GABI_INSTANCE: gabi-policies
+      HOST: gabi-cost-management-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: hccm-stage
+      AWS_RDS_SECRET_NAME: cost-stage-db-ro
+      GABI_INSTANCE: gabi-cost-management
   - namespace:
-      $ref: /services/insights/remediations/namespaces/remediations-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
-      HOST: gabi-remediations-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: remediations-prod
-      AWS_RDS_SECRET_NAME: remediations-db
-      GABI_INSTANCE: gabi-remediations
-  - namespace:
-      $ref: /services/insights/cloud-connector/namespaces/prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-cloud-connector-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: cloud-connector-prod
-      AWS_RDS_SECRET_NAME: cloud-connector-db
-      GABI_INSTANCE: gabi-cloud-connector
-      DB_DRIVER: pgx
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-rbac-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: rbac-prod
-      AWS_RDS_SECRET_NAME: rbac-db
-      GABI_INSTANCE: gabi-rbac
-  - namespace:
-      $ref: /services/quayio/namespaces/quays02ue1.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-quayio-stage.apps.quays02ue1.s6d1.p1.openshiftapps.com
-      NAMESPACE: quay
-      AWS_RDS_SECRET_NAME: quayio-stage-57-py3-rds
-      GABI_INSTANCE: gabi-quayio
-      DB_DRIVER: mysql
-  - namespace:
-      $ref: /services/quayio/namespaces/quayp04ue2.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-quayio-prod.apps.quayp04ue2.k9x1.p1.openshiftapps.com
-      NAMESPACE: quay
-      AWS_RDS_SECRET_NAME: quay-db-config-secret
-      GABI_INSTANCE: gabi-quayio
-      DB_DRIVER: mysql
-  - namespace:
-      $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-patchman-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: patchman-engine-prod
-      AWS_RDS_SECRET_NAME: patchman-db-readonly
-      GABI_INSTANCE: gabi-patchman
-  - namespace:
-      $ref: /services/insights/vulnerability/namespaces/vulnerability-engine-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-vulnerability-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: vulnerability-engine-prod
-      AWS_RDS_SECRET_NAME: vulnerability-engine-db-readonly
-      GABI_INSTANCE: gabi-vulnerability
-      SERVER_TIMEOUT: 300s
-  - namespace:
-      $ref: /services/insights/vulnerability/namespaces/vmaas-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-vmaas-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: vmaas-prod
-      AWS_RDS_SECRET_NAME: vmaas-db-readonly
-      GABI_INSTANCE: gabi-vmaas
+      HOST: gabi-cost-management-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: hccm-prod
+      AWS_RDS_SECRET_NAME: cost-prod-db-ro
+      GABI_INSTANCE: gabi-cost-management
   - namespace:
       $ref: /services/insights/historical-system-profiles/namespaces/stage-historical-system-profiles-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
       HOST: gabi-historical-system-profiles-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
       NAMESPACE: historical-system-profiles-stage
@@ -469,95 +358,782 @@ resourceTemplates:
       GABI_INSTANCE: gabi-historical-system-profiles
   - namespace:
       $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
       HOST: gabi-historical-system-profiles-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
       NAMESPACE: historical-system-profiles-prod
       AWS_RDS_SECRET_NAME: historical-system-profiles-db
       GABI_INSTANCE: gabi-historical-system-profiles
   - namespace:
-      $ref: /services/rhose/namespaces/stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
-      HOST: gabi-rhosedb-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
-      NAMESPACE: rhose-stage
-      AWS_RDS_SECRET_NAME: rhosedb-rds
-      GABI_INSTANCE: gabi-rhosedb
+      HOST: gabi-host-inventory-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: host-inventory-stage
+      AWS_RDS_SECRET_NAME: host-inventory-readonly-db
+      GABI_INSTANCE: gabi-host-inventory
   - namespace:
-      $ref: /services/rhose/namespaces/production.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+      $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
-      HOST: gabi-rhosedb-production.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
-      NAMESPACE: rhose-production
-      AWS_RDS_SECRET_NAME: rhosedb-rds
-      GABI_INSTANCE: gabi-rhosedb
+      HOST: gabi-host-inventory-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: host-inventory-prod
+      AWS_RDS_SECRET_NAME: host-inventory-db-readonly-rds
+      GABI_INSTANCE: gabi-host-inventory
   - namespace:
-      $ref: /services/insights/ros/namespaces/stage-ros-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+      $ref: /services/insights/malware-detection/namespaces/stage-malware-detection-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
-      HOST: gabi-ros-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: ros-stage
-      AWS_RDS_SECRET_NAME: ros-db
-      GABI_INSTANCE: gabi-ros
-      DB_DRIVER: pgx
+      HOST: gabi-malware-detection-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: malware-detection-stage
+      AWS_RDS_SECRET_NAME: malware-detection-db
+      GABI_INSTANCE: gabi-malware-detection
   - namespace:
-      $ref: /services/insights/ros/namespaces/ros-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+      $ref: /services/insights/malware-detection/namespaces/malware-detection-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
-      HOST: gabi-ros-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: ros-prod
-      AWS_RDS_SECRET_NAME: ros-db
-      GABI_INSTANCE: gabi-ros
-      DB_DRIVER: pgx
-      DB_WRITE: true
+      HOST: gabi-malware-detection-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: malware-detection
+      AWS_RDS_SECRET_NAME: malware-detection-db
+      GABI_INSTANCE: gabi-malware-detection
+      SERVER_TIMEOUT: 600s
   - namespace:
-      $ref: /services/insights/edge/namespaces/stage-edge-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+      $ref: /services/insights/module-update-router/namespaces/stage-module-update-router-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
-      HOST: gabi-edge-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
-      NAMESPACE: edge-stage
-      AWS_RDS_SECRET_NAME: edge-db
-      GABI_INSTANCE: gabi-edge
-      DB_DRIVER: pgx
+      HOST: module-update-router.stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: module-update-router-stage
+      AWS_RDS_SECRET_NAME: module-update-router-db
+      GABI_INSTANCE: gabi-module-update-router
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-notifications-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: notifications-stage
+      AWS_RDS_SECRET_NAME: notifications-backend-db
+      GABI_INSTANCE: gabi-notifications
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/notifications-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-notifications-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: notifications-prod
+      AWS_RDS_SECRET_NAME: notifications-backend-db
+      GABI_INSTANCE: gabi-notifications
+  - namespace:
+      $ref: /services/insights/ocp-vulnerability/namespaces/stage-ocp-vulnerability-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-ocp-vulnerability-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: ocp-vulnerability-stage
+      AWS_RDS_SECRET_NAME: ocp-vulnerability-db-readonly
+      GABI_INSTANCE: gabi-ocp-vulnerability
+  - namespace:
+      $ref: /services/insights/ocp-vulnerability/namespaces/ocp-vulnerability-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-ocp-vulnerability-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: ocp-vulnerability-prod
+      AWS_RDS_SECRET_NAME: ocp-vulnerability-db-readonly
+      GABI_INSTANCE: gabi-ocp-vulnerability
+  - namespace:
+      $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-patchman-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: patchman-engine-stage
+      AWS_RDS_SECRET_NAME: patchman-db-readonly
+      GABI_INSTANCE: gabi-patchman
+  - namespace:
+      $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-patchman-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: patchman-engine-prod
+      AWS_RDS_SECRET_NAME: patchman-db-readonly
+      GABI_INSTANCE: gabi-patchman
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-rbac-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: rbac-stage
+      AWS_RDS_SECRET_NAME: rbac-db
+      GABI_INSTANCE: gabi-rbac
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-rbac-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: rbac-prod
+      AWS_RDS_SECRET_NAME: rbac-db
+      GABI_INSTANCE: gabi-rbac
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-remediations-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: remediations-stage
+      AWS_RDS_SECRET_NAME: remediations-db
+      GABI_INSTANCE: gabi-remediations
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/remediations-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-remediations-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: remediations-prod
+      AWS_RDS_SECRET_NAME: remediations-db
+      GABI_INSTANCE: gabi-remediations
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-subscription-watch-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: rhsm-stage
+      AWS_RDS_SECRET_NAME: swatch-tally-db
+      GABI_INSTANCE: gabi-subscription-watch
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-subscription-watch-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: rhsm-prod
+      AWS_RDS_SECRET_NAME: swatch-tally-db
+      GABI_INSTANCE: gabi-subscription-watch
   - namespace:
       $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
       HOST: gabi-sources-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
       NAMESPACE: sources-stage
       AWS_RDS_SECRET_NAME: sources-stage-db-ro
       GABI_INSTANCE: gabi-sources
-      DB_DRIVER: pgx
-  - namespace:
-      $ref: /services/insights/ocp-vulnerability/namespaces/ocp-vulnerability-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
-    parameters:
-      HOST: gabi-ocp-vulnerability-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      NAMESPACE: ocp-vulnerability-prod
-      AWS_RDS_SECRET_NAME: ocp-vulnerability-db
-      GABI_INSTANCE: gabi-ocp-vulnerability
   - namespace:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
       HOST: gabi-sources-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
       NAMESPACE: sources-prod
       AWS_RDS_SECRET_NAME: sources-prod-db-ro
-      USERS_CONFIGMAP_NAME: gabi-sources
-      DB_DRIVER: pgx
+      GABI_INSTANCE: gabi-sources
+  - namespace:
+      $ref: /services/insights/system-baseline/namespaces/stage-system-baseline-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    delete: true
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-system-baselines-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: system-baseline-stage
+      AWS_RDS_SECRET_NAME: system-baseline-db
+      GABI_INSTANCE: gabi-system-baselines
+  - namespace:
+      $ref: /services/insights/system-baseline/namespaces/system-baseline-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-system-baselines-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: system-baseline-prod
+      AWS_RDS_SECRET_NAME: system-baseline-db
+      GABI_INSTANCE: gabi-system-baselines
+  - namespace:
+      $ref: /services/insights/vulnerability/namespaces/stage-vmaas-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-vmaas-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: vmaas-stage
+      AWS_RDS_SECRET_NAME: vmaas-db-readonly
+      GABI_INSTANCE: gabi-vmaas
+  - namespace:
+      $ref: /services/insights/vulnerability/namespaces/vmaas-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-vmaas-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: vmaas-prod
+      AWS_RDS_SECRET_NAME: vmaas-db-readonly
+      GABI_INSTANCE: gabi-vmaas
+  - namespace:
+      $ref: /services/insights/vulnerability/namespaces/stage-vulnerability-engine-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-vulnerability-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: vulnerability-engine-stage
+      AWS_RDS_SECRET_NAME: vulnerability-engine-db-readonly
+      GABI_INSTANCE: gabi-vulnerability
+  - namespace:
+      $ref: /services/insights/vulnerability/namespaces/vulnerability-engine-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-vulnerability-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: vulnerability-engine-prod
+      AWS_RDS_SECRET_NAME: vulnerability-engine-db-readonly
+      GABI_INSTANCE: gabi-vulnerability
+      SERVER_TIMEOUT: 300s
+  - namespace:
+      $ref: /services/managed-connectors/namespaces/managed-connectors-stage.yaml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-managed-connectors.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      NAMESPACE: managed-connectors-stage
+      AWS_RDS_SECRET_NAME: cos-fleet-manager-rds
+      GABI_INSTANCE: gabi-managed-connectors
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage.yml
+    name: gabi-ocm-account-manager-stage
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-ocm-account-manager-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      NAMESPACE: uhc-stage
+      AWS_RDS_SECRET_NAME: uhc-acct-mngr-rds-readonly
+      GABI_INSTANCE: gabi-ocm-account-manager
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-production.yml
+    name: gabi-ocm-account-manager-production
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-ocm-account-manager-production.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
+      NAMESPACE: uhc-production
+      AWS_RDS_SECRET_NAME: uhc-acct-mngr-rds-readonly
+      GABI_INSTANCE: gabi-ocm-account-manager
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage.yml
+    name: gabi-ocm-clusters-service-rds-stage
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-ocm-clusters-service-rds-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      NAMESPACE: uhc-stage
+      AWS_RDS_SECRET_NAME: uhc-clusters-service-rds-readonly
+      GABI_INSTANCE: gabi-ocm-clusters-service-rds
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-production.yml
+    name: gabi-ocm-cluster-service-rds-production
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-ocm-clusters-service-rds-production.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
+      NAMESPACE: uhc-production
+      AWS_RDS_SECRET_NAME: uhc-clusters-service-rds-readonly
+      GABI_INSTANCE: gabi-ocm-clusters-service-rds
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-quayio-stage.apps.quays02ue1.s6d1.p1.openshiftapps.com
+      NAMESPACE: quay
+      AWS_RDS_SECRET_NAME: quayio-stage-57-py3-replica-2-rds
+      GABI_INSTANCE: gabi-quayio
+      DB_DRIVER: mysql
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp04ue2.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-quayio-prod.apps.quayp04ue2.k9x1.p1.openshiftapps.com
+      NAMESPACE: quay
+      AWS_RDS_SECRET_NAME: quay-db-config-gabi-secret
+      GABI_INSTANCE: gabi-quayio
+      DB_DRIVER: mysql
+  - namespace:
+      $ref: /services/rhose/namespaces/stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-rhosedb-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      NAMESPACE: rhose-stage
+      AWS_RDS_SECRET_NAME: rhosedb-rds-replica
+      GABI_INSTANCE: gabi-rhosedb
+  - namespace:
+      $ref: /services/rhose/namespaces/production.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: gabi-rhosedb-production.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
+      NAMESPACE: rhose-production
+      AWS_RDS_SECRET_NAME: rhosedb-rds-replica
+      GABI_INSTANCE: gabi-rhosedb
+  - namespace:
+      $ref: /services/status-board/namespaces/stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: status-board-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      NAMESPACE: status-board-stage
+      AWS_RDS_SECRET_NAME: status-board-stage-rds-readonly
+      GABI_INSTANCE: gabi-sd-ops-dev
+  - namespace:
+      $ref: /services/status-board/namespaces/production.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: status-board-production.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
+      NAMESPACE: status-board-production
+      AWS_RDS_SECRET_NAME: status-board-production-rds-readonly
+      GABI_INSTANCE: gabi-sd-ops-dev
+  - namespace:
+      $ref: /services/web-rca/namespaces/stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: web-rca-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      NAMESPACE: web-rca-stage
+      AWS_RDS_SECRET_NAME: web-rca-stage-rds-readonly
+      GABI_INSTANCE: gabi-sd-ops-dev
   - namespace:
       $ref: /services/web-rca/namespaces/production.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
       HOST: web-rca-production.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
       NAMESPACE: web-rca-production
       AWS_RDS_SECRET_NAME: web-rca-production-rds-readonly
       GABI_INSTANCE: gabi-sd-ops-dev
   - namespace:
-      $ref: /services/status-board/namespaces/production.yml
-    ref: 18ef4b11a5bb361cac789b8fab353f9ebef52b2d
+      $ref: /services/cna/namespaces/integration.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
     parameters:
-      HOST: status-board-production.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
-      NAMESPACE: status-board-production
-      AWS_RDS_SECRET_NAME: status-board-production-rds-readonly
+      HOST: cna-integration.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      NAMESPACE: cna-integration
+      AWS_RDS_SECRET_NAME: cna-integration-rds-readonly
       GABI_INSTANCE: gabi-sd-ops-dev
+  - namespace:
+      $ref: /services/cna/namespaces/stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: cna-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      NAMESPACE: cna-stage
+      AWS_RDS_SECRET_NAME: cna-stage-rds-readonly
+      GABI_INSTANCE: gabi-sd-ops-dev
+  - namespace:
+      $ref: /services/cna/namespaces/prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    promotion:
+      auto: true
+      subscribe:
+      - github-gabi-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-gabi-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-gabi-post-deploy-tests
+          target_config_hash: 72bfc83c1541a3be
+          type: parent_saas_config
+    parameters:
+      HOST: cna-production.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com
+      NAMESPACE: cna-production
+      AWS_RDS_SECRET_NAME: cna-production-rds-readonly
+      GABI_INSTANCE: gabi-sd-ops-dev
+  - namespace:
+      $ref: /services/insights/ros/namespaces/stage-ros-stage.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    parameters:
+      HOST: gabi-ros-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: ros-stage
+      AWS_RDS_SECRET_NAME: ros-db
+      GABI_INSTANCE: gabi-ros
+  - namespace:
+      $ref: /services/insights/ros/namespaces/ros-prod.yml
+    ref: f1a049180eaf843878ac37bf37ec340a7cbbdd79
+    parameters:
+      HOST: gabi-ros-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      NAMESPACE: ros-prod
+      AWS_RDS_SECRET_NAME: ros-db
+      GABI_INSTANCE: gabi-ros

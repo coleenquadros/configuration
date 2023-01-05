@@ -374,6 +374,8 @@ Clusters service API is returning an abnormally high number of 5xx Error request
 ### Steps:
 
 - Check `deployment/clusters-service` logs to determine why errors are occurring.
+  - Grep through the logs for `returning http 500`
+  - Grep through the logs for the `opid` that is returned from the previous search
 - Contact Service Development A team on #service-delivery, sd-mp-devel@redhat.com.
 - Inform the greater service delivery team.
 

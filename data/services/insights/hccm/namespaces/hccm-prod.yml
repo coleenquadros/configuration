@@ -76,7 +76,7 @@ openshiftResources:
     qontract.recycle: "true"
 - provider: vault-secret
   path: insights/secrets/insights-prod/hccm-prod/koku-secret
-  version: 1
+  version: 2
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
@@ -166,11 +166,19 @@ externalResources:
         - deletion
         - failover
         - maintenance
-        - backup
     # PostgreSQL Parameter Group
     parameter_group: /terraform/resources/insights/production/rds/postgres-curr-parameter-group-cost-management-prod.yml
     annotations:
       clowder/database: koku
+    reset_password: APPSRE-4546
+    # Replica instance for Gabi.
+  - provider: rds
+    identifier: cost-management-prod-readonly
+    defaults: /terraform/resources/insights/production/rds/postgres13-rds-cost-management-prod.yml
+    parameter_group: /terraform/resources/insights/production/rds/postgres-curr-parameter-group-cost-management-prod.yml
+    replica_source: cost-management-prod
+    output_resource_name: cost-prod-db-ro
+    output_resource_db_name: koku
   - provider: s3
     identifier: hccm-prod-s3
     defaults: /terraform/resources/s3-all-expires-465-days.yml

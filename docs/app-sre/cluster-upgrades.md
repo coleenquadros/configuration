@@ -6,9 +6,26 @@ This document explains how the integration decides to upgrade a cluster.
 
 Jira ticket: https://issues.redhat.com/browse/SDE-1376
 
+## Cluster upgrades for Red Hat owned OCM organizations
+
+The AppSRE cluster upgrades integration can now be used to manage upgrades in additional OCM organizations, where clusters are not managed in app-interface.
+
+This is the result of a PoC to expose advanced cluster upgrade capabilities to internal RH teams.
+
+Jira ticket: https://issues.redhat.com/browse/SDE-2341
+
+> Note: The end goal is to expose this capability to external customers as well, likely as an OCM API.
+
+This documentation applies to both use cases:
+- Cluster upgrades for clusters managed in app-interface (AppSRE clusters)
+- Cluster upgrades for additional OCM organizations (RH only)
+
 ## Overview
 
-To enable upgrades for a cluster, add an `upgradePolicy` section to the cluster file:
+To enable upgrades for a cluster, add the following section to either:
+- the cluster file (if the cluster is managed in app-interface)
+- the `upgradePolicyClusters` section of an OCM file ([example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/4751dee2c4ed02e5a3fbde4617074c508bf74e6c/data/dependencies/ocm/production.yml#L43-50)), along with the cluster `name` field (for RH owned OCM organizations)
+
 ```yaml
 upgradePolicy:
   # types of workloads running on this cluster
@@ -25,6 +42,8 @@ upgradePolicy:
     mutexes:
     - mutex-1
     - mutex-2
+    # OCM upgrade sector to which the cluster belongs
+    sector: sector-1
 ```
 
 ## How it works
@@ -34,7 +53,8 @@ For each cluster with an `upgradePolicy`, we check that the following conditions
 - there are available versions to upgrade to.
 - the upgrade schedule is within the next 2 hours.
 - the version has been soaking in other clusters with the same workloads (more than `soakDays`).
-- all the configured mutexes (by default `[]`) can be acquired. Said differently, there is no ongoing cluster upgrades with any of these mutexes.
+- all the configured `mutexes` (by default `[]`) can be acquired. Said differently, there is no ongoing cluster upgrades with any of these `mutexes`.
+- the sector name refers to a sector defined in the cluster OCM organization in app-interface (`ocm` field), with their `dependencies`. An upgrade can be applied on a cluster only if all clusters from previous sectors already run at least that version.
 
 The versions to upgrade to are iterated over in reverse order, so it is assumed that the latest version that meets the conditions is chosen.
 
@@ -91,12 +111,6 @@ We choose different soak days to give some interval between upgrades. Should any
 The first clusters to be upgraded belong to the stage environment (app-sre-stage-01, appsres03ue1).
 
 Once a version has soaked for 7 days, the production clusters will be upgraded (app-sre-prod-01, appsrep05ue1).
-
-### CodeReady Dependency Analytics (CRDA)
-
-The first cluster to be upgraded belongs to the stage environment (app-sre-stage-02).
-
-Once a version has soaked for 3 days, the production cluster will be upgraded (app-sre-prod-03).
 
 ### console.redhat.com (CRC)
 

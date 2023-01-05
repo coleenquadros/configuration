@@ -14,28 +14,28 @@ namespaces:
 
 slos:
 - name: RHSM api success
+  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=rhsm-subscriptions&viewPanel=36
   SLIType: availability
   SLISpecification: ratio of HTTP response codes that are not 5xx
-  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/rhsm/SLO.md
-  SLOParameters:
-    window: 28d
-  expr: 1.00 - (sum(rate(api_3scale_gateway_api_status{exported_service="rhsm-subscriptions", status="5xx"}[5m])) / sum(rate(api_3scale_gateway_api_status{exported_service="rhsm-subscriptions"}[5m])))
   SLOTarget: 0.90
   SLOTargetUnit: percent_0_1
-  prometheusRules: /insights-prod/rhsm-prod/rhsm.prometheusrules.yaml
-  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=rhsm-subscriptions&viewPanel=36
-
-- name: RHSM api latency
-  SLIType: latency
-  SLISpecification: ratio of services request durations under 2 seconds
-  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/rhsm/SLO.md
   SLOParameters:
     window: 28d
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/rhsm/rhsm-slo-availability.yml
+  expr: 1.00 - (sum(rate(api_3scale_gateway_api_status{exported_service="rhsm-subscriptions", status="5xx"}[5m])) / sum(rate(api_3scale_gateway_api_status{exported_service="rhsm-subscriptions"}[5m])))
+  prometheusRules: /insights-prod/rhsm-prod/rhsm.prometheusrules.yaml
+
+- name: RHSM api latency
+  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=rhsm-subscriptions&viewPanel=36
+  SLIType: latency
+  SLISpecification: ratio of services request durations under 2 seconds
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 28d
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/rhsm/rhsm-slo-latency.yml
   expr: |
     sum(rate(api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="rhsm-subscriptions"}[{{window}}]))
     /
     sum(rate(api_3scale_gateway_api_time_count{exported_service="rhsm-subscriptions"}[{{window}}]))
-  SLOTarget: 0.90
-  SLOTargetUnit: percent_0_1
   prometheusRules: /insights-prod/rhsm-prod/rhsm.prometheusrules.yaml
-  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=rhsm-subscriptions&viewPanel=36

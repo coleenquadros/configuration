@@ -1,0 +1,41 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /observability/prometheusrules/kas-fleet-manager-kafkas-stuck-in-resuming-state-production.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      # 0m   - 20m no kafkas stuck ion resuming state
+      # 20m  - 40m kafka in resuming state for 10 minutes
+      # 40m  - 60m no kafkas stuck ion resuming state
+      - series: 'kas_fleet_manager_kafka_requests_current_status_info{cluster_id="1jp6kdr7k0sjbe5adck2prjur8f39378",id="cdhnc9c3c37mtccrk12g",status="suspended"} 1'
+        values: '1+0x20 0+0x40'
+      - series: 'kas_fleet_manager_kafka_requests_current_status_info{cluster_id="1jp6kdr7k0sjbe5adck2prjur8f39378",id="cdhnc9c3c37mtccrk12g",status="resuming"} 1'
+        values: '0+0x20 1+0x20 0+0x20'
+      - series: 'kas_fleet_manager_kafka_requests_current_status_info{cluster_id="1jp6kdr7k0sjbe5adck2prjur8f39378",id="cdh36943c37idfspotqg",status="ready"} 1'
+        values: '0+0x40 1+0x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: KasFleetManagerKafkasStuckInResumingState - production
+        exp_alerts: []
+      - eval_time: 40m
+        alertname: KasFleetManagerKafkasStuckInResumingState - production
+        exp_alerts:
+          - exp_labels:
+              alertname: KasFleetManagerKafkasStuckInResumingState - production
+              cluster_id: 1jp6kdr7k0sjbe5adck2prjur8f39378
+              id: cdhnc9c3c37mtccrk12g
+              service: kas-fleet-manager
+              status: resuming
+              severity: warning
+            exp_annotations:
+              message: "Kafka cdhnc9c3c37mtccrk12g stuck in resuming state for more than 15 minutes"
+              dashboard: "https://grafana.app-sre.devshift.net/d/WLBv_KuMz/kas-fleet-manager-metrics?orgId=1&var-datasource=app-sre-prod-04-prometheus"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kas-fleet-manager-kafkas-stuck-in-resuming-state"
+      - eval_time: 60m
+        alertname: KasFleetManagerKafkasStuckInResumingState - production
+        exp_alerts: []

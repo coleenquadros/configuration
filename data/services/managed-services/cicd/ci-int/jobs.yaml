@@ -146,6 +146,13 @@ config:
         - 'gl-build-master-managed-services':
             branch: mk-release
             display_name: application-services-ui build-mk-release
+        - 'gl-pr-check-managed-services-frontend':
+            pr_check_script_path: '.rhcicd/./pr_check.sh'
+            display_name: application-services-ui-frontend pr-check
+        - 'gl-build-master-managed-services-frontend':
+            build_deploy_script_path: '.rhcicd/./build_deploy.sh'
+            display_name: application-services-ui-frontend build-mk-release
+            branch: mk-release
 
   - project:
       name: kas-fleet-manager
@@ -183,19 +190,20 @@ config:
             slack_channel_notification: mk-kas-fleet-manager
             cron_expression: 'H 7 * * 2-5' # ~7am UTC Tuesday to Friday
 
+
   - project:
-      name: kafka-storage-expansions
+      name: kafka-config-update
       label: kas-fleet-manager
       node: managed-services
       gl_group: mk-ci-cd
-      gl_project: kafka-storage-expansions
+      gl_project: kafka-config-update
       jobs:
-        - 'gl-pr-check-kafka-storage-expansions':
-            display_name: kafka-storage-expansions pr-check
+        - 'gl-pr-check-kafka-config-update':
+            display_name: kafka-config-update pr-check
             pr_check_script_path: './pr_check/pr_check.sh'
-        - 'gl-build-master-kafka-storage-expansions':
+        - 'gl-build-master-kafka-config-update':
             branch: main
-            display_name: kafka storage upgrade
+            display_name: kafka config update
             build_deploy_script_path: './run.sh'
             slack_channel_notification: mk-kas-fleet-manager
             timeout: 300
@@ -239,13 +247,13 @@ config:
             ci_cmd: 'make pull/upstream/all'
             slack_channel_notification: mk-ci-cd
             cron_expression: '0 */1 * * *' # Every 1h
-            disable: false
+            disable: true
         - 'managed-services-merge-pulled-upstreams':
             display_name: managed services merge pulled upstreams
             ci_cmd: 'make pull/upstream/merge'
             slack_channel_notification: mk-ci-cd
             cron_expression: '*/15 * * * *' # Every 15 minutes
-            disable: false
+            disable: true
         - 'managed-services-promote-ui':
             ui: kafka
             display_name: managed-{ui} promote ui components

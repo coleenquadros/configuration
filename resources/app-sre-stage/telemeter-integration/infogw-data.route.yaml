@@ -1,0 +1,23 @@
+# This route originally was for the telemeter-prometheus
+# We are still keeping it around to redirect to the new thanos querier service until docs are updated
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-prod-http
+    haproxy.router.openshift.io/balance: source
+    haproxy.router.openshift.io/timeout: 5m
+  name: infogw-data
+spec:
+  host: infogw-data.api.integration.openshift.com
+  port:
+    targetPort: https
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: reencrypt
+  to:
+    kind: Service
+    name: telemeter-token-refresher
+    weight: 100
+  wildcardPolicy: None

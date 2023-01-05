@@ -1,0 +1,30 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: cos-fleet-manager
+
+name: cos-fleet-manager
+
+app:
+  $ref: /services/managed-connectors/app.yaml
+
+namespaces:
+- $ref: /services/managed-connectors/namespaces/managed-connectors-production.yaml
+
+slos:
+- name: API availability
+  SLIType: availability
+  SLISpecification: Percentage of requests that are served successfully (status code != 5xx)
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/managed-connectors/slos/cos-fleet-manager-api-availability.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(api_inbound_request_count{namespace="managed-connectors-production", code=~"5.."}[{{window}}]))
+    /
+    sum(rate(api_inbound_request_count{namespace="managed-connectors-production"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/cos-fleet-manager-slos-availability-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/cos-fleet-manager-slos-availability-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/zbx1Eg0Mz/cos-fleet-manager-slos?orgId=1

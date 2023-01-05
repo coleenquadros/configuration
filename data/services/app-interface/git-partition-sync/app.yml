@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/app-1.yml
+
+
+labels:
+  service: app-interface
+
+name: git-partition-sync
+
+description: |
+  git-partition-sync is an automation tool for synchronizing network partitioned gitlab projects
+
+parentApp:
+  $ref: /services/app-interface/app.yml
+
+architectureDocument: https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/git-partition-sync/architecture/
+sopsUrl: https://TODO
+grafanaUrls:
+- title: TODOREPLACE
+  url: https://TODO
+onboardingStatus: InProgress
+
+escalationPolicy:
+  $ref: /teams/app-sre/escalation-policies/stream-3.yaml
+serviceOwners:
+- name: App-SRE Stream 3
+  email: sd-app-sre+stream-3@redhat.com
+
+dependencies:
+- $ref: /dependencies/ci-ext/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: git-partition-sync-producer
+    description: 'component of git-partition-sync tasked with uploading encrypted source projects to s3'
+    public: true
+  - name: git-partition-sync-consumer
+    description: 'component of git-partition-sync tasked with downloading s3 objects and pushing to destinations'
+    public: true
+
+codeComponents:
+- name: git-partition-sync-producer
+  resource: upstream
+  url: https://github.com/app-sre/git-partition-sync-producer
+- name: git-partition-sync-consumer
+  resource: upstream
+  url: https://github.com/app-sre/git-partition-sync-consumer

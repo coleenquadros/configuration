@@ -73,11 +73,16 @@ openshiftResources:
   path: /insights-stage/platform-mq-stage/kafka-cyndi.secret.yaml
 - provider: vault-secret
   path: insights/secrets/insights-stage/strimzi-stage/mk-oauth-secret
-  version: 3
+  version: 5
   name: mk-oauth-secret
-
-#kafkaCluster:
-#  $ref: /kafka/crcp01ue1k/cluster.yml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/strimzi-stage/clowder-oauth
+  version: 6
+  name: clowder-oauth
+- provider: vault-secret
+  path: insights/secrets/perf/strimzi-perf/lag-exporter-config
+  version: 1
+  name: lag-exporter-config
 
 managedExternalResources: true
 
@@ -105,27 +110,24 @@ externalResources:
     user_policy:
       {
         "Version": "2012-10-17",
-        "Statement": [
-          {
-            "Effect": "Allow",
-            "Action": [
-              "s3:ListBucket",
-            ],
-            "Resource": [
-              "arn:aws:s3:::insights-client-metrics-perf",
-              "arn:aws:s3:::insights-warehouse-perf",
-            ]
-          },
-          {
-            "Effect": "Allow",
-            "Action": [
-              "s3:*Object"
-            ],
-            "Resource": [
-              "arn:aws:s3:::insights-client-metrics-perf/*",
-              "arn:aws:s3:::insights-warehouse-perf/*",
-            ]
-          }
-        ]
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-client-metrics-perf",
+            "arn:aws:s3:::insights-warehouse-perf",
+          ]
+        }, {
+          "Effect": "Allow",
+          "Action": [
+            "s3:*Object"
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-client-metrics-perf/*",
+            "arn:aws:s3:::insights-warehouse-perf/*",
+          ]
+        }]
       }
     output_resource_name: strimzi-bucket-read-write

@@ -1,0 +1,287 @@
+$schema: /app-sre/saas-file-target-1.yml
+
+namespace:
+  $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
+ref: 63ae258042cc3cd9caf6530c4f6c11e87b4602b1
+promotion:
+  publish:
+  - assisted-installer-production-deploy-success-channel
+parameters:
+  HW_VALIDATOR_REQUIREMENTS: |
+    [{
+        "version": "default",
+        "master": {
+          "cpu_cores": 4,
+          "ram_mib": 16384,
+          "disk_size_gb": 100,
+          "installation_disk_speed_threshold_ms": 10,
+          "network_latency_threshold_ms": 100,
+          "packet_loss_percentage": 0
+        },
+        "worker": {
+          "cpu_cores": 2,
+          "ram_mib": 8192,
+          "disk_size_gb": 100,
+          "installation_disk_speed_threshold_ms": 10,
+          "network_latency_threshold_ms": 1000,
+          "packet_loss_percentage": 10
+        },
+        "sno": {
+          "cpu_cores": 8,
+          "ram_mib": 15360,
+          "disk_size_gb": 100,
+          "installation_disk_speed_threshold_ms": 10
+        },
+        "edge-worker": {
+          "cpu_cores": 2,
+          "ram_mib": 8192,
+          "disk_size_gb": 15,
+          "installation_disk_speed_threshold_ms": 10
+        }
+      }]
+  INSTALL_RH_CA: false
+  BASE_DNS_DOMAINS: "" # Emphasize the fact that route53 is disabled on prod.
+  # CONSOLE_BASE_URL is defined at the environment parameters level
+  ALLOWED_DOMAINS: ${CONSOLE_BASE_URL},https://cloud.redhat.com
+  INSTALLER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-rhel8:v1.0.0-235
+  CONTROLLER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-reporter-rhel8:v1.0.0-300
+  AGENT_DOCKER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-agent-rhel8:v1.0.0-217
+  OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
+  PUBLIC_CONTAINER_REGISTRIES: quay.io
+  RELEASE_TAG: v2.13.3
+  OS_IMAGES: |-
+    [
+      {
+        "openshift_version": "4.8",
+        "cpu_architecture": "x86_64",
+        "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.8/4.8.14/rhcos-4.8.14-x86_64-live.x86_64.iso",
+        "version": "48.84.202109241901-0"
+      },
+      {
+        "openshift_version": "4.9",
+        "cpu_architecture": "x86_64",
+        "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.9/4.9.45/rhcos-4.9.45-x86_64-live.x86_64.iso",
+        "version": "49.84.202207192205-0"
+      },
+      {
+        "openshift_version": "4.10",
+        "cpu_architecture": "x86_64",
+        "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.10/4.10.37/rhcos-4.10.37-x86_64-live.x86_64.iso",
+        "version": "410.84.202210040010-0"
+      },
+      {
+        "openshift_version": "4.10",
+        "cpu_architecture": "arm64",
+        "url": "https://mirror.openshift.com/pub/openshift-v4/aarch64/dependencies/rhcos/4.10/4.10.37/rhcos-4.10.37-aarch64-live.aarch64.iso",
+        "version": "410.84.202210040011-0"
+      },
+      {
+        "openshift_version": "4.11",
+        "cpu_architecture": "x86_64",
+        "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.11/4.11.9/rhcos-4.11.9-x86_64-live.x86_64.iso",
+        "version": "411.86.202210041459-0"
+      },
+      {
+        "openshift_version": "4.11",
+        "cpu_architecture": "arm64",
+        "url": "https://mirror.openshift.com/pub/openshift-v4/aarch64/dependencies/rhcos/4.11/4.11.9/rhcos-4.11.9-aarch64-live.aarch64.iso",
+        "version": "411.86.202210032347-0"
+      },
+      {
+        "openshift_version": "4.12",
+        "cpu_architecture": "x86_64",
+        "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/pre-release/4.12.0-ec.2/rhcos-4.12.0-ec.2-x86_64-live.x86_64.iso",
+        "version": "412.86.202208101039-0"
+      },
+      {
+        "openshift_version": "4.12",
+        "cpu_architecture": "arm64",
+        "url": "https://mirror.openshift.com/pub/openshift-v4/aarch64/dependencies/rhcos/pre-release/4.12.0-ec.2/rhcos-4.12.0-ec.2-aarch64-live.aarch64.iso",
+        "version": "412.86.202208101040-0"
+      }
+    ]
+  RELEASE_IMAGES: |-
+    [
+      {
+        "openshift_version": "4.8.12",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.8.12-x86_64",
+        "version": "4.8.12"
+      },
+      {
+        "openshift_version": "4.8.29",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.8.29-x86_64",
+        "version": "4.8.29"
+      },
+      {
+        "openshift_version": "4.8.36",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.8.36-x86_64",
+        "version": "4.8.36"
+      },
+      {
+        "openshift_version": "4.8.39",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.8.39-x86_64",
+        "version": "4.8.39"
+      },
+      {
+        "openshift_version": "4.8",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.8.55-x86_64",
+        "version": "4.8.55",
+        "cpu_architectures": [
+          "x86_64"
+        ]
+      },
+      {
+        "openshift_version": "4.9.9",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.9.9-x86_64",
+        "version": "4.9.9"
+      },
+      {
+        "openshift_version": "4.9.13",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.9.13-x86_64",
+        "version": "4.9.13"
+      },
+      {
+        "openshift_version": "4.9.17",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.9.17-x86_64",
+        "version": "4.9.17"
+      },
+      {
+        "openshift_version": "4.9.25",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.9.25-x86_64",
+        "version": "4.9.25"
+      },
+      {
+        "openshift_version": "4.9.37",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.9.37-x86_64",
+        "version": "4.9.37"
+      },
+      {
+        "openshift_version": "4.9",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.9.53-x86_64",
+        "version": "4.9.53",
+        "cpu_architectures": [
+          "x86_64"
+        ]
+      },
+      {
+        "openshift_version": "4.10.38",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.10.38-x86_64",
+        "version": "4.10.38",
+        "cpu_architectures": [
+          "x86_64"
+        ]
+      },
+      {
+        "openshift_version": "4.10",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.10.45-x86_64",
+        "version": "4.10.45",
+        "cpu_architectures": [
+          "x86_64"
+        ]
+      },
+      {
+        "openshift_version": "4.10",
+        "cpu_architecture": "arm64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.10.45-aarch64",
+        "version": "4.10.45",
+        "cpu_architectures": [
+          "arm64"
+        ]
+      },
+      {
+        "openshift_version": "4.11.9-multi",
+        "cpu_architecture": "multi",
+        "cpu_architectures": [
+          "x86_64",
+          "arm64",
+          "ppc64le",
+          "s390x"
+        ],
+        "url": "quay.io/openshift-release-dev/ocp-release:4.11.9-multi",
+        "version": "4.11.9-multi"
+      },
+      {
+        "openshift_version": "4.11",
+        "cpu_architecture": "x86_64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.11.20-x86_64",
+        "version": "4.11.20",
+        "default": true,
+        "cpu_architectures": [
+          "x86_64"
+        ]
+      },
+      {
+        "openshift_version": "4.11",
+        "cpu_architecture": "arm64",
+        "url": "quay.io/openshift-release-dev/ocp-release:4.11.20-aarch64",
+        "version": "4.11.20",
+        "cpu_architectures": [
+          "arm64"
+        ]
+      },
+      {
+        "openshift_version": "4.11.13-multi",
+        "cpu_architecture": "multi",
+        "cpu_architectures": [
+          "x86_64",
+          "arm64",
+          "ppc64le",
+          "s390x"
+        ],
+        "url": "quay.io/openshift-release-dev/ocp-release:4.11.13-multi",
+        "version": "4.11.13-multi"
+      },
+      {
+        "openshift_version": "4.12",
+        "cpu_architecture": "x86_64",
+        "cpu_architectures": [
+          "x86_64"
+        ],
+        "url": "quay.io/openshift-release-dev/ocp-release:4.12.0-rc.6-x86_64",
+        "support_level": "beta",
+        "version": "4.12.0-rc.6"
+      },
+      {
+        "openshift_version": "4.12",
+        "cpu_architecture": "arm64",
+        "cpu_architectures": [
+          "arm64"
+        ],
+        "url": "quay.io/openshift-release-dev/ocp-release:4.12.0-rc.6-aarch64",
+        "support_level": "beta",
+        "version": "4.12.0-rc.6"
+      },
+      {
+        "openshift_version": "4.12.0-rc.6-multi",
+        "cpu_architecture": "multi",
+        "cpu_architectures": [
+          "x86_64",
+          "arm64",
+          "ppc64le",
+          "s390x"
+        ],
+        "url": "quay.io/openshift-release-dev/ocp-release:4.12.0-rc.6-multi",
+        "version": "4.12.0-rc.6-multi"
+      }
+    ]
+  REGISTRY_CREDS: ""
+  AGENT_TIMEOUT_START: 30m
+  DISABLED_HOST_VALIDATIONS: sufficient-network-latency-requirement-for-role,has-default-route
+  ENABLE_AUTO_ASSIGN: true
+  ENABLE_ORG_TENANCY: false
+  ENABLE_UPGRADE_AGENT: true
+  IMAGE_SERVICE_BASE_URL: ${OCM_BASE_URL}/api/assisted-images
+  ENABLE_ORG_BASED_FEATURE_GATES: true

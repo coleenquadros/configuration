@@ -16,14 +16,14 @@ pipelinesProvider:
 deployResources:
   requests:
     cpu: 800m
-    memory: 1800Mi
+    memory: 2500Mi
   limits:
     cpu: 800m
-    memory: 1800Mi
+    memory: 2500Mi
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-monitoring-info
 
 authentication:
@@ -79,7 +79,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
-    ref: f4fd9cc267401daabf849c59149f35664e8353a3
+    ref: 5863b85340961d06312bd6e3f8216114e44b57bf
     parameters:
       NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-stage
@@ -105,9 +105,9 @@ resourceTemplates:
       OBSERVATORIUM_API_CPU_REQUEST: 100m
       OBSERVATORIUM_API_IDENTIFIER: observatorium-observatorium-mst-api
       OBSERVATORIUM_API_IMAGE_TAG: main-2022-10-11-v0.1.2-264-g53d6ae8
-      OBSERVATORIUM_API_MEMORY_LIMIT: 1Gi
-      OBSERVATORIUM_API_MEMORY_REQUEST: 256Mi
-      OBSERVATORIUM_API_REPLICAS: 3
+      OBSERVATORIUM_API_MEMORY_LIMIT: 4Gi
+      OBSERVATORIUM_API_MEMORY_REQUEST: 1Gi
+      OBSERVATORIUM_API_REPLICAS: 6
       OPA_AMS_CPU_LIMIT: 200m
       OPA_AMS_CPU_REQUEST: 100m
       OPA_AMS_IMAGE_TAG: master-2021-07-14-d517f70
@@ -125,11 +125,14 @@ resourceTemplates:
       OIDC_AUDIENCE: 'observatorium'
       OIDC_ISSUER_URL: '${SSO_BASE_URL}'
       SLEEP_DURATION_SECONDS: '15'
-      MANAGED_TENANTS: 'rhobs,osd'
+      MANAGED_TENANTS: 'rhobs,osd,appsre,rhoc'
       RHOBS_RELOADER_SECRET_NAME: rhobs-tenant-mst-staging
-      OSD_RELOADER_SECRET_NAME: observatorium-observatorium-mst-api
+      OSD_RELOADER_SECRET_NAME: rhobs-osd-tenant
+      APPSRE_RELOADER_SECRET_NAME: observatorium-appsre-staging
+      RHOC_RELOADER_SECRET_NAME: observatorium-rhoc-staging
+      LOG_RULES_ENABLED: true
       OBSCTL_RELOADER_IMAGE: 'quay.io/app-sre/obsctl-reloader'
-      OBSCTL_RELOADER_IMAGE_TAG: 'f021479'
+      OBSCTL_RELOADER_IMAGE_TAG: 'a39316a'
       METRICS_WRITE_SERVICE_NAME: observatorium-thanos-receive
       METRICS_WRITE_SERVICE_PORT: '19291'
     promotion:
@@ -138,7 +141,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: f4fd9cc267401daabf849c59149f35664e8353a3
+    ref: 5863b85340961d06312bd6e3f8216114e44b57bf
     parameters:
       NAMESPACE: observatorium-mst-production
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-production
@@ -187,24 +190,25 @@ resourceTemplates:
       SLEEP_DURATION_SECONDS: '15'
       MANAGED_TENANTS: 'rhobs,osd'
       RHOBS_RELOADER_SECRET_NAME: rhobs-tenant-mst-production
-      OSD_RELOADER_SECRET_NAME: observatorium-observatorium-mst-api
+      OSD_RELOADER_SECRET_NAME: rhobs-osd-tenant
+      LOG_RULES_ENABLED: true
       OBSCTL_RELOADER_IMAGE: 'quay.io/app-sre/obsctl-reloader'
-      OBSCTL_RELOADER_IMAGE_TAG: 'f021479'
+      OBSCTL_RELOADER_IMAGE_TAG: 'a39316a'
       METRICS_WRITE_SERVICE_NAME: observatorium-thanos-receive
       METRICS_WRITE_SERVICE_PORT: '19291'
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/rhobsp02ue1/observatorium-mst-production.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: ac141bd1e1b1ce202de1be23a3f711a492bcf69e
+    ref: 687866f1c73ed3cf1dfca89c3eaf4c6bbaf26d75
     parameters:
       NAMESPACE: observatorium-mst-production
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-production
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-mst-production
       PROMETHEUS_AMS_REMOTE_WRITE_PROXY_TARGET: 'observatorium-thanos-receive'
-      GUBERNATOR_REPLICAS: 9
+      GUBERNATOR_REPLICAS: 6
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       JAEGER_COLLECTOR_NAMESPACE: observatorium-tools-production
-      OBSERVATORIUM_API_REPLICAS: 15
+      OBSERVATORIUM_API_REPLICAS: 6
       OBSERVATORIUM_API_CPU_REQUEST: 100m
       OBSERVATORIUM_API_CPU_LIMIT: 1
       OBSERVATORIUM_API_MEMORY_REQUEST: 256Mi
@@ -229,12 +233,25 @@ resourceTemplates:
       SERVICE_ACCOUNT_NAME: observatorium-mst
       OBSERVATORIUM_API_IDENTIFIER: observatorium-observatorium-mst-api
       OBSERVATORIUM_API_IMAGE: quay.io/observatorium/api
-      OBSERVATORIUM_API_IMAGE_TAG: main-2022-10-11-v0.1.2-264-g53d6ae8
+      OBSERVATORIUM_API_IMAGE_TAG: main-2022-12-15-v0.1.2-298-gfeb2d1a
       OPA_AMS_IMAGE_TAG: master-2021-07-14-d517f70
-      RULES_OBJSTORE_IMAGE_TAG: main-2022-04-01-64cd17e
+      RULES_OBJSTORE_IMAGE_TAG: main-2022-09-21-9df4d2c
       RULES_OBJSTORE_S3_SECRET: rhobsp02ue1-mst-rules-objstore-production-s3
       RULES_OBJSTORE_SECRET: rhobsp02ue1-mst-rules-objstore-objectstorage
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
+      OBSERVATORIUM_URL: 'https://rhobs.rhobsp02ue1.api.openshift.com/'
+      OIDC_AUDIENCE: 'observatorium'
+      OIDC_ISSUER_URL: '${SSO_BASE_URL}'
+      SLEEP_DURATION_SECONDS: '15'
+      MANAGED_TENANTS: 'rhobs,hypershift-platform-staging,hypershift-platform'
+      RHOBS_RELOADER_SECRET_NAME: rhobs-tenant-mst-production
+      HYPERSHIFT_PLATFORM_STAGING_RELOADER_SECRET_NAME: rhobs-hypershift-platform-staging-tenant
+      HYPERSHIFT_PLATFORM_RELOADER_SECRET_NAME: rhobs-hypershift-platform-tenant
+      LOG_RULES_ENABLED: false
+      OBSCTL_RELOADER_IMAGE: 'quay.io/app-sre/obsctl-reloader'
+      OBSCTL_RELOADER_IMAGE_TAG: 'a39316a'
+      METRICS_WRITE_SERVICE_NAME: observatorium-thanos-receive
+      METRICS_WRITE_SERVICE_PORT: '19291'
 - name: observatorium-mst-metrics
   path: /resources/services/observatorium-metrics-template.yaml
   url: https://github.com/rhobs/configuration
@@ -250,7 +267,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
-    ref: 7ce23c0549d92c40a20508551cacad08d041b28a
+    ref: e2284c131a09510c659e143d5f1c55bf54a7de8f
     parameters:
       NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_ALERTMANAGER_LOG_LEVEL: debug
@@ -283,13 +300,14 @@ resourceTemplates:
       # TODO(bwplotka): Fix it on templating side, it's super confusing. It means downsampling is enabled.
       THANOS_COMPACTOR_RETENTION_DISABLE_DOWNSAMPLING: '--no-downsampling.disable'
       THANOS_CONFIG_SECRET: observatorium-mst-thanos-objectstorage
-      THANOS_IMAGE_TAG: v0.29.0-rc.0
+      THANOS_IMAGE_TAG: v0.29.0
       THANOS_QUERIER_CPU_LIMIT: '3'
       THANOS_QUERIER_CPU_REQUEST: '2'
       THANOS_QUERIER_MEMORY_LIMIT: '12Gi'
       THANOS_QUERIER_MEMORY_REQUEST: '8Gi'
       THANOS_QUERIER_REPLICAS: 4
       THANOS_QUERIER_FILE_SD_TARGETS: '[]'
+      THANOS_QUERIER_PROXY_STRATEGY: 'lazy'
       THANOS_VOLCANO_IMAGE_TAG: main-2022-10-07-a4e33415
       THANOS_VOLCANO_IMAGE: quay.io/thanos/thanos
       THANOS_VOLCANO_LOG_LEVEL: debug
@@ -308,9 +326,9 @@ resourceTemplates:
       THANOS_RECEIVE_CPU_REQUEST: '2'
       THANOS_RECEIVE_DEBUG_ENV: '1'
       THANOS_RECEIVE_LOG_LEVEL: 'debug'
-      THANOS_RECEIVE_MEMORY_LIMIT: '12Gi'
-      THANOS_RECEIVE_MEMORY_REQUEST: '12Gi'
-      THANOS_RECEIVE_REPLICAS: 4
+      THANOS_RECEIVE_MEMORY_LIMIT: '24Gi'
+      THANOS_RECEIVE_MEMORY_REQUEST: '24Gi'
+      THANOS_RECEIVE_REPLICAS: 6
       THANOS_RECEIVE_HASHRINGS_ALGORITHM: ketama
       THANOS_RULE_SYNCER_IMAGE_TAG: main-2022-09-14-338f9ec
       THANOS_RULER_CPU_LIMIT: '4'
@@ -336,12 +354,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
-
-    ## While this comment is here, do not alter the ref for this target without speaking to @pgough :)
-    ## There is a breaking change on the ref below which is living on a temp branch until all migrations
-    ## are complete. Once all migrations are complete, the branch will be merged to main and
-    # this comment can be removed
-    ref: 97ee65fcb0f3fa6b3cd0e93baa2b33082fc37cc7
+    ref: e2284c131a09510c659e143d5f1c55bf54a7de8f
     parameters:
       NAMESPACE: observatorium-mst-production
       OBSERVATORIUM_NAMESPACE: observatorium-mst-production
@@ -353,7 +366,7 @@ resourceTemplates:
       JAEGER_COLLECTOR_NAMESPACE: observatorium-production
       THANOS_CONFIG_SECRET: observatorium-mst-thanos-objectstorage
       THANOS_S3_SECRET: observatorium-mst-thanos-production-s3
-      THANOS_IMAGE_TAG: v0.28.0
+      THANOS_IMAGE_TAG: v0.29.0
       THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
       THANOS_QUERIER_REPLICAS: 4
       THANOS_QUERIER_CPU_REQUEST: '3'
@@ -361,6 +374,7 @@ resourceTemplates:
       THANOS_QUERIER_MEMORY_REQUEST: '24Gi'
       THANOS_QUERIER_MEMORY_LIMIT: '24Gi'
       THANOS_QUERIER_FILE_SD_TARGETS: '[]'
+      THANOS_QUERIER_PROXY_STRATEGY: 'lazy'
       THANOS_QUERY_FRONTEND_REPLICAS: 3
       THANOS_QUERY_FRONTEND_CPU_REQUEST: '100m'
       THANOS_QUERY_FRONTEND_CPU_LIMIT: '1'
@@ -372,11 +386,11 @@ resourceTemplates:
       THANOS_STORE_CPU_LIMIT: '1'
       THANOS_STORE_MEMORY_REQUEST: '5Gi'
       THANOS_STORE_MEMORY_LIMIT: '20Gi'
-      THANOS_RECEIVE_REPLICAS: 5
-      THANOS_RECEIVE_CPU_REQUEST: '1500m'
-      THANOS_RECEIVE_CPU_LIMIT: '1500m'
-      THANOS_RECEIVE_MEMORY_REQUEST: '15Gi'
-      THANOS_RECEIVE_MEMORY_LIMIT: '15Gi'
+      THANOS_RECEIVE_REPLICAS: 9
+      THANOS_RECEIVE_CPU_REQUEST: '4'
+      THANOS_RECEIVE_CPU_LIMIT: '4'
+      THANOS_RECEIVE_MEMORY_REQUEST: '44Gi'
+      THANOS_RECEIVE_MEMORY_LIMIT: '44Gi'
       THANOS_RECEIVE_LOG_LEVEL: 'debug'
       THANOS_RECEIVE_DEBUG_ENV: '1'
       THANOS_RECEIVE_HASHRINGS_ALGORITHM: ketama
@@ -413,7 +427,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/rhobsp02ue1/observatorium-mst-production.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: c9af81c05622ee863962ade46cceabe390c79f4a
+    ref: e2284c131a09510c659e143d5f1c55bf54a7de8f
     parameters:
       NAMESPACE: observatorium-mst-production
       OBSERVATORIUM_NAMESPACE: observatorium-mst-production
@@ -425,14 +439,15 @@ resourceTemplates:
       JAEGER_COLLECTOR_NAMESPACE: observatorium-tools-production
       THANOS_CONFIG_SECRET: rhobsp02ue1-mst-thanos-objectstorage
       THANOS_S3_SECRET: rhobsp02ue1-mst-thanos-production-s3
-      THANOS_IMAGE_TAG: v0.27.0
+      THANOS_IMAGE_TAG: main-2022-12-16-789046a
       THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
       THANOS_QUERIER_REPLICAS: 4
-      THANOS_QUERIER_CPU_REQUEST: '1'
-      THANOS_QUERIER_CPU_LIMIT: '1'
-      THANOS_QUERIER_MEMORY_REQUEST: '16Gi'
-      THANOS_QUERIER_MEMORY_LIMIT: '16Gi'
+      THANOS_QUERIER_CPU_REQUEST: '3'
+      THANOS_QUERIER_CPU_LIMIT: '6'
+      THANOS_QUERIER_MEMORY_REQUEST: '24Gi'
+      THANOS_QUERIER_MEMORY_LIMIT: '24Gi'
       THANOS_QUERIER_FILE_SD_TARGETS: '[]'
+      THANOS_QUERIER_PROXY_STRATEGY: 'lazy'
       THANOS_QUERY_FRONTEND_REPLICAS: 3
       THANOS_QUERY_FRONTEND_CPU_REQUEST: '100m'
       THANOS_QUERY_FRONTEND_CPU_LIMIT: '1'
@@ -444,29 +459,32 @@ resourceTemplates:
       THANOS_STORE_CPU_LIMIT: '1'
       THANOS_STORE_MEMORY_REQUEST: '5Gi'
       THANOS_STORE_MEMORY_LIMIT: '20Gi'
-      THANOS_RECEIVE_REPLICAS: 5
-      THANOS_RECEIVE_CPU_REQUEST: '1500m'
-      THANOS_RECEIVE_CPU_LIMIT: '1500m'
-      THANOS_RECEIVE_MEMORY_REQUEST: '15Gi'
-      THANOS_RECEIVE_MEMORY_LIMIT: '15Gi'
+      THANOS_RECEIVE_REPLICAS: 15
+      THANOS_RECEIVE_CPU_REQUEST: '15'
+      THANOS_RECEIVE_CPU_LIMIT: '15'
+      THANOS_RECEIVE_MEMORY_REQUEST: '180Gi'
+      THANOS_RECEIVE_MEMORY_LIMIT: '180Gi'
       THANOS_RECEIVE_LOG_LEVEL: 'debug'
       THANOS_RECEIVE_DEBUG_ENV: '1'
+      THANOS_RECEIVE_HASHRINGS_ALGORITHM: ketama
       THANOS_COMPACTOR_REPLICAS: 1
       THANOS_COMPACTOR_RETENTION_RESOLUTION_RAW: '365d'
       THANOS_COMPACTOR_RETENTION_RESOLUTION_FIVE_MINUTES: '365d'
       THANOS_COMPACTOR_RETENTION_RESOLUTION_ONE_HOUR: '365d'
       # TODO(bwplotka): Fix it on templating side, it's super confusing. It means downsampling is enabled.
       THANOS_COMPACTOR_RETENTION_DISABLE_DOWNSAMPLING: '--no-downsampling.disable'
-      THANOS_COMPACTOR_PVC_REQUEST: '50Gi'
-      THANOS_RULE_SYNCER_IMAGE_TAG: main-2022-01-11-1290656
-      THANOS_RULER_LOG_LEVEL: 'info'
+      THANOS_COMPACTOR_PVC_REQUEST: '150Gi'
+      THANOS_COMPACTOR_LOG_LEVEL: 'debug'
+      THANOS_COMPACTOR_CPU_REQUEST: '200m'
+      THANOS_COMPACTOR_CPU_LIMIT: '2'
+      THANOS_RULE_SYNCER_IMAGE_TAG: main-2022-09-14-338f9ec
+      THANOS_RULER_LOG_LEVEL: 'debug'
       THANOS_RULER_REPLICAS: 2
       THANOS_RULER_CPU_REQUEST: '4'
       THANOS_RULER_CPU_LIMIT: '4'
       THANOS_RULER_MEMORY_REQUEST: '8Gi'
       THANOS_RULER_MEMORY_LIMIT: '8Gi'
       THANOS_RULER_PVC_REQUEST: '50Gi'
-      THANOS_COMPACTOR_LOG_LEVEL: 'debug'
       THANOS_STORE_CACHE_MEMORY_LIMIT_MB: 2048
       MEMCACHED_IMAGE_TAG: 1.5
       MEMCACHED_MEMORY_LIMIT_MB: 2048Mi
@@ -480,6 +498,7 @@ resourceTemplates:
       MEMCACHED_EXPORTER_MEMORY_REQUEST: 50Mi
       MEMCACHED_EXPORTER_MEMORY_LIMIT: 200Mi
       SERVICE_ACCOUNT_NAME: observatorium-mst
+      THANOS_RECEIVE_HASHRING_SERVICE_NAME: observatorium-thanos-receive-default
 - name: observatorium-mst-logs
   path: /resources/services/observatorium-logs-template.yaml
   url: https://github.com/rhobs/configuration

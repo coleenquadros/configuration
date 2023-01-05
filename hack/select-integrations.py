@@ -10,65 +10,66 @@ import yaml
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-ORIGIN_BRANCH = os.getenv('ORIGIN_BRANCH', 'remotes/origin/master')
+ORIGIN_BRANCH = os.getenv("ORIGIN_BRANCH", "remotes/origin/master")
 
 
 def get_integrations(data):
     integrations = {}
-    for df_path, df in data['data'].items():
-        if df['$schema'] == '/app-sre/integration-1.yml':
-            integrations[df['name']] = df
+    for df_path, df in data["data"].items():
+        if df["$schema"] == "/app-sre/integration-1.yml":
+            integrations[df["name"]] = df
 
     return integrations
 
 
 def get_modified_files():
-    return check_output(['git', 'diff', ORIGIN_BRANCH, '--name-only']).split()
+    return check_output(["git", "diff", ORIGIN_BRANCH, "--name-only"]).split()
 
 
 def get_data_schema(data, modified_file):
-    """ get the schema of a file coming from data dir. If the file does not
-    exist, it has been deleted, so get it from git """
+    """get the schema of a file coming from data dir. If the file does not
+    exist, it has been deleted, so get it from git"""
 
     # modified_file represents the git path, but not the keys of data['data']
     # because the leading `data` or `test_data` has been stripped. We need to calculate it
     # here to be able to fetch it from data
-    data_path = modified_file[modified_file.find(os.path.sep):]
+    data_path = modified_file[modified_file.find(os.path.sep) :]
 
-    if data_path in data['data']:
+    if data_path in data["data"]:
         # file is present in data.json, we can obtain it from there
-        datafile = data['data'][data_path]
+        datafile = data["data"][data_path]
     else:
         # file has been deleted, we need to obtain it from git history
         datafile_raw = check_output(
-            ['git', 'show', '{}:{}'.format(ORIGIN_BRANCH, modified_file)])
+            ["git", "show", "{}:{}".format(ORIGIN_BRANCH, modified_file)]
+        )
         datafile = yaml.safe_load(datafile_raw)
 
-    return datafile['$schema']
+    return datafile["$schema"]
 
 
 def get_resource_schema(data, modified_file):
-    """ get the schema of a file coming from resources dir. If the file does
-    not exist, it has been deleted, so get it from git """
+    """get the schema of a file coming from resources dir. If the file does
+    not exist, it has been deleted, so get it from git"""
 
     # modified_file represents the git path, but not the keys of
     # data['resources'] because the leading `resources` has been stripped. We
     # need to calculate it here to be able to fetch it from data
-    data_path = modified_file[len('resources'):]
+    data_path = modified_file[len("resources") :]
 
     schema = None
-    if data_path in data['resources']:
+    if data_path in data["resources"]:
         # file is present in data.json, we can obtain it from there
-        schema = data['resources'][data_path]['$schema']
+        schema = data["resources"][data_path]["$schema"]
     else:
         # file has been deleted, we need to obtain it from git history
         datafile_raw = check_output(
-            ['git', 'show', '{}:{}'.format(ORIGIN_BRANCH, modified_file)])
-        schema_re = re.compile(r'^\$schema: (?P<schema>.+\.ya?ml)$',
-                               re.MULTILINE)
+            ["git", "show", "{}:{}".format(ORIGIN_BRANCH, modified_file)]
+        )
+        schema_re = re.compile(r"^\$schema: (?P<schema>.+\.ya?ml)$", re.MULTILINE)
         s = schema_re.search(datafile_raw)
         if s:
-            schema = s.group('schema')
+            schema = s.group("schema")
 
     return schema
 
@@ -91,20 +92,27 @@ def get_modified_schemas(data, modified_files, is_test_data):
 def get_integrations_by_schema(integrations, schema):
     matches = set()
     for int_name, integration in integrations.items():
-        if schema in integration['schemas']:
+        if schema in integration["schemas"]:
             matches.add(int_name)
     return matches
 
 
-def print_cmd(pr, select_all, non_bundled_data_modified, int_name, override=None):
+def print_cmd(
+    pr,
+    select_all,
+    non_bundled_data_modified,
+    int_name,
+    override=None,
+    has_integrations_changes=False,
+):
     cmd = ""
-    if pr.get('state'):
+    if pr.get("state"):
         cmd += "STATE=true "
-    if pr.get('sqs'):
+    if pr.get("sqs"):
         cmd += "SQS_GATEWAY=true "
-    if pr.get('no_validate_schemas'):
+    if pr.get("no_validate_schemas"):
         cmd += "NO_VALIDATE=true "
-    if not select_all and pr.get('early_exit'):
+    if not select_all and pr.get("early_exit") and not has_integrations_changes:
         cmd += "EARLY_EXIT=true "
 
     if int_name == "change-owners":
@@ -121,49 +129,63 @@ def print_cmd(pr, select_all, non_bundled_data_modified, int_name, override=None
             # decisions about self-serviceability
             cmd += "CHANGE_TYPE_PROCESSING_MODE=authoritative "
     if int_name == "vault-manager":
-        cmd += 'run_vault_reconcile_integration &'
+        cmd += "run_vault_reconcile_integration &"
     elif int_name == "user-validator":
-        cmd += 'run_user_validator &'
+        cmd += "run_user_validator &"
+    elif int_name == "git-partition-sync":
+        cmd += "run_git_partition_sync_integration &"
     else:
         if override:
             # only qr integrations support sharding
-            shard = override['awsAccount']["$ref"].split("/")[2]
-            cmd += "ALIAS=" + pr['cmd'] + "_" + shard + " "
-            cmd += "IMAGE=" + override['imageRef'] + " "
-            cmd += "run_int " + pr['cmd'] + " --account-name " + shard +" &"
+            shard = override["awsAccount"]["$ref"].split("/")[2]
+            cmd += "ALIAS=" + pr["cmd"] + "_" + shard + " "
+            cmd += "IMAGE=" + override["imageRef"] + " "
+            cmd += "run_int " + pr["cmd"] + " --account-name " + shard + " &"
         else:
-            cmd += "run_int " + pr['cmd'] + ' &'
+            cmd += "run_int " + pr["cmd"] + " &"
 
     print(cmd)
 
 
-def print_pr_check_cmds(integrations, selected=None, select_all=False,
-                        non_bundled_data_modified=False):
+def print_pr_check_cmds(
+    integrations,
+    selected=None,
+    select_all=False,
+    non_bundled_data_modified=False,
+    has_integrations_changes=False,
+):
     if selected is None:
         selected = []
 
     for int_name, integration in integrations.items():
-        pr = integration.get('pr_check')
-        if not pr or pr.get('disabled'):
+        pr = integration.get("pr_check")
+        if not pr or pr.get("disabled"):
             continue
 
-        always_run = pr.get('always_run')
+        always_run = pr.get("always_run")
         if int_name not in selected and not select_all and not always_run:
             continue
 
         if pr.get("shardSpecOverride"):
             for override in pr.get("shardSpecOverride"):
-                print_cmd(pr, select_all, non_bundled_data_modified, int_name, override)
+                print_cmd(
+                    pr,
+                    select_all,
+                    non_bundled_data_modified,
+                    int_name,
+                    override,
+                    has_integrations_changes,
+                )
 
         print_cmd(pr, select_all, non_bundled_data_modified, int_name)
 
 
 def main():
     # chdir to git root
-    os.chdir('{}/..'.format(dir_path))
+    os.chdir("{}/..".format(dir_path))
 
     # grab data
-    with open(sys.argv[1], 'r') as f:
+    with open(sys.argv[1], "r") as f:
         data = json.load(f)
 
     is_test_data = True if sys.argv[2] == "yes" else False
@@ -172,23 +194,29 @@ def main():
     modified_files = get_modified_files()
 
     def any_modified(func):
-        return any([func(p) for p in modified_files])
+        return any(func(p) for p in modified_files)
 
     def all_modified(func):
-        return all([func(p) for p in modified_files])
+        return all(func(p) for p in modified_files)
 
-    if all_modified(lambda p: re.match(r'^docs/', p)):
+    if all_modified(lambda p: re.match(r"^docs/", p)):
         # only docs: no need to run pr check
         return
 
-    non_bundled_data_modified=any_modified(lambda p: not re.match(r'^(data|resources)/', p))
+    non_bundled_data_modified = any_modified(
+        lambda p: not re.match(r"^(data|resources)/", p)
+    )
+    has_integrations_changes = any_modified(
+        lambda p: re.match(r"^data/integrations/", p)
+    )
 
-    if any_modified(lambda p: not re.match(r'^(data|resources|docs|test_data)/', p)):
+    if any_modified(lambda p: not re.match(r"^(data|resources|docs|test_data)/", p)):
         # unknow case: we run all integrations
         print_pr_check_cmds(
             integrations,
             select_all=True,
-            non_bundled_data_modified=non_bundled_data_modified
+            non_bundled_data_modified=non_bundled_data_modified,
+            has_integrations_changes=has_integrations_changes,
         )
         return
 
@@ -202,22 +230,25 @@ def main():
 
     # list of integrations based on resources/
     # TEMPORARY PATH BASED HACK
-    if any_modified(lambda p: re.match(r'^resources/terraform/', p)):
-        selected.add('terraform-resources')
-    if any_modified(lambda p: re.match(r'^resources/jenkins/', p)):
-        selected.add('jenkins-job-builder')
-    if any_modified(lambda p: re.match(r'^resources/', p) \
-            and not re.match(r'resources/(terraform|jenkins)/', p)):
-        selected.add('openshift-routes')
-        selected.add('openshift-resources')
-        selected.add('openshift-tekton-resources')
+    if any_modified(lambda p: re.match(r"^resources/terraform/", p)):
+        selected.add("terraform-resources")
+    if any_modified(lambda p: re.match(r"^resources/jenkins/", p)):
+        selected.add("jenkins-job-builder")
+    if any_modified(
+        lambda p: re.match(r"^resources/", p)
+        and not re.match(r"resources/(terraform|jenkins)/", p)
+    ):
+        selected.add("openshift-routes")
+        selected.add("openshift-resources")
+        selected.add("openshift-tekton-resources")
 
     print_pr_check_cmds(
         integrations,
         selected=selected,
-        non_bundled_data_modified=non_bundled_data_modified
+        non_bundled_data_modified=non_bundled_data_modified,
+        has_integrations_changes=has_integrations_changes,
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

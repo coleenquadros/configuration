@@ -58,12 +58,10 @@ Options:
 
 #### qontract-reconcile
 
-In order to use this tool, the easiest option is to clone the `qontract-reconcile` repository. You will need Python 3.9.
+In order to use this tool, the easiest option is to use pip to install `qontract-reconcile`.
 
 ```
-$ git clone https://github.com/app-sre/qontract-reconcile
-$ cd qontract-reconcile
-$ python -m venv venv && source venv/bin/activate && pip install -e .
+$ pip install --user qontract-reconcile --upgrade
 ```
 
 If you need to have multiple Python versions installed locally, you can use projects such as [pyenv](https://github.com/pyenv/pyenv).
@@ -92,7 +90,7 @@ server = "http://localhost:4000/graphql"
 * In a different terminal, from the directory where you have cloned `qontract-reconcile`:
 
   ```
-  (venv) $ qontract-cli --config config.promtool.toml run-prometheus-test -s config \
+  $ qontract-cli --config config.promtool.toml run-prometheus-test -s config \
     resources/observability/prometheusrules/app-interface-production.prometheusrulestests.yaml  \
     app-sre-prod-01
   Unit Testing:  /var/folders/dx/y5_klhc1187gnzzmyb4pswb40000gn/T/tmp7kj8agy1
@@ -107,4 +105,4 @@ The previous example assumes that any potential secret will be searched locally 
 
 ## Further documentation
 
-Writing tests can be difficult at the beginning. This [article](https://www.robustperception.io/unit-testing-rules-with-prometheus) is a nicer start than the official documentation.
+Writing tests can be difficult at the beginning. The articles [here](https://www.robustperception.io/unit-testing-rules-with-prometheus) and [here](https://howardburgess.github.io/prometheus-unit-testing/#/) are a nicer start than the official documentation.

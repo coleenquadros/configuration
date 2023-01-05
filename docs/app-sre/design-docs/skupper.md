@@ -306,6 +306,47 @@ https://skupper-skupper-fake-api-server-net.apps.appsres04ue2.n4k3.p1.openshifta
 * Due to its nature of wrapping TCP packages into AMQP messages, we expect higher latency on skupper-exposed services.
   For now, we don't have enough experience and benchmarks to judge this; therefore, currently, it should be for non-latency critical applications only.
 
+
+## Latency
+
+See [blackbox exporter](https://grafana.app-sre.devshift.net/goto/CjROdFDVk?orgId=1) to compare the differences between skupper and non-skupper exposed prometheus services.
+
+***Statistics (2022-11-07 based on last 24 hours)***:
+
+> :information_source: **Note**
+>
+> blackbox exporter is running on app-sre-prod-01 (app-sre-observability).
+
+
+app-sre-prod-01 (us-east-1):
+
+| **Service**                       | **encrypted**      | **Average Probe Duration** |
+| --------------------------------- | ------------------ | -------------------------- |
+| customer prometheus (**skupper**) | :x:                | 8.85 ms                    |
+| customer prometheus (**native**)  | :white_check_mark: | 17.0 ms                    |
+| cluster prometheus (**skupper**)  | :white_check_mark: | 19.3 ms                    |
+| cluster prometheus (**native**)   | :white_check_mark: | 17.2 ms                    |
+
+app-sre-prod-03 (us-east-1):
+
+| **Service**                       | **encrypted**      | **Average Probe Duration** |
+| --------------------------------- | ------------------ | -------------------------- |
+| customer prometheus (**skupper**) | :x:                | 9.25 ms                    |
+| customer prometheus (**native**)  | :white_check_mark: | 17.5 ms                    |
+| cluster prometheus (**skupper**)  | :white_check_mark: | 21.3 ms                    |
+| cluster prometheus (**native**)   | :white_check_mark: | 20.2 ms                    |
+
+appsrep05ue1 (us-east-1):
+
+| **Service**                       | **encrypted**      | **Average Probe Duration** |
+| --------------------------------- | ------------------ | -------------------------- |
+| customer prometheus (**skupper**) | :x:                | 10.5                       |
+| customer prometheus (**native**)  |                    | not reachable              |
+| cluster prometheus (**skupper**)  | :white_check_mark: | 24.3 ms                    |
+| cluster prometheus (**native**)   |                    | not reachable              |
+
+The differences between skupper vs. native are negligible, except HTTP vs. HTTPS, which is coherent.
+
 ## Open Topics
 
 * HTTPS and certificate validation, see also [Skupper TLS with Prepopulated Certificates][skupper-prepopulated-Certificates]
@@ -318,12 +359,12 @@ https://skupper-skupper-fake-api-server-net.apps.appsres04ue2.n4k3.p1.openshifta
 
 ## Milestones
 
-1. Implement Skupper for Grafana -> Prometheus connections and gain more experience
-   1. Monitor interruptions during cluster upgrades
-   1. Measure metrics via *blackbox-exporter*
-1. Go/No go decision for the usage of skupper within Red Hat in general
-1. Design document for a skupper qontract-reconcile integration
-1. Implementation of integration
+1. [ ] Implement Skupper for Grafana -> Prometheus connections and gain more experience
+   1. [x] Monitor interruptions during cluster upgrades
+   1. [x] Measure metrics via *blackbox-exporter*. See results in [Latency](#latency) section
+1. [ ] Go/No go decision for the usage of skupper within Red Hat in general
+1. [ ] Design document for a skupper qontract-reconcile integration
+1. [ ] Implementation of integration
 
 ## Links
 

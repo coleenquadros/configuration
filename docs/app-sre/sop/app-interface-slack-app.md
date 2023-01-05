@@ -68,3 +68,39 @@ settings:
   socket_mode_enabled: false
   token_rotation_enabled: false
 ```
+
+
+## Slack usage across AppSRE tooling
+
+### PagerDuty
+- https://redhat.pagerduty.com/service-directory?direction=asc&query=&team_ids=PS6EEYR
+### AlertManager (#sd-app-sre-alert)
+- https://coreos.slack.com/apps/A0F7XDUAZ-incoming-webhooks?tab=settings&next_id=0
+- https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-input/alertmanager-integration
+### Qontract-reconcile (cluster upgrades, jira, etc)
+- https://app.slack.com/app-settings/T027F3GAJ/AKCMUPYJ3/app-manifest
+- https://api.slack.com/apps/AKCMUPYJ3/oauth
+- https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/app-interface (reconcile/triggers channel)
+- https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-stage/app-interface-stage/app-interface (reconcile/triggers channel stage)
+### Jenkins
+- https://ci.int.devshift.net/manage/configure
+- https://ci.int.devshift.net/credentials/store/system/domain/_/credential/slack-integration-token/
+- https://ci.ext.devshift.net/manage/configure
+- https://ci.ext.devshift.net/credentials/store/system/domain/_/credential/slack-integration-token/
+### Status page
+- https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/status.redhat.com
+- https://manage.statuspage.io/pages/dn6mqn7xvzz3/slack
+- https://manage.statuspage.io/pages/8szqd6w4s277/slack
+- https://coreos.slack.com/services/B0CUC1N1Y
+### Gitlab (#sd-app-sre-info)
+- https://gitlab.cee.redhat.com/service/app-interface/-/settings/integrations/slack/edit
+- https://gitlab.cee.redhat.com/service/dev-guidelines
+- https://gitlab.cee.redhat.com/app-sre/infra
+- https://gitlab.cee.redhat.com/service/app-sre-observability
+- https://gitlab.cee.redhat.com/service/vault-devshift-net
+- https://gitlab.cee.redhat.com/app-sre/contract
+- https://coreos.slack.com/apps/A0F7XDUAZ-incoming-webhooks?tab=settings&next_id=0
+### Github
+- https://github.com/organizations/app-sre/settings/installations/1177464
+### Unleash
+- https://app-interface.unleash.devshift.net/addons/edit/1

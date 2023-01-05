@@ -179,6 +179,31 @@ openshiftResources:
   path: /web-rca/production/web-rca-s3.prometheusrules.yaml
 - provider: resource
   path: /web-rca/production/web-rca-rds.prometheusrules.yaml
+
+### Devfile Registry
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/devfile-registry.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: devfile-registry-production
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/devfile-registry-redhat.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: devfile-registry-redhat-production
+- provider: resource
+  path: /observability/prometheusrules/devfile-registry-production.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/devfile-registry-redhat-production.prometheusrules.yaml
+
+## Glitchtip rules
+- provider: resource
+  path: /observability/prometheusrules/glitchtip-slo-production.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/glitchtip-production-prometheusrules.yaml
+
 ### Container Security Operator rules
 - provider: resource
   path: /observability/prometheusrules/container-security-operator.prometheusrules.yaml
@@ -316,6 +341,10 @@ openshiftResources:
   path: /observability/prometheusrules/kas-fleet-manager-cluster-capacity-production.prometheusrules.yaml
 - provider: resource
   path: /observability/prometheusrules/kas-fleet-manager-kafka-version-mismatch-production.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/kas-fleet-manager-kafkas-stuck-in-suspending-state-production.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/kas-fleet-manager-kafkas-stuck-in-resuming-state-production.prometheusrules.yaml
   ### COS Fleet Manager
 - provider: resource
   path: /observability/prometheusrules/cos-fleet-manager-slos-availability-production.prometheusrules.yaml
@@ -356,6 +385,16 @@ openshiftResources:
   variables:
     environment: production
     namespace: web-rca-production
+
+### Glitchtip
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/glitchtip.servicemonitor.yaml
+  variables:
+    namespace: glitchtip-production
+- provider: vault-secret
+  path: cs-sre/creds/glitchtip/production/glitchtip-service-monitor-bearer-token
+  version: 3
 
 ## Service Registry
 
@@ -468,5 +507,5 @@ openshiftResources:
   path: /observability/prometheusrules/rhose-fleet-manager-production.prometheusrules.yaml
 
 sharedResources:
-- $ref: /services/observability/shared-resources/dvo.yml
+- $ref: /services/observability/shared-resources/dvo-openshift.yml
 - $ref: /services/observability/shared-resources/dvo-alerts.yml

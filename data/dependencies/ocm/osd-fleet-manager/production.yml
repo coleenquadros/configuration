@@ -1,0 +1,142 @@
+---
+$schema: /openshift/openshift-cluster-manager-1.yml
+labels:
+  service: osd-fleet-manager
+name: osd-fleet-manager-ocm-production
+description: OpenShift Cluster Manager PROD - OSD Fleet Manager
+url: https://api.openshift.com
+accessTokenClientId: osd-fleet-manager-production
+accessTokenUrl: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+accessTokenClientSecret:
+  path: app-interface/osd-fleet-manager/production/fleet-manager
+  field: ocm-service.clientSecret
+  version: 1
+blockedVersions:
+- ^.*-ec\..*$
+- ^.*-fc\..*$
+- ^4\.11\.0-rc\.[0-5]$
+# Temporarily block 4.12 upgrades until after shutdown
+- ^4\.12\..*$
+
+upgradePolicyAllowedWorkloads:
+- service-cluster
+- management-cluster
+upgradePolicyAllowedMutexes:
+- service-cluster
+- management-cluster
+
+sectors:
+# region support for hypershift GA:
+# https://docs.google.com/document/d/1AvSgSOlnHg34IFwxIGQzakNYqoItcbRFe08Qdq0NKJ4/edit#heading=h.lvnw05606r2j
+# - name: af-south-1
+# - name: ap-east-1
+# - name: ap-northeast-1
+# - name: ap-northeast-2
+# - name: ap-south-1
+# - name: ap-southeast-1
+- name: ap-southeast-2
+- name: eu-central-1
+- name: eu-west-1
+- name: us-east-1
+- name: us-east-2
+  dependencies:
+  - name: us-east-1
+- name: us-west-2
+  dependencies:
+  - name: us-east-2
+upgradePolicyDefaults:
+- name: service-cluster
+  matchLabels:
+    ext-hypershift.openshift.io/cluster-type: service-cluster
+  upgradePolicyTemplate:
+    path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
+    type: jinja2
+    variables:
+      schedule: 0 11 * * 1-5
+- name: management-cluster
+  matchLabels:
+    ext-hypershift.openshift.io/cluster-type: management-cluster
+  upgradePolicyTemplate:
+    path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
+    variables:
+      schedule: 0 13 * * 1-5
+upgradePolicyClusters:
+- name: hs-mc-1sek0vqe0
+  upgradePolicy:
+    workloads:
+    - management-cluster
+    schedule: 0 13 * * 1-5
+    conditions:
+      sector: us-east-1
+      soakDays: 0
+      mutexes:
+      - management-cluster
+- name: hs-sc-1sek0vq5g
+  upgradePolicy:
+    workloads:
+    - service-cluster
+    schedule: 0 11 * * 1-5
+    conditions:
+      sector: us-east-1
+      soakDays: 0
+      mutexes:
+      - service-cluster
+- name: hs-mc-qiag659u0
+  upgradePolicy:
+    workloads:
+    - management-cluster
+    schedule: 0 13 * * 1-5
+    conditions:
+      sector: eu-west-1
+      soakDays: 0
+      mutexes:
+      - management-cluster
+- name: hs-sc-qiag65950
+  upgradePolicy:
+    workloads:
+    - service-cluster
+    schedule: 0 11 * * 1-5
+    conditions:
+      sector: eu-west-1
+      soakDays: 0
+      mutexes:
+      - service-cluster
+- name: hs-mc-aj68uo7r0
+  upgradePolicy:
+    workloads:
+    - management-cluster
+    schedule: 0 13 * * 1-5
+    conditions:
+      sector: us-east-1
+      soakDays: 0
+      mutexes:
+      - management-cluster
+- name: hs-mc-aj68uoang
+  upgradePolicy:
+    workloads:
+    - management-cluster
+    schedule: 0 13 * * 1-5
+    conditions:
+      sector: eu-west-1
+      soakDays: 0
+      mutexes:
+      - management-cluster
+- name: hs-mc-k9svq4pj0
+  upgradePolicy:
+    workloads:
+    - management-cluster
+    schedule: 0 13 * * 1-5
+    conditions:
+      sector: us-east-1
+      soakDays: 0
+      mutexes:
+      - management-cluster
+recommendedVersions:
+- workload: management-cluster
+  channel: candidate
+  recommendedVersion: 4.12.0-rc.1
+  initialVersion: openshift-v4.12.0-rc.1-candidate
+- workload: service-cluster
+  channel: candidate
+  recommendedVersion: 4.12.0-rc.5
+  initialVersion: openshift-v4.12.0-rc.5-candidate

@@ -1,0 +1,51 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: web-rca
+name: web-rca-2022-12-01
+app:
+  $ref: /services/web-rca/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://gitlab.cee.redhat.com/service/web-rca:
+    - branch: master
+      total: 24
+      success: 24
+    https://gitlab.cee.redhat.com/service/web-rca-ui:
+    - branch: master
+      total: 18
+      success: 10
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-04
+    namespace: web-rca-production
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: web-rca-stage
+    validations:
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 1
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 1
+  service_slo:
+  - cluster: app-sre-prod-04
+    namespace: web-rca-production
+    slo_name: Web-RCA API Availability
+    slo_doc_name: web-rca
+    slo_value: 99.9967191839634
+    slo_target: 90.0
+  - cluster: app-sre-prod-04
+    namespace: web-rca-production
+    slo_name: Web-RCA API Latency
+    slo_doc_name: web-rca
+    slo_value: 99.9998080333765
+    slo_target: 99.0

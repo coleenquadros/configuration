@@ -5,7 +5,6 @@ labels: {}
 name: sd-ops-dev
 
 permissions:
-- $ref: /dependencies/ci-int/permissions/ci-int-ro.yml
 - $ref: /dependencies/ci-int/permissions/ci-int-read-only.yml
 - $ref: /services/observability/permissions/observability-access.yml
 - $ref: /dependencies/quay/permissions/quay-membership-sd-ops-dev.yml
@@ -43,9 +42,9 @@ access:
 - namespace:
     $ref: /services/cna/namespaces/integration.yml
   role: edit
-# - namespace: add, once the production environment is created
-#     $ref: /services/cna/namespaces/production.yml
-#   role: view
+- namespace:
+    $ref: /services/cna/namespaces/prod.yml
+  role: view
 - namespace:
     $ref: /services/cna/namespaces/cna-pipelines.appsrep05ue1.yaml
   role: view
@@ -61,6 +60,12 @@ self_service:
   - $ref: /services/web-rca/cicd/deploy.yaml
   - $ref: /services/cna/cicd/deploy.yaml
 - change_type:
+    $ref: /app-interface/changetype/app-owner.yml
+  datafiles:
+  - $ref: /services/status-board/app.yml
+  - $ref: /services/web-rca/app.yml
+  - $ref: /services/cna/app.yml
+- change_type:
     $ref: /app-interface/changetype/namespace-owner.yml
   datafiles:
   - $ref: /services/status-board/namespaces/stage.yml
@@ -69,7 +74,16 @@ self_service:
   - $ref: /services/web-rca/namespaces/production.yml
   - $ref: /services/cna/namespaces/stage.yml
   - $ref: /services/cna/namespaces/integration.yml
+  - $ref: /services/cna/namespaces/prod.yml
 
 sentry_teams:
   - $ref: /dependencies/sentry/teams/sd-ops-dev-stage.yml
   - $ref: /dependencies/sentry/teams/sd-ops-dev-production.yml
+
+glitchtip_roles:
+- organization:
+    $ref: /dependencies/glitchtip/organizations/sd-sea.yml
+  role: member
+
+glitchtip_teams:
+- $ref: /dependencies/glitchtip/teams/sd-ops-dev.yml

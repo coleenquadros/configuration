@@ -103,9 +103,6 @@ cat "$CONFIG_TOML" > ${WORK_DIR}/config/config.toml
 # Gatekeeper. If this fails, we skip all the integrations.
 run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre || exit 1
 
-### gitlab-ci-skipper runs first to determine if other integrations should run
-[[ "$(run_int gitlab-ci-skipper $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)" == "yes" ]] && exit 0
-
 }
 
 # Prepare to run integrations on local server

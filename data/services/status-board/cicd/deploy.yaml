@@ -15,7 +15,7 @@ pipelinesProvider:
 
 slack: # configure where to send notifications of success/failure of deployments
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: sd-ops-services-dev
 
 managedResourceTypes:
@@ -23,6 +23,7 @@ managedResourceTypes:
 - Service
 - ServiceAccount
 - ConfigMap
+- CronJob
 
 imagePatterns:
 - quay.io/app-sre/status-board
@@ -50,13 +51,14 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
     ref: main
     parameters:
       REPLICAS: 3
+      PRUNER_DISABLE: false
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: service-status-board-gl-build-main
   - namespace:
       $ref: /services/status-board/namespaces/production.yml
-    ref: c2ced7281825bd2bd716f4fee244c520b5a57773
+    ref: c2ed13176a21c9eb4a691e2045ee13cc05ceb6e0
     parameters:
       DATABASE_SECRET_NAME: status-board-production-rds
       OCM_BASE_URL: https://api.openshift.com

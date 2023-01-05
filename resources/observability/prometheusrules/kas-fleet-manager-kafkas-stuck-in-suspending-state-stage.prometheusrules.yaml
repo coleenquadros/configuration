@@ -1,0 +1,24 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: kas-fleet-manager-kafkas-stuck-in-suspending-state-stage
+spec:
+  groups:
+  - name: kas-fleet-manager-stage
+    rules:
+    - alert: KasFleetManagerKafkasStuckInSuspendingState - stage
+      annotations:
+        message: "Kafka {{ $labels.id }} stuck in suspending state for more than 5 minutes"
+        dashboard: "https://grafana.stage.devshift.net/d/WLBv_KuMz/kas-fleet-manager-metrics?orgId=1&var-datasource=app-sre-stage-01-prometheus"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kas-fleet-manager-kafkas-stuck-in-suspending-state"
+      expr: |
+        kas_fleet_manager_kafka_requests_current_status_info{status="suspending"} == 1
+      for: 5m
+      labels:
+        service: kas-fleet-manager
+        severity: warning

@@ -1,0 +1,97 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: automation-hub
+name: automation-hub-2022-12-01
+app:
+  $ref: /services/insights/automation-hub/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/ansible/galaxy_ng:
+    - branch: master
+      total: 25
+      success: 21
+    - branch: master
+      total: 1
+      success: 1
+    https://github.com/ansible/galaxy-importer:
+    - branch: master
+      total: 1
+      success: 1
+    https://github.com/ansible/ansible-hub-ui:
+    - branch: master
+      total: 49
+      success: 49
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: automation-hub-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: automation-hub-prod
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: automation-hub-stage-tests
+    post_deploy_job: false
+  - cluster: app-sre-stage-01
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcp01ue1
+    namespace: automation-hub-prod
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 1
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 2
+  - cluster: crcp01ue1
+    namespace: automation-hub-jobs-prod
+    validations:
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 2
+  - cluster: crcs02ue1
+    namespace: automation-hub-stage
+    validations:
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 2
+  - cluster: crcs02ue1
+    namespace: automation-hub-jobs-stage
+    validations:
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 7
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 7
+  - cluster: appsres03ue1
+    namespace: automation-hub-stage-tests
+    validations:
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 1
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 1
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: automation-hub-prod
+    slo_name: automation-hub latency
+    slo_doc_name: automation-hub
+    slo_value: 99.9199208923681
+    slo_target: 90.0
+  - cluster: crcp01ue1
+    namespace: automation-hub-prod
+    slo_name: automation-hub availability
+    slo_doc_name: automation-hub
+    slo_value: 99.9969761152494
+    slo_target: 95.0

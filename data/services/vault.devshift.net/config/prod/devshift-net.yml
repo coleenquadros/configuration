@@ -18,3 +18,31 @@ auth:
   secretID:
     path: "app-sre/ci-int/vault-manager-creds"
     field: "secret_id"
+
+replication:
+- vaultInstance:
+    $ref: /services/vault.devshift.net/config/ci-ext/ci-ext.yml
+  sourceAuth:
+    provider: "approle"
+    secretEngine: "kv_v1"
+    roleID:
+      path: "app-sre/creds/vault-replication-approle-main"
+      field: "role_id"
+    secretID:
+      path: "app-sre/creds/vault-replication-approle-main"
+      field: "secret_id"
+
+  destAuth:
+    provider: "approle"
+    secretEngine: "kv_v1"
+    roleID:
+      path: "app-sre/creds/vault-replication-approle-ci-ext"
+      field: "role_id"
+    secretID:
+      path: "app-sre/creds/vault-replication-approle-ci-ext"
+      field: "secret_id"
+
+  paths:
+  - provider: "jenkins"
+    jenkinsInstance:
+      $ref: /dependencies/ci-ext/ci-ext.yml

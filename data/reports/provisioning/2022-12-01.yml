@@ -1,0 +1,38 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: provisioning
+name: provisioning-2022-12-01
+app:
+  $ref: /services/insights/provisioning/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RHEnVision/provisioning-frontend:
+    - branch: master
+      total: 14
+      success: 14
+    https://github.com/RHEnVision/provisioning-backend:
+    - branch: master
+      total: 39
+      success: 36
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: provisioning-stage
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: provisioning-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 3
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 2
+  service_slo: null

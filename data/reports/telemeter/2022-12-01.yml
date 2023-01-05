@@ -1,0 +1,69 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: telemeter
+name: telemeter-2022-12-01
+app:
+  $ref: /services/rhobs/telemeter/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/rhobs/configuration:
+    - branch: master
+      total: 8
+      success: 8
+    https://github.com/openshift/telemeter:
+    - branch: master
+      total: 4
+      success: 4
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: openshift-customer-monitoring
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: rhobs-testing
+    namespace: openshift-customer-monitoring
+    post_deploy_job: false
+  - cluster: telemeter-prod-01
+    namespace: openshift-customer-monitoring
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: telemeter-prod-01
+    namespace: telemeter-production
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 1
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 2
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 3
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 3
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 1
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 1
+  - cluster: app-sre-stage-01
+    namespace: telemeter-stage
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 1
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 2
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 3
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 3
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 1
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 1
+  service_slo: null

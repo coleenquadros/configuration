@@ -8,7 +8,7 @@ name: dsaas-preview
 description: preview namespace for dsaas
 
 cluster:
-  $ref: /openshift/app-sre-stage-02/cluster.yml
+  $ref: /openshift/app-sre-stage-01/cluster.yml
 
 app:
   $ref: /services/openshift.io/app.yml
@@ -17,16 +17,23 @@ environment:
   $ref: /products/openshift.io/environments/stage.yml
 
 networkPoliciesAllow:
-- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-02.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
-grafanaUrl: "https://grafana.app-sre.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods?var-datasource=app-sre-stage-02-cluster-prometheus&var-namespace=dsaas-preview"
+grafanaUrl: "https://grafana.app-sre.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods?var-datasource=app-sre-stage-01-cluster-prometheus&var-namespace=dsaas-preview"
 
 managedRoles: true
 
 managedResourceTypes:
 - ConfigMap
+- ServiceAccount
 
 openshiftResources:
+- provider: vault-secret
+  path: app-interface/global/quay/openshiftio/quay.io
+  version: 2
+  type: kubernetes.io/dockercfg
+- provider: resource
+  path: /dsaas-stg/dsaas-deploy.serviceaccount.yaml
 - provider: resource
   path: /dsaas-stg/dsaas-preview/redirector.configmap.yaml
 - provider: resource

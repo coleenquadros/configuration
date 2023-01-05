@@ -88,14 +88,36 @@ openshiftResources:
 ### ci.int.devshift.net
 - provider: resource
   path: /observability/prometheusrules/ci-int.prometheusrules.yaml
+### Hive Capacity
+## hive-production
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheusrules/hive-production-capacity.prometheusrules.yaml
+  variables:
+    appsre_env: production
+    max_clusters_per_shard: 500
+    grafana_datasource: appsrep05ue1-prometheus
+## hive-stage
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheusrules/hive-stage-capacity.prometheusrules.yaml
+  variables:
+    appsre_env: staging
+    max_clusters_per_shard: 500
+    grafana_datasource: appsrep05ue1-prometheus
 ### App-SRE contract
 - provider: resource-template
   type: extracurlyjinja2
   path: /app-sre/app-sre-contract/app-sre-contract.prometheusrules.yaml.j2
-
+# Vault rules
+- provider: resource
+  path: /observability/prometheusrules/vault-production.prometheusrules.yaml
 ### Container Security Operator rules
 - provider: resource
   path: /observability/prometheusrules/container-security-operator.prometheusrules.yaml
+### Blackbox exporter checks
+- provider: resource
+  path: /observability/prometheusrules/blackbox-exporter-int.prometheusrules.yaml
 
 ## ServiceMonitors
 ### App-SRE contract
@@ -115,7 +137,14 @@ openshiftResources:
 ### MT-SRE Jenkins (ci-int) builds
 - provider: resource
   path: /observability/prometheusrules/mt-sre-ci-int.prometheusrules.yaml
+### Vault
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/vault.servicemonitor.yaml
+  variables:
+    environment: prod
+    namespace: vault-prod
 
 sharedResources:
-- $ref: /services/observability/shared-resources/dvo.yml
+- $ref: /services/observability/shared-resources/dvo-openshift.yml
 - $ref: /services/observability/shared-resources/dvo-alerts.yml

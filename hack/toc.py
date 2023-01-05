@@ -19,7 +19,7 @@
 import re
 
 
-with open('README.md') as file_obj:
+with open("README.md") as file_obj:
     links = []
 
     # Code sections are enclosed in ```
@@ -30,18 +30,18 @@ with open('README.md') as file_obj:
     for line in file_obj:
 
         # Mark the beginning of a code section
-        if not code_section and line.startswith('```'):
+        if not code_section and line.startswith("```"):
             code_section = True
             continue
 
         # Mark the end of a code seciont
         if code_section:
-            if line.startswith('```'):
+            if line.startswith("```"):
                 code_section = False
             continue
 
         # Only interested in lines starting with #
-        if not line.startswith('#'):
+        if not line.startswith("#"):
             continue
 
         elements = line.split()
@@ -57,10 +57,10 @@ with open('README.md') as file_obj:
         # "##"   -> "  - "
         # "###"  -> "    - "
         # "####" -> "      - "
-        level = (' ' * (2 * (len(hashes) - 1))) + '- '
+        level = (" " * (2 * (len(hashes) - 1))) + "- "
 
         # Only alphanumerics and "-" are used for links
-        link_el =  [re.sub('[^a-zA-Z0-9-]', '', word) for word in title_el]
+        link_el = [re.sub("[^a-zA-Z0-9-]", "", word) for word in title_el]
 
         " ".join(elements[1:])
         link = "-".join(link_el).lower()
@@ -75,9 +75,9 @@ with open('README.md') as file_obj:
                 break
 
             # Starting from the second occurrence, the counter is used
-            new_link = '{}-{}'.format(link, counter)
+            new_link = "{}-{}".format(link, counter)
             counter += 1
 
         # Putting all together
         title = " ".join(title_el)
-        print('{}[{}](#{})'.format(level, title, new_link))
+        print("{}[{}](#{})".format(level, title, new_link))

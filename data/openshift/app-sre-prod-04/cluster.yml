@@ -11,7 +11,7 @@ alertmanagerUrl: https://alertmanager.app-sre-prod-04.devshift.net
 serverUrl: https://api.app-sre-prod-04.i5h0.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
 auth:
-  service: github-org-team
+- service: github-org-team
   org: app-sre
   team: app-sre-prod-04-cluster
 observabilityNamespace:
@@ -30,7 +30,7 @@ spec:
   provider: aws
   region: us-east-1
   channel: fast
-  version: 4.11.5
+  version: 4.11.18
   initial_version: 4.3.18
   multi_az: true
   nodes: 9
@@ -100,9 +100,19 @@ peering:
     vpc:
       $ref: /aws/image-builder-prod/vpcs/vpc-0581dd780cb801493.yml
     manageRoutes: true
+  - provider: account-tgw
+    name: app-sre-prod-04
+    account:
+      $ref: /aws/svc-transit-prod/account.yml
+    tags:
+      hypershift: svc-transit-privatelink
+    manageRoutes: true
+    manageSecurityGroups: true
+    cidrBlock: 172.16.0.0/12
 automationToken:
   path: app-sre/creds/kube-configs/app-sre-prod-04
   field: token
+clusterAdmin: true
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/app-sre-prod-04-cluster-admin
   field: token
@@ -115,6 +125,9 @@ awsInfrastructureManagementAccounts:
 - account:
     $ref: /aws/image-builder-prod/account.yml
   accessLevel: network-mgmt
+- account:
+    $ref: /aws/svc-transit-prod/account.yml
+  accessLevel: network-mgmt
 awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
@@ -122,9 +135,3 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
-- awsGroup:
-    $ref: /aws/app-sre/groups/Log-consumers.yml
-  accessLevel: read-only
-- awsGroup:
-    $ref: /aws/app-sre-logs/groups/Log-consumers.yml
-  accessLevel: read-only

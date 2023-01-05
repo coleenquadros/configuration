@@ -16,7 +16,7 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-remediations
 
 managedResourceTypes:
@@ -34,6 +34,9 @@ authentication:
     path: insights/quay/cloudservices-push
     field: all
     version: 3
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
 
 resourceTemplates:
 - name: remediations-consumer
@@ -41,6 +44,7 @@ resourceTemplates:
   url: https://github.com/RedHatInsights/remediations-consumer
   parameters:
     KAFKA_SSL_ENABLED: false
+    KAFKA_CONNECTION_TIMEOUT: 10000
     DB_SSL_ENABLED: true
     LOG_CW_ENABLED: true
     LOG_LEVEL: info
@@ -49,10 +53,17 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/remediations-prod.yml
-    ref: 99ccbd4bacb78b4682f98c70505711cbe8455aec
+    ref: a72d0ead3631f019e60ce9655de92d31a7545a1c
   - namespace:
       $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
-    ref: 89c4e679239862eb89fc5a8baf1c50c67b9c96b9
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-remediations-consumer-gh-build-master
+    promotion:
+      publish:
+        - remediations-consumer-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true
@@ -64,6 +75,7 @@ resourceTemplates:
   url: https://github.com/RedHatInsights/remediations-consumer
   parameters:
     KAFKA_SSL_ENABLED: false
+    KAFKA_CONNECTION_TIMEOUT: 10000
     DB_SSL_ENABLED: true
     LOG_CW_ENABLED: true
     LOG_LEVEL: info
@@ -72,10 +84,17 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/remediations-prod.yml
-    ref: 99ccbd4bacb78b4682f98c70505711cbe8455aec
+    ref: a72d0ead3631f019e60ce9655de92d31a7545a1c
   - namespace:
       $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
-    ref: 89c4e679239862eb89fc5a8baf1c50c67b9c96b9
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-remediations-consumer-gh-build-master
+    promotion:
+      publish:
+        - remediations-update-consumer-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true
@@ -95,12 +114,12 @@ resourceTemplates:
     LOG_LEVEL: info
     MAX_REPLICAS: 5
     MIGRATION_COMMAND: npm run db:create; npm run db:migrate
-    MIN_REPLICAS: 2
+    MIN_REPLICAS: 3
     PATCHMAN_IMPL: impl
     PATH_PREFIX: /api
     RBAC_IMPL: impl
     RECEPTOR_IMPL: impl
-    REMEDIATIONS_REPLICAS: 2
+    REMEDIATIONS_REPLICAS: 3
     SOURCES_IMPL: impl
     SSG_IMPL: impl
     SSG_HOST: http://playbooks-ssg:8080
@@ -111,22 +130,31 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/remediations-prod.yml
-    ref: 99929dafdf15bed95c859caaba956424eed33245
+    ref: dcb140117e8e5b82176129affa04a065866b79d3
     parameters:
       PLATFORM_HOSTNAME_URL: "cert.${PLATFORM_HOSTNAME}"
+      USERS_TEST_ACCOUNT: 'insights-qa'
       FLOORIST_SUSPEND: 'false'
       FLOORIST_IMAGE_TAG: b57a5a8
       FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-prod
       FLOORIST_SCHEDULE: '11 10 * * *'
   - namespace:
       $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
-    ref: 5ddb482a41d1c5cd486efe98608a36bd8c1d53cc
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-remediations-gh-build-master
     parameters:
       PLATFORM_HOSTNAME_URL: "cert.${PLATFORM_HOSTNAME}"
+      USERS_TEST_ACCOUNT: 'insights-qa'
       FLOORIST_SUSPEND: 'false'
       FLOORIST_IMAGE_TAG: fe12542 # 2022-06-03
       FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage
       FLOORIST_SCHEDULE: '11 10 * * *'
+    promotion:
+      publish:
+        - remediations-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true

@@ -1,30 +1,26 @@
 ---
 $schema: /openshift/openshift-cluster-manager-1.yml
-
 labels:
   service: app-sre
-
 name: ocm-production
 description: OpenShift Cluster Manager production - App SRE OSDv4 clusters
-url: "https://api.openshift.com"
-
-accessTokenClientId: cloud-services
+url: https://api.openshift.com
+accessTokenClientId: sd-app-sre-ocm-sa
 accessTokenUrl: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
-# The use of offline token is deprecated
-offlineToken:
+accessTokenClientSecret:
   path: app-sre/creds/ocm/sd-app-sre-ocm-app-interface
-  field: offline_token
-
+  field: client_secret
 blockedVersions:
-- '^.*-ec\..*$'
-- '^.*-fc\..*$'
-- '^4\.11\.0-rc\.[0-5]$'
+- ^.*-ec\..*$
+- ^.*-fc\..*$
+- ^4\.11\.0-rc\.[0-5]$
+- ^4\.11\..*$
+- ^4\.12\..*$
 
 upgradePolicyAllowedWorkloads:
 - appsre
 - clair
 - crc
-- crda
 - hacbs
 - hive
 - hypershift
@@ -33,6 +29,7 @@ upgradePolicyAllowedWorkloads:
 - ocm-quay
 - quay
 - telemeter
+- example
 
 upgradePolicyAllowedMutexes:
 - ocm-quay-critical
@@ -40,3 +37,17 @@ upgradePolicyAllowedMutexes:
 - candidate-0
 - hive-production
 - ocmquay-production
+
+upgradePolicyClusters:
+- name: appint-ex-01
+  upgradePolicy:
+    workloads:
+    - example
+    schedule: '* * * * *'
+    conditions:
+      soakDays: 0
+recommendedVersions:
+- workload: example
+  channel: candidate
+  recommendedVersion: 4.12.0-rc.5
+  initialVersion: openshift-v4.12.0-rc.5-candidate

@@ -15,13 +15,14 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-uhc-info
 
 managedResourceTypes:
 - Deployment
 - Service
 - ConfigMap
+- PodDisruptionBudget
 
 imagePatterns:
 - quay.io/app-sre/osd-fleet-manager
@@ -49,10 +50,17 @@ resourceTemplates:
       OCM_URL: ${OCM_BASE_URL}
       REPLICAS: 1
       ENABLE_PROVISION_SHARD_RECONCILIATION: true
+      ENABLE_ACCOUNT_RECONCILIATION: true
+      ENABLE_NETWORK_RECONCILIATION: true
       # TODO we shouldn't need to provide OIDC info at all, see https://issues.redhat.com/browse/SDA-6676
       OIDCS3_BUCKET_NAME: oidc-bucket-integration
       AWS_BASE_DOMAIN: i3.devshift.org
       EXTERNAL_DNS_DOMAIN_FILTER: i3.devshift.org
+      CLUSTER_EXPIRATION_TIME_DELTA_DAYS: 3650
+      SENTRY_ENABLE: false
+      # TODO remove this once MCE fix is in place
+      # See #incident-hypershift-staging-12-20
+      HYPERSHIFT_OPERATOR_IMAGE: "quay.io/hypershift/hypershift-operator:config-fix-20221221"
       SUPPORTED_CLOUD_PROVIDERS: |-
         - name: aws
           regions:
@@ -61,7 +69,8 @@ resourceTemplates:
           # HyperShift Service Cluster
           hs-sc:
             name_prefix: "hs-sc-"
-            openshift_version: ""
+            # needs to match name from https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
+            openshift_version: "openshift-v4.12.0-rc.1-candidate"
             multi_az: true
             ccs: true
             compute_machine_type: m5.xlarge
@@ -73,13 +82,14 @@ resourceTemplates:
           # HyperShift Management Cluster
           hs-mc:
             name_prefix: "hs-mc-"
-            openshift_version: ""
+            # needs to match name from https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
+            openshift_version: "openshift-v4.12.0-rc.1-candidate"
             multi_az: true
             ccs: true
             compute_machine_type: m5.xlarge
             compute_autoscale: true
             compute_autoscale_min_replicas: 3
-            compute_autoscale_max_replicas: 9
+            compute_autoscale_max_replicas: 30
             network_type: OVNKubernetes
             private: false
       ENABLE_SIMPLE_IDENTITY_PROVIDER: true
@@ -87,9 +97,13 @@ resourceTemplates:
         - "fleet-manager-debug"
       DEVELOPER_USERS:
         - "fleet-manager-debug"
-      CLUSTER_CHANNEL: "stable"
-      ENABLE_CLUSTER_AUTO_UPGRADE: true
+      CLUSTER_CHANNEL: "candidate"
+      ENABLE_CLUSTER_AUTO_UPGRADE: false
       CLUSTER_AUTO_UPGRADE_CRON: "0 4 * * *"
+      RHOBS_URL: "https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform-staging/api/v1/receive"
+      RHOBS_ENV: "int"
+      MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: "40"
+      MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: "80"
   - namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
     ref: main
@@ -105,17 +119,29 @@ resourceTemplates:
       # TODO we shouldn't need to provide OIDC info at all, see https://issues.redhat.com/browse/SDA-6676
       OIDCS3_BUCKET_NAME: oidc-bucket-integration
       ENABLE_PROVISION_SHARD_RECONCILIATION: true
+      ENABLE_ACCOUNT_RECONCILIATION: true
+      ENABLE_NETWORK_RECONCILIATION: true
       AWS_BASE_DOMAIN: s3.devshift.org
       EXTERNAL_DNS_DOMAIN_FILTER: s3.devshift.org
+      CLUSTER_EXPIRATION_TIME_DELTA_DAYS: 3650
+      SENTRY_ENABLE: true
+      SENTRY_PROJECT: 39
+      SENTRY_URL: https://sentry.stage.devshift.net
+      # TODO remove this once MCE fix is in place
+      # See #incident-hypershift-staging-12-20
+      HYPERSHIFT_OPERATOR_IMAGE: "quay.io/hypershift/hypershift-operator:config-fix-20221221"
       SUPPORTED_CLOUD_PROVIDERS: |-
         - name: aws
           regions:
             - name: us-west-2
+            - name: us-east-2
+            - name: us-east-1
       CLUSTER_TEMPLATES: |-2
           # HyperShift Service Cluster
           hs-sc:
             name_prefix: "hs-sc-"
-            openshift_version: ""
+            # needs to match name from https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/stage
+            openshift_version: "openshift-v4.12.0-rc.1-candidate"
             multi_az: true
             ccs: true
             compute_machine_type: m5.4xlarge
@@ -127,18 +153,87 @@ resourceTemplates:
           # HyperShift Management Cluster
           hs-mc:
             name_prefix: "hs-mc-"
-            openshift_version: ""
+            # needs to match name from https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/stage
+            openshift_version: "openshift-v4.12.0-rc.1-candidate"
             multi_az: true
             ccs: true
             compute_machine_type: m5.4xlarge
             compute_autoscale: true
             compute_autoscale_min_replicas: 3
-            compute_autoscale_max_replicas: 12
+            compute_autoscale_max_replicas: 30
             network_type: OVNKubernetes
             private: false
       ENABLE_SIMPLE_IDENTITY_PROVIDER: true
       READ_ONLY_USERS:
         - "fleet-manager-debug"
-      CLUSTER_CHANNEL: "stable"
-      ENABLE_CLUSTER_AUTO_UPGRADE: true
+      CLUSTER_CHANNEL: "candidate"
+      ENABLE_CLUSTER_AUTO_UPGRADE: false
       CLUSTER_AUTO_UPGRADE_CRON: "0 4 * * *"
+      RHOBS_URL: "https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform-staging/api/v1/receive"
+      RHOBS_ENV: "staging"
+      MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: "40"
+      MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: "80"
+  - namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
+    ref: 19e5bb1bbffe45684ba508784b2aaee11a3e2f9d
+    parameters:
+      ENVIRONMENT: production
+      OCM_URL: ${OCM_BASE_URL}
+      # TODO scale to 3 replicas once deployed successfully
+      REPLICAS: 1
+      # TODO we shouldn't need to provide OIDC info at all, see https://issues.redhat.com/browse/SDA-6676
+      OIDCS3_BUCKET_NAME: oidc-bucket-production
+      ENABLE_PROVISION_SHARD_RECONCILIATION: true
+      ENABLE_ACCOUNT_RECONCILIATION: true
+      ENABLE_NETWORK_RECONCILIATION: true
+      AWS_BASE_DOMAIN: p3.openshiftapps.com
+      EXTERNAL_DNS_DOMAIN_FILTER: p3.openshiftapps.com
+      # CLUSTER_EXPIRATION_TIME_DELTA_DAYS: 3650
+      SENTRY_ENABLE: false
+      # TODO: Figure out the proper sentry project
+      SENTRY_PROJECT: 1
+      SENTRY_URL: https://sentry.devshift.net
+      SUPPORTED_CLOUD_PROVIDERS: |-
+        - name: aws
+          regions:
+            - name: us-east-1
+            - name: eu-west-1
+      CLUSTER_TEMPLATES: |-2
+          # HyperShift Service Cluster
+          hs-sc:
+            name_prefix: "hs-sc-"
+            # needs to match name from https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/prod
+            openshift_version: "openshift-v4.12.0-rc.1-candidate"
+            multi_az: true
+            ccs: true
+            compute_machine_type: m5.4xlarge
+            compute_autoscale: true
+            compute_autoscale_min_replicas: 3
+            compute_autoscale_max_replicas: 9
+            compute_nodes: 3
+            network_type: OVNKubernetes
+            private: false
+
+          # HyperShift Management Cluster
+          hs-mc:
+            name_prefix: "hs-mc-"
+            # needs to match name from https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/prod
+            openshift_version: "openshift-v4.12.0-rc.1-candidate"
+            multi_az: true
+            ccs: true
+            compute_machine_type: m5.4xlarge
+            compute_autoscale: true
+            compute_autoscale_min_replicas: 3
+            compute_autoscale_max_replicas: 60
+            network_type: OVNKubernetes
+            private: false
+      ENABLE_SIMPLE_IDENTITY_PROVIDER: true
+      READ_ONLY_USERS:
+        - "fleet-manager-debug"
+      # NOTE CLUSTER_CHANNEL should remain 'candidate' until 4.12 is available in prod stable, then it should be 'stable'.
+      CLUSTER_CHANNEL: "candidate"
+      ENABLE_CLUSTER_AUTO_UPGRADE: false
+      RHOBS_URL: "https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform/api/v1/receive"
+      RHOBS_ENV: "prod"
+      MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: "40"
+      MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: "80"

@@ -1,0 +1,56 @@
+$schema: /app-sre/integration-1.yml
+
+labels: {}
+
+name: ocm-upgrade-scheduler-org
+
+description: Manage Upgrade Policy schedules in OCM organizations
+
+upstream: https://github.com/app-sre/qontract-reconcile
+
+pr_check:
+  cmd: ocm-upgrade-scheduler-org
+  state: true
+
+managed:
+- namespace:
+    $ref: /services/app-interface/namespaces/app-interface-stage-int.yml
+  spec:
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 200Mi
+        cpu: 200m
+    logs:
+      slack: true
+    state: true
+- namespace:
+    $ref: /services/app-interface/namespaces/app-interface-production-int.yml
+  spec:
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 200Mi
+        cpu: 200m
+    logs:
+      slack: true
+    state: true
+
+schemas:
+- /openshift/openshift-cluster-manager-1.yml
+- /openshift/cluster-addon-1.yml
+- /openshift/cluster-1.yml
+- /openshift/jump-host-1.yml
+- /app-interface/app-interface-settings-1.yml
+- /app-sre/integration-1.yml
+- /dependencies/dependency-1.yml
+- /aws/group-1.yml
+- /aws/account-1.yml
+- /access/user-1.yml
+- /aws/vpc-1.yml
+- /aws/ecr-1.yml
+- /dependencies/rosa-ocm-1.yml

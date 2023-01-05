@@ -16,7 +16,7 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -56,7 +56,7 @@ resourceTemplates:
     VALIDATION_INTERVAL: "1800"
     VALIDATION_ATTEMPTS_THRESHOLD: "2"
     VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
-    CONNECTOR_ALLOWLIST_SP: "ansible,sap_system,sap_sids,operating_system,owner_id,rhc_client_id,rhsm,bios_vendor,bios_version,bios_release_date,infrastructure_type,host_type,mssql"
+    CONNECTOR_ALLOWLIST_SP: "ansible,sap,sap_system,sap_sids,operating_system,owner_id,rhc_client_id,rhsm,bios_vendor,bios_version,bios_release_date,infrastructure_type,host_type,mssql,system_update_method"
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
@@ -82,8 +82,9 @@ resourceTemplates:
       SOURCE_NAMESPACE: xjoin-prod
       TARGET_NAMESPACE: xjoin-prod
       MAX_AGE: "46"
-      CONNECTOR_TOPIC: "platform-mq-prod.platform.inventory.events"
-      DLQ_TOPIC_NAME: "platform-mq-prod.platform.cyndi.dlq"
+      CONNECTOR_TOPIC: "platform.inventory.events"
+      DLQ_TOPIC_NAME: "platform.cyndi.dlq"
+      VALIDATION_ATTEMPTS_THRESHOLD_INIT: "60"
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-perf.yml
     ref: master
@@ -162,8 +163,6 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: d0caf4e6144b6951623ab516852a3a7862a1238e
-    parameters:
-      SOURCE_TOPIC: "platform-mq-prod.platform.inventory.events"
 
 - name: advisor-pipeline
   path: /deploy/pipeline.yml
@@ -183,8 +182,6 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: d0caf4e6144b6951623ab516852a3a7862a1238e
-    parameters:
-      SOURCE_TOPIC: "platform-mq-prod.platform.inventory.events"
 
 - name: patch-pipeline
   path: /deploy/pipeline.yml
@@ -204,8 +201,6 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: d0caf4e6144b6951623ab516852a3a7862a1238e
-    parameters:
-      SOURCE_TOPIC: "platform-mq-prod.platform.inventory.events"
 
 - name: vulnerability-pipeline
   path: /deploy/pipeline.yml
@@ -225,8 +220,6 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: 42d204c0c8ee6b4ba7b073adcdfecc6a47af8bed
-    parameters:
-      SOURCE_TOPIC: "platform-mq-prod.platform.inventory.events"
 
 - name: compliance-pipeline
   path: /deploy/pipeline.yml
@@ -247,8 +240,6 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: d0caf4e6144b6951623ab516852a3a7862a1238e
-    parameters:
-      SOURCE_TOPIC: "platform-mq-prod.platform.inventory.events"
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-perf.yml
     ref: master
@@ -271,5 +262,3 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: d0caf4e6144b6951623ab516852a3a7862a1238e
-    parameters:
-      SOURCE_TOPIC: "platform-mq-prod.platform.inventory.events"

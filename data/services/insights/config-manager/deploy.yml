@@ -16,12 +16,13 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
 - ClowdApp
 - ClowdJobInvocation
+- Frontend
 
 imagePatterns:
 - quay.io/cloudservices
@@ -45,7 +46,7 @@ resourceTemplates:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: RedHatInsights-config-manager-gh-build-master
     parameters:
-      CM_LOG_LEVEL: debug
+      CM_LOG_LEVEL: trace
       CM_DISPATCHER_HOST: http://${PLAYBOOK_DISPATCHER_HOST}:${PLAYBOOK_DISPATCHER_PORT}
       CM_INVENTORY_HOST: http://${HOST_INVENTORY_HOST}:8000
       CM_CLOUD_CONNECTOR_HOST: http://${CLOUD_CONNECTOR_HOST}:${CLOUD_CONNECTOR_PORT}
@@ -53,9 +54,9 @@ resourceTemplates:
       REPLICAS: 2
   - namespace:
       $ref: /services/insights/config-manager/namespaces/config-manager-prod.yml
-    ref: 3daa0836d6974230edc809bc5d888c19ee07f00b
+    ref: 86f9f7de88cb9223af3eb066dbf0270a21167976
     parameters:
-      CM_LOG_LEVEL: debug
+      CM_LOG_LEVEL: info
       CM_DISPATCHER_HOST: http://${PLAYBOOK_DISPATCHER_HOST}:${PLAYBOOK_DISPATCHER_PORT}
       CM_INVENTORY_HOST: http://${HOST_INVENTORY_HOST}:8000
       CM_CLOUD_CONNECTOR_HOST: http://${CLOUD_CONNECTOR_HOST}:${CLOUD_CONNECTOR_PORT}
@@ -83,3 +84,8 @@ resourceTemplates:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+    ref: 86f7483cc14b9b68d3ccc5979c7711996384544f
+    parameters:
+      ENV_NAME: env-stage

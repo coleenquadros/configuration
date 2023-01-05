@@ -91,7 +91,7 @@ def report_tuple(path):
     """
 
     report_name = os.path.basename(path)
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         content = f.read()
 
     return (report_name, content)
@@ -105,61 +105,45 @@ def main():
     except IndexError:
         reports_dir = None
 
-    with open(results_json, 'r') as f:
+    with open(results_json, "r") as f:
         results = json.load(f)
 
-    results_schemas = [
-        i for i in results
-        if i["kind"] == "SCHEMA"
-    ]
+    results_schemas = [i for i in results if i["kind"] == "SCHEMA"]
 
-    errors_schemas = [
-        i for i in results_schemas
-        if i["result"]["status"] == "ERROR"
-    ]
+    errors_schemas = [i for i in results_schemas if i["result"]["status"] == "ERROR"]
 
-    results_files = [
-        i for i in results
-        if i["kind"] == "FILE"
-    ]
+    results_files = [i for i in results if i["kind"] == "FILE"]
 
-    errors_files = [
-        i for i in results_files
-        if i["result"]["status"] == "ERROR"
-    ]
+    errors_files = [i for i in results_files if i["result"]["status"] == "ERROR"]
 
-    results_refs = [
-        i for i in results
-        if i["kind"] == "REF"
-    ]
+    results_refs = [i for i in results if i["kind"] == "REF"]
 
-    errors_refs = [
-        i for i in results_refs
-        if i["result"]["status"] == "ERROR"
-    ]
+    errors_refs = [i for i in results_refs if i["result"]["status"] == "ERROR"]
 
     template = jinja2.Template(REPORT_TEMPLATE)
 
     if reports_dir:
-        success_glob = glob(reports_dir + '/reconcile_reports_success/*.txt')
-        fail_glob = glob(reports_dir + '/reconcile_reports_fail/*.txt')
+        success_glob = glob(reports_dir + "/reconcile_reports_success/*.txt")
+        fail_glob = glob(reports_dir + "/reconcile_reports_fail/*.txt")
         reconcile_success = list(map(report_tuple, success_glob))
         reconcile_fail = list(map(report_tuple, fail_glob))
     else:
         reconcile_success = []
         reconcile_fail = []
 
-    print(template.render(
-        results_schemas=results_schemas,
-        errors_schemas=errors_schemas,
-        results_files=results_files,
-        errors_files=errors_files,
-        errors_refs=errors_refs,
-        reconcile_success=reconcile_success,
-        reconcile_fail=reconcile_fail,
-        description=os.environ.get('DESCRIPTION')
-    ))
+    print(
+        template.render(
+            results_schemas=results_schemas,
+            errors_schemas=errors_schemas,
+            results_files=results_files,
+            errors_files=errors_files,
+            errors_refs=errors_refs,
+            reconcile_success=reconcile_success,
+            reconcile_fail=reconcile_fail,
+            description=os.environ.get("DESCRIPTION"),
+        )
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

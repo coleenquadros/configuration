@@ -201,6 +201,75 @@
     <<: *gl_build_master
 
 - job-template:
+    id: 'jenkins-worker-housekeeping'
+    name: 'jenkins-worker-housekeeping-{tagname}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_bot_key
+        - *ansible-reader-role-creds
+        - *ansible-ec2-inventory
+    builders:
+    - shell: |
+        trap "rm -f ${{WORKSPACE}}/ansible/app-sre-bot.key" EXIT SIGINT
+        cd ansible
+        echo ${{APP_SRE_BOT_KEY}} | base64 --decode > app-sre-bot.key
+        chmod 0600 app-sre-bot.key
+        eval `ssh-agent -s`
+        ssh-add app-sre-bot.key
+        export REQUESTS_CA_BUNDLE="/etc/pki/tls/cert.pem"
+        ansible-playbook -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -i hosts/aws_ec2.yaml playbooks/jenkins-worker-housekeeping.yml --tags '{tagname}' -v -D
+    <<: *gl_build_master
+
+- job-template:
+    id: 'jenkins-worker-housekeeping-timed'
+    name: 'jenkins-worker-housekeeping-timed-{tagname}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_bot_key
+        - *ansible-reader-role-creds
+        - *ansible-ec2-inventory
+    builders:
+    - shell: |
+        trap "rm -f ${{WORKSPACE}}/ansible/app-sre-bot.key" EXIT SIGINT
+        cd ansible
+        echo ${{APP_SRE_BOT_KEY}} | base64 --decode > app-sre-bot.key
+        chmod 0600 app-sre-bot.key
+        eval `ssh-agent -s`
+        ssh-add app-sre-bot.key
+        export REQUESTS_CA_BUNDLE="/etc/pki/tls/cert.pem"
+        ansible-playbook -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -i hosts/aws_ec2.yaml playbooks/jenkins-worker-housekeeping.yml --tags '{tagname}' -v -D
+    cron_expression: H */2 * * *
+    <<: *gl_timed
+
+- job-template:
+    id: 'jenkins-worker-housekeeping-update-host'
+    job_name: 'jenkins-worker-housekeeping-update-host'
+    name: '{job_name}'
+    commands: ''
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *ansible-ec2-inventory
+    publishers:
+    - git:
+        push-merge: false
+        push-only-if-success: true
+        branches:
+        - branch:
+            name: "master"
+    cron_expression: H/5 * * * *
+    <<: *gl_timed
+
+- job-template:
     id: 'gl-build-master-infra'
     name: '{gl_group}-{gl_project}-gl-build-{branch}'
     wrappers:

@@ -1,0 +1,66 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels: {}
+
+name: saas-rhobs-rules-and-dashboards
+description: 'SaaS tracking file for App-interface'
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+pipelinesProvider:
+  $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- ConfigMap
+- PrometheusRule
+
+imagePatterns: []
+
+resourceTemplates:
+- name: rhobs-dashboards
+  url: https://gitlab.cee.redhat.com/service/rhobs-rules-and-dashboards
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: main
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 3b9c2c04de9f52982757b2f828c1109edbe449e7
+# Targets for below configs are decided based on the RHOBS instance hosting the tenant, in this case:
+# data/services/rhobs/observatorium-mst/cicd/saas-tenants.yaml
+- name: osd-rhobs-rules
+  url: https://gitlab.cee.redhat.com/service/rhobs-rules-and-dashboards
+  path: /rules/osd
+  provider: directory
+  targets:
+  - name: observatorium-mst-stage
+    namespace:
+      $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
+    ref: main
+  - name: observatorium-mst-production
+    namespace:
+      $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
+    ref: bcb80e92668b4ee1556d91709106b6045f1b5487
+- name: hypershift-platform-rhobs-rules
+  url: https://gitlab.cee.redhat.com/service/rhobs-rules-and-dashboards
+  path: /rules/hypershift-platform/template.yaml
+  targets:
+  - name: rhobsp02ue1-stage
+    namespace:
+      $ref: /services/rhobs/observatorium-mst/namespaces/rhobsp02ue1/observatorium-mst-production.yml
+    ref: main
+    parameters:
+      TENANT: hypershift-platform-staging
+  - name: rhobsp02ue1-production
+    namespace:
+      $ref: /services/rhobs/observatorium-mst/namespaces/rhobsp02ue1/observatorium-mst-production.yml
+    ref: ab4a97f38c28c73704f8b72159285fcf5c7703e0

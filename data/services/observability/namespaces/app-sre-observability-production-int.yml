@@ -1,0 +1,38 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-sre-observability-production
+description: production namespace for the app-sre observability stack
+
+cluster:
+  $ref: /openshift/appsrep05ue1/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsrep05ue1.yml
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Secret
+
+openshiftResources:
+# Secrets
+## Blackbox Exporter
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/blackbox-exporter/blackbox-exporter-config.secret.yaml
+## SignalFX Prometheus Exporter
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/signalfx-exporter/signalfx-exporter-config.secret.yaml

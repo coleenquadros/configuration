@@ -24,7 +24,7 @@
 
 To on-board a new OSDv4 cluster to app-interface, perform the following operations:
 
-## Step 1 - Cluster creation and initial access for dedicated-admins
+## Step 1 - Cluster creation and initial access for dedicated-admins and automatic cluster file updates
 
 This step should be performed in a single merge request.
 
@@ -66,7 +66,7 @@ This step should be performed in a single merge request.
     elbFQDN: ''
 
     auth:
-      service: github-org-team
+    - service: github-org-team
       org: app-sre
       team: <cluster_name>-cluster
 
@@ -112,14 +112,13 @@ This step should be performed in a single merge request.
       path: app-sre/creds/kube-configs/<cluster_name>
       field: token
 
+    clusterAdmin: true # should enable cluster admin for this cluster via OCM
+
     machinePools: # optional, specify additional Machine Pools to be provisioned
     - id: (machine pool name, should be unique per cluster)
       instance_type: (desired instance type. m5.xlarge for example)
       replicas: (desired number of instances in the pool)
       labels: {}
-
-    addons: # enable log forwarding to the cluster's AWS account
-    - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
 
     internal: false
 
@@ -157,6 +156,19 @@ This step should be performed in a single merge request.
         - cluster:
             $ref: /openshift/<cluster_name>/cluster.yml
         group: dedicated-admins
+    ```
+
+1. Grant the AppSRE gitlab bot (@devtools-bot) permissions to self-service updates to the cluster file:
+
+    ```yaml
+    # /data/teams/app-sre/roles/app-sre-gitlab-bot.yml
+    ...
+    self_service:
+    - change_type:
+        $ref: /app-interface/changetype/cluster-auto-updater.yml
+      datafiles:
+      ...
+      - $ref: /openshift/<cluster_name>/cluster.yml
     ```
 
 1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM. Proceed with the following steps after the cluster's installation is complete.
@@ -204,7 +216,7 @@ This step should be performed in a single merge request.
 
 1. If your cluster is private, you should first make sure you can access it through ci.ext via VPC peering.
 
-    1. Configure VPC peering to jumphost (ci.ext) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md).
+    1. Configure VPC peering to jumphost (ci.int) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md).
 
         ```yaml
         peering:
@@ -212,10 +224,10 @@ This step should be performed in a single merge request.
           - provider: account-vpc
             name: <cluster_name>_app-sre
             vpc:
-              $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
+              $ref: /aws/app-sre/vpcs/ci-int.yml
             manageRoutes: true
+            manageAccountRoutes: true
         ```
-    1. Once the above is merged and deployed, you should add a route in app-sre vpc. This is achieved in [app-sre/infra](https://gitlab.cee.redhat.com/app-sre/infra) repo. See this [MR](https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/79) as an example. You can get VPC peering connection name from the app-sre AWS account.
 
 ## Step 2 - Bot access and App SRE project template
 
@@ -258,19 +270,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     1. Jump host configuration to your `cluster.yml` file:
         ```yaml
         jumpHost:
-          $ref: /openshift/bastion.ci.ext.devshift.net.jumphost.yml
-        ```
-
-    1. Request vpc peering config to `app-sre-ci-int` to your `cluster.yml` file:
-
-        ```yaml
-        - provider: account-vpc-mesh
-          name: <cluster_name>_app-sre-ci-int
-          account:
-            $ref: /aws/app-sre/account.yml
-          tags:
-            Name: ci.int
-          manageRoutes: true
+          $ref: /openshift/bastion.ci.int.devshift.net.jumphost.yml
         ```
 
     1. Request vpc peering config to `app-sre-prod-01` to your `cluster.yml` file:
@@ -430,9 +430,7 @@ hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <
 
 ## Step 7 - Obtain cluster-admin
 
-1. Create an OHSS ticket to enable cluster-admin in the cluster. Examples: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302), [OHSS-5939](https://issues.redhat.com/browse/OHSS-5939)
-
-1. Once the ticket is Done, add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/administering_a_cluster/osd-admin-roles.html
+1. Add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/administering_a_cluster/osd-admin-roles.html
 
 1. Login to the cluster, create a cluster-admin ServiceAccount, grant it the cluster-admin role and obtain its token:
   ```sh
