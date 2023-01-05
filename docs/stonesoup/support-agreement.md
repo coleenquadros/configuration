@@ -13,11 +13,8 @@ The Stonesoup teams can get support from @app-sre-ic in [#sd-app-sre](https://re
 
 ## App-interface features agreed to be used by Stonesoup
 
-As of 2022-10-04:
+As of 2023-01-05:
 * Preference to use clusters provided by appSRE but experimentation is done with the current provisioned HACBS cluster from appSRE (hacbss02ue1) and a bring your own cluster.
-* For the workload clusters:
-  * Have the observability stack applied which includes logging aggregation to cloudwatch and Prometheus/alertmanager
-  * The target is to deploy the KCP syncer (includes a clusterrole and clusterrolebinding) via a saas file.
 * For the service provider workspaces:
   * Secrets management from appSRE's Vault instance
 * Vault instance access could be done either by:
