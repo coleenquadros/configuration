@@ -22,9 +22,9 @@ Automatically trigger tests upon a complete upgrade of the ACM Addon.
 
 ## Proposal
 
-The condition to trigger the tests in that all Service/Management clusters in an environment (integration / stage) have been upgraded to a new ACM Addon version. All such clusters are within a single OCM organization.
+The condition to trigger the tests is that all Service/Management clusters in an environment (integration / stage) have been upgraded to a new ACM Addon version. All such clusters are within a single OCM organization.
 
-Once all clusters within an OCM organization have been upgraded, we should trigger a specified job in Jenkins.
+Once all clusters within an OCM organization with this Addon installed have been upgraded, we should trigger a specified job in Jenkins.
 
 The proposed schema to support this effort is: https://github.com/app-sre/qontract-schemas/pull/363
 
