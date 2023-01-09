@@ -1,0 +1,37 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: observatorium-logs
+
+name: consoledot-platform-clusters-dashboard
+description: consoledot-platform-clusters-dashboard
+
+app:
+  $ref: /services/insights/devprod/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-consoledot-devprod
+
+managedResourceTypes:
+- ConfigMap
+
+imagePatterns: []
+
+resourceTemplates:
+- name: insights-consoledot-platform-cluster-dashboards
+  url: https://gitlab.cee.redhat.com/insights-platform/devprod-ops
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: ab24c0b0deef24fd513468a1a83b5b9c9cc1e5de

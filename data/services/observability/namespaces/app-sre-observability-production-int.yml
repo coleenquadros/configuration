@@ -24,7 +24,9 @@ sharedResources:
 managedRoles: true
 
 managedResourceTypes:
+- ConfigMap
 - Secret
+- Route
 
 openshiftResources:
 # Secrets
@@ -36,3 +38,42 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /observability/signalfx-exporter/signalfx-exporter-config.secret.yaml
+## Grafana
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-production/app-sre-observability-htpasswd
+  version: 1
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/grafana/grafana-config.secret.yaml
+  variables:
+    auto_assign_org_role: Viewer
+    external_url: https://grafana.int.devshift.net
+- provider: vault-secret
+  name: grafana-proxy-config
+  path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-proxy-config-int
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-proxy-config-openshift
+  version: 2
+- provider: resource-template
+  type: jinja2
+  path: /observability/grafana.route.yaml
+  variables:
+    environment: ''
+    host: grafana.int.devshift.net
+    cert_manager_issuer_name: letsencrypt-devshiftnet-dns
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-playground.configmap.yaml
+  validate_json: true
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: grafana-production-int
+    defaults: /terraform/resources/grafana/rds-1.yml
+    output_resource_name: grafana-db

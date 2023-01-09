@@ -13,6 +13,14 @@ app:
 pipelinesProvider:
   $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
 
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 600Mi
+  limits:
+    cpu: 300m
+    memory: 600Mi
+
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
@@ -30,6 +38,7 @@ managedResourceTypes:
 imagePatterns:
 - quay.io/openshift/origin-oauth-proxy
 - quay.io/app-sre/promlens
+- quay.io/app-sre/prom-promlens
 
 authentication:
   # required for private images
@@ -48,11 +57,12 @@ resourceTemplates:
     GRAFANA_URL: http://grafana-direct:3001
   targets:
   - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
     ref: main
     parameters:
       IMAGE_TAG: v1.1.0
       HOSTNAME: promlens.stage.devshift.net
+      CERT_MANAGER_ISSUER_NAME: letsencrypt-devshiftnet-dns
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: f60eef7b5257f15be3174b4a5039f629a58f37ab
