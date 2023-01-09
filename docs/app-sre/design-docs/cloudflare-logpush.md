@@ -25,7 +25,7 @@ Today, Quay has a requirement for pushing worker logs to S3 and tying them into 
 
 ## Non-objectives
 * Send Quay's worker logs to S3. This work will be delegated to the Quay team through self-service once the feature is implemented.
-* Send Cloudflare account audit logs to S3. This will be implemented in a different story.
+* Send Cloudflare account audit logs to S3. This will be implemented in a different story, but we will leverage Logpush feature.
 
 
 ## Proposal
@@ -43,6 +43,8 @@ Cloudflare offers [Logpush](https://developers.cloudflare.com/logs/about/) mecha
 ### Logpush destinations
 Cloudflare supports multiple [destinations](https://developers.cloudflare.com/logs/get-started/enable-destinations/) for sending logs. We initially expose R2 and S3 destinations to start with and enable other destinations as needed in future.
 
+Any pre-requisites if required, such as access policy for Amazon S3 to allow Cloudflare to push logs will be documented per https://developers.cloudflare.com/logs/get-started/enable-destinations/ 
+
 
 
 ### Ownership challenge
@@ -52,11 +54,13 @@ Some of the Logpush destinations such as Amazon S3, Google Cloud Storage, Micros
 The ownership challenge can be validated either manually through inspection or through automation using Terraform. The automation through Terraform requires a data source lookup (for e.g `aws_s3_bucket_object`) for a given provider and then plugging it in `ownership_challenge` field of `cloudflare_logpush_job`. (See a detailed example at https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpush_job#example-usage). This pattern involves the use of two different providers, aws and cloudflare.
 
 
-Currently, app-interface does not have a good way to specify resources with dependencies across different providers. Also, our pattern follows integration per Terraform provider, so solving for this is outside of this design doc. **Hence, ownership challenge validation will be done manually.** We will provide detailed doc on how validation works for Logpush destination requiring ownership later.
+Currently, app-interface does not have a good way to specify resources with dependencies across different providers. Also, our pattern follows integration per Terraform provider, so solving for this is outside of this design doc. **Hence, ownership challenge validation will be done manually.** We will provide detailed doc on how validation works for Logpush destination requiring ownership later. 
 
 
 ### Logpush job monitoring
-A configured Cloudflare Logpush job may fail to push logs due to variety of reasons. We need some alerting in place to notify us in this scenario.
+A configured Cloudflare Logpush job may fail to push logs due to variety of reasons. Cloudflare does have retries in case of intermittent failures but eventually it will disable the job if it fails to reach the destination. The disabled job can be re-enabled later.
+
+We need some alerting in place to notify us in case of failed job scenario.
 Cloudflare offers two different solutions for monitoring job status.
 1. Cloudflare notification system: We can utilize this option through terraform using `cloudflare_notification_policy` resource. This option supports email, custom webhook and pagerduty integration.
 2. Cloudflare GraphQL API: In order to utilize this, we will need to make an upstream contribution to [Cloudflare lablabs exporter](https://github.com/lablabs/cloudflare-exporter) to expose `failing_logpush_job_disabled_alert` metric.
@@ -69,6 +73,32 @@ The alert delivery mechanism (pagerduty vs. email) through Cloudflare notificati
 
 
 Long term we would utilize Cloudflare GraphQL API through the exporter and relying on prometheus alerts to page us via pagerduty once the support is there. We can revisit the monitoring aspect and improve on it in the future.
+
+
+### Implementation
+
+To implement Logpush feature, we will use existing `terraform_cloudflare_resources` integration and use provider pattern for Terraform resources listed.
+
+#### Schemas
+
+A tentative schema will be as follows within `/openshift/namespace-1.yml` with appropriate fields exposed additionally as required by the resources.
+
+
+```
+...
+
+externalResources:
+- provider: cloudflare
+  provisioner:
+    $ref: /cloudflare/app-sre/account.yml
+  resources:
+    - provider: cloudflare_logpush_job
+    ...
+    - provider: cloudflare_logpush_ownership_challenge
+    ...
+    - provider: cloudflare_notification_policy
+    ...
+```
 
 
 ## Milestones
