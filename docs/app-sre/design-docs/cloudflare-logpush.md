@@ -62,17 +62,11 @@ A configured Cloudflare Logpush job may fail to push logs due to variety of reas
 
 We need some alerting in place to notify us in case of failed job scenario.
 Cloudflare offers two different solutions for monitoring job status.
-1. Cloudflare notification system: We can utilize this option through terraform using `cloudflare_notification_policy` resource. This option supports email, custom webhook and pagerduty integration.
+1. Cloudflare notification system: We can utilize this option through terraform using `cloudflare_notification_policy` resource. This option supports email, custom webhook and pagerduty integration. Ideally, we prefer PagerDuty integration, but initial research shows Cloudflare does not support any PagerDuty API keys but relies on user level authentication, which is not ideal.
 2. Cloudflare GraphQL API: In order to utilize this, we will need to make an upstream contribution to [Cloudflare lablabs exporter](https://github.com/lablabs/cloudflare-exporter) to expose `failing_logpush_job_disabled_alert` metric.
 
 
-For now, we will move forward with the Cloudflare notification system since the Lablabs exporter lacks metrics for Logpush. Contributing to the Lablabs exporter is currently out of scope.
-
-
-The alert delivery mechanism (pagerduty vs. email) through Cloudflare notification will be decided later. Ideally, we prefer PagerDuty integration, but initial research shows Cloudflare does not support any PagerDuty API keys but relies on user level authentication, which is not ideal. More research is needed in this area for a further decision and will be done once initial support for Logpush is implemented.
-
-
-Long term we would utilize Cloudflare GraphQL API through the exporter and relying on prometheus alerts to page us via pagerduty once the support is there. We can revisit the monitoring aspect and improve on it in the future.
+For now, we are exploring if we can expose the relevant metrics (and set up Prometheus alerts) using Cloudflare GraphQL API and the exporter. If there are any significant blockers with this approach, we will default to Cloudflare notification system with email delivery.
 
 
 ### Implementation
