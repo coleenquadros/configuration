@@ -28,6 +28,8 @@ As of 2023-01-05:
     secrets in the service provider namespaces.
   * AWS resources integrations, like RDS database and S3 bucket. app-interface management will be
     used to provide connection information to the service provider namespaces.
+* App-interface will be used to provision a serviceaccount and rbac to be used by Stonesoup's own
+  argocd instance, to manage deployment of Stonesoup controllers.
 
 Additionally:
 
