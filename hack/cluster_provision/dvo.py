@@ -38,7 +38,7 @@ cluster:
   $ref: /openshift/{cluster}/cluster.yml
 
 app:
-  $ref: /services/deployment-validation-operator/app.yml
+  $ref: /services/osd-operators/deployment-validation-operator/app.yml
 
 environment:
   $ref: /products/app-sre/environments/production.yml
