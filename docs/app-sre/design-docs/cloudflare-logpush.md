@@ -43,7 +43,7 @@ Cloudflare offers [Logpush](https://developers.cloudflare.com/logs/about/) mecha
 ### Logpush destinations
 Cloudflare supports multiple [destinations](https://developers.cloudflare.com/logs/get-started/enable-destinations/) for sending logs. We initially expose R2 and S3 destinations to start with and enable other destinations as needed in future.
 
-Any pre-requisites if required, such as access policy for Amazon S3 to allow Cloudflare to push logs will be documented per https://developers.cloudflare.com/logs/get-started/enable-destinations/ 
+Any pre-requisites if required, such as access policy for Amazon S3 to allow Cloudflare to push logs will be documented per [the Cloudflare docs](https://developers.cloudflare.com/logs/get-started/enable-destinations/)
 
 
 
@@ -66,7 +66,11 @@ Cloudflare offers two different solutions for monitoring job status.
 2. Cloudflare GraphQL API: In order to utilize this, we will need to make an upstream contribution to [Cloudflare lablabs exporter](https://github.com/lablabs/cloudflare-exporter) to expose `failing_logpush_job_disabled_alert` metric.
 
 
-For now, we are exploring if we can expose the relevant metrics (and set up Prometheus alerts) using Cloudflare GraphQL API and the exporter. If there are any significant blockers with this approach, we will default to Cloudflare notification system with email delivery.
+For now, we can investigate into exposing relevant metrics (and set up Prometheus alerts) using Cloudflare GraphQL API and the Lablabs Cloudflare exporter. If there are any significant blockers with this approach, we will default to Cloudflare notification system with email delivery.
+
+### Logpush job failures
+
+Cloudflare Logpush job does implement retries 5 times over 5 minute duration if it's unable to reach the destinations. However, cloudflare does not guarantee this and may occasionally drop logs. See [What happens if my cloud storage destination is temporarily unavailable?](https://developers.cloudflare.com/logs/faq/logpush/#what-happens-if-my-cloud-storage-destination-is-temporarily-unavailable). Cloudflare Logpush will store these logs for 72 hrs and will not backfill any of the dropped logs. In this case, we will require a backup of Logpull configurations to retrieve the missing logs. Automating backfilling of logs is currently out of scope.
 
 
 ### Implementation
@@ -98,3 +102,4 @@ externalResources:
 ## Milestones
 * Implement Logpush job
 * Implement Logpush job monitoring
+* Logpull SOP (in case of Logpush job failures and covering missing logs)
