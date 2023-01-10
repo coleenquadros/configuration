@@ -406,7 +406,7 @@ Once you have the dashboard ConfigMap, follow these instructions:
     provider: directory
     targets:
     - namespace:
-        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+        $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
       ref: master
   ```
   * Note: remember to add `ConfigMap` to the `managedResourceTypes` section.
