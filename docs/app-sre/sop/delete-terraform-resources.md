@@ -31,7 +31,7 @@ resource deletion.
 > changes in a timely manner.
 
 Wait a couple of minutes until all running terraform-resources integrations are finished
-(observe the [#sd-app-sre-reconcile](https://coreos.slack.com/archives/CS0E65QCV) channel).
+(observe the [#sd-app-sre-reconcile](https://redhat-internal.slack.com/archives/CS0E65QCV) channel).
 
 ## Check CI results and merge
 

@@ -74,6 +74,6 @@ The process for upgrading is simple:
 
 ## Support
 
-The [#forum-tektoncd-pipelines](https://coreos.slack.com/archives/CSPS1077U) Slack
+The [#forum-tektoncd-pipelines](https://redhat-internal.slack.com/archives/CSPS1077U) Slack
 channel can be used for asking general questions about OpenShift Pipelines. Beyond that,
 AppSRE is generally responsible for managing the operator on our clusters.

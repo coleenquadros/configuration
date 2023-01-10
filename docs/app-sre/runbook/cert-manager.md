@@ -135,7 +135,7 @@ metadata:
 
 When multiple secured `Routes` use the same `host`, openshift router uses the same certificate for all of them. In these cases, cert-manager annotations need to be set in one of the routes only.
 
-- [More info](https://coreos.slack.com/archives/CCH60A77E/p1658931732003599)
+- [More info](https://redhat-internal.slack.com/archives/CCH60A77E/p1658931732003599)
 - [Example](https://gitlab.cee.redhat.com/service/app-interface/-/tree/d005987304a30f981d76f5e042d12097b25d3d83/resources/app-sre-stage/telemeter-stage)
 
 

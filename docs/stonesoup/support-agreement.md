@@ -9,7 +9,7 @@ The app-interface components used by Stonesoup will be supported by AppSRE. Ston
 Note this hybrid SRE model is very new as of 2022-10-04. Further adaptations, discussions, agreements should be expected.
 
 AppSRE supports the tooling around app-interface, as it does for all its tenants.
-The Stonesoup teams can get support from @app-sre-ic in [#sd-app-sre](https://coreos.slack.com/archives/CCRND57FW) on this tooling, for the features that are agreed to be used, as listed in the next section.
+The Stonesoup teams can get support from @app-sre-ic in [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) on this tooling, for the features that are agreed to be used, as listed in the next section.
 
 ## App-interface features agreed to be used by Stonesoup
 

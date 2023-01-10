@@ -7,7 +7,7 @@ The Services Dashboard service itself will not be supported by AppSRE. The appli
 
 AppSRE supports the tooling around app-interface, as it does for all its tenants.
 
-The Services Dashboard team can get support from @app-sre-ic in [#sd-app-sre](https://coreos.slack.com/archives/CCRND57FW) on this tooling, for the features that are agreed to be used, as listed in the next section.
+The Services Dashboard team can get support from @app-sre-ic in [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) on this tooling, for the features that are agreed to be used, as listed in the next section.
 
 ## App-interface features agreed to be used by Services Dashboard
 
