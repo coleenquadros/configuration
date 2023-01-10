@@ -2,7 +2,7 @@
 
 This document serves as a first tier support for issues around app-interface.
 
-For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-sre](https://coreos.slack.com/messages/CCRND57FW) on CoreOS Slack.
+For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) on CoreOS Slack.
 
 ## ToC
 
@@ -22,7 +22,7 @@ If your MR is urgent or time sensitive requests, see [contacting AppSRE](#contac
 
 ### Contacting AppSRE
 
-You can catch the AppSRE team in the `#sd-app-sre` channel of `coreos.slack.com`.
+You can catch the AppSRE team in the `#sd-app-sre` channel of `redhat-internal.slack.com`.
 
 To create a request, please open an issue in one of the following Jira projects:
 
@@ -384,7 +384,7 @@ The users in this page are granted a `view` permission in the `telemeter-product
 
 ### Accessing DataHub
 
-DataHub is not managed by the AppSRE team, but you can find the process to [request access here](https://help.datahub.redhat.com/docs/interacting-with-telemetry-data). To report issues with Datahub (ex: timeouts with telemeter-lts-dashboards.datahub.redhat.com) see [this help page](https://help.datahub.redhat.com/docs/data-hub-report-issues) or reach out to [#forum-telemetry](https://coreos.slack.com/messages/forum-telemetry) on Slack for additional info.
+DataHub is not managed by the AppSRE team, but you can find the process to [request access here](https://help.datahub.redhat.com/docs/interacting-with-telemetry-data). To report issues with Datahub (ex: timeouts with telemeter-lts-dashboards.datahub.redhat.com) see [this help page](https://help.datahub.redhat.com/docs/data-hub-report-issues) or reach out to [#forum-telemetry](https://redhat-internal.slack.com/archives/CEG5ZJQ1G) on Slack for additional info.
 
 ### Jenkins Vault plugin upgrade
 

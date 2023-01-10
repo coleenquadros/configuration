@@ -11,7 +11,7 @@ Once the infra MR is merged, there is no need to do anything manual. This [job](
 
 ## Getting access to bastion host bastion.ci.int.devshift.net
 1. Make MR with your public part of SSH key to [app-sre/infra repo](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/playbooks/bastion-accounts.yml)
-1. Ping app-sre in [Slack channel #sd-app-sre](https://coreos.slack.com/archives/CCRND57FW) to get MR merged.
+1. Ping app-sre in [Slack channel #sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) to get MR merged.
 1. Check in several minutes after merge that You have access by `ssh bastion.ci.int.devshift.net`
 
 ## Get IP's for private clusters you are accessing

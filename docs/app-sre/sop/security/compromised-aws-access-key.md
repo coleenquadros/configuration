@@ -4,7 +4,7 @@
 
 Since the chance of malicious behavior happening increases very fast as every moment passes when a key is exposed on the internet, the action of deactivating/deleting the leaked key should be one of the first things that happens. However, even though the below steps are numbered by priority, it is not mandatory that they are performed in the exact sequence, for example, feel free to involve InfoSec or create a Slack channel before you check unsanctioned resources.
 
-It is also not expected that you perform all the steps by yourself, please feel free to include AppSRE IC, on-call or any team member who is available. Contact us at [#sd-app-sre](https://coreos.slack.com/archives/CCRND57FW) slack channel.
+It is also not expected that you perform all the steps by yourself, please feel free to include AppSRE IC, on-call or any team member who is available. Contact us at [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) slack channel.
 
 
 1. Make the key inactive or delete the key: 

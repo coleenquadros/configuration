@@ -2438,7 +2438,7 @@ Once the MR is merged, an integration called `aws-iam-password-reset` will delet
 
 A different integration, called `terraform-users` will realize that the user does not have a login profile and will re-create it. At this point, the user has a new random password.
 
-The curious reader can follow [#sd-app-sre-reconcile](https://coreos.slack.com/archives/CS0E65QCV) to see when these two actions have completed.
+The curious reader can follow [#sd-app-sre-reconcile](https://redhat-internal.slack.com/archives/CS0E65QCV) to see when these two actions have completed.
 
 Once the new password is in place, it needs to be picked up by an app-interface-output created by a `qontract-cli` command called `terraform-users-credentials` (the repository is refreshed once every 10 minutes).
 

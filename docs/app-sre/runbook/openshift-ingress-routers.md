@@ -55,7 +55,7 @@ Some important notes on scaling the ingress router in OSD:
 1. Increasing the number of ingress router pods cannot be self-serviced. This means that the default of 2 pods is not easily changed and SRE-P usually doesn't make exceptions. It's possible that this could change in the future with [NE-361](https://issues.redhat.com/browse/NE-361).
 2. The infra nodes can be vertically scaled (to the next EC2 instance size). See the [SOPs](#sops) section for more information.
 
-The original discussion with SRE-P can be found in [Slack](https://coreos.slack.com/archives/CCX9DB894/p1640012063193800).
+The original discussion with SRE-P can be found in [Slack](https://redhat-internal.slack.com/archives/CCX9DB894/p1640012063193800).
 
 ### Access Logging
 
@@ -63,7 +63,7 @@ Enabling access logging, like you can do in [OCP](https://docs.openshift.com/con
 
 **Note:** AppSRE has not enabled ingress router access logs on a production cluster in the past. Investigation is required to determine the additional resources that might be consumed by a busy router.
 
-The original discussion with SRE-P can be found in [Slack](https://coreos.slack.com/archives/CCX9DB894/p1640029687217400).
+The original discussion with SRE-P can be found in [Slack](https://redhat-internal.slack.com/archives/CCX9DB894/p1640029687217400).
 
 ## Known Issues
 
@@ -138,7 +138,7 @@ From the findings in APPSRE-1564, we don't have any proof that this issue could 
 #### More information
 
 * [RH Customer Portal article](https://access.redhat.com/solutions/5603871)
-  * it states that this only affects Passthrough Routes, but [confirmed with #forum-network-edge that this affects all Routes](https://coreos.slack.com/archives/CCH60A77E/p1642539370035300)
+  * it states that this only affects Passthrough Routes, but [confirmed with #forum-network-edge that this affects all Routes](https://redhat-internal.slack.com/archives/CCH60A77E/p1642539370035300)
 * Background information: APPSRE-1564
 * [Configuration info for Ingress Operator](https://docs.openshift.com/container-platform/4.9/networking/ingress-operator.html#nw-ingress-controller-configuration-parameters_configuring-ingress) including `tlsInspectDelay`
 * [HAProxy docs](https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#4-tcp-request%20inspect-delay) for `inspect-delay`

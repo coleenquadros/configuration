@@ -6,7 +6,7 @@ There are some special considerations when upgrading OCM Quay RDS instances. The
 
 @sre-platform-region-leads and @dsantama from #sd-cicd should be notified once we're ready to schedule maintenance.
 
-An example message that was shared in #sd-app-sre can be seen here: https://coreos.slack.com/archives/CCRND57FW/p1651842103993419
+An example message that was shared in #sd-app-sre can be seen here: https://redhat-internal.slack.com/archives/CCRND57FW/p1651842103993419
 
 ## Impact
 

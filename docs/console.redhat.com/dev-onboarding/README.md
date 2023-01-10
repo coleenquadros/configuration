@@ -155,7 +155,7 @@ Note that some sensitive updates are not posted, e.g. secrets.
 
 ### CoreOS Slack
 
-To log in to CoreOS Slack, go to https://coreos.slack.com and click on `Sign in with Google`. This workspace allows you to sign in with your `@redhat.com` Google account.
+To log in to CoreOS Slack, go to https://redhat-internal.slack.com and click on `Sign in with Google`. This workspace allows you to sign in with your `@redhat.com` Google account.
 
 ### Shared Channels
 

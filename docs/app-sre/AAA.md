@@ -89,8 +89,8 @@ Every AppSRE/MT-SRE engineer should have access to the following:
   * If needed can reset KRB password
     [here](https://password.corp.redhat.com/changepassword).
   * https://gitlab.cee.redhat.com/app-sre/infra: keeps our Ansible and Terraform bits and bobs.
-* Slack: coreos.slack.com
-  * To gain access to coreos.slack.com, follow the instructions [here](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/openshift_slack#jive_content_id_Quickstart).
+* Slack: redhat-internal.slack.com
+  * To gain access to redhat-internal.slack.com, follow the instructions [here](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/openshift_slack#jive_content_id_Quickstart).
   * #sd-app-sre-teamchat (private channel): speak to any team member to get an
     invitation.
   * User groups: @app-sre-team: obtained via this
