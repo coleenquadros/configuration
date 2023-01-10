@@ -70,7 +70,7 @@ For now, we can investigate into exposing relevant metrics (and set up Prometheu
 
 ### Logpush job failures
 
-Cloudflare Logpush job does implement retries 5 times over 5 minute duration if it's unable to reach the destinations. However, cloudflare does not guarantee this and may occasionally drop logs. See [What happens if my cloud storage destination is temporarily unavailable?](https://developers.cloudflare.com/logs/faq/logpush/#what-happens-if-my-cloud-storage-destination-is-temporarily-unavailable). Cloudflare Logpush will store these logs for 72 hrs and will not backfill any of the dropped logs. In this case, we will require a backup of Logpull configurations to retrieve the missing logs. Automating backfilling of logs is currently out of scope.
+Cloudflare Logpush job does implement retries 5 times over 5 minute duration if it's unable to reach the destinations. However, cloudflare does not guarantee this and may occasionally drop logs. See [What happens if my cloud storage destination is temporarily unavailable?](https://developers.cloudflare.com/logs/faq/logpush/#what-happens-if-my-cloud-storage-destination-is-temporarily-unavailable). Cloudflare Logpush will store these logs for 72 hrs and will not backfill any of the dropped logs. In this case, we will require a backup of Logpull with retention to retrieve the missing logs. Automating backfilling of logs is currently out of scope.
 
 
 ### Implementation
@@ -102,4 +102,4 @@ externalResources:
 ## Milestones
 * Implement Logpush job
 * Implement Logpush job monitoring
-* Logpull SOP (in case of Logpush job failures and covering missing logs)
+* Logpull retention and SOP for tenants (in case of missing logs)
