@@ -38,7 +38,11 @@ if [ "$NEW_COMMIT" != "$OLD_COMMIT" ]; then
     sed -i$SED_OPT "s/$OLD_COMMIT/$NEW_COMMIT/" $ENV_FILE
 fi
 
-OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE_DASHBOARDS)
+OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE_DASHBOARDS | sort -u)
+if [ ! -z "$(echo $OLD_SHA | grep ' ')" ]; then
+    echo "Multiple SHAs found in $SAAS_FILE_DASHBOARDS. Please fix it before using this script."
+    exit 1
+fi
 if [ "$NEW_SHA" != "$OLD_SHA" ]; then
     sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE_DASHBOARDS
 fi
