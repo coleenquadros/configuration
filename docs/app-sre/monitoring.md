@@ -419,7 +419,7 @@ Once you have the dashboard ConfigMap, follow these instructions:
   targets:
   (...)
   - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
     ref: <your-service-repo-commit-sha>
   ```
   * Note: with this configuration, you can promote changes to your dashboards along with the code changes that created them.
