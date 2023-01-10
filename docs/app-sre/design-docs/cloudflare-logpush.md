@@ -13,7 +13,7 @@ https://issues.redhat.com/browse/APPSRE-6626
 
 
 
-Cloudflare products generate logs which are stored within the Cloudflare ecosystem. Tenants using Cloudflare products exposed through the app-interface will want these logs shipped to destinations such as R2, S3 or Splunk for long term retention and other analytical purposes.
+Cloudflare products generate logs which are stored within the Cloudflare ecosystem. Tenants using Cloudflare products exposed through the app-interface will want these logs shipped to destinations such as R2, S3 or Splunk for retention (long-term retention for datasets such audit logs and permanant retention for short-lived logs like HTTP requests) and other analytical purposes.
 
 
 Today, Quay has a requirement for pushing worker logs to S3 and tying them into their analytics tooling. In addition, we also have audit logs for accounts that we want to push to S3 (similar to Vault audit logs being shipped to S3).
