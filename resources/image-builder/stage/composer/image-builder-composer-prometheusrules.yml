@@ -297,3 +297,82 @@ spec:
       labels:
         latency: "0.2"
       record: image_builder_composer_http_requests:latency_rate3d
+    # record some expressions for the dashboards
+    # specifically for burn rates and 28day windows
+  - name: image-builder.openshiftio.expressions
+    interval: 1m
+    rules:
+      # record the targets first
+      ## compose success
+      - record: image_builder_composer:compose_request:slo_target
+        expr: "0.95"
+      - record: image_builder_composer:compose_request:error_budget
+        expr: "1 - image_builder_composer:compose_request:slo_target"
+      ## crequest latency
+      - record: image_builder_composer:request_latency:slo_target
+        expr: "0.95"
+      - record: image_builder_composer:request_latency:error_budget
+        expr: "1 - image_builder_composer:request_latency:slo_target"
+      # record expressions
+      ## compose error rate & budget
+      - record: image_builder_composer:compose_request:error_rate28d
+        labels:
+          env: "stage"
+        expr: |
+          (
+            sum(increase(image_builder_composer_request_count{code=~"5.*", path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[28d]))
+            /
+            sum(increase(image_builder_composer_request_count{path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[28d]))
+          ) OR on() vector(0) # set fallback value (no data means 0% error rate)
+      - record: image_builder_composer:compose_request:success_rate28d
+        labels:
+          env: "stage"
+        expr: "1 - image_builder_composer:compose_request:error_rate28d"
+      - record: image_builder_composer:compose_request:budget_consumed28d
+        labels:
+          env: "stage"
+        expr: |
+          # error rate / error budget
+          image_builder_composer:compose_request:error_rate28d
+          / 
+          ignoring (env) group_left image_builder_composer:compose_request:error_budget
+      - record: image_builder_composer:compose_request:budget_remaining28d
+        labels:
+          env: "stage"
+        expr: |
+          # 28 days * 24 hours * (error_budget - error_rate)
+          28 * 24 * (
+            - image_builder_composer:compose_request:error_rate28d
+            + ignoring (env) group_left image_builder_composer:compose_request:error_budget
+          )
+      ## latency error rate & budget
+      - record: image_builder_composer:request_latency:error_rate28d
+        labels:
+          env: "stage"
+        expr: |
+          1 - (
+            sum(increase(image_builder_composer_http_duration_seconds_bucket{le="0.2"}[28d]))
+            /
+            sum(increase(image_builder_composer_http_duration_seconds_count[28d]))
+          ) OR on() vector(1)
+      - record: image_builder_composer:request_latency:success_rate28d
+        labels:
+          env: "stage"
+        expr: "1 - image_builder_composer:request_latency:success_rate28d"
+      - record: image_builder_composer:request_latency:budget_consumed28d
+        labels:
+          env: "stage"
+        expr: |
+          # error rate / error budget
+          image_builder_composer:request_latency:error_rate28d
+          / 
+          ignoring (env) group_left image_builder_composer:request_latency:error_budget
+      - record: image_builder_composer:request_latency:budget_remaining28d
+        labels:
+          env: "stage"
+        expr: |
+          # 28 days * 24 hours * (error_budget - error_rate)
+          28 * 24 * (
+            - image_builder_composer:request_latency:error_rate28d
+            + ignoring (env) group_left image_builder_composer:request_latency:error_budget
+          )
