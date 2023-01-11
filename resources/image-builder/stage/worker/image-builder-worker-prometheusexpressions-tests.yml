@@ -1,0 +1,105 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /image-builder/stage/worker/image-builder-worker-prometheusrules.yml
+
+evaluation_interval: 28d
+
+tests:
+    # build success tests
+    - interval: 28d
+      input_series:
+        - series: image_builder_worker_total_jobs{type="osbuild", arch="x86_64", status="5xx", tenant="org-15877963"}
+          values: '30+30x4'
+        - series: image_builder_worker_total_jobs{type="osbuild", arch="x86_64", status="2xx", tenant="org-15877963"}
+          values: '10+10x4'
+      promql_expr_test:
+        - expr: "image_builder_worker:build_success:error_rate28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_worker:build_success:error_rate28d{env="stage", arch="x86_64", tenant="org-15877963"}'
+                value: 0.75
+        - expr: "image_builder_worker:build_success:budget_consumed28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_worker:build_success:budget_consumed28d{env="stage", arch="x86_64", tenant="org-15877963"}'
+                value: 14.999999999999988
+        - expr: "image_builder_worker:build_success:budget_remaining28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_worker:build_success:budget_remaining28d{env="stage", arch="x86_64", tenant="org-15877963"}'
+                value: -470.4
+
+    # build duration tests
+    - interval: 28d
+      input_series:
+        - series: image_builder_worker_job_duration_seconds_bucket{le="1792", type="osbuild", arch="x86_64", status="2xx", tenant="org-15877963"}
+          values: 0+4x5
+        - series: image_builder_worker_job_duration_seconds_count{type="osbuild", arch="x86_64", status="2xx", tenant="org-15877963"}
+          values: 5+10x5
+      promql_expr_test:
+        - expr: "image_builder_worker:build_duration:error_rate28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_worker:build_duration:error_rate28d{env="stage", arch="x86_64", tenant="org-15877963"}'
+                value: 0.4
+        - expr: "image_builder_worker:build_duration:budget_consumed28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_worker:build_duration:budget_consumed28d{env="stage", arch="x86_64", tenant="org-15877963"}'
+                value: 7.999999999999994
+        - expr: "image_builder_worker:build_duration:budget_remaining28d"
+          eval_time: 28d
+          exp_samples:
+              # sample 1.
+              - labels: 'image_builder_worker:build_duration:budget_remaining28d{env="stage", arch="x86_64", tenant="org-15877963"}'
+                value: -235.2
+
+    # depsolve success tests
+    - interval: 28d
+      input_series:
+        - series: image_builder_worker_total_jobs{type="depsolve", status="5xx", tenant="org-15877963"}
+          values: '30+30x4'
+        - series: image_builder_worker_total_jobs{type="depsolve", status="2xx", tenant="org-15877963"}
+          values: '10+10x4'
+      promql_expr_test:
+        - expr: "image_builder_worker:depsolve_success:error_rate28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_worker:depsolve_success:error_rate28d{env="stage", tenant="org-15877963"}'
+                value: 0.25
+        - expr: "image_builder_worker:depsolve_success:budget_consumed28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_worker:depsolve_success:budget_consumed28d{env="stage", tenant="org-15877963"}'
+                value: 4.999999999999996
+        - expr: "image_builder_worker:depsolve_success:budget_remaining28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_worker:depsolve_success:budget_remaining28d{env="stage", tenant="org-15877963"}'
+                value: -134.39999999999998
+
+    # depsolve duration tests
+    - interval: 28d
+      input_series:
+        - series: image_builder_worker_job_duration_seconds_bucket{le="32", type="depsolve", status="2xx", tenant="org-15877963"}
+          values: 0+6x5
+        - series: image_builder_worker_job_duration_seconds_count{type="depsolve", status="2xx", tenant="org-15877963"}
+          values: 5+10x5
+      promql_expr_test:
+        - expr: "image_builder_worker:depsolve_duration:error_rate28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_worker:depsolve_duration:error_rate28d{env="stage", tenant="org-15877963"}'
+                value: 0.4
+        - expr: "image_builder_worker:depsolve_duration:budget_consumed28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_worker:depsolve_duration:budget_consumed28d{env="stage", tenant="org-15877963"}'
+                value: 7.999999999999994
+        - expr: "image_builder_worker:depsolve_duration:budget_remaining28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_worker:depsolve_duration:budget_remaining28d{env="stage", tenant="org-15877963"}'
+                value: -235.2

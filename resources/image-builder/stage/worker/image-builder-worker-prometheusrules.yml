@@ -469,3 +469,156 @@ spec:
         /
         sum(rate(image_builder_worker_request_count{subsystem="worker"}[6h]))
       record: image_builder_worker_total_failed_requests:burnrate6h
+  - name: image-builder.openshiftio.expressions
+    interval: 1m
+    rules:
+      # worker
+      # record the targets first
+      ## build success
+      - record: image_builder_worker:build_success:slo_target
+        expr: | 
+          0.95
+      - record: image_builder_worker:build_success:error_budget
+        expr: | 
+          1 - image_builder_worker:build_success:slo_target
+      ## build duration
+      - record: image_builder_worker:build_duration:slo_target
+        expr: | 
+          0.95
+      - record: image_builder_worker:build_duration:error_budget
+        expr: "1 - image_builder_worker:build_duration:slo_target"
+      ## depsolve success
+      - record: image_builder_worker:depsolve_success:slo_target
+        expr: "0.95"
+      - record: image_builder_worker:depsolve_success:error_budget
+        expr: "1 - image_builder_worker:depsolve_success:slo_target"
+      ## depsolve duration
+      - record: image_builder_worker:depsolve_duration:slo_target
+        expr: "0.95"
+      - record: image_builder_worker:depsolve_duration:error_budget
+        expr: "1 - image_builder_worker:depsolve_duration:slo_target"
+      # record expressions
+      ## build error rate & error budget
+      - record: image_builder_worker:build_success:error_rate28d
+        labels:
+          env: "stage"
+        expr: |
+          (
+            sum by (arch, tenant) (increase(image_builder_worker_total_jobs{type=~"osbuild.*", status="5xx"}[28d]))
+            /
+            sum by (arch, tenant) (increase(image_builder_worker_total_jobs{type=~"osbuild.*", status!="4xx"}[28d])) 
+          ) OR on() vector(0) # set fallback value (no data means 0% error rate)
+      - record: image_builder_worker:build_success:success_rate28d
+        labels:
+          env: "stage"
+        expr: "1 - image_builder_worker:build_success:success_rate28d"
+      - record: image_builder_worker:build_success:budget_consumed28d
+        labels:
+          env: "stage"
+        expr: |
+          # error rate / error budget
+          image_builder_worker:build_success:error_rate28d
+          / 
+          ignoring (arch, env, tenant) group_left image_builder_worker:build_success:error_budget
+      - record: image_builder_worker:build_success:budget_remaining28d
+        labels:
+          env: "stage"
+        expr: |
+          # 28 days * 24 hours * (error_budget - error_rate)
+          28 * 24 * (
+            - image_builder_worker:build_success:error_rate28d
+            + ignoring (arch, env, tenant) group_left image_builder_worker:build_success:error_budget  
+          )
+      ## build duration & error budget
+      - record: image_builder_worker:build_duration:error_rate28d
+        labels:
+          env: "stage"
+        expr: |
+          (
+            sum by (arch, tenant) (increase(image_builder_worker_job_duration_seconds_bucket{le="1792",type="osbuild"}[28d]))
+            /
+            sum by (arch, tenant) (increase(image_builder_worker_job_duration_seconds_count{type="osbuild"}[28d])) 
+          ) OR on() vector(0)
+      - record: image_builder_worker:build_duration:success_rate28d
+        labels:
+          env: "stage"
+        expr: "1 - image_builder_worker:build_duration:success_rate28d"
+      - record: image_builder_worker:build_duration:budget_consumed28d
+        labels:
+          env: "stage"
+        expr: |
+          # error rate / error budget
+          image_builder_worker:build_duration:error_rate28d
+          / 
+          ignoring (arch, env, tenant) group_left image_builder_worker:build_duration:error_budget
+      - record: image_builder_worker:build_duration:budget_remaining28d
+        labels:
+          env: "stage"
+        expr: |
+          # 28 days * 24 hours * (error_budget - error_rate)
+          28 * 24 * (
+            - image_builder_worker:build_duration:error_rate28d
+            + ignoring (arch, env, tenant) group_left image_builder_worker:build_duration:error_budget  
+          )
+      ## depsolve error rate & error budget
+      - record: image_builder_worker:depsolve_success:error_rate28d
+        labels:
+          env: "stage"
+        expr: |
+          1 - (
+            sum by (tenant) (increase(image_builder_worker_total_jobs{type="depsolve", status="5xx"}[28d]))
+            /
+            sum by (tenant) (increase(image_builder_worker_total_jobs{type="depsolve", status!="4xx"}[28d]))
+          ) OR on() vector(1) # set fallback value (no data means 0% error rate)
+      - record: image_builder_worker:depsolve_success:success_rate28d
+        labels:
+          env: "stage"
+        expr: "1 - image_builder_worker:depsolve_success:success_rate28d"
+      - record: image_builder_worker:depsolve_success:budget_consumed28d
+        labels:
+          env: "stage"
+        expr: |
+          # error rate / error budget
+          image_builder_worker:depsolve_success:error_rate28d
+          / 
+          ignoring (env, tenant) group_left image_builder_worker:depsolve_success:error_budget
+      - record: image_builder_worker:depsolve_success:budget_remaining28d
+        labels:
+          env: "stage"
+        expr: |
+          # 28 days * 24 hours * (error_budget - error_rate)
+          28 * 24 * (
+            - image_builder_worker:depsolve_success:error_rate28d
+            + ignoring (env, tenant) group_left image_builder_worker:depsolve_success:error_budget  
+          )
+      ## depsolve duration & error budget
+      - record: image_builder_worker:depsolve_duration:error_rate28d
+        labels:
+          env: "stage"
+        expr: |
+          1 - (
+            sum by (tenant) (increase(image_builder_worker_job_duration_seconds_bucket{le="32",type="depsolve"}[28d]))
+            /
+            sum by (tenant) (increase(image_builder_worker_job_duration_seconds_count{type="depsolve"}[28d])) 
+          ) OR on() vector(1)
+      - record: image_builder_worker:depsolve_duration:success_rate28d
+        labels:
+          env: "stage"
+        expr: "1 - image_builder_worker:depsolve_duration:success_rate28d"
+      - record: image_builder_worker:depsolve_duration:budget_consumed28d
+        labels:
+          env: "stage"
+        expr: |
+          # error rate / error budget
+          image_builder_worker:depsolve_duration:error_rate28d
+          / 
+          ignoring (env, tenant) group_left image_builder_worker:depsolve_duration:error_budget
+      - record: image_builder_worker:depsolve_duration:budget_remaining28d
+        labels:
+          env: "stage"
+        expr: |
+          # 28 days * 24 hours * (error_budget - error_rate)
+          28 * 24 * (
+            - image_builder_worker:depsolve_duration:error_rate28d
+            + ignoring (env, tenant) group_left image_builder_worker:depsolve_duration:error_budget  
+          )
