@@ -476,15 +476,12 @@ spec:
       # record the targets first
       ## build success
       - record: image_builder_worker:build_success:slo_target
-        expr: | 
-          0.95
+        expr: "0.95"
       - record: image_builder_worker:build_success:error_budget
-        expr: | 
-          1 - image_builder_worker:build_success:slo_target
+        expr: "1 - image_builder_worker:build_success:slo_target"
       ## build duration
       - record: image_builder_worker:build_duration:slo_target
-        expr: | 
-          0.95
+        expr: "0.95"
       - record: image_builder_worker:build_duration:error_budget
         expr: "1 - image_builder_worker:build_duration:slo_target"
       ## depsolve success
@@ -511,7 +508,7 @@ spec:
       - record: image_builder_worker:build_success:success_rate28d
         labels:
           env: "stage"
-        expr: "1 - image_builder_worker:build_success:success_rate28d"
+        expr: "1 - image_builder_worker:build_success:error_rate28d"
       - record: image_builder_worker:build_success:budget_consumed28d
         labels:
           env: "stage"
@@ -534,15 +531,15 @@ spec:
         labels:
           env: "stage"
         expr: |
-          (
+          1 - (
             sum by (arch, tenant) (increase(image_builder_worker_job_duration_seconds_bucket{le="1792",type="osbuild"}[28d]))
             /
             sum by (arch, tenant) (increase(image_builder_worker_job_duration_seconds_count{type="osbuild"}[28d])) 
-          ) OR on() vector(0)
+          ) OR on() vector(1)
       - record: image_builder_worker:build_duration:success_rate28d
         labels:
           env: "stage"
-        expr: "1 - image_builder_worker:build_duration:success_rate28d"
+        expr: "1 - image_builder_worker:build_duration:error_rate28d"
       - record: image_builder_worker:build_duration:budget_consumed28d
         labels:
           env: "stage"
@@ -565,15 +562,15 @@ spec:
         labels:
           env: "stage"
         expr: |
-          1 - (
+          (
             sum by (tenant) (increase(image_builder_worker_total_jobs{type="depsolve", status="5xx"}[28d]))
             /
             sum by (tenant) (increase(image_builder_worker_total_jobs{type="depsolve", status!="4xx"}[28d]))
-          ) OR on() vector(1) # set fallback value (no data means 0% error rate)
+          ) OR on() vector(0) # set fallback value (no data means 0% error rate)
       - record: image_builder_worker:depsolve_success:success_rate28d
         labels:
           env: "stage"
-        expr: "1 - image_builder_worker:depsolve_success:success_rate28d"
+        expr: "1 - image_builder_worker:depsolve_success:error_rate28d"
       - record: image_builder_worker:depsolve_success:budget_consumed28d
         labels:
           env: "stage"
