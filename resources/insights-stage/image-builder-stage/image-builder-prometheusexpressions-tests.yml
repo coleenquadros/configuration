@@ -1,0 +1,56 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-stage/image-builder-stage/image-builder-prometheusrules.yml
+
+evaluation_interval: 28d
+
+tests:
+    # Compose request tests
+    - interval: 28d
+      input_series:
+        - series: image_builder_crc_compose_errors
+          values: '8+8x4'
+        - series: image_builder_crc_compose_requests_total
+          values: '10+10x4'
+      promql_expr_test:
+        - expr: "image_builder_crc:compose_request:error_rate28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_crc:compose_request:error_rate28d{env="stage"}'
+                value: 0.8
+        - expr: "image_builder_crc:compose_request:budget_consumed28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_crc:compose_request:budget_consumed28d{env="stage"}'
+                value: 15.999999999999988 
+        - expr: "image_builder_crc:compose_request:budget_remaining28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_crc:compose_request:budget_remaining28d{env="stage"}'
+                value: -504
+
+    # latency tests
+    - interval: 28d
+      input_series:
+        - series: image_builder_crc_http_duration_seconds_bucket{le="0.5"}
+          values: 0+2x5
+        - series: image_builder_crc_http_duration_seconds_count
+          values: 5+10x5
+      promql_expr_test:
+        - expr: "image_builder_crc:request_latency:error_rate28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_crc:request_latency:error_rate28d{env="stage"}'
+                value: 0.8
+        - expr: "image_builder_crc:request_latency:budget_consumed28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_crc:request_latency:budget_consumed28d{env="stage"}'
+                value: 15.999999999999988 
+        - expr: "image_builder_crc:request_latency:budget_remaining28d"
+          eval_time: 28d
+          exp_samples:
+              - labels: 'image_builder_crc:request_latency:budget_remaining28d{env="stage"}'
+                value: -504
