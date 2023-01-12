@@ -4,7 +4,7 @@ As discussed during [SDE-1909](https://issues.redhat.com/browse/SDE-1909), Stone
 
 ## Support agreement
 
-The app-interface components used by Stonesoup will be supported by AppSRE. Stonesoup will support their own services, and SRE will not carry the pager for them initially. However, Stonesoup leads are working through the [hybrid SRE phases](https://docs.google.com/document/d/1ojVWef6uBHGUjWCd0rNqo9DPjUNSvffTJCyOT_Ga1hY/edit#heading=h.36ayys1g7an3) which will at some point in the future include SRE incident response outside Stonesoup engineering team business hours.
+The app-interface components used by Stonesoup will be supported by AppSRE. Stonesoup will support their own services, and SRE will not carry the pager for them initially. However, Stonesoup leads are working through the [hybrid SRE phases](https://docs.google.com/document/d/1ojVWef6uBHGUjWCd0rNqo9DPjUNSvffTJCyOT_Ga1hY/edit#heading=h.36ayys1g7an3) which may at some point in the future include SRE incident response outside Stonesoup engineering team business hours, but only once Stonesoup components go through the app-sre onboarding process.
 
 AppSRE supports the tooling around app-interface, as it does for all its tenants.
 The Stonesoup teams can get support from @app-sre-ic in [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) on this tooling, for the features that are agreed to be used, as listed in the next section.
