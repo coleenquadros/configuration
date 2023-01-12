@@ -296,3 +296,32 @@ Depending on the solution, we need different level of access.
 
 ### Escalations
 - If `@edge-support` is unresponsive, ping the `@assistedinstaller-team` user on Slack channel #team-assisted-installer-alert
+
+## Opensearch disk filling up
+
+### Severity: Warning
+
+### Impact
+If Opensearch used disk space reaches 80%, the server will start rejecting writes, to avoid filling up disk and causing even more serious issues.
+
+### Summary
+This can be due to some rogue process, or simply maintenance neglection.
+
+### Access required
+
+Access to opensearch:
+* [Opensearch production](https://kibana-assisted.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/_dashboards/app/home/)
+* [Opensearch stage](https://kibana-assisted-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/_dashboards/app/home/)
+
+
+### Steps
+- Go to dev-tools tab
+- Check what index (if any) is taking up too much space
+- If there is data that can be deleted, then we can delete it right away and mitigate the alert
+- If there is no data that can be deleted, we can increase disk size from `/resources/terraform/assisted-installer/elasticsearch*.yaml` files (according to the target environment)
+- This process will take time, if we want to mitigate the impact, we can [force merge](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-forcemerge.html) the indexes with the most number of segments/data
+
+Note: we can follow [AWS guide](https://aws.amazon.com/premiumsupport/knowledge-center/opensearch-deleted-documents/)
+
+### Escalations
+`@edge-cloud-team` can help with this, alternatively `@assistedinstaller-team` can be pinged.
