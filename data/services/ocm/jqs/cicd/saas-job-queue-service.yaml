@@ -21,6 +21,7 @@ slack:
 managedResourceTypes:
   - Deployment
   - Service
+  - ConfigMap
 
 imagePatterns:
   - quay.io/app-sre/job-queue-service
@@ -31,71 +32,82 @@ authentication:
     field: all
 
 resourceTemplates:
-  - name: job-queue-service
-    url: https://gitlab.cee.redhat.com/service/job-queue-service
-    path: /templates/service-template.yml
-    parameters:
-      ENVIRONMENT: production
-      IMAGE_REGISTRY: quay.io
-      IMAGE_REPOSITORY: app-sre/job-queue-service
-      JWKS_URL: https://api.openshift.com/.well-known/jwks.json
-      REPLICAS: 1
-      RATE_LIMIT: 1000
-      # After openshift upgrade, we're seeing sporadic "http2: server: error reading preface"
-      # errors in log, source IP is openshift router.
-      GODEBUG: http2server=0
-    targets:
-      - namespace:
-          $ref: /services/ocm/namespaces/uhc-production.yml
-        ref: ee9f468df17e9aec3438c40287f19671783243ce
-        parameters:
-          GLOG_V: 1
-          ENABLE_SENTRY: true
-          SENTRY_URL: sentry.devshift.net
-          SENTRY_PROJECT: 18
-          UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
-          WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
-          RATE_LIMIT: 1000
-          REPLICAS: 3
-      - namespace:
-          $ref: /services/ocm/namespaces/uhc-stage.yml
-        ref: master
-        upstream:
-          instance:
-            $ref: /dependencies/ci-int/ci-int.yml
-          name: service-job-queue-service-gl-build-master
-        parameters:
-          GLOG_V: 5
-          ENABLE_SENTRY: true
-          SENTRY_URL: sentry.stage.devshift.net
-          SENTRY_PROJECT: 22
-          UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
-          WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
-          RATE_LIMIT: 1000
-          REPLICAS: 3
-      - namespace:
-          $ref: /services/ocm/namespaces/uhc-stage-appsres04ue2.yml
-        ref: master
-        upstream:
-          instance:
-            $ref: /dependencies/ci-int/ci-int.yml
-          name: service-job-queue-service-gl-build-master
-        parameters:
-          GLOG_V: 5
-          ENABLE_SENTRY: true
-          SENTRY_URL: sentry.stage.devshift.net
-          SENTRY_PROJECT: 22
-          UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
-          WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
-          RATE_LIMIT: 1000
-      - namespace:
-          $ref: /services/ocm/namespaces/uhc-integration.yml
-        ref: master
-        upstream:
-          instance:
-            $ref: /dependencies/ci-int/ci-int.yml
-          name: service-job-queue-service-gl-build-master
-        parameters:
-          GLOG_V: 5
-          UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
-          WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
+- name: job-queue-service
+  url: https://gitlab.cee.redhat.com/service/job-queue-service
+  path: /templates/service-template.yml
+  parameters:
+    ENVIRONMENT: production
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/job-queue-service
+    JWKS_URL: https://api.openshift.com/.well-known/jwks.json
+    REPLICAS: 1
+    RATE_LIMIT: 1000
+    # After openshift upgrade, we're seeing sporadic "http2: server: error reading preface"
+    # errors in log, source IP is openshift router.
+    GODEBUG: http2server=0
+  targets:
+    - namespace:
+        $ref: /services/ocm/namespaces/uhc-production.yml
+      ref: ee9f468df17e9aec3438c40287f19671783243ce
+      parameters:
+        GLOG_V: 1
+        ENABLE_SENTRY: true
+        SENTRY_URL: sentry.devshift.net
+        SENTRY_PROJECT: 18
+        UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+        WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
+        RATE_LIMIT: 1000
+        REPLICAS: 3
+    - namespace:
+        $ref: /services/ocm/namespaces/uhc-stage.yml
+      ref: master
+      upstream:
+        instance:
+          $ref: /dependencies/ci-int/ci-int.yml
+        name: service-job-queue-service-gl-build-master
+      parameters:
+        GLOG_V: 5
+        ENABLE_SENTRY: true
+        SENTRY_URL: sentry.stage.devshift.net
+        SENTRY_PROJECT: 22
+        UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+        WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
+        RATE_LIMIT: 1000
+        REPLICAS: 3
+    - namespace:
+        $ref: /services/ocm/namespaces/uhc-stage-appsres04ue2.yml
+      ref: master
+      upstream:
+        instance:
+          $ref: /dependencies/ci-int/ci-int.yml
+        name: service-job-queue-service-gl-build-master
+      parameters:
+        GLOG_V: 5
+        ENABLE_SENTRY: true
+        SENTRY_URL: sentry.stage.devshift.net
+        SENTRY_PROJECT: 22
+        UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+        WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
+        RATE_LIMIT: 1000
+    - namespace:
+        $ref: /services/ocm/namespaces/uhc-integration.yml
+      ref: master
+      upstream:
+        instance:
+          $ref: /dependencies/ci-int/ci-int.yml
+        name: service-job-queue-service-gl-build-master
+      parameters:
+        GLOG_V: 5
+        UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+        WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
+- name: job-queue-service-dashboards
+  url: https://gitlab.cee.redhat.com/service/job-queue-service
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: cbd356d0176d565729119eebf75bed4e1b086a98
