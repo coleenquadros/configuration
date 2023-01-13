@@ -86,7 +86,7 @@ Notes:
 
 - Regex expressions are supported.
 - These steps will also cause existing upgrades to be cancelled if time allows.
-- All AppSRE clusters are provisioned in the [OCM production instance](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2860db033ff2cc88aadf6b655d8ced7ac66746d3/data/dependencies/ocm/production.yml#L18).
+- All AppSRE clusters are provisioned in the [OCM production instance](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ocm/production.yml#L13).
 
 
 ## Upgrade strategy
