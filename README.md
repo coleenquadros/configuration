@@ -561,6 +561,24 @@ In order to get access to Sentry, a user has to have:
     * Example: [dev](/data/teams/ocm/roles/dev.yml) role.
 
 ---
+### Create a Glitchtip Organization (`/dependencies/glitchtip-organization-1.yml`)
+
+A glitchtip project is related to a glitchtip organization, and all projects in an organization can be accessed by all organization members.
+
+To define your glitchtip organization, create a file in `/data/dependencies/glitchtip/organizations/` with a structure like the following:
+```yaml
+$schema: /dependencies/glitchtip-organization-1.yml
+
+labels:
+  service: glitchtip
+
+name: <name of the organization - lower case max 64 characters>
+description: <description of the organization>
+instance:
+  $ref: /dependencies/glitchtip/glitchtip-stage.yml
+
+```
+
 ### Create a GlitchTip Project for an onboarded App (`/dependencies/glitchtip-project-1.yml`)
 
 To define your glitchtip project, create a file in `/data/dependencies/glitchtip/projects/` with a structure like the following:
@@ -580,23 +598,7 @@ organization:
 
 The name, app, description, platform, teams, and organization fields are required. The name must be unique.
 
-### Create a Glitchtip Organization (`/dependencies/glitchtip-organization-1.yml`)
 
-A glitchtip project is related to a glitchtip organization, and all projects in an organization can be accessed by all organization members.
-
-To define your glitchtip organization, create a file in `/data/dependencies/glitchtip/organizations/` with a structure like the following:
-```yaml
-$schema: /dependencies/glitchtip-organization-1.yml
-
-labels:
-  service: glitchtip
-
-name: <name of the organization - lower case max 64 characters>
-description: <description of the organization>
-instance:
-  $ref: /dependencies/glitchtip/glitchtip-stage.yml
-
-```
 
 Please note that the organization's name must be unique.
 
@@ -638,6 +640,16 @@ In order to get access to Glitchtip, a user has to have the following:
   ```
   E.g.: [app-sre role](data/teams/app-sre/roles/app-sre.yml)
 
+### Glitchtip Project DSN in namespace
+
+This is optional but highliy recommended. The Glitchtip DSN is the URL that is used to send errors to Glitchtip. You can find it in the Glitchtip project settings (web-ui), but you can easily consume it via `Secret` in your openshift namespace. To do so, add the following section to your `/openshift/namespace-1.yml` file:
+
+```yaml
+glitchtipProjects:
+- $ref: <glitchtip project file (`(`/dependencies/glitchtip-project-1.yml`)`), for example `/dependencies/glitchtip/projects/glitchtip-production/app-interface-prod.yml`>
+```
+
+---
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
 [services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
