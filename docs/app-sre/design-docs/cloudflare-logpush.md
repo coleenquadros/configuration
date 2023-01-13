@@ -26,6 +26,7 @@ Today, Quay has a requirement for pushing worker logs to S3 and tying them into 
 ## Non-objectives
 * Send Quay's worker logs to S3. This work will be delegated to the Quay team through self-service once the feature is implemented.
 * Send Cloudflare account audit logs to S3. This will be implemented in a different story, but we will leverage Logpush feature.
+* Automating pushing backfilled logs to the destination.
 
 
 ## Proposal
@@ -38,6 +39,7 @@ Cloudflare offers [Logpush](https://developers.cloudflare.com/logs/about/) mecha
 * `cloudflare_logpush_job` to configure logpush job
 * `cloudflare_logpush_ownership_challenge` required for destination such as S3 etc.
 * `cloudflare_notification_policy` to configure monitoring for Logpush jobs.
+* `cloudflare_logpull_retention`, used as back up when Logpush job fails for certain datasets.
 
 
 ### Logpush destinations
@@ -63,7 +65,7 @@ A configured Cloudflare Logpush job may fail to push logs due to variety of reas
 We need some alerting in place to notify us in case of failed job scenario.
 Cloudflare offers two different solutions for monitoring job status.
 1. Cloudflare notification system: We can utilize this option through terraform using `cloudflare_notification_policy` resource. This option supports email, custom webhook and pagerduty integration. Ideally, we prefer PagerDuty integration, but initial research shows Cloudflare does not support any PagerDuty API keys but relies on user level authentication, which is not ideal.
-2. Cloudflare GraphQL API: In order to utilize this, we will need to make an upstream contribution to [Cloudflare lablabs exporter](https://github.com/lablabs/cloudflare-exporter) to expose `failing_logpush_job_disabled_alert` metric.
+2. Cloudflare GraphQL API: In order to utilize this, we will need to make an upstream contribution to [Cloudflare lablabs exporter](https://github.com/lablabs/cloudflare-exporter) to expose `logpushHealthAdaptiveGroups` metric.
 
 
 For now, we can investigate into exposing relevant metrics (and set up Prometheus alerts) using Cloudflare GraphQL API and the Lablabs Cloudflare exporter. If there are any significant blockers with this approach, we will default to Cloudflare notification system with email delivery.
