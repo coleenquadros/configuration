@@ -11,12 +11,14 @@ accessTokenClientSecret:
   path: app-interface/osd-fleet-manager/integration/fleet-manager
   field: ocm-service.clientSecret
   version: 8
+
 addonUpgradeTests:
 - addon:
     $ref: /dependencies/ocm/addons/advanced-cluster-management.yml
   instance:
     $ref: /dependencies/ci-int/ci-int.yml
   name: uhc-integration-tests-integration
+
 blockedVersions:
 - ^.*-ec\..*$
 - ^.*-fc\..*$
@@ -59,13 +61,16 @@ upgradePolicyDefaults:
     type: jinja2
     variables:
       schedule: 0 11 * * 1-5
+      setMutexes: false
 - name: management-cluster
   matchLabels:
     ext-hypershift.openshift.io/cluster-type: management-cluster
   upgradePolicyTemplate:
     path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
+    type: jinja2
     variables:
       schedule: 0 13 * * 1-5
+      setMutexes: false
 upgradePolicyClusters:
 - name: hs-mc-cdducjuis
   upgradePolicy:
@@ -75,8 +80,6 @@ upgradePolicyClusters:
     conditions:
       sector: us-west-2
       soakDays: 0
-      mutexes:
-      - management-cluster
 - name: hs-sc-cbmcd0f3e
   upgradePolicy:
     workloads:
@@ -85,8 +88,6 @@ upgradePolicyClusters:
     conditions:
       sector: us-west-2
       soakDays: 0
-      mutexes:
-      - service-cluster
 - name: hs-sc-7op0pe1r0
   upgradePolicy:
     workloads:
@@ -95,8 +96,6 @@ upgradePolicyClusters:
     conditions:
       sector: us-west-2
       soakDays: 0
-      mutexes:
-      - service-cluster
 - name: hs-mc-7op0pe2og
   upgradePolicy:
     workloads:
@@ -105,8 +104,6 @@ upgradePolicyClusters:
     conditions:
       sector: us-west-2
       soakDays: 0
-      mutexes:
-      - management-cluster
 recommendedVersions:
 - workload: management-cluster
   channel: candidate

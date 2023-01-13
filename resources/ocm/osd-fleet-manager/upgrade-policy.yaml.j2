@@ -14,8 +14,10 @@ conditions:
   # We can also set no sector with | default("null")
   sector: {{ labels['ext-hypershift.openshift.io/sector'] | default(cluster.spec.region) }}
   soakDays: {{ labels['ext-hypershift.openshift.io/soak-days'] | default(0) }}
+  {%- if setMutexes | default(true) %}
   mutexes:
   # forbid concurrent upgrades in a given sector for a given cluster type
   # This still allows concurrent upgrades in different sectors
   # - {{ labels['ext-hypershift.openshift.io/sector'] | default(cluster.spec.region) }}-{{ labels['ext-hypershift.openshift.io/cluster-type'] }}
   - {{ labels['ext-hypershift.openshift.io/cluster-type'] }}
+  {%- endif %}
