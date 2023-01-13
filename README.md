@@ -640,14 +640,6 @@ In order to get access to Glitchtip, a user has to have the following:
   ```
   E.g.: [app-sre role](data/teams/app-sre/roles/app-sre.yml)
 
-### Glitchtip Project DSN in namespace
-
-This is optional but highliy recommended. The Glitchtip DSN is the URL that is used to send errors to Glitchtip. You can find it in the Glitchtip project settings (web-ui), but you can easily consume it via `Secret` in your openshift namespace. To do so, add the following section to your `/openshift/namespace-1.yml` file:
-
-```yaml
-glitchtipProjects:
-- $ref: <glitchtip project file (`(`/dependencies/glitchtip-project-1.yml`)`), for example `/dependencies/glitchtip/projects/glitchtip-production/app-interface-prod.yml`>
-```
 
 ---
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
