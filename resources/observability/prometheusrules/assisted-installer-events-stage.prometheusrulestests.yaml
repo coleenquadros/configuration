@@ -103,3 +103,56 @@ tests:
   - eval_time: 24h
     alertname: Assisted Installer Events - Assisted service events ingestion greatly reduced - Stage
     exp_alerts:
+
+# Test disk space available
+- interval: 5m
+  input_series:
+  - series: elasticsearch_filesystem_data_size_bytes{es_data_node="true",namespace="assisted-installer-stage",name="nodeA"}
+    values: 0 50 60 71+0x10 60+0x10
+  - series: elasticsearch_filesystem_data_available_bytes{es_data_node="true",namespace="assisted-installer-stage",name="nodeA"}
+    values: 100 50 40 29+0x10 40+0x10
+  - series: elasticsearch_filesystem_data_size_bytes{es_data_node="true",namespace="assisted-installer-stage",name="nodeB"}
+    values: 0 50 60 61+0x10 60+0x10 82+0x10
+  - series: elasticsearch_filesystem_data_available_bytes{es_data_node="true",namespace="assisted-installer-stage",name="nodeB"}
+    values: 100 50 40 39+0x10 40+0x10 18+0x10
+
+  alert_rule_test:
+  # nodeA goes to 71% of space occupied
+  - eval_time: 60m
+    alertname: Assisted Installer Opensearch - Opensearch (stage) disk is getting full
+    exp_alerts:
+    - exp_labels:
+        service: assisted-installer
+        severity: warning
+        es_data_node: true
+        name: nodeA
+        namespace: assisted-installer-stage
+      exp_annotations:
+        message: "Assisted Installer Opensearch - Opensearch (stage) disk is getting full (node nodeA is 71% full) <!subteam^S01T3MZGJ9M>"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#opensearch-disk-filling-up"
+  # Both nodes go back to acceptable values, no alert
+  - eval_time: 60m
+    alertname: Assisted Installer Opensearch - Opensearch (stage) disk is above watermark
+    exp_alerts:
+  - eval_time: 80m
+    alertname: Assisted Installer Opensearch - Opensearch (stage) disk is getting full
+    exp_alerts:
+  - eval_time: 80m
+    alertname: Assisted Installer Opensearch - Opensearch (stage) disk is above watermark
+    exp_alerts:
+  # NodeB goes above watermark
+  - eval_time: 150m
+    alertname: Assisted Installer Opensearch - Opensearch (stage) disk is getting full
+    exp_alerts:
+  - eval_time: 150m
+    alertname: Assisted Installer Opensearch - Opensearch (stage) disk is above watermark
+    exp_alerts:
+    - exp_labels:
+        service: assisted-installer
+        severity: warning
+        es_data_node: true
+        name: nodeB
+        namespace: assisted-installer-stage
+      exp_annotations:
+        message: "Assisted Installer Opensearch - Opensearch (stage) disk is above watermark (node nodeB is 82% full) <!subteam^S01T3MZGJ9M>"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#opensearch-disk-filling-up"
