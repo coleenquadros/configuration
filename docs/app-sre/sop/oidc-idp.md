@@ -65,7 +65,7 @@ Order a new SSO auth.redhat.com client via a [ServiceNow ticket](https://redhat.
 * **SSO Protocol**: OIDC (OpenID Connect)
 * **What environments are you interested in using for SSO**: Production
 * **Flow Used**: Authorization Code
-* **Access Type**: Unsure
+* **Access Type**: public
 * **Redirect URLs?**: https://oauth-openshift.apps.XXX.p1.openshiftapps.com/oauth2callback/redhat-app-sre-auth
 
 This manual task will be replaced by the [dynamic client registration feature](https://issues.redhat.com/browse/ITIAM-4261) in the future.
