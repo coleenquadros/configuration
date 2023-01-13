@@ -32,7 +32,7 @@
 
 ## Preface
 
-This documents is for AppSRE engineer consumption.
+This document is for AppSRE engineer consumption.
 
 It aims to ensure agreement and govern the AppSRE continuity and readiness plan.
 Information within this document aims to be the authoritative source for access,
@@ -45,11 +45,8 @@ surfaces and processes, including incident management.
 * [AppSRE Contract](https://gitlab.cee.redhat.com/app-sre/contract)
 * [Developer's Guide](https://service.pages.redhat.com/dev-guidelines/)
 * [Service Delivery / AppSRE shared
-  drive](https://drive.google.com/drive/u/0/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ).
-  Shared with Service Delivery.
-* [AppSRE Team
-  Drive](https://drive.google.com/drive/u/0/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs).
-  Viewable and editable by AppSRE members only.
+  drive](https://drive.google.com/drive/u/0/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ) (shared with Service Delivery)
+* [AppSRE Team Drive](https://drive.google.com/drive/folders/1FkGuqIWdY0XLgIfUGIdpckhF-cDsVF_u) (viewable and editable by AppSRE members only)
 
 ## AppSRE Engineer Onboarding
 
@@ -57,18 +54,18 @@ surfaces and processes, including incident management.
 
 You have a new, shiny laptop. Now, make sure you comply with [the laptop security guidelines](https://source.redhat.com/departments/it/it-information-security/wiki/laptop_security).
 
-### Declare your github repositories in Rover
+### Declare your GitHub repositories in Rover
 
-Ideally you'd declare your **professional** social media in your
+Ideally, you'd declare your **professional** social media in your
 [Rover profile](https://rover.redhat.com/people/profile/). At the very
-least we want you to declare your Github account there, so that
+least, we want you to declare your GitHub account there so that
 InfoSec can [scan for any key
 leaks](https://source.redhat.com/departments/it/it-information-security/wiki/details_about_rover_github_information_security_and_scanning#how-can-i-tell-the-scanner-to-allow-certain-things-in-my-repo-)
 on your **public** repositories.
 
 ### Registering the user in App-Interface
 
-Most of the resources required as an AppSRE will be obtained via a user definition with AppSRE specific roles in App-Interface.
+Most of the resources required as an AppSRE will be obtained via a user definition with AppSRE-specific roles in App-Interface.
 
 * Developer's guide: [How to add a user to
   App-Interface](https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/team/).
@@ -86,7 +83,7 @@ Most of the resources required as an AppSRE will be obtained via a user definiti
 Every AppSRE/MT-SRE engineer should have access to the following:
 
 * LDAP
-  * If needed can reset KRB password
+  * If needed can reset Kerberos password
     [here](https://password.corp.redhat.com/changepassword).
   * https://gitlab.cee.redhat.com/app-sre/infra: keeps our Ansible and Terraform bits and bobs.
 * Slack: redhat-internal.slack.com
@@ -98,21 +95,21 @@ Every AppSRE/MT-SRE engineer should have access to the following:
 * Internal IRC (irc.devel.redhat.com):
   * **#appsre**: backup channel if Slack is down or if sensitive content must be addressed.
   * **#servicedelivery**: backup channel for service delivery org if Slack is down.
-  * **#MIM**: Major incident management.
-  * **#aos**: Openshift channel.
+  * **#mim**: Major incident management (MIM).
+  * **#aos**: OpenShift channel.
 * Calendar:
   * [AppSRE calendar](https://calendar.google.com/calendar/u/0?cid=cmVkaGF0LmNvbV9iZ2VzaW1tYThyMTdndHJ2amxkaXU5Ym9ub0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t):
-    AppSRE engineers are encourage to create all meetings in this calendar for team awareness.
+    AppSRE engineers are encouraged to create all meetings in this calendar for team awareness.
   * [SD-org PTO / OOO](https://calendar.google.com/calendar/u/0?cid=cmVkaGF0LmNvbV8xN2piaHNtYmR2MTdhMTJhaHBvcDc5cWJ0a0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t):
     Any PTO must be reported here.
   * [SD-org calendar](https://calendar.google.com/calendar/u/0?cid=cmVkaGF0LmNvbV9hZzdoNG5kMnIydGlrM2dqZWxhaGRmbGhkOEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t):
     AppSRE doesn't use this calendar usually.
 * Google Meet:
-  * App SRE bridge: https://meet.google.com/zti-gkvy-pvn. We refer to this room as [zti](https://meet.google.com/zti-gkvy-pvn).
+  * AppSRE bridge: https://meet.google.com/zti-gkvy-pvn. We refer to this room as [ZTI](https://meet.google.com/zti-gkvy-pvn).
 * BlueJeans
   * To be used only if Google Meet is not available.
   * (Optional) Install BlueJeans client.
-  * App SRE bridge: https://bluejeans.com/994349364/8531
+  * AppSRE bridge: https://bluejeans.com/994349364/8531
 * Mailing lists:
   * http://groups.google.com/: new mailing list manager
     * [sd-app-sre-announce](https://groups.google.com/u/0/a/redhat.com/g/sd-app-sre-announce)
@@ -127,7 +124,7 @@ Every AppSRE/MT-SRE engineer should have access to the following:
   * Optional - Additional information surfaces, subscription not mandatory
     * ACCESS: aos-devel: very high volume (useful to get the latest news about OpenShift development). Subscribe from UI.
 * Sd-org onboarding
-  * ACCESS Contact Meghna Gala (mgala@redhat.com) re Sd-org onboarding (may not be needed)
+  * ACCESS Contact Meghna Gala (mgala@redhat.com) regarding sd-org onboarding (may not be needed)
     * Added to sd-org mailing list
   * ACCESS: [Jira](https://issues.redhat.com)
     * Email openshift-jira-admin@redhat.com for any issues
@@ -135,42 +132,42 @@ Every AppSRE/MT-SRE engineer should have access to the following:
 * github.com/openshift
   * ACCESS: [here](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/openshift_onboarding_checklist_for_github)
 * Bugzilla
-  * ACCESS: Ensure you have access to [bugzilla](https://bugzilla.redhat.com)
-    * Login as Red Hat Associate with kerberos credentials
-  * Verify you have permissions to view private and private_comment. This should be provided as part of the redhat group. See [here](https://docs.engineering.redhat.com/pages/viewpage.action?spaceKey=OMEGA&title=Group+Membership+Policy) for group information.
-* Pagerduty
-  * ACCESS: Create a [Jira ticket](https://issues.redhat.com/) in the OHSS board to request access to PagerDuty, and assign it to [Meghna Gala](https://rover.redhat.com/people/profile/mgala)
-  * you can check this [example ticket](https://issues.redhat.com/browse/OHSS-2547), but double check the assignee before commiting.
-  * Ensure you are listed with the appropriate contact detail in your Pagerduty profile.
-  * The recommended setup includes the Pagerduty app on your mobile phone. From the website you can test notifications to ensure that you have correctly set up the application to override any do not disturb settings.
-  * For notification troubleshooting see [here](https://support.pagerduty.com/docs/notification-troubleshooting).
+  * ACCESS: Ensure you have access to [Bugzilla](https://bugzilla.redhat.com)
+    * Login as Red Hat Associate with Kerberos credentials
+  * Verify you have permission to view private and private_comment. This should be provided as part of the Red Hat group. See [here](https://docs.engineering.redhat.com/pages/viewpage.action?spaceKey=OMEGA&title=Group+Membership+Policy) for group information.
+* PagerDuty
+  * Open a Service-Now (also known as "SNOW") ticket requesting PagerDuty account creation and access using [this](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=ed13c6af1b2a2c50e43942a7bc4bcbc3) form.
+  * Feel free to add your Manager to the list of additional contacts so that they can also receive status updates.
+  * Ensure that your contact details and time zone are set up correctly.
+  * The recommended setup includes the PagerDuty application on your mobile phone. From the website, you can test notifications to ensure that you have correctly set up the application to override any do not disturb settings.
+  * For notifications troubleshooting see [here](https://support.pagerduty.com/docs/notification-troubleshooting).
 * AppSRE shared folders
-  * ACCESS: Go to the following folders and request access with your Red Hat Gsuite account
-    * [Public Top Level Directory](https://drive.google.com/drive/u/1/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ) (contains RCAs, etc)
+  * ACCESS: Go to the following folders and request access with your Red Hat GSuite account
+    * [Public Top Level Directory](https://drive.google.com/drive/u/1/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ) (contains RCAs, etc.)
     * [Private](https://drive.google.com/drive/u/1/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs) (for AppSRE Team members only)
 * Vault
   * Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
     * [setup instructions](https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/adding-sensitive-data/#getting-access-to-vault)
 * Quay
-  * Login to/Create account at https://quay.io
+  * Login to/Create an account at https://quay.io
     * Attach with Red Hat SSO.
   * Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
   * Add `quay_username` in the [user file](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/teams/app-sre/users) and populate with quay user.
-* ssh access to jenkins related instances
+* SSH access to Jenkins-related instances
   * Via MR to [app-sre/infra repo](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/group_vars/all)
-    * add username and public part of your ssh key like [here](https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/144)
+    * Add username and public part of your SSH key like [here](https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/144)
 * CLI installs
   * Ansible
-    * You can install directly on your local machine or in a virtual environment (recommended)
+    * You can install it directly on your local machine or in a virtual environment (recommended)
       * To install locally:
         * (MacOS) `brew install ansible`
         * (Fedora/RHEL) `dnf install ansible-core`
       * To install in a virtual environment:
         * Set up pyenv
-        * Activate the virtual environment and install ansible with `pip install ansible`
+        * Activate the virtual environment and install Ansible with `pip install ansible`
         * For this setup, I currently have `python version 3.9.12`, `ansible version 2.9.27`, `jinja2 version 3.0.3`, and `hvac version 0.10.0`
-          * NOTE: The versions are very finicky so it may take some trial and error
-    * Ensure you have your ssh hosts file configured correctly because the ansible-playbook command assumes you do otherwise it will throw a SSH error
+          * NOTE: The versions are very finicky, so it may take some trial and error
+    * Ensure you have your SSH hosts file configured correctly because the ansible-playbook command assumes you do otherwise, it will throw an SSH error
   * Terraform
     * To install, go to the [vendor's download site](https://releases.hashicorp.com/terraform/) to find the version you need.
     * Ensure you have the correct terraform version on your laptop by looking at what [cli.py shows in qontract-reconcile for environment variable TERRAFORM_VERSION](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py)
@@ -180,21 +177,21 @@ Every AppSRE/MT-SRE engineer should have access to the following:
       * Please note that this will only work for virtual devices.
   * Python
     * (MacOS) To install: `brew install python`
-    * (Fedora/RHEL) should be preinstalled
-    * Because we now require MFA, in order to login you will have to do the following:
+    * (Fedora/RHEL) should be pre-installed
+    * Because we now require MFA, in order to login, you will have to do the following:
   * Alternatively, use pyenv to manage your versions of Python
     * (MacOS) To install: `brew install pyenv`
     * (Fedora/RHEL) Check out [pyenv-installer](https://github.com/pyenv/pyenv-installer)
   * OpenShift Client (oc)
-    * Check out [this download page](https://access.redhat.com/downloads/content/290) or [alternatively this mirror](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/).
+    * Check out [this download page](https://access.redhat.com/downloads/content/290) or, alternatively [this mirror](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/).
     * Instructions for installing are [here](https://docs.openshift.com/container-platform/4.10/cli_reference/openshift_cli/getting-started-cli.html).
-    * Qontract-reconcile uses a specific version of the oc binary [referenced in cli.py](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py#L136)
+    * qontract-reconcile uses a specific version of the oc binary [referenced in cli.py](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py#L136)
 
 Every AppSRE engineer should have access to the following:
 
 * GitHub
   * GitHub profile must include `Company: Red Hat`.
-  * Verify inclusion in all github orgs listed
+  * Verify inclusion in all GitHub organizations listed
     [here](https://visual-app-interface.devshift.net/githuborgs).
 * Gitlab:
   * https://gitlab.cee.redhat.com/app-sre
@@ -206,21 +203,21 @@ Every AppSRE engineer should have access to the following:
 * AWS
   * Nothing to do. Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
   * Make sure you enable MFA in **all** your AWS accounts.
-* App SRE infrastructure managed by ansible
-  * Access is managed by adding ssh keys to the [admin-list](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts. It is recommended that ssh key is RSA, 4096-sized and password-protected as those are the [requirements for Tier 1 Bastion keys](https://source.redhat.com/groups/public/openshiftplatformsre/wiki/faq_openshift_tiered_access_overview_for_osd3#jive_content_id_Tier_1)
+* AppSRE infrastructure managed by Ansible
+  * Access is managed by adding SSH keys to the [admin-list](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts. It is recommended that SSH key is RSA, 4096-sized and password-protected, as those are the [requirements for Tier 1 Bastion keys](https://source.redhat.com/groups/public/openshiftplatformsre/wiki/faq_openshift_tiered_access_overview_for_osd3#jive_content_id_Tier_1)
 * OpenStack Project infrastructure
   * We have our ci-int infrastructure deployed [here](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project)
     * Domain: redhat.com
     * Kerberos login and password
   * Detailed info [here](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/openstack-ci-int.md)
 * Tier 1 Bastion access for OSD3 (optional - mostly not needed):
-  * This is necessary to access some clusters that are not publicly exposed (for example hive shards still in OSDv3)
+  * This is necessary to access some clusters that are not publicly exposed (for example, Hive shards still in OSDv3)
   * Access process is documented [here](https://source.redhat.com/groups/public/openshiftplatformsre/wiki/faq_openshift_tiered_access_overview_for_osd3)
     * You should request Tier1
 * Pendo:
   * This is necessary to post maintenance and outage messages in https://console.redhat.com/openshift
-  * Access is provided via email to Jacquelene Booker <jbooker@redhat.com>.
-  * [Logging](https://app.pendo.io/login) in is done using the full Red Hat email.
+  * Access is provided via e-mail to Jacquelene Booker <jbooker@redhat.com>.
+  * [Logging](https://app.pendo.io/login) in is done using the full Red Hat e-mail.
   * Required permissions at the time of writing are:
     * Analyst
     * Guide Publisher
@@ -230,28 +227,27 @@ Every AppSRE engineer should have access to the following:
 * Unleash:
   * Feature toggle service to enable/disable features in runtime.
   * AppSRE unleash instance is here: https://app-interface.unleash.devshift.net/
-  * More details available [here](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md)
+  * More details are available [here](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md)
 * SendGrid
   * Nothing to do, granted by `sendgrid_accounts` in the [AppSRE role](data/teams/app-sre/roles/app-sre.yml).
 * Deadman's snitch
-  * Ask somebody in the team to invite you to the organization. You'll receive an e-mail with a link to the invite. Create a new account then, it will be added automatically to the organization and you'll see all the heartbeats we have configured. You'll also be able to create even more.
-* app-sre [kube-configs](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/)
+  * Ask somebody in the team to invite you to the organization. You'll receive an e-mail with a link to the invite. Create a new account then it will be added automatically to the organization, and you'll see all the heartbeats we have configured. You'll also be able to create even more.
+* AppSRE [kube-configs](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/)
 
 #### Returning Red Hat Employee Gotchas
 
 * Accounts need to be re-enabled
   * Bugzilla
-    * Send e-mail to bugzilla-owner@redhat.com or create ticket at the [Help
-      Portal](https://help.redhat.com/)
+    * Send e-mail to bugzilla-owner@redhat.com or create a ticket at the [Help Portal](https://help.redhat.com/)
     * It is likely the re-activated account will not have the needed
       permissions. Request access to the devel group by following the directions
       [here](https://docs.engineering.redhat.com/display/OMEGA/Group+Membership+Policy)
-  * Bluejeans
+  * BlueJeans
     * Create an IT ticket
 
 #### Maintaining access pieces
 
-Access pieces are a very quickly moving target, and they change very frequently. In order to maintain an accurate list of access pieces these actions must be followed by the each AppSRE team member:
+Access pieces are a very quickly moving target, and they change very frequently. In order to maintain an accurate list of access pieces, these actions must be followed by each AppSRE team member:
 
 * All access pieces are documented in the [Access and surfaces list](#access-and-surfaces-list) section.
 * If an AppSRE team member gains access to something and it's not linked from in this list, it's their responsibility to add it there.
@@ -274,14 +270,14 @@ has a very clear mission with regard to knowledge sharing:
 * There are no single owners or SMEs for any of the components and processes
   owned or implemented by the AppSRE team.
 * It is the responsibility of every AppSRE member to make sure no knowledge is
-  siloed, and to share any new knowledge piece with the rest of the team using
+  in a silo and to share any new knowledge piece with the rest of the team using
   the implemented processes and channels.
 * Each AppSRE member has the right to raise any concerns about any knowledge
-  gaps and the team will prioritize filling in those gaps.
+  gaps, and the team will prioritize filling in those gaps.
 
 #### Training Resources
 
-The AppSRE team will maintains an index of training resources. All AppSRE members must go through [those training documents](https://source.redhat.com/groups/public/sre-services/sre_services_wiki/appsre_introduction#jive_content_id_AppSRE_Training).
+The AppSRE team will maintain an index of training resources. All AppSRE members must go through [those training documents](https://source.redhat.com/groups/public/sre-services/sre_services_wiki/appsre_introduction#jive_content_id_AppSRE_Training).
 
 #### Deep Dive sessions
 
@@ -290,9 +286,9 @@ On a periodical basis, the AppSRE team will hold "Deep Dive sessions". These ses
 * The main goal is to share knowledge within the AppSRE team.
 * Periodicity: every 6 weeks.
 * 1h sessions.
-* Presentations should have an accompanying slide deck and must be well prepared.
+* Presentations should have an accompanying slide deck and must be well-prepared.
 * Any topics that are directly related to the AppSRE day-to-day will be prioritized over general knowledge ones.
-* Attendance from all the team members is strongly encouraged, as well as participation and making the sessions dynamic.
+* Attendance from all the team members is strongly encouraged, as well as participation and making the session dynamic.
 
 Those sessions are tracked in this document: [AppSRE Deep Dives](https://docs.google.com/document/d/1T4QNO2qQYpBl4uhiNdr2iP7LO1pfmCVkzyWHgHDIIJA/edit).
 
@@ -309,13 +305,13 @@ This section guides a new team member in carrying out tasks that are:
 
 As long as we can find tasks that match the learning criteria, we'll prefer to do them over doing an exercise task.
 
-The assumption behind the structure of the syllabus is that there is a limited amount of information that is understood in every task, especially during the first period with the team. to have an experience in which the team member gets as much out of every task, we will want to make each task as narrow as possible. following tasks will assume the knowledge from previous tasks and expand around it. this essentially means that we are doing more [DFS than BFS](https://www.geeksforgeeks.org/difference-between-bfs-and-dfs).
+The assumption behind the structure of the syllabus is that there is a limited amount of information that is understood in every task, especially during the first period with the team. To have an experience in which the team member gets as much out of every task, we will want to make each task as narrow as possible. Following tasks will assume the knowledge from previous tasks and expand around it. This essentially means that we are doing more [DFS than BFS](https://www.geeksforgeeks.org/difference-between-bfs-and-dfs).
 
-Since every project, small or large, goes through app-interface in some way, the first few tasks will focus on day to day activities in app-interface, such as CI/CD and integrations. With this knowledge gained very early in the on-boarding process of a new team member, many requests in #sd-app-sre will already be understandable.
+Since every project, small or large, goes through app-interface in some way, the first few tasks will focus on day-to-day activities in app-interface, such as CI/CD and integrations. With this knowledge gained very early in the on-boarding process of a new team member, many requests in #sd-app-sre will already be understandable.
 
 A big part of being an SRE is to work through toil items. We want to encourage new team members to contribute to refactors, cleanups, and any other toil item. We want to encourage everyone to do that! chop wood, carry water.
 
-The practical training is a really a fancy name for working on tickets. Tickets to get started on are usually labeled as a `good-first-issue`, and some will contain an additional label `ai#n` to indicate the difficulty level:
+Practical training is really a fancy name for working on tickets. Tickets to get started with are usually labelled as a `good-first-issue`, and some will contain an additional label `ai#n` to indicate the difficulty level:
 
 [AI #1](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%231%22)
 [AI #2](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%232%22)
@@ -330,7 +326,7 @@ Documented in the [On Call rotation](./on-call.md) SOP.
 
 ## Incident Process
 
-All AppSRE team members will follow the Incident Process as accurately as possible, raise any concers and keep it up to date.
+All AppSRE team members will follow the Incident Process as accurately as possible, raise any concerns and keep it up to date.
 
 Documented in the [Incident Process](./incident-process.md) SOP.
 
@@ -339,7 +335,7 @@ Documented in the [Incident Process](./incident-process.md) SOP.
 * [PnT DevOps - Issue Escalation Procedure](https://docs.engineering.redhat.com/pages/viewpage.action?pageId=140541042)
 * [Red Hat Major Incident Management (MIM)](https://source.redhat.com/groups/public/it-major-incident-management)
 * [IT ISO (IT Operations)](https://source.redhat.com/groups/public/iso/it_operations_iso_wiki/welcome_to_it_iso_it_operations)
-* PnT-Infra-Escalation google chat group to escalate issues regarding Openstack, OCP, etc...
+* PnT-Infra-Escalation google chat group to escalate issues regarding OpenStack, OCP, etc...
 * [People Index for PnT-EXD](https://docs.engineering.redhat.com/pages/viewpage.action?spaceKey=EXDINFRA&title=EXD+Infrastructure+People+Index)
 
 ## Contract
