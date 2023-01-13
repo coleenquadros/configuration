@@ -2923,6 +2923,74 @@ This process can be done in two ways.
 * Method two
   * Open a MR to add the line `delete: true` on the related namespace file and delete the targets from the saas file.
 
+
+### How to enable replication between Vault instances
+
+To enable replication between two different vault instances create a replication section on the vault instance file that will act as the "source" vault.
+
+The common config for all the different providers is the authentication and the destination instance, this can be configured as this example:
+
+```yaml
+replication:
+- vaultInstance:
+    $ref: destination/vault/instance/file.yml
+  sourceAuth:
+    provider: "approle"
+    secretEngine: "kv_v1"
+    roleID:
+      path: "path/to/source_vault/role_id"
+      field: "role_id"
+    secretID:
+      path: "path/to/source_vault/secret"
+      field: "secret_id"
+
+  destAuth:
+    provider: "approle"
+    secretEngine: "kv_v1"
+    roleID:
+      path: "path/to/destination_vault/role_id"
+      field: "role_id"
+    secretID:
+      path: "path/to/destination_vault//secret"
+      field: "secret_id"
+```
+
+The replication can be configured using two different providers, `jenkins` and `policy`.
+
+#### Jenkins
+
+Jenkins provider on vault replication integration allow to copy all the secrets used by a given jenkins instance from the source vault instance to the destination instance. An example config for this would be:
+
+```yaml
+  paths:
+  - provider: "jenkins"
+    jenkinsInstance:
+      $ref: dependencies/jenkins_instance_file.yml
+```
+
+And optionlly, the secrets to copy can be limited by a vault policy with the following configuration:
+
+```yaml
+  paths:
+  - provider: "jenkins"
+    jenkinsInstance:
+      $ref: dependencies/jenkins_instance_file.yml
+    policy:
+      $ref: policy/path/policy.yml
+```
+
+#### Policy
+
+Policy provider on vault replication integration allow to copy all the secrets under the paths on the policy. An example configuration would be:
+
+```yaml
+  - provider: "policy"
+    policy:
+      $ref: policy/path/policy.yml
+```
+
+Real examples can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/config/prod/devshift-net.yml)
+
 ## Design
 
 Additional design information: [here](docs/app-interface/design.md)
