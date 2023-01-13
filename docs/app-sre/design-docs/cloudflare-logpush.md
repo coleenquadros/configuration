@@ -98,6 +98,10 @@ externalResources:
     ...
     - provider: cloudflare_notification_policy
     ...
+    - provider: zone
+      identifier: test-zone
+      retention_policy: enabled 
+
 ```
 
 
