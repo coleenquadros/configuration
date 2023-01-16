@@ -28,4 +28,3 @@ All alerts are multiwindow, multi-burn-rate alerts. The following are the list o
 - `FleetManagerServiceClusterCapacity<OCM Cluster ID>30mto6hP90BudgetBurn`
 - `FleetManagerServiceClusterCapacity<OCM Cluster ID>2hto1dor6hto3dP90BudgetBurn`
   
-See [kas-fleet-manager-slos-latency-*](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/resources/observability/prometheusrules) prometheus rules in AppInterface to see how it was implemented.

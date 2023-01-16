@@ -1,7 +1,7 @@
 # Fleet Manager API - Added Latency SLO/SLI
 
 ## SLI description
-We are measuring the latency added by Fleet Manager in the provisionning workflow
+We are measuring the latency added by Fleet Manager in the provisionning workflow. Not yet implemented
 
 ## SLI Rationale
 The Fleet-manager adds latency when performing actions in the Hosted Cluster provisionning workflow. The goal of this SLI is to measure this added latency that will allow internal users and customers to know how fast the process is.
@@ -22,5 +22,5 @@ All alerts are multiwindow, multi-burn-rate alerts. The following are the list o
 - `FleetManagerAddedLatency2hto1dor6hto3dP99BudgetBurn`
 - `FleetManagerAddedLatency30mto6hP90BudgetBurn`
 - `FleetManagerAddedLatency2hto1dor6hto3dP90BudgetBurn`
-  
-See [kas-fleet-manager-slos-latency-*](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/resources/observability/prometheusrules) prometheus rules in AppInterface to see how it was implemented.
+
+
