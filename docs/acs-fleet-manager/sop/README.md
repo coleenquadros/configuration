@@ -377,6 +377,10 @@ in the incident handling determine the appropriate status. Some examples include
   - Status `partial_outage` makes sense here.
 - ACS fleet manager does not respond at all to requests.
   - Status `major_outage` makes sense here.
+- ACS fleet manager or services it depends on are under maintenance
+  - Status `under_maintenance` makes sense here.
+
+Example of merge request modifying the status can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/55703).
 
 ---
 
