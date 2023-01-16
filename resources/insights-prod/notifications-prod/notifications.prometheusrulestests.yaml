@@ -169,3 +169,28 @@ tests:
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/notifications-prod/deployments"
           message: "Notifications: Stopped processing messages from Kafka"
           runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/SOPs/alerts/NoMessageBeingProcessedProd.html"
+
+#NotificationsEngineIngressTopicKafkaLagProd
+- interval: 1m
+  input_series:
+    - series: sum(kafka_consumergroup_group_lag{topic="platform.notifications.ingress", group="integrations"})
+      values: 0 10 5 800 200 1000
+
+  alert_rule_test:
+    - eval_time: 1m
+      alertname: NotificationsEngineIngressTopicKafkaLagProd
+      exp_alerts:
+
+    - eval_time: 5m
+      alertname: NotificationsEngineIngressTopicKafkaLagProd
+      exp_alerts:
+        - exp_labels:
+            severity: medium
+            service: insights
+            env: prod
+            app_team: notifications
+          exp_annotations:
+            dashboard: "https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcp01ue1-prometheus"
+            link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/notifications-prod/deployments"
+            message: "Notifications: Kafka lag of platform.notifications.ingress topic exceeded alert threshold in prod environment."
+            runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/SOPs/alerts/NotificationsEngineIngressTopicKafkaLagProd.html"
