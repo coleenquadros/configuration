@@ -30,6 +30,7 @@ managedResourceTypes:
 - Deployment
 - Service
 - ConfigMap
+- Frontend
 
 imagePatterns:
 - quay.io/rhoas/kas-fleet-manager
@@ -844,3 +845,14 @@ resourceTemplates:
           # 20 guarantee that we'll always have one worker node prewarmed for 20 developer instances of size x1.
           num_reserved_instances: 20
           base_streaming_unit_size: x1
+
+## MAS new front end deployments
+
+- name: application-services-ui-frontend
+  path: /deploy/frontend.yml
+  url: https://gitlab.cee.redhat.com/mk-ci-cd/application-services-ui
+  targets:
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+      disable: true  # do not create an app-sre deploy job for ephemeral namespace
+      ref: internal  # populated by bonfire
