@@ -1,0 +1,60 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: content-sources
+
+name: content-sources-prod
+description: Content Sources on the Production cluster under app-interface management
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/content-sources/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  name: content-sources-certs
+  path: app-interface/content-sources/prod/certs
+  version: 1
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-common/iqe-vault.secret.yaml
+
+sharedResources:
+  - $ref: /services/insights/shared-resources/metrics-export-prod.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: rds
+    identifier: content-sources-prod
+    defaults: /terraform/resources/insights/production/rds/postgres13-rds-1.yml
+    overrides:
+      apply_immediately: true
+    parameter_group: /terraform/resources/insights/production/rds/postgres13-parameter-group-content-sources-prod.yml
+    output_resource_name: content-sources-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: content-sources-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
