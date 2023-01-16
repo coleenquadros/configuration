@@ -24,7 +24,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/notifications-prod/deployments"
           message: "Notifications Backend Alert (Prod)"
           description: "Notifications Backend: Down in Prod for 5 minutes."
-          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NotificationsBackendDownProd.html"
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/SOPs/alerts/NotificationsBackendDownProd.html"
       - alert: NotificationsEngineDownProd
         expr: absent(up{service="notifications-engine-service", namespace="notifications-prod"}) or up{service="notifications-engine-service", namespace="notifications-prod"} == 0
         for: 5m
@@ -38,7 +38,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/notifications-prod/deployments"
           message: "Notifications Engine Alert (Prod)"
           description: "Notifications Engine: Down in Prod for 5 minutes."
-          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NotificationsEngineDownProd.html"
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/SOPs/alerts/NotificationsEngineDownProd.html"
       - alert: NotificationsGWDownProd
         expr: absent(up{service="notifications-gw-service", namespace="notifications-prod"}) or up{service="notifications-gw-service", namespace="notifications-prod"} == 0
         for: 5m
@@ -52,7 +52,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/notifications-prod/deployments"
           message: "Notifications GW Alert (Prod)"
           description: "Notifications GW: Down in Prod for 5 minutes."
-          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NotificationsGWDownProd.html"
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/SOPs/alerts/NotificationsGWDownProd.html"
       - alert: NotificationsRestartsProd
         expr: sum(increase(kube_pod_container_status_restarts_total{namespace="notifications-prod"}[20m])) > 5
         labels:
@@ -64,7 +64,7 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcp01ue1-prometheus"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/notifications-prod/deployments"
           message: "Notifications: Pod restarts occurring more than 5x in the past 20min in prod environment."
-          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NotificationsRestartsProd.html"
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/SOPs/alerts/NotificationsRestartsProd.html"
       - alert: NoMessageBeingProcessedProd
         expr: sum(rate(input_consumed_seconds_count{service="notifications-backend-service"}[5m])) == 0
         for: 5m
@@ -77,4 +77,16 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&viewPanel=172&refresh=15m&var-datasource=crcp01ue1-prometheus"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/notifications-prod/deployments"
           message: "Notifications: Stopped processing messages from Kafka"
-          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NoMessageBeingProcessedProd.html"
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/SOPs/alerts/NoMessageBeingProcessedProd.html"
+      - alert: NotificationsEngineIngressTopicKafkaLagProd
+        expr: sum(kafka_consumergroup_group_lag{topic="platform.notifications.ingress", group="integrations"}) > 1000
+        labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: notifications
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcp01ue1-prometheus"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/notifications-prod/deployments"
+          message: "Notifications: Kafka lag of platform.notifications.ingress topic exceeded alert threshold in prod environment."
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/SOPs/alerts/NotificationsEngineIngressTopicKafkaLagProd.html"
