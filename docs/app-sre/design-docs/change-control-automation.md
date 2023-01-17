@@ -43,9 +43,11 @@ The prior version of this document included usage of Alertmanager, Jiralert, and
 
 `gch` will interact with GitLab and Jira whether or not `gch` makes the initial change request ticket. Therefore, there is no strong purpose to segment the creation of a ticket to a distributed system. Instead, I believe we will achieve faster impact and a lower ongoing support cost if we move ticket creation and ticket management into `gch`, as opposed to just ticket management.
 
-### GitLab MR and Jira Ticket Relationships
+### Label Permissions
 
+Introducing labels as a state machine for `gch` operations means that we must also manage the list of users who can apply change control labels to a MR. In gitlab housekeeping, a list of allowed users is checked when processing labels, and labels from unauthorized sources are removed. In general, this means that most users have permissions to modify labels, but they will not persist on subsequent reconciliation loops.
 
+The label permissions for change-control-automation should apply to any developer who is creating MRs to app-interface. 
 
 ### GitLab and Jira Client Technical Requirements
 
@@ -53,6 +55,8 @@ The prior version of this document included usage of Alertmanager, Jiralert, and
 
 * create_issue (supported)
 * get_issues (supported) - needs a code update or a new method to support custom JQL queries
+
+One important note - the "approved" status in Jira may correspond to a number of ticket states. i.e. "Awaiting Implementation," or other label strings. We must include constants in `gch` which represent the totality of possible approval states as it relates to tickets.
 
 #### GitLab
 
@@ -76,56 +80,83 @@ The prior version of this document included usage of Alertmanager, Jiralert, and
 
 Each table below describes the conditions for `gch` actions and the actions performed based on the state of the MR, Labels, Comments, and Jira Ticket.
 
-|   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
-|:---:|:---:|:---:|:---:|:---:|
-|  **Conditions** |   |   |   |   |
-|   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
+### No actions
+-----
+
+|   | **MR**  |  **Labels** |  **Jira Ticket**  |
+|:---:|:---|:---|:---|
+|  **Conditions** |   |   |   | 
+|   |  **Integration** | **Labels**  | | 
 | **Actions**  |   |   |   |   |
 
-|   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
-|:---:|:---:|:---:|:---:|:---:|
-|  **Conditions** |  open |   |   |   |
-|   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
-| **Actions**  |   |   |   |   |
+### New MR
+-----
 
-|   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
-|:---:|:---:|:---:|:---:|:---:|
-|  **Conditions** |  open |   | /change-record  |   |
-|   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
-| **Actions**  |  Set labels | +change-record-pending  |   |  Create ticket |
+|   | **MR**  |  **Labels** |  **Jira Ticket**  |
+|:---:|:---|:---|:---|
+|  **Conditions** |  open |   |   |
+|   |  **Integration** | **Labels**  | |
+| **Actions**  |   |   |   |
 
-|   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
-|:---:|:---:|:---:|:---:|:---:|
-|  **Conditions** |  open | change-record-pending  | /change-record  |  open |
-|   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
-| **Actions**  |  Set labels, find ticket | -change-record-pending +change-record-active | +ticket url  |   |
+### Existing MR, add change control record automation
+-----
 
-|   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
-|:---:|:---:|:---:|:---:|:---:|
-|  **Conditions** |  open | change-record-active | /change-record  |  approved |
-|   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
+|   | **MR**  |  **Labels** |  **Jira Ticket**  |
+|:---:|:---|:---|:---|
+|  **Conditions** |  open | +cr-pending  |   |
+|   |  **Integration** | **Labels**  | |
+| **Actions**  | Create ticket  |   | Ticket created |
+
+### Existing MR, actions performed after ticket created
+-----
+
+|   | **MR**  |  **Labels** |  **Jira Ticket**  |
+|:---:|:---|:---|:---|
+|  **Conditions** |  open | cr-pending  | open |
+|   |  **Integration** | **Labels**  | |
+| **Actions**  |  Set labels, find ticket, comment ticket url | -cr-pending +cr-active |  |
+
+### Existing MR, Jira ticket approved
+-----
+
+|   | **MR**  |  **Labels** |  **Jira Ticket**  |
+|:---:|:---|:---|:---|
+|  **Conditions** |  open | cr-active | approved |
+|   |  **Integration** | **Labels**  | |
 | **Actions**  |  |  |   |   |
 
-|   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
-|:---:|:---:|:---:|:---:|:---:|
-|  **Conditions** |  open | change-record-active | /change-record, /major-change  |  open |
-|   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
-| **Actions**  | Set labels, Poll for ticket status, enforce merge protection | +major-change-pending | +major change protection on  |   |
+### Existing MR, add major change protection
+-----
 
-|   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
-|:---:|:---:|:---:|:---:|:---:|
-|  **Conditions** |  open | Change-record-active, major-change-pending | /change-record, /major-change  |  approved |
-|   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
-| **Actions**  | Set labels, Poll for ticket status, allow merge | -major-change-pending +major-change-approved | +change approved  |   |
+|   | **MR**  |  **Labels** |  **Jira Ticket**  |
+|:---:|:---|:---|:---|
+|  **Conditions** |  open | cr-active, +cr-approval-required  |  open |
+|   |  **Integration** | **Labels**  | |
+| **Actions**  | Set labels, Poll for ticket status, enforce merge protection, comment "major change protection enabled" |  | |   |
 
-|   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
-|:---:|:---:|:---:|:---:|:---:|
-|  **Conditions** |  open | Change-record-active, major-change-pending | /change-record, /major-change  |  denied |
-|   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
-| **Actions**  | Set labels, Poll for ticket status, deny merge | -major-change-pending +major-change-denied | +change denied  |   |
+### Existing MR, Jira ticket approved
+-----
 
-|   | **MR**  |  **Labels** |  **Comments** | **Jira Ticket**  |
-|:---:|:---:|:---:|:---:|:---:|
-|  **Conditions** |  open | Change-record-active, major-change-pending | /change-record, /major-change, /major-change-cancel  |  open |
-|   |  **Integration** | **Labels**  | **Comments**  | **Jiralert**  |
-| **Actions**  | Set labels | -major-change-pending  | +major change protection off  |   |
+|   | **MR**  |  **Labels** |  **Jira Ticket**  |
+|:---:|:---|:---|:---|
+|  **Conditions** |  open | cr-active, cr-approval-required | approved |
+|   |  **Integration** | **Labels**  | |
+| **Actions**  | Set labels, Poll for ticket status, allow merge, comment "major change record approved" | -cr-approval-required +cr-approved |  |
+
+### Existing MR, Jira ticket denied
+-----
+
+|   | **MR**  |  **Labels** |  **Jira Ticket**  |
+|:---:|:---|:---|:---|
+|  **Conditions** |  open | cr-active, cr-approval-required |  denied |
+|   |  **Integration** | **Labels**  | |
+| **Actions**  | Set labels, Poll for ticket status, deny merge, comment "major change record denied" | -cr-approval-required +cr-denied |  |
+
+### Existing MR, cancel major change protection
+-----
+
+|   | **MR**  |  **Labels** |  **Jira Ticket**  |
+|:---:|:---|:---|:---|
+|  **Conditions** |  open | cr-active, cr-approval-required, +cr-approval-required-cancel |  open |
+|   |  **Integration** | **Labels**  | |
+| **Actions**  | Set labels, comment "major change protection off | -cr-approval-required, -cr-approval-required-cancel  |   |
