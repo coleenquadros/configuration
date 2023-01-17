@@ -9,7 +9,7 @@
 
 # Running the tests
 ### Step 1
-Clone the [glitchtip tests](https://gitlab.cee.redhat.com/cssre/glitchtip-tests) repository.
+Clone the [glitchtip tests](https://gitlab.cee.redhat.com/app-sre/glitchtip-tests) repository.
 ### Step 2
 Setup `.env` file in the root of the source code directory and add it to `.gitignore` file
 
@@ -80,12 +80,12 @@ The load profiles we must use are:
 
 
 
-1. A [load profile](https://gitlab.cee.redhat.com/cssre/glitchtip-tests/-/blob/main/locustio/scripts/test_fibonacci_load.py) that generates step-wise user load to identify the general performance of GT and answers the following questions. This load profile simply calls GT’s store API.
+1. A [load profile](https://gitlab.cee.redhat.com/app-sre/glitchtip-tests/-/blob/main/locustio/scripts/test_fibonacci_load.py) that generates step-wise user load to identify the general performance of GT and answers the following questions. This load profile simply calls GT’s store API.
     1. How does GT perform when user load is increased?
     2. How does GT perform when the user load is U?
     3. When does GT start to generate errors?
     4. What happens to GT when there is an error?
-2. A [load profile](https://gitlab.cee.redhat.com/cssre/glitchtip-tests/-/blob/main/locustio/scripts/browsing_load_1.py) that generates browsing load given GT is under user load of U and answers the following questions. This load profile calls GT’s store API and at the same time naively mimics user activity by calling GT’s APIs that view projects or issues.
+2. A [load profile](https://gitlab.cee.redhat.com/app-sre/glitchtip-tests/-/blob/main/locustio/scripts/browsing_load_1.py) that generates browsing load given GT is under user load of U and answers the following questions. This load profile calls GT’s store API and at the same time naively mimics user activity by calling GT’s APIs that view projects or issues.
     5. Is the GT UI still usable given user load U?
 
 
