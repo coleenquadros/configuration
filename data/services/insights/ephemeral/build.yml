@@ -1,0 +1,36 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: ephemeral-namespace-operator
+
+name: ci-ext-ephemeral-namespace-operator-jobs
+description: ephemeral-namespace-operator ci-ext jobs
+
+app:
+  $ref: /services/insights/ephemeral/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+type: jobs
+
+config:
+- project:
+    name: ephemeral-namespace-operator-stage
+    label: insights
+    node: insights
+    gh_org: RedHatInsights
+    gh_repo: ephemeral-namespace-operator
+    quay_org: cloudservices
+    jobs:
+    - "insights-operator-gh-pr-check":
+        display_name: ephemeral-namespace-operator pr-check
+        trigger_exclude_path: 'docs/.*\n.*\.adoc'
+    - "insights-gh-build-master":
+        display_name: ephemeral-namespace-operator build-master
+    - 'gh-build-catalog-master-with-upstream':
+        display_name: ephemeral-namespace-operator catalog build master
+        upstream: RedHatInsights-ephemeral-namespace-operator-gh-build-master
+        bundle_image: quay.io/cloudservices/ephemeral-namespace-operator-bundle
+        catalog_image: quay.io/cloudservices/ephemeral-namespace-operator-index
