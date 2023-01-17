@@ -20,7 +20,8 @@ Note this hybrid SRE model is very new as of 2022-10-04. Further adaptations, di
 
 As of 2023-01-05:
 
-* Preference is to use clusters provided by appSRE. Request and details to be formalized in [STONE-248](https://issues.redhat.com/browse/STONE-248).
+* Stonesoup team will provision their own ROSA clusters ([STONE-248](https://issues.redhat.com/browse/STONE-248)).
+  * AppSRE team will enroll the clusters in app-interface and set up their observability stack on them.
   * app-interface management will be used to manage admin access to the cluster by Stonesoup engineers.
   * The originally provisioned HACBS cluster (hacbss02ue1) is no longer needed, and can be decomissioned.
 * For the service provider namespaces where stonesoup controllers run:
