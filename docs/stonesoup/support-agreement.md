@@ -1,6 +1,6 @@
 # Stonesoup - app-interface Support Agreement
 
-As discussed during [SDE-1909](https://issues.redhat.com/browse/SDE-1909), Stonesoup will not go over full onboarding in app-interface. Instead, they will use only a selected set of features.
+As discussed during [SDE-1909](https://issues.redhat.com/browse/SDE-1909), Stonesoup will not go over full onboarding in app-interface. Instead, they will use only a selected set of features. This is known as the "a la carte" model of app-interface usage.
 
 ## Support agreement
 
@@ -13,8 +13,6 @@ The Stonesoup teams can get support from @app-sre-ic in [#sd-app-sre](https://re
 
 * Document was originally prepared on 2022-10-04.
 * Document was revised substantially on 2023-01-05, to reflect a [decision](https://docs.google.com/document/d/1ONrBWVlbdGZIIEanEtiUP3daUCKmrGgehk2VtPhN-Mk/edit) from the [ARB](https://source.redhat.com/departments/products_and_global_engineering/oo_cto/red_hat_office_of_the_cto_wiki/architecture_review_board_arb) to drop KCP from the architecture.
-
-Note this hybrid SRE model is very new as of 2022-10-04. Further adaptations, discussions, agreements should be expected.
 
 ## App-interface features agreed to be used by Stonesoup
 
@@ -50,4 +48,3 @@ As of 2023-01-05:
 ## Other Resources
 
 * [Recording](https://drive.google.com/file/d/1WpyX05WNji3aFiO7rchR6sVENcbM1Ct-/view) from October 4, 2022
-* Stonesoup [hybrid SRE phases document](https://docs.google.com/document/d/1ojVWef6uBHGUjWCd0rNqo9DPjUNSvffTJCyOT_Ga1hY/edit#heading=h.36ayys1g7an3), tracked in [STONE-317](https://issues.redhat.com/browse/STONE-317).
