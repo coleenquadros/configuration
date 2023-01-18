@@ -174,6 +174,34 @@ run_git_partition_sync_integration() {
   return $status
 }
 
+run_account_notifier() {
+  local status
+
+  STARTTIME=$(date +%s)
+
+  docker run --rm -t \
+    -v ${WORK_DIR}/config:/config:z \
+    -e GRAPHQL_SERVER=${GRAPHQL_SERVER} \
+    -e DRY_RUN=true \
+    -e RUN_ONCE=true \
+    ${GO_RECONCILE_IMAGE}:${GO_RECONCILE_IMAGE_TAG} account-notifier -c /config/config.toml \
+    2>&1 | tee ${SUCCESS_DIR}/reconcile-account-notifier.txt
+
+  status="$?"
+  ENDTIME=$(date +%s)
+
+  # Add integration run durations to a file
+  echo "app_interface_int_execution_duration_seconds{integration=\"account-notifier\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+
+  if [ "$status" != "0" ]; then
+    echo "INTEGRATION FAILED: account-notifier" >&2
+    mv ${SUCCESS_DIR}/reconcile-account-notifier.txt ${FAIL_DIR}/reconcile-account-notifier.txt
+  fi
+
+  return $status
+}
+
+
 run_user_validator() {
   local status
 
@@ -181,19 +209,19 @@ run_user_validator() {
 
   # USER_VALIDATOR_INVALID_USERS is just a workaround. See https://issues.redhat.com/browse/APPSRE-4706
   docker run --rm -t \
-    -e QONTRACT_SERVER_URL=${GRAPHQL_SERVER} \
+    -e GRAPHQL_SERVER=${GRAPHQL_SERVER} \
     -e GRAPHQL_USERNAME=${GRAPHQL_USERNAME} \
     -e GRAPHQL_PASSWORD=${GRAPHQL_PASSWORD} \
     -e GITHUB_API=${GITHUB_API} \
     -e RUNNER_USE_FEATURE_TOGGLE=true \
-    -e VAULT_ADDR=https://vault.devshift.net \
+    -e VAULT_SERVER=https://vault.devshift.net \
     -e VAULT_AUTHTYPE=approle \
     -e VAULT_ROLE_ID=${USER_VALIDATOR_ROLE_ID} \
     -e UNLEASH_API_URL=$UNLEASH_API_URL \
     -e UNLEASH_CLIENT_ACCESS_TOKEN=$UNLEASH_CLIENT_ACCESS_TOKEN \
     -e VAULT_SECRET_ID=${USER_VALIDATOR_SECRET_ID} \
     -e USER_VALIDATOR_INVALID_USERS='/teams/quay/users/hdonnay.yml,/teams/sd-sre/users/drow.yml,/teams/insights/users/ccx/dpensier.yml,/teams/insights/users/khowell.yml,/teams/insights/users/cmoore.yml,/teams/ocm/users/gshilin.yml,/teams/insights/users/dhalasz.yml,/teams/managed-services/users/mziccard.yml,/teams/managed-services/users/akoserwa.yml,/teams/image-builder/users/obudai.yml,/teams/insights/users/jwong.yml,/teams/advanced-cluster-security/users/mclasmei.yml,/teams/rhmi/users/davmarti.yml,/teams/assisted-installer/users/odepaz.yaml,/teams/infosec/users/rmonk.yml,/teams/cs-sre/users/jsarnovs.yml,/teams/assisted-installer/users/jhernand.yml,/teams/insights/users/vkrizan.yml,/teams/insights/users/osapryki.yml' \
-    ${USER_VALIDATOR_IMAGE}:${USER_VALIDATOR_IMAGE_TAG} user-validator \
+    ${GO_RECONCILE_IMAGE}:${GO_RECONCILE_IMAGE_TAG} user-validator \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-user-validator.txt
 
   status="$?"
