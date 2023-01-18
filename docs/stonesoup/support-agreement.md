@@ -28,7 +28,8 @@ As of 2023-01-05:
   * Secrets management from AppSRE's Vault instance. app-interface management will be used to land
     secrets in the service provider namespaces.
   * AWS resources integrations, like RDS database and S3 bucket. app-interface management will be
-    used to provide connection information to the service provider namespaces.
+    used to provide connection information to the service provider namespaces. The AWS account
+    provided by the Stonesoup team will be used by app-interface for these resources.
 * App-interface will be used to provision a serviceaccount and rbac to be used by Stonesoup's own
   argocd instance, to manage deployment of Stonesoup controllers.
 
