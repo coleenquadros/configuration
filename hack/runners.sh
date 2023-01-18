@@ -192,7 +192,7 @@ run_user_validator() {
     -e UNLEASH_API_URL=$UNLEASH_API_URL \
     -e UNLEASH_CLIENT_ACCESS_TOKEN=$UNLEASH_CLIENT_ACCESS_TOKEN \
     -e VAULT_SECRET_ID=${USER_VALIDATOR_SECRET_ID} \
-    -e USER_VALIDATOR_INVALID_USERS='/teams/quay/users/hdonnay.yml,/teams/sd-sre/users/drow.yml,/teams/insights/users/ccx/dpensier.yml,/teams/insights/users/khowell.yml,/teams/insights/users/cmoore.yml,/teams/ocm/users/gshilin.yml,/teams/insights/users/dhalasz.yml,/teams/managed-services/users/mziccard.yml,/teams/managed-services/users/akoserwa.yml,/teams/image-builder/users/obudai.yml,/teams/insights/users/jwong.yml,/teams/advanced-cluster-security/users/mclasmei.yml,/teams/rhmi/users/davmarti.yml,/teams/assisted-installer/users/odepaz.yaml' \
+    -e USER_VALIDATOR_INVALID_USERS='/teams/quay/users/hdonnay.yml,/teams/sd-sre/users/drow.yml,/teams/insights/users/ccx/dpensier.yml,/teams/insights/users/khowell.yml,/teams/insights/users/cmoore.yml,/teams/ocm/users/gshilin.yml,/teams/insights/users/dhalasz.yml,/teams/managed-services/users/mziccard.yml,/teams/managed-services/users/akoserwa.yml,/teams/image-builder/users/obudai.yml,/teams/insights/users/jwong.yml,/teams/advanced-cluster-security/users/mclasmei.yml,/teams/rhmi/users/davmarti.yml,/teams/assisted-installer/users/odepaz.yaml,/teams/infosec/users/rmonk.yml,/teams/cs-sre/users/jsarnovs.yml,/teams/assisted-installer/users/jhernand.yml,/teams/insights/users/vkrizan.yml,/teams/insights/users/osapryki.yml' \
     ${USER_VALIDATOR_IMAGE}:${USER_VALIDATOR_IMAGE_TAG} user-validator \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-user-validator.txt
 
