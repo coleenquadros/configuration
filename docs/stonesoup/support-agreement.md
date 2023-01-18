@@ -25,7 +25,7 @@ As of 2023-01-05:
   * app-interface management will be used to manage admin access to the cluster by Stonesoup engineers.
   * The originally provisioned HACBS cluster (hacbss02ue1) is no longer needed, and can be decomissioned.
 * For the service provider namespaces where stonesoup controllers run:
-  * Secrets management from appSRE's Vault instance. app-interface management will be used to land
+  * Secrets management from AppSRE's Vault instance. app-interface management will be used to land
     secrets in the service provider namespaces.
   * AWS resources integrations, like RDS database and S3 bucket. app-interface management will be
     used to provide connection information to the service provider namespaces.
