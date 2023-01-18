@@ -22,7 +22,7 @@ As of 2023-01-05:
 
 * Stonesoup team will provision their own ROSA clusters ([STONE-248](https://issues.redhat.com/browse/STONE-248)).
   * AppSRE team will enroll the clusters in app-interface and set up their observability stack on them.
-  * app-interface management will be used to manage admin access to the cluster by Stonesoup engineers.
+  * Stonesoup team will use OCM directly to manage their own access.
   * The originally provisioned HACBS cluster (hacbss02ue1) is no longer needed, and can be decomissioned.
 * For the service provider namespaces where stonesoup controllers run:
   * Secrets management from AppSRE's Vault instance. app-interface management will be used to land
