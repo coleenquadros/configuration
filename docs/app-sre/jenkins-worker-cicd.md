@@ -38,8 +38,40 @@ For the auto-scaling group, we enable [CloudWatch metrics](https://gitlab.cee.re
 
 For running nodes, since all nodes are running node-exporter, we use [ec2_sd_config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#ec2_sd_config) to retrieve scrape targets from AWS EC2 instances. Configuration can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig-internal.secret.yaml#L176-190). and all targets can be found [here](https://prometheus.appsrep05ue1.devshift.net/targets#pool-jenkins_worker)
 
+### Dashboards
+
+We have two dashboards related to Jenkins workers:
+
+* Jenkins nodes: https://grafana.app-sre.devshift.net/d/IfKto8hVz/jenkins-nodes?orgId=1
+* Node exporter full: https://grafana.app-sre.devshift.net/d/rYdddlPWk/node-exporter-full?orgId=1
+
+The first one can be used to find issues in certain nodes filtering by node types. If there's a problem with a certain node, you can then get extended information by using the Node exporter full dashboard
+
+### Jenkins UI metrics
+
+There's a Jenkins UI metrics that can be used to gain additional insights, especially around JVM issues:
+
+* Jenkins master: https://ci.int.devshift.net/monitoring
+* Jenkins workers: https://ci.int.devshift.net/monitoring/nodes
 
 ## Housekeeping
 
 We still need to running some housekeeping jobs to help us manage these nodes. We use ansible [ec2 inventory](https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html) to get inventory hosts and run jobs against it. Host configuration can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/aws_ec2.yaml). Job definition can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/jenkins/app-sre/job-templates.yaml#L203-250) and jobs are [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/jobs.yaml#L104-118)
 
+## Log in to Jenkins workers
+
+Log in to a dynamically created Jenkins node is the last option to debug a problem. Consider first using the above dashboards or spinning a new node using the same AMI to debug issues. If that is not enough, you may be able to ssh into the instance to do further debugging.
+
+IMPORTANT: **Never do any manual change in a dynamic node**. Changes must be done in the [Packer](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/packer) configuration.
+
+Dynamic nodes are part of ASGs, hence the way to know which is the IP associated is by querying into the AWS account of the ASG (usually `app-sre`) since this information is not shown by Jenkins. Using AWS cli:
+
+```
+aws ec2 describe-instances --instance-ids <instance-id> | jq -r .Reservations[].Instances[].PrivateIpAddress
+```
+
+where `<instance-id>` is shown in Jenkins UI, e.g. `i-08c2168b1bb67b8eb`
+
+Once you have the IP, you can use your own RedHat user to log in.
+
+As a quick workaround, you can use the [dynamic inventory](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/aws_ec2_host.json) used by the Housekeeping jobs to find the IP of a host.
