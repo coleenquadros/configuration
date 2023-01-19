@@ -2955,7 +2955,7 @@ replication:
       field: "secret_id"
 ```
 
-The `replication` key can be configured using two different providers, `jenkins` and `policy`
+The `replication` key can be configured using providers. Providers allow to configure different sources for secrets that are going to be copied and at least one must be configured, the integration has two different providers, `jenkins` and `policy`.
 
 #### Jenkins
 
