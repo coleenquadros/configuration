@@ -44,8 +44,8 @@ surfaces and processes, including incident management.
 * [App-Interface](https://gitlab.cee.redhat.com/service/app-interface)
 * [AppSRE Contract](https://gitlab.cee.redhat.com/app-sre/contract)
 * [Developer's Guide](https://service.pages.redhat.com/dev-guidelines/)
-* [Service Delivery / AppSRE shared
-  drive](https://drive.google.com/drive/u/0/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ) (shared with Service Delivery)
+* [Site Reliability Engineering / AppSRE shared
+  drive](https://drive.google.com/drive/folders/0AIimM0HiftflUk9PVA) (shared with Site Reliability Engineering)
 * [AppSRE Team Drive](https://drive.google.com/drive/folders/1FkGuqIWdY0XLgIfUGIdpckhF-cDsVF_u) (viewable and editable by AppSRE members only)
 
 ## AppSRE Engineer Onboarding
@@ -142,9 +142,7 @@ Every AppSRE/MT-SRE engineer should have access to the following:
   * The recommended setup includes the PagerDuty application on your mobile phone. From the website, you can test notifications to ensure that you have correctly set up the application to override any do not disturb settings.
   * For notifications troubleshooting see [here](https://support.pagerduty.com/docs/notification-troubleshooting).
 * AppSRE shared folders
-  * ACCESS: Go to the following folders and request access with your Red Hat GSuite account
-    * [Public Top Level Directory](https://drive.google.com/drive/u/1/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ) (contains RCAs, etc.)
-    * [Private](https://drive.google.com/drive/u/1/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs) (for AppSRE Team members only)
+  * ACCESS: Make sure that you have access to the above Google Drive folders.
 * Vault
   * Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
     * [setup instructions](https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/adding-sensitive-data/#getting-access-to-vault)
