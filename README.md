@@ -2926,7 +2926,7 @@ This process can be done in two ways.
 
 ### How to enable replication between Vault instances
 
-To enable replication between two different vault instances create a replication section on the vault instance file that will act as the "source" vault.
+To enable replication between two different vault instances create a replication section on the Vault instance file (`/vault-config/instance-1.yml`) that will act as the source Vault.
 
 The common config for all the different providers is the authentication and the destination instance, this can be configured as this example:
 
@@ -2955,11 +2955,11 @@ replication:
       field: "secret_id"
 ```
 
-The replication can be configured using two different providers, `jenkins` and `policy`.
+The `replication` key can be configured using two different providers, `jenkins` and `policy`
 
 #### Jenkins
 
-Jenkins provider on vault replication integration allow to copy all the secrets used by a given jenkins instance from the source vault instance to the destination instance. An example config for this would be:
+Jenkins provider on Vault replication integration allows to copy all the secrets used by a given Jenkins instance from the source Vault instance to the destination instance. An example config for this would be:
 
 ```yaml
   paths:
@@ -2968,7 +2968,7 @@ Jenkins provider on vault replication integration allow to copy all the secrets 
       $ref: dependencies/jenkins_instance_file.yml
 ```
 
-And optionlly, the secrets to copy can be limited by a vault policy with the following configuration:
+And optionally, the secrets to copy can be limited by a Vault policy with the following configuration:
 
 ```yaml
   paths:
@@ -2981,7 +2981,7 @@ And optionlly, the secrets to copy can be limited by a vault policy with the fol
 
 #### Policy
 
-Policy provider on vault replication integration allow to copy all the secrets under the paths on the policy. An example configuration would be:
+Policy provider on Vault replication integration allows to copy all the secrets under the path on the policy. An example configuration would be:
 
 ```yaml
   - provider: "policy"
