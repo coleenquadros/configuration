@@ -17,7 +17,7 @@ pipelinesProvider:
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
-  channel: managed-by-cssre
+  channel: sd-app-sre-info
 
 authentication:
   image:
@@ -28,30 +28,33 @@ authentication:
 managedResourceTypes:
 - Deployment
 - Service
-- CronJob
 - ServiceAccount
 - ConfigMap
-- Job
 
 imagePatterns:
 - quay.io/cs-sre/glitchtip
+- quay.io/app-sre/glitchtip
 
 resourceTemplates:
-- name: glitchtip
-  url: https://github.com/rh-cssre/glitchtip-frontend
+- name: glitchtip-app-sre
+  url: https://github.com/app-sre/glitchtip
   path: /openshift/template.yaml
   targets:
   - namespace:
       $ref: /services/glitchtip/namespaces/glitchtip-stage.yml
-    ref: master
+    ref: main
     upstream:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
-      name: rh-cssre-glitchtip-frontend-gh-build-master
+      name: app-sre-glitchtip-gh-build-main
     parameters:
       GLITCHTIP_DOMAIN: https://glitchtip.stage.devshift.net
       KEYCLOAK_URL: https://auth.redhat.com/auth
       KEYCLOAK_REALM: EmployeeIDP
+- name: glitchtip
+  url: https://github.com/rh-cssre/glitchtip-frontend
+  path: /openshift/template.yaml
+  targets:
   - namespace:
       $ref: /services/glitchtip/namespaces/glitchtip-production.yaml
     ref: master
@@ -65,19 +68,21 @@ resourceTemplates:
       KEYCLOAK_REALM: EmployeeIDP
 
 - name: glitchtip-observability
-  url: https://github.com/rh-cssre/glitchtip-frontend
-  path: /openshift/grafana
+  url: https://github.com/app-sre/glitchtip
+  path: /grafana
   provider: directory
   targets:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: master
+    delete: true
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: 4e2f6680b72a60419ad96a37f659c31a43b556fa
+    delete: true
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
-    ref: master
+    ref: main
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
-    ref: 4e2f6680b72a60419ad96a37f659c31a43b556fa
+    ref: 91d9d044b9ee2af07a8ef6d61044580e008b4449
