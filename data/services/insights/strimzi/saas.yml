@@ -174,20 +174,6 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
     ref: master
-- name: prometheus-kafka-consumer-group-exporter
-  hash_length: 7
-  path: /openshift.yaml
-  url: https://github.com/RedHatInsights/prometheus-kafka-consumer-group-exporter
-  targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
-    # New images are broken because Dockerfile tries to pull from docker.io
-    ref: 6a7a8abca447a3576e6da47007a21ad776a1f6e1
-    parameters:
-      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9092
-      AUTO_OFFSET_RESET: latest
-      GROUP_ID: lag_exporter_stage
-      IMAGE: quay.io/app-sre/prometheus-kafka-consumer-group-exporter
 - name: lightbend-lag-exporter
   path: /deploys/openshift/lightbend-lag-exporter.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -218,6 +204,7 @@ resourceTemplates:
       SRC_CLUSTER_ALIAS: platform-mq-stage
       TGT_CLUSTER_ALIAS: consoledot-test-stage
       KAFKA_MM2_VERSION: 3.1.0
+      MM2_REPLICA_COUNT: 0
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
     ref: 886340ec51f9bd583bcd5d0503d1069562b8d809
