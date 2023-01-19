@@ -132,6 +132,8 @@ def print_cmd(
         cmd += "run_vault_reconcile_integration &"
     elif int_name == "user-validator":
         cmd += "run_user_validator &"
+    elif int_name == "account-notifier":
+        cmd += "run_account_notifier &"
     elif int_name == "git-partition-sync":
         cmd += "run_git_partition_sync_integration &"
     else:

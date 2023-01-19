@@ -1,0 +1,47 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-interface
+
+name: saas-go-qontract-reconcile
+description: 'SaaS tracking file for go-qontract-reconcile'
+
+app:
+  $ref: /services/app-interface/go-qontract-reconcile/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: sd-app-sre-info
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+managedResourceTypes:
+- Deployment
+
+imagePatterns:
+- quay.io/app-sre/go-qontract-reconcile
+- quay.io/app-sre/internal-redhat-ca
+
+resourceTemplates:
+- name: account-notifier
+  url: https://github.com/app-sre/go-qontract-reconcile
+  path: /openshift/deployment-template.yml
+  targets:
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-stage-int.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-go-qontract-reconcile-gh-build-main
+    parameters:
+      INTEGRATION_NAME: account-notifier
+      DRY_RUN: true
