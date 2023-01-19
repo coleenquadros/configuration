@@ -1,0 +1,98 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: aws-vpce-operator
+description: integration resources for aws-vpce-operator
+
+cluster:
+  $ref: /openshift/hivei01ue1/cluster.yml
+
+environment:
+  $ref: /products/osdv4/environments/integration-hivei01ue1.yml
+
+app:
+  $ref: /services/osd-operators/aws-account-operator/app.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/svc-transit-int/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: svc-cluster--aws-vpce-operator
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": [
+              "ec2:DescribeSubnets",
+              "ec2:CreateSecurityGroup",
+              "ec2:DeleteSecurityGroup",
+              "ec2:DescribeSecurityGroups",
+              "ec2:AuthorizeSecurityGroupIngress",
+              "ec2:AuthorizeSecurityGroupEgress",
+              "ec2:DescribeSecurityGroupRules",
+              "ec2:CreateVpcEndpoint",
+              "ec2:DeleteVpcEndpoints",
+              "ec2:DescribeVpcEndpoints",
+              "ec2:ModifyVpcEndpoint",
+              "route53:ChangeResourceRecordSets",
+              "route53:ListHostedZonesByName",
+              "route53:ListResourceRecordSets",
+              "ec2:CreateTags",
+              "ec2:DeleteTags",
+              "ec2:DescribeTags",
+              "sts:AssumeRole",
+              "ec2:DescribeVpcEndpointConnections",
+              "ec2:AcceptVpcEndpointConnections"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+          }
+        ]
+      }
+    output_resource_name: svc-transit-int-aws-vpce-operator
+- provider: aws
+  provisioner:
+    $ref: /aws/osd-privatelink-int/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: mgmt-cluster-aws-vpce-operator
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": [
+              "ec2:DescribeSubnets",
+              "ec2:CreateSecurityGroup",
+              "ec2:DeleteSecurityGroup",
+              "ec2:DescribeSecurityGroups",
+              "ec2:AuthorizeSecurityGroupIngress",
+              "ec2:AuthorizeSecurityGroupEgress",
+              "ec2:DescribeSecurityGroupRules",
+              "ec2:CreateVpcEndpoint",
+              "ec2:DeleteVpcEndpoints",
+              "ec2:DescribeVpcEndpoints",
+              "ec2:ModifyVpcEndpoint",
+              "route53:ChangeResourceRecordSets",
+              "route53:ListHostedZonesByName",
+              "route53:ListResourceRecordSets",
+              "ec2:CreateTags",
+              "ec2:DeleteTags",
+              "ec2:DescribeTags",
+              "sts:AssumeRole",
+              "ec2:DescribeVpcEndpointConnections",
+              "ec2:AcceptVpcEndpointConnections"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+          }
+        ]
+      }
+    output_resource_name: osd-privatelink-int-aws-vpce-operator
