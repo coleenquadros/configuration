@@ -25,6 +25,9 @@ The local disk/volume that Prometheus writes data to is full. Prometheus will fa
 - Tail the prometheus pod logs and wait for the WAL to have been applied and the pod running fine
 - Delete the same amount of directories in the other pod and restart Prometheus.
 
+## Follow-up actions
+- Investigate what caused the disk to fill, particularly look at the [Troubleshooting High Cardinality Metrics](/docs/app-sre/sop/prometheus/troubleshooting-high-cardinality-metrics.md) documentation
+
 ## Escalations
 
 - Ping more team members in #sd-app-sre-teamchat
