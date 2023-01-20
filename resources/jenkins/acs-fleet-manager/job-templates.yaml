@@ -21,28 +21,3 @@
           notify-failure: True
           notify-repeated-failure: True
     <<: *gh_build_master
-
-- job-template:
-    id: acs-fleet-manager-e2e
-    name: "{gh_repo}-e2e-{branch}"
-    wrappers:
-      - timeout_wrapper:
-          timeout: "{timeout}"
-      - vault-secrets:
-          <<: *vault_defaults
-          secrets:
-            - *acs-fleet-manager-e2e-test
-    build_deploy_script_path: 'e2e/run_e2e_stage.sh'
-    upstream: ''
-    triggers:
-      - reverse:
-          jobs: '{upstream}'
-          results: 'success'
-    publishers:
-      - slack:
-          room: "{slack_channel_notification}"
-          notify-start: False
-          notify-success: True
-          notify-failure: True
-          notify-repeated-failure: True
-    <<: *gh_build_master
