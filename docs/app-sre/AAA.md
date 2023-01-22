@@ -189,8 +189,7 @@ Every AppSRE engineer should have access to the following:
 
 * GitHub
   * GitHub profile must include `Company: Red Hat`.
-  * Verify inclusion in all GitHub organizations listed
-    [here](https://visual-app-interface.devshift.net/githuborgs).
+  * Verify inclusion in the [app-sre](https://github.com/app-sre) GitHub organization.
 * Gitlab:
   * https://gitlab.cee.redhat.com/app-sre
     * Access to all repositories is managed via this group.
