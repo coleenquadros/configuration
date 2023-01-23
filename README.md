@@ -1601,11 +1601,11 @@ For more information about the versions that RDS supports:
 
 | Version | Minimum minor version | Notes                                                                                                                                                                                                      |
 |---------|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 14      | \>= 14.1              | Announced as the minimum required version by email from AWS                                                                                                                                                |
-| 13      | \>= 13.3              | Announced as the minimum required version by email from AWS                                                                                                                                                |
-| 12      | \>= 12.7              | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
-| 11      | \>= 11.12             | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
-| ~~10~~  |                       | **End of life, do not use.**                                                                                                                                                                               |
+| 14      | \>= 14.3              | Announced as the minimum required version by email from AWS                                                                                                                                                |
+| 13      | \>= 13.7              | Announced as the minimum required version by email from AWS                                                                                                                                                |
+| 12      | \>= 12.11             | Announced as the minimum required version by email from AWS                                                                                                                                                |
+| 11      | \>= 11.16             | Announced as the minimum required version by email from AWS                                                                                                                                                |
+| ~~10~~  |                       | **End of life, do not use.**                                                                                                                                                 |
 
 ###### MySQL
 
