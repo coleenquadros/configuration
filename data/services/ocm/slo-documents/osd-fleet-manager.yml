@@ -26,18 +26,18 @@ slos:
 #  dashboard: /to/do
 
 - name: saturation-level
-  SLIType: availability
-  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain percentafe of the time
+  SLIType: correctness
+  SLISpecification: Saturation level in each and every service cluster in each and every region shall be between the configured High Saturation Threshold and the full level (100%)
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/osd-fleet-manager/slos/fleet-manager-saturation.md
   SLOParameters:
     window: 28d
   expr: 
-    sum(fleet_manager_management_cluster_hosted_cluster_count{job="fleet-manager-metrics",osd-fleet-manager-production="osd-fleet-manager-production",region="$region"}[{{window}}])
+    sum by (region, service_cluster) (rate(fleet_manager_management_cluster_hosted_cluster_count{job="fleet-manager-metrics",namespace="osd-fleet-manager-production"}[{{window}}]))
     /
     (
-    sum(fleet_manager_available_management_clusters_by_service_cluster_count{region="$region", job="fleet-manager-metrics",osd-fleet-manager-production="osd-fleet-manager-production"}[{{window}}]) 
+    sum by (region, service_cluster) (rate(fleet_manager_available_management_clusters_by_service_cluster_count{job="fleet-manager-metrics",namespace="osd-fleet-manager-production"}[{{window}}])) 
     *
-    sum(fleet_manager_max_desired_hosted_cluster_count{region="$region", job="fleet-manager-metrics",osd-fleet-manager-production="osd-fleet-manager-production"}[{{window}}])
+    sum by (region, service_cluster) (rate(fleet_manager_max_desired_hosted_cluster_count{job="fleet-manager-metrics",namespace="osd-fleet-manager-production"}[{{window}}]))
     )
   SLOTarget: 0.90
   SLOTargetUnit: percent_0_1
