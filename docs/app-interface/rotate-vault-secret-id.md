@@ -22,7 +22,7 @@ Update the secret ID in the following configs:
 - [reconcile-config-toml](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/qontract-reconcile-toml) -> create new secret version
 - [reconcile-config-toml-stage](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-stage/app-interface-stage/qontract-reconcile-toml) -> create new secret version
 - [ci-int-config-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml) -> edit secret (Jenkins does not support secret versions)
-  - don't forget to also update `data_base64`! 
+  - don't forget to also update `data_base64`! Decode via `base64 -d` and then encode with `base64` (as is, newlines are fine in there)
 
 4. Bump secret versions in app-interface
 
