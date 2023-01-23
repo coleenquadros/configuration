@@ -36,7 +36,10 @@ echo "loading master bundle from s3://${AWS_S3_BUCKET}/bundle-archive/${MASTER_B
 download_s3 "${MASTER_BRANCH_COMMIT_SHA}" "${MASTER_BUNDLE_FILE}"
 if [ $? -ne 0 ]; then
   MASTER_WORKTREE_DIR="./master"
-  echo "unable to load master bundle from S3, generating from master branch"
+  echo "Error: unable to load master bundle from S3, generating from master branch"
+  echo "The master bundle may be unable to be loaded due to a mismatch between A-I in the repo"
+  echo "and A-I in AWS S3, or network/authentication issues. This is not expected behavior and will require"
+  echo "further investigation by AppSRE engineers into the app interface build master job."
   git worktree add ${MASTER_WORKTREE_DIR} master
   
   pushd ${MASTER_WORKTREE_DIR}  
