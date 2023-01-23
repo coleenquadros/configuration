@@ -34,11 +34,7 @@ Create and merge an MR that bumps the newly created secret versions in app-inter
 - [app-interface-stage](../../data/services/app-interface/namespaces/app-interface-stage.yml)
 - [app-interface-stage-int](../../data/services/app-interface/namespaces/app-interface-stage-int.yml)
 
-5. Trigger a dummy-deployment
-
-Let's roll out qontract-reconcile to see if everthing works as expected. Create and deploy a dummy release.
-
-6. Delete old secret ID
+5. Delete old secret ID
 
 Make sure integrations are running properly. Once you delete the old secret ID, it cannot be recovered.
 
@@ -46,7 +42,7 @@ Make sure integrations are running properly. Once you delete the old secret ID, 
 vault write -f auth/approle/role/app-interface/secret-id/destroy secret_id=<OLD_SECRET_ID_FROM_STEP_2>
 ```
 
-7. Ensure old secret ID is not usable anylonger
+6. Ensure old secret ID is not usable anylonger
 
 This command must fail:
 
