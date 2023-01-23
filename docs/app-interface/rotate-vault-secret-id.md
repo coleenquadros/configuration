@@ -19,9 +19,9 @@ You will need it in the last step of this SOP
 
 Update the secret ID in the following configs:
 
-- [reconcile-config-toml](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/qontract-reconcile-toml)
-- [reconcile-config-toml-stage](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-stage/app-interface-stage/qontract-reconcile-toml)
-- [ci-int-config-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml)
+- [reconcile-config-toml](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/qontract-reconcile-toml) -> create new secret version
+- [reconcile-config-toml-stage](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-stage/app-interface-stage/qontract-reconcile-toml) -> create new secret version
+- [ci-int-config-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml) -> edit secret (Jenkins does not support secret versions)
   - don't forget to also update `data_base64`! 
 
 4. Bump secret versions in app-interface
