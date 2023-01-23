@@ -40,6 +40,8 @@ Let's roll out qontract-reconcile to see if everthing works as expected. Create 
 
 6. Delete old secret ID
 
+Make sure integrations are running properly. Once you delete the old secret ID, it cannot be recovered.
+
 ```
 vault write -f auth/approle/role/app-interface/secret-id/destroy secret_id=<OLD_SECRET_ID_FROM_STEP_2>
 ```
