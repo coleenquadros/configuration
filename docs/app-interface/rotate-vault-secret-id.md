@@ -27,6 +27,7 @@ Update the secret ID in the following configs:
 4. Bump secret versions in app-interface
 
 Create and merge an MR that bumps the newly created secret versions in app-interface
+(Grep for the secrets' vault path in the following files and bump the versions)
 
 - [app-interface-prod](../../data/services/app-interface/namespaces/app-interface-production.yml)
 - [app-interface-prod-int](../../data/services/app-interface/namespaces/app-interface-production-int.yml)
