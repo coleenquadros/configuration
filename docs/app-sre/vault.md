@@ -210,6 +210,7 @@ This SOP explains the process of recycling the Vault RDS DB password.
 ## Recycle Vault AppRole secret_id
 
 This SOP explains the process of recycling an AppRole's secret_id.
+If you want to rotate app-interface's secret_id, then refer to [App Interface - Rotate Vault Secret ID](./app-interface/rotate-vault-secret-id.md) instead.
 
 1. Destroy the AppRole's desired secret_id: https://www.vaultproject.io/api-docs/auth/approle#destroy-approle-secret-id
 
