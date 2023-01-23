@@ -34,6 +34,8 @@ authentication:
     path: app-sre/quay/app-sre-pull
     field: all
 resourceTemplates:
+
+# Green ring
 - name: uhc-account-manager-green
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
   path: /templates/named-service-template.yml
@@ -180,12 +182,6 @@ resourceTemplates:
       RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
       RBAC_BASE_URL: https://mtls.internal.console.redhat.com
       RBAC_PROXY: ''
-      SUSPEND_RBAC_RECONCILER_CRON: 'false'
-      RBAC_RECONCILER_DRY_RUN: 'false'
-      RBAC_RECONCILER_CRON_SCHEDULE: 15,45 * * * *
-      WAREHOUSE_DELETED_CLUSTERS_DRY_RUN: 'false'
-      WAREHOUSE_DELETED_CLUSTERS_MAX_AMOUNT: 1000
-      CLUSTER_TRANSFERS_RECONCILER_DRY_RUN: 'false'
       CLUSTER_REG_RATE_LIMIT: 500000
       ORG_CLUSTER_REG_RATE_LIMIT: 750000
       DB_MAX_OPEN_CONNS: 250
@@ -194,56 +190,46 @@ resourceTemplates:
       CRONJOB_SENTRY_PROJECT: '23'
       CONSUMER_SENTRY_PROJECT: '32'
       GLOG_V: 5
-      SUSPEND_HYDRA_FETCH_ORGANIZATIONS_DATA_CRON: 'false'
-      HYDRA_FETCH_ORGANIZATONS_DATA_DRY_RUN: 'false'
-      HYDRA_DEBUG: 'false'
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_2
-      SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: '1'
-      SUBSCRIPTION_STATUS_RECONCILER_RELEASED_UNRELEASED_TRIGGER_DURATION: 1h
-      SUSPEND_ACCOUNT_RECONCILER_CRON: 'false'
-      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: 'true'
-      SUSPEND_OCP_USAGE_RECONCILER_CRON: 'true'
-      SUSPEND_OCP_USAGE_CLEANER_CRON: 'true'
-      SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: 'false'
-      SUSPEND_RH_MARKETPLACE_QUOTA_RECONCILER_CRON: 'false'
-      SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: 'false'
-      SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: 'false'
-      SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: 'false'
-      SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: 'false'
-      SUSPEND_AUTO_ENTITLEMENT_RECONCILER_CRON: 'false'
-      MOA_ENTITLEMENT_RECONCILER_DRY_RUN: 'false'
-      AUTO_ENTITLEMENT_RECONCILER_DRY_RUN: 'false'
-      RH_MARKETPLACE_QUOTA_RECONCILER_DRY_RUN: 'false'
       MOA_SKU: SER0579
-      REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: 'false'
-      REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: '1'
-      REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: '5'
-      REGISTRY_CREDENTIAL_POOL_LOADER_HIGH_WATERMARK: '10'
       UHC_DEBUG: 'true'
       UNLEASH_URL: https://ocm-stage.unleash.devshift.net/api
       QUAY_REGISTRY_TEAM_NAME: staginginstallers
-      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: '*/5 * * * *'
-      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: 30 17 * * *
-      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: '*/30 * * * *'
-      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: 0 * * * *
-      ACCOUNT_RECONCILER_CRON_SCHEDULE: 59 15 * * 2
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
-      SUBSCRIPTION_STATUS_RECONCILER_DRY_RUN: 'false'
-      SUBSCRIPTION_STATUS_RECONCILER_MAX_DELETE_CLUSTERS: '1'
       MANDRILL_TIMEOUT: 60s
-      UMB_CONSUMER_REPLICAS: '1'
-      UMB_URL: umb.api.redhat.com:61612
-      UMB_USER_QUEUE: Consumer.uhcaccountmanager.ocm-user-consumer-stage
-      UMB_USER_TOPIC: VirtualTopic.canonical.user
-      UMB_USER_CONSUMER_DRY_RUN: 'false'
-      ENABLE_UMB_USER_CONSUMER_MOCK: 'false'
-      UMB_SUBSCRIPTION_QUEUE: Consumer.uhcaccountmanager.ocm-subscription-consumer-stage
-      UMB_SUBSCRIPTION_TOPIC: VirtualTopic.canonical.subscription
-      UMB_SUBSCRIPTION_CONSUMER_DRY_RUN: 'false'
-      ENABLE_UMB_SUBSCRIPTION_CONSUMER_MOCK: 'false'
-      UMB_TIMEOUT: 3h
       AUTOMATIC_BAN: 'false'
-      ACCOUNT_RECONCILER_DRY_RUN: 'false'
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-production.yml
+    ref: a09f1c862e871bf27795d02a8a3a1014a3510e86
+    parameters:
+      MEMORY_LIMIT: 4Gi
+      REPLICAS: 1
+      API_REPLICA_COUNT_MIN: '6'
+      API_REPLICA_COUNT_MAX: '6'
+      RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.redhat.com/candlepin
+      WAREHOUSE_DELETED_CLUSTERS_DRY_RUN: 'false'
+      WAREHOUSE_DELETED_CLUSTERS_MAX_AMOUNT: 1000
+      CLUSTER_REG_RATE_LIMIT: 250
+      ORG_CLUSTER_REG_RATE_LIMIT: 50
+      DB_MAX_OPEN_CONNS: 250
+      SENTRY_URL: sentry.devshift.net
+      SENTRY_PROJECT: '2'
+      CRONJOB_SENTRY_PROJECT: '17'
+      CONSUMER_SENTRY_PROJECT: '1018'
+      GLOG_V: 5
+      ENABLE_CERTIFICATE_MOCK: 'false'
+      MOA_SKU: MW01369
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_for_vault_secret_21
+      UNLEASH_URL: https://ocm.unleash.devshift.net/api
+      FETCH_TELEMETER_METRICS_DRY_RUN: 'false'
+      TELEMETER_DEBUG: 'true'
+      QUAY_REGISTRY_TEAM_NAME: installers
+      METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
+      DB_QUERY_READ_TIMEOUT_SERVER: '300000'
+      DB_QUERY_WRITE_TIMEOUT_SERVER: '60000'
+      MANDRILL_TIMEOUT: 60s
+
+# Original AMS deployment -- Blue ring
 - name: uhc-account-manager
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
   path: /templates/service-template.yml
