@@ -34,11 +34,13 @@ echo -n "<NEW_USER_FROM_STEP_2>:<PASSWORD_FROM_STEP_1>" | base64
 
 7. Add user (from step 2) and password (from step 1) to [basic-auth](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface/production/basic-auth)
 
-In addition, submit a MR to app-interface to update the following secret versions:
+8. In addition, submit a MR to app-interface to update the following secret versions:
 - https://gitlab.cee.redhat.com/service/app-interface/-/blob/30260ea6fae449ae8da8fab66c4707733e5f9f6b/data/services/app-interface/namespaces/app-interface-production.yml#L31-33
 - https://gitlab.cee.redhat.com/service/app-interface/-/blob/30260ea6fae449ae8da8fab66c4707733e5f9f6b/data/services/app-interface/namespaces/app-interface-production.yml#L43-45
 
 You may need to restart all the pods in the app-interface-production namespace.
+
+9. When everything still works, remove the old user/password entry from the [htpasswd](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/app-interface  htpasswd)
 
 # Recycle app-interface basic auth developer access
 
