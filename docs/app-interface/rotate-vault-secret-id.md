@@ -28,6 +28,9 @@ Update the secret ID in the following configs:
 - [ci-int-config-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml) -> edit secret (Jenkins does not support secret versions)
   - don't forget to also update `data_base64`! Decode via `base64 -d` and then encode with `base64` (as is, newlines are fine in there)
 
+- [gitlab-fork-compliance](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/gitlab-fork-compliance-approle-creds)
+  - don't forget to also update `data_base64`! Decode via `base64 -d` and then encode with `base64` (as is, newlines are fine in there)
+
 4. Bump secret versions in app-interface
 
 Create and merge an MR that bumps the newly created secret versions in app-interface
