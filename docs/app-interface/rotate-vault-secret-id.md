@@ -20,6 +20,7 @@ You will need it in the last step of this SOP
 Update the secret ID in the following configs:
 
 - [reconcile-config-toml](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/qontract-reconcile-toml)
+- [reconcile-config-toml-stage](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-stage/app-interface-stage/qontract-reconcile-toml)
 - [ci-int-config-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml)
   - don't forget to also update `data_base64`! 
 
@@ -29,6 +30,8 @@ Create and merge an MR that bumps the newly created secret versions in app-inter
 
 - [app-interface-prod](../../data/services/app-interface/namespaces/app-interface-production.yml)
 - [app-interface-prod-int](../../data/services/app-interface/namespaces/app-interface-production-int.yml)
+- [app-interface-stage](../../data/services/app-interface/namespaces/app-interface-stage.yml)
+- [app-interface-stage-int](../../data/services/app-interface/namespaces/app-interface-stage-int.yml)
 
 5. Trigger a dummy-deployment
 
