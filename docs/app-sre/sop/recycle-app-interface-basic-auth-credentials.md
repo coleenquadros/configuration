@@ -40,7 +40,15 @@ echo -n "<NEW_USER_FROM_STEP_2>:<PASSWORD_FROM_STEP_1>" | base64
 
 You may need to restart all the pods in the app-interface-production namespace.
 
-9. When everything still works, remove the old user/password entry from the [htpasswd](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/app-interface  htpasswd)
+9. When everything still works, remove the old user/password entry from the [htpasswd](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/app-interface  htpasswd) -> also bump secret version in app-interface
+
+10. Verify that old credentials are not working anymore
+
+This should fail:
+
+```
+curl -v https://app-interface.devshift.net/graphql -H 'Authorization: Basic <OLD-BASE64-ENCODED-CREDS>'
+```
 
 # Recycle app-interface basic auth developer access
 
