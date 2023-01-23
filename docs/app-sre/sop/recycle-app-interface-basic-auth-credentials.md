@@ -23,7 +23,7 @@ Beware of newlines! Use `echo -n`
 echo -n "<NEW_USER_FROM_STEP_2>:<PASSWORD_FROM_STEP_1>" | base64
 ```
 
-4. Add htpasswd entry (step 2) to file [htpasswd](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/app-interface  htpasswd)
+4. Add htpasswd entry (step 2) to file [htpasswd](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/app-interface)
 
 5. Add base64 encoded token (step 3) in the following qontract-tomls:
   - [app-interface-production](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/qontract-reconcile-toml)
@@ -40,7 +40,7 @@ echo -n "<NEW_USER_FROM_STEP_2>:<PASSWORD_FROM_STEP_1>" | base64
 
 You may need to restart all the pods in the app-interface-production namespace.
 
-9. When everything still works, remove the old user/password entry from the [htpasswd](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/app-interface  htpasswd) -> also bump secret version in app-interface
+9. When everything still works, remove the old user/password entry from the [htpasswd](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/app-interface) -> also bump secret version in app-interface
 
 10. Verify that old credentials are not working anymore
 
