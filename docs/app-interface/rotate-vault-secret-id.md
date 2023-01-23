@@ -48,6 +48,8 @@ vault write -f auth/approle/role/app-interface/secret-id/destroy secret_id=<OLD_
 
 7. Ensure old secret ID is not usable anylonger
 
+This command must fail:
+
 ```
 vault write auth/approle/login role_id=7a72019e-85e0-637a-7706-65c88a47fd94 secret_id=<OLD_SECRET_ID_FROM_STEP_2>
 ```
