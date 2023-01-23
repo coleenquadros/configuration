@@ -1,5 +1,9 @@
 # Rotate Vault Secret ID
 
+If this is a high emergency situation, then we can start with step 6. and delete the secret ID instantly.
+Note, that this will lead to all integrations failing, thus secrets will need to be adjusted manually.
+If this is not super urgent, then follow this procedure:
+
 1. Create new secret ID in vault - you can do this in the terminal of the [vault UI](https://vault.devshift.net)
 
 Double check parameters with what is currently configured in the [approle](../../data/services/vault.devshift.net/config/prod/roles/approles/app-interface-approle.yml).
