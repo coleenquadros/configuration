@@ -17,23 +17,30 @@ You will need it in the last step of this SOP
 
 3. Update secret ID in configs
 
-Update the secret ID in the following confis:
+Update the secret ID in the following configs:
 
 - [reconcile-config-toml](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-interface-production/qontract-reconcile-toml)
 - [ci-int-config-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml)
   - don't forget to also update `data_base64`! 
 
-4. Trigger a dummy-deployment
+4. Bump secret versions in app-interface
+
+Create and merge an MR that bumps the newly created secret versions in app-interface
+
+- [app-interface-prod](../../data/services/app-interface/namespaces/app-interface-production.yml)
+- [app-interface-prod-int](../../data/services/app-interface/namespaces/app-interface-production-int.yml)
+
+5. Trigger a dummy-deployment
 
 Let's roll out qontract-reconcile to see if everthing works as expected. Create and deploy a dummy release.
 
-5. Delete old secret ID
+6. Delete old secret ID
 
 ```
 vault write -f auth/approle/role/app-interface/secret-id/destroy secret_id=<OLD_SECRET_ID_FROM_STEP_2>
 ```
 
-6. Ensure old secret ID is not usable anylonger
+7. Ensure old secret ID is not usable anylonger
 
 ```
 vault write auth/approle/login role_id=7a72019e-85e0-637a-7706-65c88a47fd94 secret_id=<OLD_SECRET_ID_FROM_STEP_2>
