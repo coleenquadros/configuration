@@ -1,6 +1,6 @@
 # Rotate Vault Secret ID
 
-If this is a high emergency situation, then we can start with step 6. and delete the secret ID instantly.
+If this is a high emergency situation, then we can start with step 5. and delete the secret ID instantly.
 Note, that this will lead to all integrations failing, thus secrets will need to be adjusted manually.
 If this is not super urgent, then follow this procedure:
 
