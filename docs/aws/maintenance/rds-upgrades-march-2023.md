@@ -14,10 +14,7 @@ Minor version upgrades of database engines are typically backwards-compatible, b
 
 ## What do I need to do if I have an affected RDS instance?
 
-1. If your RDS instances are not running [approved versions](/README.md#approved-rds-versions), then you will need to [upgrade the database engine minor version in app-interface](/README.md#rds-minor-version-upgrades)
-2. If you don't upgrade your RDS instance AWS will upgrade it automatically in the following RDS instance maintenance window:
-   * **PostgreSQL**
-     * Starting February 20, 2023 00:00:01 AM UTC, you will not be able to create new RDS instances with PostgreSQL minor versions listed above from either the AWS Console or the CLI. We recommend you to upgrade your databases before March 20, 2023. RDS will upgrade your PostgreSQL databases running minor versions listed above as well as any instances restored from the snapshots of these versions to the latest minor version during a scheduled maintenance window between March 20, 2023 00:00:01 UTC and April 20, 2023 00:00:01 UTC. On April 20, 2023 00:00:01 AM UTC, any PostgreSQL databases running minor versions listed above that remain will be upgraded to the latest minor version regardless of instances’ scheduled maintenance window.
+If your RDS instances are not running [approved versions](/README.md#approved-rds-versions), then you will need to [upgrade the database engine minor version in app-interface](/README.md#rds-minor-version-upgrades).
 
 ## Will these upgrades cause a downtime?
 
@@ -32,5 +29,6 @@ The timeline below summarizes the actions that need to be taken by each date.
 | Deadline      | Tasks |
 | ----------- | ----------- |
 | ASAP      | 1. Teams using RDS should check if their databases are running the versions outlined [here](/README.md#approved-rds-versions)<br>2. Start upgrading the minor versions of your affected databases in stage as soon as possible to provide sufficient time for testing       |
+| February 20, 2023 | You will not be able to create new RDS instances with PostgreSQL minor versions listed above from either the AWS Console or the CLI. |
 | March 20, 2022   | All stage and production databases should be running [approved versions of the database engine](/README.md#approved-rds-versions)       |
-| April 20, 2023 00:00:01 AM UTC | All RDS instances running PostgreSQL not supported minor versions will be upgraded to the latest minor version regardless of instances scheduled maintenance window    |
+| April 20, 2023 00:00:01 AM UTC | All RDS instances running PostgreSQL not supported minor versions will be upgraded to the latest minor version.    |
