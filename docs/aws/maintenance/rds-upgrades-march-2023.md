@@ -2,7 +2,7 @@
 
 [TOC]
 
-Amazon RDS for PostgreSQL minor versions 14.2, 14.1, 13.6, 13.5, 13.4, 13.3, 12.10, 12.9, 12.8, 12.7, 11.15, 11.14, 11.13, 11.12, 10.20, 10.19, 10.18 and 10.17  will reach end of standard support on March 20, 2023. To prevent issues we ask the tenants to upgrade their RDS versions. The minimum supported versions by AppSRE are documented [here](/README.md#approved-rds-versions).
+Amazon RDS for PostgreSQL minor versions 14.2, 14.1, 13.6, 13.5, 13.4, 13.3, 12.10, 12.9, 12.8, 12.7, 11.15, 11.14, 11.13, 11.12, 10.20, 10.19, 10.18 and 10.17 will reach end of standard support on March 20, 2023. To prevent issues we ask the tenants to upgrade their RDS versions. The minimum supported versions by AppSRE are documented [here](/README.md#approved-rds-versions).
 
 Minor version upgrades of database engines are typically backwards-compatible, but teams will need to perform their due diligence and test the impact of the upgrade on their services.
 
