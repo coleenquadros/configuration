@@ -33,4 +33,4 @@ The timeline below summarizes the actions that need to be taken by each date.
 | ----------- | ----------- |
 | ASAP      | 1. Teams using RDS should check if their databases are running the versions outlined [here](/README.md#approved-rds-versions)<br>2. Start upgrading the minor versions of your affected databases in stage as soon as possible to provide sufficient time for testing       |
 | March 20, 2022   | All stage and production databases should be running [approved versions of the database engine](/README.md#approved-rds-versions)       |
-| April 20, 2023 00:00:01 AM | All RDS instances running PostgreSQL not supported minor versions will be upgraded to the latest minor version regardless of instances scheduled maintenance window    |
+| April 20, 2023 00:00:01 AM UTC | All RDS instances running PostgreSQL not supported minor versions will be upgraded to the latest minor version regardless of instances scheduled maintenance window    |
