@@ -50,6 +50,9 @@ A good starting point is to email tenants and put a notification in the #sd-app-
 channel as soon as we feel that we're confident in the information released by AWS. The
 timelines can sometimes be aggressive, so we don't want tenants to be surprised.
 
+Create an update doc in `app-interface`, as shown in [this example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/aws/maintenance/rds-upgrades-june-2022.md),
+where users can go to get up to date information and details about the upgrade.
+
 Example emails can be seen in [this folder](/data/app-interface/emails/all-rds/). The
 content will likely be different each time because sometimes it's only RDS engine
 upgrades, while other times OS upgrades might also be required.
