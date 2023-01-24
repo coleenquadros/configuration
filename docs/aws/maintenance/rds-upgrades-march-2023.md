@@ -10,8 +10,7 @@ Minor version upgrades of database engines are typically backwards-compatible, b
 
 [Click here](/README.md#approved-rds-versions) for a list of approved RDS database engine versions.
 
-1. If you aren't running an approved minor version of your database engine, then your RDS instance is affected and will need database engine minor version upgrade.
-2. If you are running an approved minor version, then your RDS instance is only affected if it has a [pending maintenance activity](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#USER_UpgradeDBInstance.Maintenance.Viewing)
+- If you aren't running an approved minor version of your database engine, then your RDS instance is affected and will need a database engine minor version upgrade.
 
 ## What do I need to do if I have an affected RDS instance?
 
