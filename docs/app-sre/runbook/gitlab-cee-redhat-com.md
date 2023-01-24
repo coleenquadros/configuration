@@ -15,8 +15,7 @@ In the event of significant GitLab.cee issues, your contact point is the IT ALM 
 | Description | Endpoint | Notes |
 |---|---|---|
 | Tickets | it-alm-tickets@redhat.com |  |
-| Support GChat | https://chat.google.com/room/AAAAFb3PAOM |  |
-| On-Call Support (US Eastern Business Time Hours) | https://chat.google.com/room/AAAAFb3PAOM |  |
+| Support Slack with On-Call | https://redhat-internal.slack.com/archives/C04HGR58KKL |  |
 | Critical Support Issues (Outside US Eastern Business Time Hours) | page-alm-oncall@redhat.pagerduty.com | This pages out the on call engineer, if they don't respond in 15 minutes, it pages out the whole team, and if they don't respond, it start escalating up the chain of command. |
 | Feature Requests | it-alm-team@redhat.com |  |
 
