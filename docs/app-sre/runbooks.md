@@ -23,6 +23,9 @@ This is the place for all runbooks that don't have their own category.
 ### AWS
 * [RDS (Relational Database Service)](/docs/aws/runbook/aws-rds.md)
 
+### Monitoring
+* [Prometheus](/docs/app-sre/runbook/prometheus.md)
+
 ### Jenkins
 * [General Runbook](/docs/app-sre/runbook/jenkins.md)
 * [CI-EXT Load Balancing](/docs/app-sre/runbook/jenkins-ci.ext-waf_alb.md)
