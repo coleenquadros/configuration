@@ -1,0 +1,22 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    # Cert-manager annotation set in cincinnati.route.yaml
+    # All routes using the same host share the same certificate
+    haproxy.router.openshift.io/balance: source
+  labels:
+    service: cincinnati-graph-builder
+  name: cincinnati-gb-rt-stg
+spec:
+  host: cc533os557xkwku.api.stage.openshift.com
+  path: /api/upgrades_info/graph-data
+  port:
+    targetPort: gb-public
+  to:
+    kind: Service
+    name: cincinnati-gb-public
+    weight: 100
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
