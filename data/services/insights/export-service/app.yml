@@ -1,0 +1,63 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: export-service
+  platform: insights
+
+name: export-service
+description: |
+  The Export-Service provides a shared approach to allow customers to
+  request and download data archives from the apps running on the c.r.c
+  platform.
+
+architectureDocument: https://TODO
+sopsUrl: https://gitlab.cee.redhat.com/TODO
+grafanaUrls:
+- title: export-service
+  url: https://grafana.app-sre.devshift.net/d/c91dcda039618ded/cloud-connector?orgId=1&var-datasource=crcp01ue1-prometheus
+onboardingStatus: BestEffort
+
+parentApp:
+  $ref: /services/insights/app.yml
+
+serviceOwners:
+- name: ConsoleDot Platform Pipeline Team
+  email: platform-pipeline@redhat.com
+- name: Derek Horton
+  email: dehort@redhat.com
+- name: Greg McCullough
+  email: gmccullo@redhat.com
+- name: Cody Mitchell
+  email: comitche@redhat.com
+
+
+serviceNotifications:
+- name: Brandon Schneider
+  email: bschneid@redhat.com
+
+dependencies:
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/ci-ext/service.yml
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/kafka/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/cloudservices.yml
+  items:
+  - name: export-service
+    public: true
+    description: Repo for the export-service Insights app
+
+
+codeComponents:
+- name: export-service
+  resource: upstream
+  url: https://github.com/RedHatInsights/export-service-go
+
+
+escalationPolicy:
+  $ref: /teams/insights/escalation-policies/crc-pipeline-escalations.yml
