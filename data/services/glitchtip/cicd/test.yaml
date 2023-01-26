@@ -1,0 +1,53 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: saas-glitchtip
+
+name: saas-glitchtip-test
+description: SaaS tracking file for Glichtip post deployment tests
+
+app:
+  $ref: /services/glitchtip/app.yml
+
+pipelinesProvider:
+  $ref: /services/glitchtip/pipelines/tekton.glitchtip-pipelines.appsrep05ue1.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Job
+- ServiceAccount
+
+publishJobLogs: true
+imagePatterns:
+- quay.io/app-sre/glitchtip-acceptance
+
+resourceTemplates:
+- name: glitchtip
+  url: https://github.com/app-sre/glitchtip
+  path: /openshift/acceptance.yaml
+  targets:
+  - namespace:
+      $ref: /services/glitchtip/namespaces/glitchtip-stage.yaml
+    ref: b8d8dce9752f3406472b3e7e6ef76769325ee005
+    parameters:
+      GLITCHTIP_URL: https://glitchtip.stage.devshift.net
+    secretParameters:
+    - name: GLITCHTIP_API_USER_EMAIL
+      secret:
+        path: app-interface/app-sre/glitchtip/stage/users/acceptance
+        field: email
+        version: 1
+    - name: GLITCHTIP_API_USER_TOKEN
+      secret:
+        path: app-interface/app-sre/glitchtip/stage/users/acceptance
+        field: token
+        version: 1
+    promotion:
+      auto: true
+      subscribe:
+      - glitchtip-stage-deploy-success-channel
