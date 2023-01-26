@@ -5,22 +5,12 @@
 
 # Onboarding new Glitchtip Instance
 
-* Enter a shell into glitchtip pod of the new instance
-* Create Django admin user for the admin webinterface
-  ```shell
-  /code$ python manage.py createsuperuser
-  Email: sd-app-sre+glitchtip-admin@redhat.com
-  Password:
-  Password (again):
-  Superuser created successfully.
-  ```
-  and store the credentials in [vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/glitchtip-stage/admin)
-* Enter django admin interface and create an [automation account](https://glitchtip.stage.devshift.net/admin/users/user/add/) `sd-app-sre+glitchtip@redhat.com` with a random password and enabled `Superuser status` flag. The password doesn't matter; the integration will use an API token later.
-* [Create](https://glitchtip.stage.devshift.net/admin/organizations_ext/organization/add/) an `app-sre-init` organization. The integration needs a bootstrapping organization, and it will delete this organization as soon as other organizations are configured.
-* Add the automation account to the `app-sre-init` organization by [creating an organization user](https://glitchtip.stage.devshift.net/admin/organizations_ext/organizationuser/add/). Choose `owner` as role!
-* Finally, [create an API token](https://glitchtip.stage.devshift.net/admin/api_tokens/apitoken/add/) for the automation user and enable all scopes except `event:***`.
-* Store the token in [vault](https://vault.devshift.net/)
-* Create a new glitchtip-instance file (example [glitchtip-stage](data/dependencies/glitchtip/glitchtip-stage.yml)).
+## Create admin and qontract-reconcile accounts
+
+1. Enter new user credentials to [vault](https://vault.devshift.net/ui/vault/secrets/app-interface/list/app-sre/glitchtip/)
+   1. Admin account is to log in to the Glitchtip django admin interface. Enter `email` and `password`
+   1. qontract-reconcile for the glitchtip integration. Enter `email` and `token`
+1. These credentials are entered into the glitchtip RDS during the startup of the glitchtip app.
 
 # Notes
 
