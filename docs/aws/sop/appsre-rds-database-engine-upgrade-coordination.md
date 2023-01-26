@@ -44,6 +44,9 @@ versions. These should be updated to the appropriate versions based on the AWS
 communication. **Update the Notes** section to reflect why this is the required
 version (we may be able to remove this in the future).
 
+**Acceptance criteria:**
+* README page updated
+
 ### Notify tenants of required RDS upgrade
 
 A good starting point is to email tenants and put a notification in the #sd-app-sre
@@ -56,6 +59,11 @@ where users can go to get up to date information and details about the upgrade. 
 Example emails can be seen in [this folder](/data/app-interface/emails/all-rds/). The
 content will likely be different each time because sometimes it's only RDS engine
 upgrades, while other times OS upgrades might also be required.
+
+**Acceptance criteria:**
+* Date-specific RDS upgrades page created
+* Email that references the page above sent to tenants
+* Announcement in #sd-app-sre -- pin the thread and reference the date-specific RDS upgrades page
 
 ### Update RDS approved version alerts
 
@@ -88,9 +96,17 @@ Jira with a filter like:
 
 `labels = "alertname=\"RDSCompliantEngineVersionCheck\"" and status not in (Closed, Done, Rejected, Obsolete)`
 
+**Acceptance criteria:**
+* Alerts updated as per the steps above
+* Alerts are verified to confirm that the expected number of tickets were created
+
 ### Last reminder for RDS upgrades
 
 Somewhere between 2-4 weeks out from the upgrade we should send one final reminder email
 and Slack notification in #sd-app-sre. AWS typically forces the upgrades after the
 deadline, so if the notifications are ignored. See the current documentation on minor
 version upgrades to determine how long of an outage is expected.
+
+**Acceptance criteria:**
+* Reminder email sent
+* Final announcement sent in #sd-app-sre
