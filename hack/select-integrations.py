@@ -114,6 +114,8 @@ def print_cmd(
         cmd += "NO_VALIDATE=true "
     if not select_all and pr.get("early_exit") and not has_integrations_changes:
         cmd += "EARLY_EXIT=true "
+        if pr.get("check_only_affected_shards"):
+            cmd += "CHECK_ONLY_AFFECTED_SHARDS=true "
 
     if int_name == "change-owners":
         if select_all or non_bundled_data_modified:
