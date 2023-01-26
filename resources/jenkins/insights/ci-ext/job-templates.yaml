@@ -291,3 +291,69 @@
     builders:
     - shell:
         command: "{ci_cmd}"
+
+- job-template:
+    id: 'insights-gh-pipeline'
+    name: '{gh_org}-{gh_repo}-pipeline'
+    slack_channel_notification: 'consoledot-development-fails'
+    project-type: pipeline
+    pipeline-scm:
+      # make parameter to override template name
+      script-path: 'Jenkinsfile'
+      scm:
+      - git:
+          url: 'git@github.com:{gh_org}/{gh_repo}.git'
+          credentials-id: '{github_ssh_credentials}'
+          skip-tag: true
+          refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
+          branches:
+          - '${{ghprbActualCommit}}'
+          merge:
+              remote: origin
+              branch: '{branch}'
+          git-config-name: "AppSRE"
+          git-config-email: "sd-app-sre@redhat.com"
+          included-regions:
+          - '{include_path}'
+          prune: true
+          clean:
+              before: true
+          wipe-workspace: true
+    triggers:
+        - github-pull-request:
+            <<: *insights_default_ghprb_triggers_cfg
+            <<: *insights_default_admin_list_cfg
+    disabled: '{disable}'
+    node: '{node}'
+    concurrent: '{concurrent_build}'
+    run_stack_analysis_path: ''
+    max_previous_builds_count: 20
+    builders:
+    - *stack_analysis
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_crcd_oc_login
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+        - *insightsdroid_github
+        - *ibutsu
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
