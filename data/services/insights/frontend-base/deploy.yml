@@ -38,7 +38,7 @@ compare: false
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-consoledot-devprod
 
 authentication:
@@ -69,6 +69,7 @@ resourceTemplates:
     parameters:
       ENV_NAME: "env-perf"
       IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
+      SSO_URL: 'https://sso.stage.redhat.com/auth/'
 
 - name: frontend-env
   path: /env.yml
@@ -94,3 +95,17 @@ resourceTemplates:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
+
+- name: api-frontend
+  path: /deploy/frontend.yml
+  url: https://github.com/RedHatInsights/api-frontend
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+    ref: 9454d7d34627d46b1783eda5ad0752a654303774
+    parameters:
+      ENV_NAME: "env-stage"

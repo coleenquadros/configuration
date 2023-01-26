@@ -1,0 +1,184 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: rhosak-stage
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: rhosak-stage
+    rules:
+      - alert: RHOSAKConnectionCountHigh
+        expr: |
+          (kafka_namespace:kafka_server_socket_server_metrics_connection_count:sum{job="ocm-production-consoledot-kafka-crcp01ue1"}
+            / on() group_right()
+          sum(kafka_instance_connection_limit{job="ocm-production-consoledot-kafka-crcp01ue1"})) > .8
+        for: 10m
+        labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: strimzi
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/Wrnmlen4z/consoledot-rhosak?orgId=1"
+          link_url: "https://console.redhat.com/application-services/streams/kafkas/cd440vjik7j146487odg/dashboard"
+          message: "RHOSAK Connections high, approaching limit"
+          runbook: "https://consoledot.pages.redhat.com/docs/dev/developer-references/sop/prodmqbroker.html"
+      - alert: RHOSAKConnectionCountCritical
+        expr: |
+          (kafka_namespace:kafka_server_socket_server_metrics_connection_count:sum{job="ocm-production-consoledot-kafka-crcp01ue1"}
+            / on() group_right()
+          sum(kafka_instance_connection_limit{job="ocm-production-consoledot-kafka-crcp01ue1"})) > .9
+        for: 5m
+        labels:
+          service: insights
+          severity: critical
+          app_team: strimzi
+          env: prod
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/Wrnmlen4z/consoledot-rhosak?orgId=1"
+          link_url: "https://console.redhat.com/application-services/streams/kafkas/cd440vjik7j146487odg/dashboard"
+          message: "RHOSAK Connections critical, approaching limit"
+          runbook: "https://consoledot.pages.redhat.com/docs/dev/developer-references/sop/prodmqbroker.html"
+      - alert: RHOSAKPersistentVolumeUsageHigh
+        expr: |
+          100 * (kafka_broker_quota_totalstorageusedbytes{job="ocm-production-consoledot-kafka-crcp01ue1"}
+            /
+          kafka_broker_quota_softlimitbytes{job="ocm-production-consoledot-kafka-crcp01ue1"}) > 80
+        for: 10m
+        labels:
+          service: insights
+          severity: high
+          app_team: strimzi
+          env: prod
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/Wrnmlen4z/consoledot-rhosak?orgId=1"
+          link_url: "https://console.redhat.com/application-services/streams/kafkas/cd440vjik7j146487odg/dashboard"
+          runbook: "https://consoledot.pages.redhat.com/docs/dev/developer-references/sop/prodmqbroker.html"
+          message: The PersistentVolume claimed by {{ $labels.statefulset_kubernetes_io_pod_name
+            }} in RHOSAK Cluster {{ $labels.strimzi_io_cluster }} is only {{ printf "%0.2f" $value
+            }}% free.
+      - alert: RHOSAKPersistentVolumeUsageCritical
+        expr: |
+          100 * (kafka_broker_quota_totalstorageusedbytes{job="ocm-production-consoledot-kafka-crcp01ue1"}
+            /
+          kafka_broker_quota_softlimitbytes{job="ocm-production-consoledot-kafka-crcp01ue1"}) > 90
+        for: 5m
+        labels:
+          service: insights
+          severity: critical
+          app_team: strimzi
+          env: prod
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/Wrnmlen4z/consoledot-rhosak?orgId=1"
+          link_url: "https://console.redhat.com/application-services/streams/kafkas/cd440vjik7j146487odg/dashboard"
+          runbook: "https://consoledot.pages.redhat.com/docs/dev/developer-references/sop/prodmqbroker.html"
+          message: The PersistentVolume claimed by {{ $labels.statefulset_kubernetes_io_pod_name
+            }} in RHOSAK Cluster {{ $labels.strimzi_io_cluster }} is only {{ printf "%0.2f" $value
+            }}% free.
+      - alert: RHOSAKPartitionCountHigh
+        expr: |
+          100 * (kafka_topic:kafka_topic_partitions:sum{job="ocm-production-consoledot-kafka-crcp01ue1"}
+            / on() group_right()
+          kafka_instance_partition_limit{job="ocm-production-consoledot-kafka-crcp01ue1"}) > 80
+        for: 10m
+        labels:
+          service: insights
+          severity: high
+          app_team: strimzi
+          env: prod
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/Wrnmlen4z/consoledot-rhosak?orgId=1"
+          link_url: "https://console.redhat.com/application-services/streams/kafkas/cd440vjik7j146487odg/dashboard"
+          runbook: "https://consoledot.pages.redhat.com/docs/dev/developer-references/sop/prodmqbroker.html"
+          message: The partition count for RHOSAK Cluster {{ $labels.strimzi_io_cluster }} is
+            at {{ printf "%0.2f" $value}}% of the limit.
+      - alert: RHOSAKPartitionCountCritical
+        expr: |
+          100 * (kafka_topic:kafka_topic_partitions:sum{job="ocm-production-consoledot-kafka-crcp01ue1"}
+            / on() group_right()
+          kafka_instance_partition_limit{job="ocm-production-consoledot-kafka-crcp01ue1"}) > 80
+        for: 5m
+        labels:
+          service: insights
+          severity: critical
+          app_team: strimzi
+          env: prod
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/Wrnmlen4z/consoledot-rhosak?orgId=1"
+          link_url: "https://console.redhat.com/application-services/streams/kafkas/cd440vjik7j146487odg/dashboard"
+          runbook: "https://consoledot.pages.redhat.com/docs/dev/developer-references/sop/prodmqbroker.html"
+          message: The partition count for RHOSAK Cluster {{ $labels.strimzi_io_cluster }} is
+            at {{ printf "%0.2f" $value}}% of the limit.
+      - alert: RHOSAKEgressThroughputHigh
+        expr: |
+          100 * (sum(kafka_topic:kafka_server_brokertopicmetrics_bytes_out_total:rate5m{job="ocm-production-consoledot-kafka-crcp01ue1"})
+            /
+          sum(kafka_broker_client_quota_limit{quota_type="Fetch",job="ocm-production-consoledot-kafka-crcp01ue1"})) > 80
+        for: 10m
+        labels:
+          service: insights
+          severity: high
+          app_team: strimzi
+          env: prod
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/Wrnmlen4z/consoledot-rhosak?orgId=1"
+          link_url: "https://console.redhat.com/application-services/streams/kafkas/cd440vjik7j146487odg/dashboard"
+          runbook: "https://consoledot.pages.redhat.com/docs/dev/developer-references/sop/prodmqbroker.html"
+          message: The data egress/fetch rate for RHOSAK Cluster {{ $labels.strimzi_io_cluster }} is
+            at {{ printf "%0.2f" $value}}% of the limit.
+      - alert: RHOSAKEgressThroughputCritical
+        expr: |
+          100 * (sum(kafka_topic:kafka_server_brokertopicmetrics_bytes_out_total:rate5m{job="ocm-production-consoledot-kafka-crcp01ue1"})
+            /
+          sum(kafka_broker_client_quota_limit{quota_type="Fetch",job="ocm-production-consoledot-kafka-crcp01ue1"})) > 90
+        for: 10m
+        labels:
+          service: insights
+          severity: critical
+          app_team: strimzi
+          env: prod
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/Wrnmlen4z/consoledot-rhosak?orgId=1"
+          link_url: "https://console.redhat.com/application-services/streams/kafkas/cd440vjik7j146487odg/dashboard"
+          runbook: "https://consoledot.pages.redhat.com/docs/dev/developer-references/sop/prodmqbroker.html"
+          message: The data egress/fetch rate for RHOSAK Cluster {{ $labels.strimzi_io_cluster }} is
+            at {{ printf "%0.2f" $value}}% of the limit.
+      - alert: RHOSAKIngressThroughputHigh
+        expr: |
+          100 * (sum(kafka_topic:kafka_server_brokertopicmetrics_bytes_in_total:rate5m{job="ocm-production-consoledot-kafka-crcp01ue1"})
+            /
+          sum(kafka_broker_client_quota_limit{quota_type="Produce",job="ocm-production-consoledot-kafka-crcp01ue1"})) > 80
+        for: 10m
+        labels:
+          service: insights
+          severity: high
+          app_team: strimzi
+          env: prod
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/Wrnmlen4z/consoledot-rhosak?orgId=1"
+          link_url: "https://console.redhat.com/application-services/streams/kafkas/cd440vjik7j146487odg/dashboard"
+          runbook: "https://consoledot.pages.redhat.com/docs/dev/developer-references/sop/prodmqbroker.html"
+          message: The data Ingress/Produce rate for RHOSAK Cluster {{ $labels.strimzi_io_cluster }} is
+            at {{ printf "%0.2f" $value}}% of the limit.
+      - alert: RHOSAKIngressThroughputCritical
+        expr: |
+          100 * (sum(kafka_topic:kafka_server_brokertopicmetrics_bytes_in_total:rate5m{job="ocm-production-consoledot-kafka-crcp01ue1"})
+            /
+          sum(kafka_broker_client_quota_limit{quota_type="Produce",job="ocm-production-consoledot-kafka-crcp01ue1"})) > 90
+        for: 10m
+        labels:
+          service: insights
+          severity: high
+          app_team: strimzi
+          env: prod
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/Wrnmlen4z/consoledot-rhosak?orgId=1"
+          link_url: "https://console.redhat.com/application-services/streams/kafkas/cd440vjik7j146487odg/dashboard"
+          runbook: "https://consoledot.pages.redhat.com/docs/dev/developer-references/sop/prodmqbroker.html"
+          message: The data Ingress/Produce rate for RHOSAK Cluster {{ $labels.strimzi_io_cluster }} is
+            at {{ printf "%0.2f" $value}}% of the limit.
+

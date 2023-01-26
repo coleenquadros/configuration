@@ -110,3 +110,17 @@ spec:
           message: "insights-results-aggregator backend service has been down for two minutes <!subteam^S043UGRST2L>"
           dashboard: "https://grafana.app-sre.devshift.net/d/ruvKwhqWk/ccx-insights-results-aggregator"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/cluster/projects/ccx-data-pipeline-stage/deployments"
+      - alert: CCXNotificationDBLowStorageSpace
+        expr: aws_rds_free_storage_space_average{container="cloudwatch-exporter", dbinstance_identifier="ccx-notification-db-stage", namespace="app-sre-observability-stage"} offset 10m < (20 * 1024^3)
+        for: 30m
+        labels:
+          severity: high
+          service: insights
+          env: stage
+          namespace: app-sre-observability-stage
+          app_team: ccx-data-pipeline
+        annotations:
+          message: "The current free storage space of DB instance {{ $labels.dbinstance_identifier }} is less than 20%."
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
+          dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20insights-stage&var-region=default&var-dbinstanceidentifier=ccx-notification-db-stage&from=now-7d&to=now"
+

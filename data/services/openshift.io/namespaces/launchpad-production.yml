@@ -8,7 +8,7 @@ name: launchpad-production
 description: production namespace for launchpad
 
 cluster:
-  $ref: /openshift/app-sre-prod-03/cluster.yml
+  $ref: /openshift/app-sre-prod-01/cluster.yml
 
 app:
   $ref: /services/openshift.io/app.yml
@@ -52,3 +52,37 @@ openshiftResources:
   path: /dsaas/launchpad-production/launcher-application.route.yaml
 - provider: resource
   path: /dsaas/dsaas-deploy.serviceaccount.yaml
+
+managedExternalResources: true
+
+externalResources:
+- provider: cloudflare
+  provisioner:
+    $ref: /cloudflare/devtools/account.yml
+  resources:
+  - provider: zone
+    identifier: fabric8io
+    zone: fabric8.io
+    plan: free
+    type: full
+    settings:
+      ipv6: 'on'
+      ssl: 'full'
+    ################### !!! ATTENTION !!! ##############################
+    # The records from this zone are partially managed                 #
+    # This means not all records are present in this file              # 
+    # It is advised to check via the Cloudflare Web UI prior to adding #
+    #   a new record. Any existing record will need to be imported     #
+    # Refer to the Cloudflare runbook for more information             #
+    ####################################################################
+    records:
+    - name: launcher
+      proxied: true
+      ttl: 1
+      type: CNAME
+      value: elb.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com
+    - name: launcher-preview
+      proxied: true
+      ttl: 1
+      type: CNAME
+      value: elb.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com

@@ -18,7 +18,7 @@ Jira ticket: https://issues.redhat.com/browse/SDE-2341
 
 This documentation applies to both use cases:
 - Cluster upgrades for clusters managed in app-interface (AppSRE clusters)
-- Cluster ugprades for additional OCM organizations (RH only)
+- Cluster upgrades for additional OCM organizations (RH only)
 
 ## Overview
 
@@ -42,6 +42,8 @@ upgradePolicy:
     mutexes:
     - mutex-1
     - mutex-2
+    # OCM upgrade sector to which the cluster belongs
+    sector: sector-1
 ```
 
 ## How it works
@@ -51,7 +53,8 @@ For each cluster with an `upgradePolicy`, we check that the following conditions
 - there are available versions to upgrade to.
 - the upgrade schedule is within the next 2 hours.
 - the version has been soaking in other clusters with the same workloads (more than `soakDays`).
-- all the configured mutexes (by default `[]`) can be acquired. Said differently, there is no ongoing cluster upgrades with any of these mutexes.
+- all the configured `mutexes` (by default `[]`) can be acquired. Said differently, there is no ongoing cluster upgrades with any of these `mutexes`.
+- the sector name refers to a sector defined in the cluster OCM organization in app-interface (`ocm` field), with their `dependencies`. An upgrade can be applied on a cluster only if all clusters from previous sectors already run at least that version.
 
 The versions to upgrade to are iterated over in reverse order, so it is assumed that the latest version that meets the conditions is chosen.
 
@@ -83,7 +86,7 @@ Notes:
 
 - Regex expressions are supported.
 - These steps will also cause existing upgrades to be cancelled if time allows.
-- All AppSRE clusters are provisioned in the [OCM production instance](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2860db033ff2cc88aadf6b655d8ced7ac66746d3/data/dependencies/ocm/production.yml#L18).
+- All AppSRE clusters are provisioned in the [OCM production instance](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ocm/production.yml#L13).
 
 
 ## Upgrade strategy
@@ -108,12 +111,6 @@ We choose different soak days to give some interval between upgrades. Should any
 The first clusters to be upgraded belong to the stage environment (app-sre-stage-01, appsres03ue1).
 
 Once a version has soaked for 7 days, the production clusters will be upgraded (app-sre-prod-01, appsrep05ue1).
-
-### CodeReady Dependency Analytics (CRDA)
-
-The first cluster to be upgraded belongs to the stage environment (app-sre-stage-02).
-
-Once a version has soaked for 3 days, the production cluster will be upgraded (app-sre-prod-03).
 
 ### console.redhat.com (CRC)
 

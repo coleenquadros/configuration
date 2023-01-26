@@ -15,7 +15,7 @@ pipelinesProvider:
 
 slack: # configure where to send notifications of success/failure of deployments
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: sd-ops-services-dev
 
 managedResourceTypes:
@@ -58,7 +58,7 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
       name: service-web-rca-gl-build-main
   - namespace:
       $ref: /services/web-rca/namespaces/production.yml
-    ref: 49fb98149ce9a11fe11adb37ef4871c5edd7f1c6
+    ref: 49490bff85db393af3b2ebd650a1f96a7899f0e2
     parameters:
       DATABASE_SECRET_NAME: web-rca-production-rds
       OCM_BASE_URL: https://api.openshift.com
@@ -85,7 +85,7 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
       name: service-web-rca-ui-gl-build-main
   - namespace:
       $ref: /services/web-rca/namespaces/production.yml
-    ref: e6d435ed4c2bc2d4ee6ed9170bc1509869119aa8
+    ref: 8602d680086975b144a68338c0ab283fbed32c5a
     parameters:
       OCM_BASE_URL: https://api.openshift.com
       REPLICAS: 3
@@ -104,5 +104,13 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
     - namespace:
         $ref: /services/observability/namespaces/app-sre-observability-production.yml
       ref: e05f2cef4ce44aa62174ffbba33f8e18eeff46e0
-
-
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+      ref: main
+      upstream:
+        instance:
+          $ref: /dependencies/ci-int/ci-int.yml
+        name: service-web-rca-gl-build-main
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+      ref: e05f2cef4ce44aa62174ffbba33f8e18eeff46e0

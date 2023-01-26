@@ -1,0 +1,67 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: mas-sso
+name: mas-sso-2022-12-01
+app:
+  $ref: /services/mas-sso/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities: null
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: mas-sso-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-04
+    namespace: mas-sso-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: mas-sso-stage
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 3
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 3
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 3
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 4
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 4
+      deployment_validation_operator_drop_net_raw_capability:
+        Failed: 1
+  - cluster: app-sre-prod-04
+    namespace: mas-sso-production
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 61
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 61
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 61
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 62
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 62
+      deployment_validation_operator_drop_net_raw_capability:
+        Failed: 1
+  service_slo:
+  - cluster: app-sre-prod-04
+    namespace: mas-sso-production
+    slo_name: SSO API Availability
+    slo_doc_name: mas-sso
+    slo_value: 99.9982644038109
+    slo_target: 99.0
+  - cluster: app-sre-prod-04
+    namespace: mas-sso-production
+    slo_name: SSO API Latency
+    slo_doc_name: mas-sso
+    slo_value: 100.0
+    slo_target: 99.0

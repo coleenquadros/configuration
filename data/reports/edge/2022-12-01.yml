@@ -1,0 +1,65 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: edge
+name: edge-2022-12-01
+app:
+  $ref: /services/insights/edge/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/edge-api:
+    - branch: master
+      total: 82
+      success: 60
+    https://github.com/RedHatInsights/edge-frontend:
+    - branch: master
+      total: 26
+      success: 26
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: edge-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: edge-prod
+    post_deploy_job: false
+  - cluster: insights-perf
+    namespace: edge-perf
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: edge-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 2
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 2
+  - cluster: crcp01ue1
+    namespace: edge-prod
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 2
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 2
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: edge-prod
+    slo_name: Request latency
+    slo_doc_name: edge
+    slo_value: 99.9141773460046
+    slo_target: 90.0
+  - cluster: crcp01ue1
+    namespace: edge-prod
+    slo_name: Requests result in successful (non-5xx) response
+    slo_doc_name: edge
+    slo_value: 99.9451743798091
+    slo_target: 90.0

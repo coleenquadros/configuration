@@ -20,13 +20,14 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
 - Subscription
 - OperatorGroup
 - ConfigMap
+- CostManagementMetricsConfig
 
 authentication:
   image:
@@ -45,6 +46,9 @@ resourceTemplates:
   path: /amq-streams.yml
   url: https://gitlab.cee.redhat.com/insights-platform/third-party-operators
   targets:
+  - namespace:
+      $ref: /services/insights/third-party-operators/amq-streams/crcd.yml
+    ref: master
   - namespace:
       $ref: /services/insights/third-party-operators/amq-streams/ephem.yml
     ref: master
@@ -123,3 +127,43 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/third-party-operators/apicurio/ephem.yml
     ref: master
+- name: costmanagement-metrics
+  path: /costmanagement-metrics.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/third-party-operators
+  targets:
+  - namespace:
+      $ref: /services/insights/third-party-operators/costmanagement-metrics/crcd01ue1.yml
+    ref: master
+  - namespace:
+      $ref: /services/insights/third-party-operators/costmanagement-metrics/ephem.yml
+    ref: master
+  - namespace:
+      $ref: /services/insights/third-party-operators/costmanagement-metrics/crcs02ue1.yml
+    ref: master
+  - namespace:
+      $ref: /services/insights/third-party-operators/costmanagement-metrics/crcp01ue1.yml
+    ref: 9c5b06a88386d316671cc8aa20cd4740ae13454f
+- name: costmanagement-metrics-config
+  path: /costmanagementmetricsconfigs.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/third-party-operators
+  targets:
+  - namespace:
+      $ref: /services/insights/third-party-operators/costmanagement-metrics/crcd01ue1.yml
+    ref: master
+    parameters:
+      SOURCE_NAME: crcd01ue1
+  - namespace:
+      $ref: /services/insights/third-party-operators/costmanagement-metrics/ephem.yml
+    ref: master
+    parameters:
+      SOURCE_NAME: c-rh-c-eph
+  - namespace:
+      $ref: /services/insights/third-party-operators/costmanagement-metrics/crcs02ue1.yml
+    ref: master
+    parameters:
+      SOURCE_NAME: crcs02ue1
+  - namespace:
+      $ref: /services/insights/third-party-operators/costmanagement-metrics/crcp01ue1.yml
+    ref: 9c5b06a88386d316671cc8aa20cd4740ae13454f
+    parameters:
+      SOURCE_NAME: crcp01ue1

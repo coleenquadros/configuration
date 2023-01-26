@@ -146,6 +146,10 @@ config:
         - 'gl-build-master-managed-services':
             branch: mk-release
             display_name: application-services-ui build-mk-release
+        - 'gl-build-master-managed-services-frontend':
+            build_deploy_script_path: './build/publish-image.sh'
+            display_name: application-services-ui-frontend publish-image
+            branch: mas-fe-containerization
 
   - project:
       name: kas-fleet-manager
@@ -180,22 +184,24 @@ config:
             branch: main
             display_name: kas-fleet-manager API perf test
             timeout: 7200
+            disable: false
             slack_channel_notification: mk-kas-fleet-manager
             cron_expression: 'H 7 * * 2-5' # ~7am UTC Tuesday to Friday
 
+
   - project:
-      name: kafka-storage-expansions
+      name: kafka-config-update
       label: kas-fleet-manager
       node: managed-services
       gl_group: mk-ci-cd
-      gl_project: kafka-storage-expansions
+      gl_project: kafka-config-update
       jobs:
-        - 'gl-pr-check-kafka-storage-expansions':
-            display_name: kafka-storage-expansions pr-check
+        - 'gl-pr-check-kafka-config-update':
+            display_name: kafka-config-update pr-check
             pr_check_script_path: './pr_check/pr_check.sh'
-        - 'gl-build-master-kafka-storage-expansions':
+        - 'gl-build-master-kafka-config-update':
             branch: main
-            display_name: kafka storage upgrade
+            display_name: kafka config update
             build_deploy_script_path: './run.sh'
             slack_channel_notification: mk-kas-fleet-manager
             timeout: 300

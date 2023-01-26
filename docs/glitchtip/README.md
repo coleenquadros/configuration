@@ -1,12 +1,11 @@
 # Glitchtip
 
-Glitchtip is An open source Error Tracking Software and a upstream fork of Sentry. The staging environment is available via https://glitchtip.stage.devshift.net and
-the productions environment is in progress.
+Glitchtip is An open source Error Tracking Software and a upstream fork of Sentry. The staging environment is available via https://glitchtip.stage.devshift.net and the productions environment is available via https://glitchtip.devshift.net
 
 ## The Architecture
 
 Glitchtip's Front-end is written in Angular Js and Node JS, along with some typescript and Its backend is written and python Django, It uses PostgreSQL as its backend database and Redis for a caching layer.
-in [The Architecture Document](https://github.com/rh-cssre/glitchtip/blob/main/docs/architecture.md).
+in [The Architecture Document](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/glitchtip/architecture/architecture.md).
 
 ## Features
 
@@ -29,7 +28,7 @@ The Glitchtip backend repository is available here: https://github.com/rh-cssre/
 
 
 The staging instance of Glitchtip is available at https://glitchtip.stage.devshift.net.
-The production instance of Glitchtip (In progress)
+The production instance of Glitchtip is available at https://glitchtip.devshift.net
 
 
 ## Documentation

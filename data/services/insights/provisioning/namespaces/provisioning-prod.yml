@@ -1,0 +1,83 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: provisioning
+
+name: provisioning-prod
+description: Provisioning on the Production cluster under app-interface management
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/provisioning/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/sources/namespaces/sources-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- Secret
+
+sharedResources:
+  - $ref: /services/insights/shared-resources/metrics-export-prod.yml
+
+managedExternalResources: true
+
+openshiftResources:
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-common/iqe-vault.secret.yaml
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: rds
+    identifier: provisioning-stage
+    defaults: /terraform/resources/insights/production/rds/postgres13-rds-1.yml
+    overrides:
+      name: provisioning_backend
+      apply_immediately: true
+    parameter_group: /terraform/resources/insights/production/rds/postgres13-parameter-group-provisioning-prod.yml
+    enhanced_monitoring: true
+    output_resource_name: provisioning-db
+    annotations:
+      clowder/database: provisioning-backend
+
+    # This service account is supposed to assume Customer provided roles
+    # We do not define any naming pattern for the Customer roles.
+    # We could try to impose it in the documentation and see if customers follow
+    # and then use exact role name to scope down perms of this account.
+  - provider: aws-iam-service-account
+    identifier: provisioning-serviceaccount-prod
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "arn:aws:iam::*:role/*"
+        }]
+      }
+    output_resource_name: provisioning-aws-acc
+  - provider: elasticache
+    identifier: provisioning-elasticache-stage
+    defaults: /terraform/resources/insights/production/elasticache/elasticache-provisioning-1.yml
+    output_resource_name: in-memory-db
+  - provider: cloudwatch
+    identifier: provisioning-cloudwatch-stage
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

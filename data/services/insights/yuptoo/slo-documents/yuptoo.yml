@@ -1,0 +1,26 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: app-interface
+
+name: app-interface
+
+app:
+  $ref: /services/insights/yuptoo/app.yml
+
+namespaces:
+- $ref: /services/insights/yuptoo/namespaces/yuptoo-prod.yml
+
+slos:
+- name: Report processing success rate
+  SLIType: availability
+  SLISpecification: 95% of report processing requests must succeed
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/yuptoo/report-processing-success-rate.md
+  SLOParameters:
+    window: 28d
+  expr: 1 - sum(increase(yuptoo_report_processing_exceptions_total[{{window}}])) / sum(increase(yuptoo_archive_downloaded_success_total[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /insights-prod/yuptoo-prod/yuptoo.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/pGzJEgoGf/yuptoo?orgId=1&var-datasource=crcp01ue1-prometheus&var-namespace=yuptoo-prod

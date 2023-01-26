@@ -23,6 +23,17 @@
                 {%- endif %}
             {%- endfor %}
         {%- endif %}
+
+        {%- if cluster.upgradePolicy.conditions.sector is not none %}
+            {%- if ocm_org.sectors is none %}
+                # raise an error if ocm.sectors is not set but a sector are being used (avoid generic "NoneType not iterable" error)
+                {% raise_error('OCM org "' + ocm_org.name + '" is missing the sectors field. The cluster ' + cluster.name + ' is referring to sector ' + cluster.upgradePolicy.conditions.sector) %}
+            {%- endif %}
+            {%- if cluster.upgradePolicy.conditions.sector not in ocm_org.sectors | map(attribute='name') %}
+                # raise an error if sector is not within the allowed sectors defined in the OCM file
+                {% raise_error('Cluster "' + cluster.name + '" upgrade policy sector "' +  cluster.upgradePolicy.conditions.sector + '" not in ocm.sectors: ' + (ocm_org.sectors | join(', '))) %}
+            {%- endif %}
+        {%- endif %}
     {%- endif %}
 {%- endmacro %}
 

@@ -1,0 +1,70 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: observatorium-mst
+name: observatorium-mst-2023-01-01
+app:
+  $ref: /services/rhobs/observatorium-mst/app.yml
+date: '2023-01-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/rhobs/configuration:
+    - branch: master
+      total: 5
+      success: 5
+    https://github.com/rhobs/obsctl-reloader:
+    - branch: master
+      total: 1
+      success: 1
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: observatorium-mst-stage
+    post_deploy_job: false
+  - cluster: telemeter-prod-01
+    namespace: observatorium-mst-production
+    post_deploy_job: false
+  - cluster: rhobsp02ue1
+    namespace: observatorium-mst-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: observatorium-mst-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 26
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 21
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 11
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 11
+  - cluster: telemeter-prod-01
+    namespace: observatorium-mst-production
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 25
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 21
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 8
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 8
+  - cluster: rhobsp02ue1
+    namespace: observatorium-tools-production
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+  - cluster: rhobsp02ue1
+    namespace: observatorium-mst-production
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 18
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 11
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 5
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 5
+  service_slo: null

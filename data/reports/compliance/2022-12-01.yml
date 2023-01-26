@@ -1,0 +1,81 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: compliance
+name: compliance-2022-12-01
+app:
+  $ref: /services/insights/compliance/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/compliance-backend:
+    - branch: master
+      total: 60
+      success: 40
+    https://gitlab.cee.redhat.com/insights-platform/compliance-ssg:
+    - branch: master
+      total: 14
+      success: 14
+    https://github.com/RedHatInsights/compliance-frontend:
+    - branch: master
+      total: 3
+      success: 3
+    https://github.com/RedHatInsights/attache:
+    - branch: master
+      total: 5
+      success: 3
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: consoledot-frontend-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: compliance-prod
+    post_deploy_job: false
+  - cluster: app-sre-stage-01
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: insights-perf
+    namespace: compliance-perf
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: compliance-stage
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 1
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 8
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 9
+      deployment_validation_operator_latest_tag:
+        Failed: 1
+  - cluster: crcp01ue1
+    namespace: compliance-prod
+    validations:
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 3
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 4
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: compliance-prod
+    slo_name: compliance latency
+    slo_doc_name: compliance
+    slo_value: 97.1115686079979
+    slo_target: 90.0
+  - cluster: crcp01ue1
+    namespace: compliance-prod
+    slo_name: compliance availability
+    slo_doc_name: compliance
+    slo_value: 99.974545002132
+    slo_target: 90.0

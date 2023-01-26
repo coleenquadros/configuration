@@ -23,7 +23,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: oncall-quay
 
 managedResourceTypes:
@@ -33,6 +33,7 @@ managedResourceTypes:
 - Role
 - RoleBinding
 - Job
+- CronJob
 
 imagePatterns:
 - quay.io/app-sre/flush-redis
@@ -41,6 +42,7 @@ imagePatterns:
 - quay.io/app-sre/quay-service-tool
 - quay.io/app-sre/quayio-update-py2-db
 - quay.io/app-sre/quayio-update-ro-keys-job
+- quay.io/app-sre/osa-openshift-analytics
 
 resourceTemplates:
 - name: quayio-service-tool
@@ -49,7 +51,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/quayio/namespaces/quays02ue1.yml
-    ref: 158f0dbd98d3bc4dea8af70fddca8e733f5f4bc8
+    ref: main
     parameters:
       QUAY_SEVICE_TOOL_CONFIG_SECRET: "quay-service-tool-config"
       IMAGE: "quay.io/app-sre/quay-service-tool"
@@ -57,7 +59,7 @@ resourceTemplates:
       SYSLOG_IMAGE_TAG: c19d7d1
   - namespace:
       $ref: /services/quayio/namespaces/quayp05ue1.yml
-    ref: 158f0dbd98d3bc4dea8af70fddca8e733f5f4bc8
+    ref: f468877126a38c47ef82a357f50de9d7bad6622d
     parameters:
       QUAY_SEVICE_TOOL_CONFIG_SECRET: "quay-service-tool-config"
       IMAGE: "quay.io/app-sre/quay-service-tool"
@@ -116,10 +118,10 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/quayio/namespaces/quays02ue1.yml
-    ref: 98801bfd3e8cb0b81f83cbbcac0346302eef7b8c
+    ref: 5e4ae6495a41fd770ea3a986a66d5100e3ab2e75
   - namespace:
       $ref: /services/quayio/namespaces/quayp05ue1.yml
-    ref: 98801bfd3e8cb0b81f83cbbcac0346302eef7b8c
+    ref: 5e4ae6495a41fd770ea3a986a66d5100e3ab2e75
 
 - name: quayio-update-py2-db
   path: /openshift.yml
@@ -158,3 +160,14 @@ resourceTemplates:
       QUAY_APP_CONFIG_SECRET: "quay-config-secret"
       DB_HOST_SECRET: "quayio-stage-57-py3-rds"
       EXPIRY_DATE: "2022-10-13"
+
+- name: quayio-osa-openshift-analytics
+  path: /openshift.yml
+  url: https://github.com/quay/osa-openshift-analytics
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp05ue1.yml
+    ref: main
+    parameters:
+      OSA_QUAY_JOB_SECRET: quayio-osa-analytics-job-config
+

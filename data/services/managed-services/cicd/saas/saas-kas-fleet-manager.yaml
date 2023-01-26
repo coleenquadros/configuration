@@ -23,13 +23,14 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: mk-kas-fleet-manager
 
 managedResourceTypes:
 - Deployment
 - Service
 - ConfigMap
+- Frontend
 
 imagePatterns:
 - quay.io/rhoas/kas-fleet-manager
@@ -37,6 +38,7 @@ imagePatterns:
 - quay.io/rhoas/envoyproxy
 - quay.io/observatorium/token-refresher
 - quay.io/rhoas/mk-token-refresher
+- quay.io/rhoas/application-services-ui-frontend-container
 
 authentication:
   image:
@@ -50,7 +52,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
-    ref: fd75ef137240c28a18e00eeb2dbb82e38cba020e
+    ref: 587a517c7b260abe5224bb4ec79e0cf4d4477d5f
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/managedkafka
@@ -65,7 +67,7 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: 5b604cafa31a97c5f3a2b9025b02a3bc7ee80f76
+    ref: a128a6a2c2f8c4f1d070d5772fd0befacc775f4c
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
@@ -83,12 +85,6 @@ resourceTemplates:
     # Global parameter - Affects Production and Stage
     # SSO_BASE_URL is defined at the environment parameters level
     JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
-    # Global parameter - Affects Production and Stage
-    CLUSTER_OPENSHIFT_VERSION: ""
-    # Global parameter - Affects Production and Stage
-    AWS_CLUSTER_COMPUTE_MACHINE_TYPE: m5.2xlarge
-    # Global parameter - Affects Production and Stage
-    GCP_CLUSTER_COMPUTE_MACHINE_TYPE: custom-8-32768
     # Global parameter - Affects Production and Stage
     # Change this to false if you want the users to be able to use the service without accepting any terms
     ENABLE_TERMS_ACCEPTANCE: true
@@ -117,7 +113,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
-    ref: fd75ef137240c28a18e00eeb2dbb82e38cba020e
+    ref: 587a517c7b260abe5224bb4ec79e0cf4d4477d5f
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: stage
@@ -151,7 +147,7 @@ resourceTemplates:
       # Token Refresher URL
       OBSERVATORIUM_TOKEN_REFRESHER_URL: http://token-refresher.managed-services-stage.svc.cluster.local
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.42.0
+      OBSERVABILITY_CONFIG_TAG: v1.49.0
       # Observatorium Red Hat SSO tenant for observability stack
       OBSERVATORIUM_RHSSO_TENANT: managedkafka
       # Red Hat SSO Observability gateway
@@ -186,11 +182,11 @@ resourceTemplates:
       STRIMZI_OPERATOR_ADDON_ID: managed-kafka-qe
       KAS_FLEETSHARD_ADDON_ID: kas-fleetshard-operator-qe
       # The Cluster Logging Operator ID. An empty string indicates that the operator should not be installed.
-      CLUSTER_LOGGING_OPERATOR_ADDON_ID: "cluster-logging-operator"
+      CLUSTER_LOGGING_OPERATOR_ADDON_ID: ""
       # Index image used for Observability Operator
-      OBSERVABILITY_OPERATOR_INDEX_IMAGE: "quay.io/rhoas/observability-operator-index:v3.0.15"
+      OBSERVABILITY_OPERATOR_INDEX_IMAGE: "quay.io/rhoas/observability-operator-index:v4.0.4"
       # Starting CSV used for Observability Operator
-      OBSERVABILITY_OPERATOR_STARTING_CSV: "observability-operator.v3.0.15"
+      OBSERVABILITY_OPERATOR_STARTING_CSV: "observability-operator.v4.0.4"
       # As a user, one can only 1 developer instance if they do not have quota to create standard instances
       MAX_ALLOWED_DEVELOPER_INSTANCES: 1
       # A list of usernames representing users who do not have access to the service
@@ -236,11 +232,12 @@ resourceTemplates:
         - "mfreer"
         - "crarobin"
         - "pcremin"
-        - "deepshar"
         - "hlipsig"
         - "sclarkso"
         - "jsarnovs"
         - "vbommana"
+        - "ves"
+        - "cabeywar"
         - "jcueto"
         - "swoodman"
         - "srbiswas"
@@ -261,7 +258,7 @@ resourceTemplates:
       - id: developer
         display_name: "Trial"
         supported_billing_models:
-          - id: trial
+          - id: standard
             ams_resource: rhosak
             ams_product: RHOSAKTrial
             ams_billing_models:
@@ -311,7 +308,7 @@ resourceTemplates:
             display_name: "1"
             ingressThroughputPerSec: "50Mi"
             egressThroughputPerSec: "100Mi"
-            totalMaxConnections: 3000
+            totalMaxConnections: 9000
             maxDataRetentionSize: "1000Gi"
             maxPartitions: 1500
             maxDataRetentionPeriod: "P14D"
@@ -329,7 +326,7 @@ resourceTemplates:
             display_name: "2"
             ingressThroughputPerSec: "100Mi"
             egressThroughputPerSec: "200Mi"
-            totalMaxConnections: 7800
+            totalMaxConnections: 18000
             maxDataRetentionSize: "2000Gi"
             maxPartitions: 3000
             maxDataRetentionPeriod: "P14D"
@@ -355,11 +352,22 @@ resourceTemplates:
                   limit: 7
                 developer:
                   limit: 30
+        - name: gcp
+          default: false
+          regions:
+            - name: us-east1
+              default: true
+              supported_instance_type:
+                standard:
+                  limit: 7
+                developer:
+                  limit: 30
+
 
       #manual: use data plane config file, auto: use kas-fleet-shard
       DATAPLANE_CLUSTER_SCALING_TYPE: auto
       DYNAMIC_SCALING_CONFIG:
-        new_data_plane_openshift_version: "4.10.15"
+        new_data_plane_openshift_version: openshift-v4.10.15
         enable_dynamic_data_plane_scale_up: false # temporarily disabled until https://issues.redhat.com/browse/MGDSTRM-10047 is fixed
         enable_dynamic_data_plane_scale_down: false # temporarily disabled until https://issues.redhat.com/browse/MGDSTRM-10047 is fixed
         compute_machine_per_cloud_provider:
@@ -388,7 +396,7 @@ resourceTemplates:
                 max_compute_nodes: 18
             kafka_workload_per_instance_type:
               standard:
-                compute_machine_type: custom-4-32768
+                compute_machine_type: custom-4-32768-ext
                 compute_node_autoscaling:
                   min_compute_nodes: 3
                   max_compute_nodes: 21
@@ -400,6 +408,14 @@ resourceTemplates:
 
       # cluster list if dataplane cluster scaling type is set to manual
       CLUSTER_LIST:
+        - name: Stage Cluster (In GCP Prod)
+          cluster_id: 20j0bm8rbqedso2qbvn5vvguthulsoci
+          cloud_provider: gcp
+          region: us-east1
+          multi_az: true
+          schedulable: true
+          kafka_instance_limit: 37
+          supported_instance_type: standard,developer
         - name: Stage Cluster (In OSD Prod)
           cluster_id: 1lfl3g1vdea86ghh26vkmbqjkain900q
           cloud_provider: aws
@@ -408,6 +424,7 @@ resourceTemplates:
           schedulable: true
           kafka_instance_limit: 37
           supported_instance_type: standard,developer
+
 
       SSO_SPECIAL_MANAGEMENT_ORG_ID: 13640203
 
@@ -452,7 +469,7 @@ resourceTemplates:
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: 5b604cafa31a97c5f3a2b9025b02a3bc7ee80f76
+    ref: a128a6a2c2f8c4f1d070d5772fd0befacc775f4c
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: production
@@ -471,7 +488,7 @@ resourceTemplates:
       # Image to be used by Envoy sidecar container
       ENVOY_IMAGE: quay.io/rhoas/envoyproxy:v1.20.2
       # The Cluster Logging Operator ID. An empty string indicates that the operator should not be installed.
-      CLUSTER_LOGGING_OPERATOR_ADDON_ID: "cluster-logging-operator"
+      CLUSTER_LOGGING_OPERATOR_ADDON_ID: ""
       OCM_URL: ${OCM_BASE_URL}
       AMS_URL: ${OCM_BASE_URL}
       # The browser url for the Streams for Apache Kafka console
@@ -504,11 +521,11 @@ resourceTemplates:
       # Red Hat SSO Observability auth server url
       OBSERVATORIUM_RHSSO_AUTH_SERVER_URL: https://sso.redhat.com/auth
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.42.0
+      OBSERVABILITY_CONFIG_TAG: v1.48.1
       # Index image used for Observability Operator
-      OBSERVABILITY_OPERATOR_INDEX_IMAGE: "quay.io/rhoas/observability-operator-index:v3.0.15"
+      OBSERVABILITY_OPERATOR_INDEX_IMAGE: "quay.io/rhoas/observability-operator-index:v4.0.2"
       # Starting CSV used for Observability Operator
-      OBSERVABILITY_OPERATOR_STARTING_CSV: "observability-operator.v3.0.15"
+      OBSERVABILITY_OPERATOR_STARTING_CSV: "observability-operator.v4.0.2"
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
       # A list of users with read-only permissions for data plane clusters
@@ -582,7 +599,7 @@ resourceTemplates:
       - id: developer
         display_name: "Trial"
         supported_billing_models:
-          - id: trial
+          - id: standard
             ams_resource: rhosak
             ams_product: RHOSAKTrial
             ams_billing_models:
@@ -632,7 +649,7 @@ resourceTemplates:
             display_name: "1"
             ingressThroughputPerSec: "50Mi"
             egressThroughputPerSec: "100Mi"
-            totalMaxConnections: 3000
+            totalMaxConnections: 9000
             maxDataRetentionSize: "1000Gi"
             maxPartitions: 1500
             maxDataRetentionPeriod: "P14D"
@@ -650,7 +667,7 @@ resourceTemplates:
             display_name: "2"
             ingressThroughputPerSec: "100Mi"
             egressThroughputPerSec: "200Mi"
-            totalMaxConnections: 7800
+            totalMaxConnections: 18000
             maxDataRetentionSize: "2000Gi"
             maxPartitions: 3000
             maxDataRetentionPeriod: "P14D"
@@ -683,6 +700,14 @@ resourceTemplates:
               default: false
               supported_instance_type:
                 standard: {}
+                developer:
+                  limit: 100
+        - name: gcp
+          default: false
+          regions:
+            - name: us-east1
+              default: true
+              supported_instance_type:
                 developer:
                   limit: 100
 
@@ -815,10 +840,26 @@ resourceTemplates:
         standard: # the instance type. It must exist in SUPPORTED_INSTANCE_TYPES
           # The number of reserved kafka instances of the size specified in "base_streaming_unit_size".
           # 0 means that prewarming is disabled for standard instance.
-          num_reserved_instances: 0
+          num_reserved_instances: 10
           base_streaming_unit_size: x1
         developer: # The instance type. It must exist in SUPPORTED_INSTANCE_TYPES.
           # The number of reserved kafka instances of the size specified in "base_streaming_unit_size".
           # 20 guarantee that we'll always have one worker node prewarmed for 20 developer instances of size x1.
           num_reserved_instances: 20
           base_streaming_unit_size: x1
+
+## MAS new front end deployments
+
+- name: application-services-ui-frontend
+  path: /deploy/frontend.yml
+  url: https://gitlab.cee.redhat.com/mk-ci-cd/application-services-ui
+  targets:
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+      disable: true  # do not create an app-sre deploy job for ephemeral namespace
+      ref: internal  # populated by bonfire
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+      ref: e1606a5d3d688a419360932145a660cc84e7b325
+      parameters:
+        ENV_NAME: env-stage

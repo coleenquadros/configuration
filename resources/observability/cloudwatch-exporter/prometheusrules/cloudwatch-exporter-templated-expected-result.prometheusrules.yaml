@@ -47,14 +47,15 @@ spec:
         jiralert: TEST
         service: app-sre-observability
         severity: medium
-    - alert: RDSPredictOutOfBurstBalance
+    - alert: RDSPredictOutOfStorage
       annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1"
         html_url: https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter-templated.prometheusrules.yaml.j2
         message: DB instance 'test/{{ $labels.dbinstance_identifier }}' storage will
-          be out of burst balance in 8 hours
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md
-      expr: predict_linear(aws_rds_burst_balance_average{dbinstance_identifier="some-rds-instance-in-test-acct"}[15m],
-        3600 * 9) <= 0
+          be full in 8 hours
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-predict-out-of-storage.md
+      expr: predict_linear(aws_rds_free_storage_space_average{dbinstance_identifier="some-rds-instance-in-test-acct"}[1h],
+        3600 * 9) < 0
       for: 1h
       labels:
         app: aws-resource-tests

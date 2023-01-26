@@ -135,7 +135,14 @@ Start by merging the MR that was created to upgrade the database. When qontract-
 
 #### Terraform Resource - errors
 
-qontract-reconcile may ***occassionally*** throw the following errors:
+qontract-reconcile might throw following errors:
+
+```
+[terraform-resources] error: b'\nError: Error modifying DB Instance cyndi-stage: InvalidParameterCombination: Cannot upgrade postgres from 10.18 to 12.11\n\tstatus code: 400, request id: f7a65b84-13e6-479b-843f-079c6204c61f\n\n  on config.tf.json line 13512, in resource.aws_db_instance.cyndi-stage:\n13512:       },\n\n\n'
+```
+
+This error can be misleading because AWS does support upgrade from 10 to 12, but only from 10.18 to 12.8 not 10.18 to 12.11. Similarly, please check the table in https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion to find the list of specific versions that your version can be upgrade to.
+
 
 ```
 [terraform-resources] error: b'\nError: Error modifying DB Instance dev-bhthakur-rds: InvalidParameterValue: Cannot modify engine version because another engine version upgrade is already in progress\n\tstatus code: 400, request id: 2fdb9061-630e-4ed7-97ed-86b6acd5cbcc\n\n  on config.tf.json line 1978, in resource.aws_db_instance.dev-bhthakur-rds:\n1978:       },\n\n\n'
@@ -148,6 +155,7 @@ qontract-reconcile may ***occassionally*** throw the following errors:
 This behavior is inconsistent and is documented [here](https://github.com/hashicorp/terraform-provider-aws/issues/24908)
 
 **If you see this error, there is no need to take any action. Terraform will soon reconcile the state as soon as the upgrade is complete on AWS side.**
+
 
 ### 5. Monitor upgrade
 

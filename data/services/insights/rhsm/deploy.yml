@@ -25,7 +25,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -59,32 +59,13 @@ resourceTemplates:
       ENVIRONMENT: stage_data
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: cdfa0093f524c4319668e65b63aebfbee25c496e
+    ref: cd2a824fe3d2dab93a503cf219ff7c44845be811
     parameters:
       ENVIRONMENT: production_data
 
-- name: auto-registration-listener
-  path: /deploy/listener.yml
-  url: https://gitlab.cee.redhat.com/rhsm/automatic-registration
-  targets:
-  - namespace:
-      $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
-    ref: 78df117606a415b6f025a8562c2556a84802c2f3
-    parameters:
-      RHSM_SERVICE_URL: https://api.rhsm.stage.redhat.com/v1/cloud_access_providers/
-      USER_SERVICE_URL: https://user.stage.api.redhat.com/
-      SOURCES_PORT: '8000'
-      ALLOWED_APPLICATION_TYPE_IDS: '3'
-  - namespace:
-      $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 78df117606a415b6f025a8562c2556a84802c2f3
-    parameters:
-      RHSM_SERVICE_URL: https://api.rhsm.redhat.com/v1/cloud_access_providers/
-      USER_SERVICE_URL: https://user.api.redhat.com/
-
 - name: insights-subscription-watch
   url: https://github.com/RedHatInsights/rhsm-subscriptions
-  path: /dashboards
+  path: /.rhcicd/grafana
   provider: directory
   targets:
   - namespace:
@@ -92,4 +73,10 @@ resourceTemplates:
     ref: main
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: e64e1634bbe256644a9c71841e9f77b52c18cf4d
+    ref: 5bbb04168566386da4dd2cc2539cfa7eae31367f
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: main
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: 5bbb04168566386da4dd2cc2539cfa7eae31367f

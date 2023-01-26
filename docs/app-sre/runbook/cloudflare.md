@@ -96,6 +96,7 @@ The steps below are followed for new accounts whether there is an existing user 
   - Go to "API Tokens"
   - Click "Create Token"
   - Set up the token with the following permissions:
+    - Account: Account Settings: Edit
     - Account: Billing: Edit
     - Account: Worker Scripts: Edit
     - Zone: Zone: Edit
@@ -103,6 +104,78 @@ The steps below are followed for new accounts whether there is an existing user 
     - Zone: Zone Settings: Edit
     - Zone: Workers Routes: Edit
     - Zone: DNS: Edit
+
+### Import a Cloudflare Zone
+
+Importing a Cloudflare zone is not much different than importing other kinds of terraform resources
+
+1. Preparation
+    1. Dump the terraform config for the specific account (to make things faster)
+        ```sh
+        qontract-reconcile ... terraform-cloudflare-resources --account-name <acct_name> --print-to-file /tmp/cftf/config.tf.json
+        ```
+    1. Remove the comment at the top of the json config file
+    1. Initialize the terraform state and check the plan (it should state it wants to create the zone)
+        ```sh
+        terraform init
+        terraform plan
+        ```
+    1. Disable the terraform-cloudflare-resources integration via Unleash
+1. Gather information
+    1. Find out what the Zone ID is
+        ```sh
+        curl -sX GET "https://api.cloudflare.com/client/v4/zones" \
+            -H "Authorization: Bearer <api_token>" \
+            -H "Content-Type: application/json" | jq .
+        ```
+    1. Find out what zone settings have been overridden
+        ```sh
+        curl -sX GET "https://api.cloudflare.com/client/v4/zones/<zone_id>/settings" \
+            -H "Authorization: Bearer <api_token>" \
+            -H "Content-Type: application/json" | jq '.result[] | select(.modified_on != null)'
+        ```
+    1. Ensure the overridden settings are added to the zone definition under `settings`
+      a. If zone settings were updated, re-generate the terraform config from step 1 and then continue
+1. Importing
+    1. Import the resource in terraform (zone settings cannot be imported hence why we manually checked and set them previously)
+        ```sh
+        terraform import cloudflare_zone.<resource_name> <zone_id>
+        ```
+1. Finalizing
+    1. Run terraform plan and the integration in --dry-run, both should normally be NO-OP
+        ```sh
+        terraform plan
+
+        qontract-reconcile ... terraform-cloudflare-resources --dry-run
+        ```
+    1. Open a MR to add the resources you imported
+    2. Merge the MR
+    3. Re-enable the integration
+    4. The next integration run should be a NO-OP
+
+### Import a Cloudflare Record
+
+**Note:** Not all records may be managed by the integration.
+
+In some cases it may be desirable to only partially manage DNS records in Cloudflare Some examples:
+
+- Importing a legacy zone
+- Lots of records (some managed by the integration, rest manually) as a workaround to performance limitations of Terraform
+
+1. Follow the `Premaration` steps from `Importing a Cloudflare Zone`
+1. Gather information
+    1. To find what the record ID is for the record we want to import
+        ```
+        curl -sX GET "https://api.cloudflare.com/client/v4/zones/<zone_id>/dns_records" \
+            -H "Authorization: Bearer <api_token>" \
+            -H "Content-Type: application/json" | jq .
+        ```
+1. Import
+    1. Import the record into terraform
+        ```
+        terraform import cloudflare_record.<resource_name> <zone_id>/<record_ID>
+        ```
+1. Follow the `Finalizing` steps from `Importing a Cloudflare Zone`
 
 ## Helpful links & resources
 

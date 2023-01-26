@@ -8,13 +8,13 @@ The IC schedule matches the AppSRE escalation policy in Pager Duty, which is [Fo
 
 There are several tasks that are expected of the AppSRE engineering acting as the IC for the shift. They are listed below in the order of priority.
 
-#### 1. Respond to critical alerts that are sent via Pagerduty (also sent to [#sd-app-sre-oncall](https://coreos.slack.com/archives/CKN746TDW))
+#### 1. Respond to critical alerts that are sent via Pagerduty (also sent to [#sd-app-sre-oncall](https://redhat-internal.slack.com/archives/CKN746TDW))
 
 `critical` or `critical-fts` alerts are an indicator that a service is significantly degraded or completely down, the latter being for alerts that only page us when there is FTS coverage. These incidents are the highest priority for the IC engineer, regardless of any other responsibilities such as meetings or other tasks on this list. The IC engineer should respond to these incidents as soon as possible and escalate to others on the team if you are unable to do so for any reason.
 
 Ensure that you are familiar with the [incident response doc](/docs/app-sre/incident-process.md) and use the criteria in that document to determine whether to declare an incident. When in doubt do not hesitate to escalate incidents to others within the AppSRE team.
 
-#### 2. Respond to user-reported issues affecting production in [#sd-app-sre](https://coreos.slack.com/messages/CCRND57FW/)
+#### 2. Respond to user-reported issues affecting production in [#sd-app-sre](https://redhat-internal.slack.com/messages/CCRND57FW/)
 
 There are several types of issues that fall within this category including:
 
@@ -38,16 +38,16 @@ We have a [checklist](/docs/app-sre/re-onboarding-checklist.md) to help drive th
 
 The IC engineer should review any open [ASIC](https://issues.redhat.com/projects/ASIC/issues/) tickets and attempt to resolve them, or at least start the investigation and post and findings to the ticket.
 
-#### 4b. Answer users questions in [#sd-app-sre](https://coreos.slack.com/messages/CCRND57FW/) that aren't impacting production
+#### 4b. Answer users questions in [#sd-app-sre](https://redhat-internal.slack.com/messages/CCRND57FW/) that aren't impacting production
 
-Users will often ask questions in [#sd-app-sre](https://coreos.slack.com/messages/CCRND57FW/) such as how to perform some task in app-interface, or other general questions. Keep the following in mind when answering questions in this channel:
+Users will often ask questions in [#sd-app-sre](https://redhat-internal.slack.com/messages/CCRND57FW/) such as how to perform some task in app-interface, or other general questions. Keep the following in mind when answering questions in this channel:
 
-1. If the application is `InProgress`, then the question should be asked in [#sd-app-sre-onboarding](https://coreos.slack.com/archives/C02CMTM9GG1).
-2. Sometimes users will ask about an issue with their OSD cluster. We only assist in cases where the cluster is managed by app-interface, otherwise they've probably mistaken us for [#sd-sre-platform](https://coreos.slack.com/archives/CCX9DB894)
+1. If the application is `InProgress`, then the question should be asked in [#sd-app-sre-onboarding](https://redhat-internal.slack.com/archives/C02CMTM9GG1).
+2. Sometimes users will ask about an issue with their OSD cluster. We only assist in cases where the cluster is managed by app-interface, otherwise they've probably mistaken us for [#sd-sre-platform](https://redhat-internal.slack.com/archives/CCX9DB894)
 
-#### 5. Respond to high alerts in [#sd-app-sre-alert](https://coreos.slack.com/archives/CDW0S85QU)
+#### 5. Respond to high alerts in [#sd-app-sre-alert](https://redhat-internal.slack.com/archives/CDW0S85QU)
 
-`high` alerts are sent to the [#sd-app-sre-alert](https://coreos.slack.com/archives/CDW0S85QU) Slack channel. The IC engineer doesn't need to respond to these immediately, but we should attempt to keep an eye on alerts that are recurring. The general process for dealing with these alerts is:
+`high` alerts are sent to the [#sd-app-sre-alert](https://redhat-internal.slack.com/archives/CDW0S85QU) Slack channel. The IC engineer doesn't need to respond to these immediately, but we should attempt to keep an eye on alerts that are recurring. The general process for dealing with these alerts is:
 
 1. Click on the **Runbook** link in the channel alert channel to access the SOP
 2. Read through the SOP and attempt to resolve the issue
@@ -57,12 +57,12 @@ Users will often ask questions in [#sd-app-sre](https://coreos.slack.com/message
 ### Additional notes
 
 * Keep in mind that the priorities of the tasks above are a general guide, but we want to keep in mind the [SLOs that we've defined for the team](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/README.md#service-agreements).
-* If you are having a very busy shift (an incident / many alerts), don't hesitate to ask for assistance in [#sd-app-sre-teamchat](https://coreos.slack.com/archives/GGC2A0MS8) if you're falling behind on tasks that are near breaching their SLO. It's possible that someone else can jump in quickly to assist with taking a look at alerts, MRs, etc.
+* If you are having a very busy shift (an incident / many alerts), don't hesitate to ask for assistance in [#sd-app-sre-teamchat](https://redhat-internal.slack.com/archives/GGC2A0MS8) if you're falling behind on tasks that are near breaching their SLO. It's possible that someone else can jump in quickly to assist with taking a look at alerts, MRs, etc.
   * TODO: it'd be good if we were more actively tracking SLOs on the different tasks listed above so that it's clearer when the IC is falling behind
 
 ### Handover process
 
-There is a Slack reminder (see `/remind list`) setup in the [#sd-app-sre-handover](https://coreos.slack.com/archives/C019FBYNL4F) channel to remind the IC to perform a handover.
+There is a Slack reminder (see `/remind list`) setup in the [#sd-app-sre-handover](https://redhat-internal.slack.com/archives/C019FBYNL4F) channel to remind the IC to perform a handover.
 
 The handover should include:
 

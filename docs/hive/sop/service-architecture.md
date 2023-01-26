@@ -28,7 +28,7 @@
 
 See the [Project Documentation](https://github.com/openshift/hive/blob/master/README.md) for more.
 
-Contact the Hive development team in [#forum-hive](https://coreos.slack.com/archives/CE3ETN3J8) on CoreOS slack.
+Contact the Hive development team in [#forum-hive](https://redhat-internal.slack.com/archives/CE3ETN3J8) on CoreOS slack.
 
 ## Service Description
 The [hive service](https://visual-app-interface.devshift.net/services#/services/hive/app.yml) in AppSRE is used by the SRE-Platform (SREP) team to provision, maintain, and monitor clusters for the OpenShift Dedicated (OSD) product, a managed service built on OpenShift Container Platform (OCP).

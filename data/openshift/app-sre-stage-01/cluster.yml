@@ -11,7 +11,7 @@ alertmanagerUrl: https://alertmanager.app-sre-stage-01.devshift.net
 serverUrl: https://api.app-sre-stage-0.k3s7.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
 auth:
-  service: github-org-team
+- service: github-org-team
   org: app-sre
   team: app-sre-stage-01-cluster
 observabilityNamespace:
@@ -33,12 +33,12 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.11.16
+  version: 4.12.1
   initial_version: 4.2.7
   multi_az: true
   autoscale:
     min_replicas: 21
-    max_replicas: 45
+    max_replicas: 51
   instance_type: m5.2xlarge
   storage: 7100
   load_balancers: 4
@@ -57,6 +57,7 @@ upgradePolicy:
     mutexes:
     # shared by all clusters on the candidate channel and having 0 soak days
     - candidate-0
+machinePools: []
 network:
   type: OpenShiftSDN
   vpc: 10.112.0.0/16
@@ -77,6 +78,7 @@ peering:
     name: app-sre-stage-01_hive-stage-01
     cluster:
       $ref: /openshift/hive-stage-01/cluster.yml
+    manageRoutes: true
   - provider: cluster-vpc-accepter
     name: app-sre-stage-01_hives02ue1
     cluster:
@@ -96,6 +98,7 @@ peering:
     name: app-sre-stage-01_image-builder-stage
     vpc:
       $ref: /aws/image-builder-stage/vpcs/vpc-0ed9b56c1460a52ef.yml
+    manageAccountRoutes: true
     manageRoutes: true
   - provider: account-vpc
     name: app-sre-stage-01_ci-ext
@@ -120,9 +123,16 @@ peering:
     manageRoutes: true
     manageSecurityGroups: true
     cidrBlock: 172.24.0.0/13
+  - provider: account-vpc
+    name: app-sre-stage-01_osio
+    vpc:
+      $ref: /aws/osio/vpcs/osio-prod-vpc-secondary-cidr.yml
+    manageAccountRoutes: true
+    manageRoutes: true
 automationToken:
   path: app-sre/creds/kube-configs/app-sre-stage-01
   field: token
+clusterAdmin: true
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/app-sre-stage-01-cluster-admin
   field: token
@@ -146,6 +156,9 @@ awsInfrastructureManagementAccounts:
   accessLevel: network-mgmt
 - account:
     $ref: /aws/svc-transit-stage/account.yml
+  accessLevel: network-mgmt
+- account:
+    $ref: /aws/osio/account.yml
   accessLevel: network-mgmt
 awsInfrastructureAccess:
 - awsGroup:

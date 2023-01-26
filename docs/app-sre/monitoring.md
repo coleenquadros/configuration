@@ -373,6 +373,13 @@ Next up, change all your panels to send queries to this datasource
 
 #### Adding a Postgres DB as a data source
 
+**Adding a postgres data source to Grafana requires manager approval**
+
+Currently, every Grafana user will have read-access to any database you are adding.
+This includes Grafana users from other tenants too.
+It is of uttmost importance to only add read-replicas as data sources, because Grafana
+has no sanity checks.
+
 1. Submit a MR to app-interface to add a read replica for your RDS instance. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6f6e26253356a63853c9b4424a81bb5919f851b8/data/services/assisted-installer/namespaces/assisted-installer-production.yml#L90-98
 1. Once the MR is merged and the read replica is provisioned, submit another MR to add the read replica as a data source to Grafana. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6f6e26253356a63853c9b4424a81bb5919f851b8/resources/observability/grafana/grafana-datasources.secret.yaml#L1182-1198
 
@@ -406,7 +413,7 @@ Once you have the dashboard ConfigMap, follow these instructions:
     provider: directory
     targets:
     - namespace:
-        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+        $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
       ref: master
   ```
   * Note: remember to add `ConfigMap` to the `managedResourceTypes` section.
@@ -419,7 +426,7 @@ Once you have the dashboard ConfigMap, follow these instructions:
   targets:
   (...)
   - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
     ref: <your-service-repo-commit-sha>
   ```
   * Note: with this configuration, you can promote changes to your dashboards along with the code changes that created them.

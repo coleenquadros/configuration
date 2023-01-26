@@ -1,0 +1,17 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2023-01-03-task-actions
+namespace:
+  $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
+identifier: tower-analytics-prod
+output: stdout
+overrides:
+  db_name: tenant_1979710
+queries:
+  - SELECT id, value, hash FROM task_action ORDER by id ASC;
+  - SELECT replace(value, '\\', '_') repl_val, replace(value, '\\', '_')::bytea repl_val_bytea, sha256(replace(value, '\\', '_')::bytea) sha, count(replace(value, '\\', '_')) cnt
+    FROM task_action
+    GROUP BY replace(value, '\\', '_')
+    HAVING (count(replace(value, '\\', '_')) > 1 OR count(replace(value, '\\', '_')::bytea) > 1 OR count(sha256(replace(value, '\\', '_')::bytea)) > 1)
+    ORDER by cnt DESC;

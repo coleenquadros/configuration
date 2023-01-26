@@ -1,0 +1,43 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: redhat-devfile-registry
+name: redhat-devfile-registry-2022-12-01
+app:
+  $ref: /services/devfile-registry/app-redhat.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/redhat-developer/devfile-registry:
+    - branch: master
+      total: 3
+      success: 3
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: devfile-registry-redhat-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-03
+    namespace: devfile-registry-redhat-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-prod-03
+    namespace: devfile-registry-redhat-production
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 8
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 8
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 8
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 9
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 8
+  - cluster: app-sre-stage-01
+    namespace: devfile-registry-redhat-stage
+    validations:
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 1
+  service_slo: null

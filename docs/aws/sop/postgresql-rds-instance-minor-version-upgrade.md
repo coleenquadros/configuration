@@ -27,7 +27,7 @@ This is the process for tenants to follow in order to upgrade the minor version 
    * **Stage databases:** if the change can be applied at any time, and you'd prefer that it is applied as soon as AppSRE approves the MR, then set `apply_immediately: true` in the `overrides` section of the RDS resource. If `apply_immediately` is not set, your RDS instance will be upgraded during the next scheduled maintenance window.
 4. Create an app-interface MR. Check the dry-run build results to ensure that only the expected databases are changed. Ask a team member to include their approval on the MR. AppSRE will review the MR as is done with all other changes.
 5. The MR will be merged once AppSRE adds the **lgtm** label.
-6. Wait for the change to be reconciled, you can monitor progress in [#sd-app-sre-reconcile](https://coreos.slack.com/archives/CS0E65QCV).
+6. Wait for the change to be reconciled, you can monitor progress in [#sd-app-sre-reconcile](https://redhat-internal.slack.com/archives/CS0E65QCV).
 ---
 
 **Note:**

@@ -13,7 +13,7 @@ def is_app(data: dict) -> bool:
 
 
 def assert_valid_app(filename: str) -> None:
-    with open(sys.argv[1]) as f:
+    with open(sys.argv[1], encoding='utf8') as f:
         d = yaml.safe_load(f)
         if is_app(d):
             st = d["onboardingStatus"]

@@ -10,12 +10,6 @@ description: Provisioning on the Stage cluster under app-interface management
 cluster:
   $ref: /openshift/crcs02ue1/cluster.yml
 
-limitRanges:
-  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
-
-quota:
-  $ref: /services/insights/default-quota.yml
-
 app:
   $ref: /services/insights/provisioning/app.yml
 
@@ -25,16 +19,27 @@ environment:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
 - $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+- $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+- $ref: /services/insights/image-builder/namespaces/stage-image-builder-stage.yml
 
 managedRoles: true
 
 managedResourceTypes:
 - ServiceAccount
+- Secret
 
 sharedResources:
   - $ref: /services/insights/shared-resources/metrics-export-stage.yml
 
 managedExternalResources: true
+
+openshiftResources:
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-common/iqe-vault.secret.yaml
+- provider: vault-secret
+  path: app-interface/provisioning/stage/floorist-bucket
+  version: 1
 
 externalResources:
 - provider: aws

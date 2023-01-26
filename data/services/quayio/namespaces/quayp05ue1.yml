@@ -223,6 +223,8 @@ openshiftResources:
   path: /quay-p/quay/quay-recovery.web-allow-external.networkpolicy.yaml
 - provider: resource
   path: /quay-p/quay/quay-py3.web-allow-external.networkpolicy.yaml
+- provider: resource
+  path: /quay-p/quay/quay-py3-cloudflare.web-allow-external.networkpolicy.yaml
 - provider: resource-template
   type: extracurlyjinja2
   path: /quay-p/quay/quay-db-jobs-config.secret.yaml
@@ -233,6 +235,11 @@ openshiftResources:
   path: /quay-p/quay/quay-service-tool.route.yaml
   vault_tls_secret_path: app-interface/quayio-prod-us-east-1/quay/service-tool-config-secret
   vault_tls_secret_version: 4
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-osa-analytics-job.secret.yaml
+  variables:
+    name: quayio-osa-analytics-job-config
 
 
 managedExternalResources: true
@@ -335,6 +342,13 @@ externalResources:
     parameter_group: /terraform/resources/quayio-production/rds-parameter-group-1.yml
     output_resource_name: clair-backfiller
     enhanced_monitoring: true
+  - provider: acm
+    identifier: wildcard-prod-quay-redhat-io
+    domain:
+      domain_name: '*.quay.io'
+      alternate_names:
+      - '*.quay.redhat.io'
+      - 'quay.io'
   - provider: alb
     identifier: quayio-production-alb01
     output_resource_name: quayio-production-alb
@@ -347,20 +361,166 @@ externalResources:
       default: false
       openshift_service: quay-load-balancer-service
     - name: quayio-production-py3
-      default: true
+      default: false
       openshift_service: quay-py3-load-balancer-service
     - name: quayio-cf
-      default: false
+      default: true
       openshift_service: quay-py3-cloudflare-load-balancer-service
     rules:
     - condition:
-        path: /v2/quayio-cloudflare-test/busybox/*
+        path: /v2/quayio-cloudflare-test/*
       action:
         - target: quayio-cf
           weight: 100
         - target: quayio-production-py3
           weight: 0
-
+    - condition:
+        path: /v2/openshift-release-dev/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/redhat/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/ansible/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/rh-osbs/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/ceph/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/cephcsi/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/redhat-dev/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/redhat-pending/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/redhat-prod/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/prometheus/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/argoproj/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/keycloak/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/cilium/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/signalfx/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/ascendio/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/getpantheon/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/team-helium/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/manhrd/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/domino/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/sysdig/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/rh-osbs-stage/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
 - provider: cloudflare
   provisioner:
     $ref: /cloudflare/quay-prod/account.yml
@@ -373,6 +533,7 @@ externalResources:
       settings:
         always_use_https: 'on'
         min_tls_version: '1.2'
+        security_level: 'off'
       records:
         - name: cdn03
           type: CNAME
@@ -399,12 +560,18 @@ externalResources:
       content_from_github:
         repo: https://github.com/quay/quay-cloudflare-cdn-worker
         path: index.js
-        ref: 7b6fa10ceddbc12eeef32bf96a2035da9c2184ef
+        ref: e9e2eba525627fdbf4708259063660548a6bb239
       vars:
-        - name: QUAY_S3_BUCKET
+        - name: QUAY_PRIMARY_REGION
+          text: us-east-1
+        - name: QUAY_PRIMARY_S3_BUCKET
           text: quayio-production-s3
+        - name: QUAY_SECONDARY_REGION
+          text: us-east-2
+        - name: QUAY_SECONDARY_S3_BUCKET
+          text: quayio-production-s3-backup
         - name: CACHE_TTL
-          text: "60"
+          text: "86400"
         - name: CLOUDFLARE_PUBLIC_KEY
           text: |-
             -----BEGIN PUBLIC KEY-----

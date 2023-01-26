@@ -24,7 +24,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -73,9 +73,9 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: 98573b655d7975aa66a2b9d586d92aacaf9ad594
+    ref: 0aec12a47be858257c7783117355621099844082
     parameters:
-      FLOORIST_SUSPEND: 'false'
+      FLOORIST_SUSPEND: 'true'
       FLOORIST_IMAGE_TAG: fe12542 # 2022-06-03
       FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage
       FLOORIST_SCHEDULE: 0 6 * * *
@@ -89,8 +89,9 @@ resourceTemplates:
       OB_ENABLED: true
       OB_BRIDGE_NAME: notifications-stage
       OB_READY_CHECK_PERIOD: 10s
-      QUARKUS_REST_CLIENT_OB_URL: https://event-bridge-event-bridge-stable.apps.ob-stable.0b9l.p1.openshiftapps.com
+      QUARKUS_REST_CLIENT_OB_URL: https://gjklh2bmbuaio30.api.openshift.com
       QUARKUS_REST_CLIENT_KC_URL: https://sso.redhat.com
+      SENTRY_DSN: https://3ff0dbd8017a4750a1d92055a1685263@o490301.ingest.sentry.io/5440905?environment=
       SOURCES_ENABLED: false
     # upstream:
     #   instance:
@@ -104,9 +105,9 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: 98573b655d7975aa66a2b9d586d92aacaf9ad594
+    ref: 41ac032e469c30ab62cb311c7e47f950d4d3a054
     parameters:
-      FLOORIST_SUSPEND: 'false'
+      FLOORIST_SUSPEND: 'true'
       FLOORIST_IMAGE_TAG: b57a5a8
       FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-prod
       FLOORIST_SCHEDULE: 0 6 * * *
@@ -114,6 +115,7 @@ resourceTemplates:
       MEMORY_LIMIT: 1Gi
       MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_DSN: https://3ff0dbd8017a4750a1d92055a1685263@o490301.ingest.sentry.io/5440905?environment=
       SENTRY_ENABLED: true
       OB_ENABLED: true
       OB_BRIDGE_NAME: notifications-prod
@@ -142,7 +144,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-engine.yaml version
-    ref: 98573b655d7975aa66a2b9d586d92aacaf9ad594
+    ref: 0aec12a47be858257c7783117355621099844082
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_LIMIT: 300m
@@ -162,12 +164,14 @@ resourceTemplates:
       OB_BACKCHANNEL_FILLER_ENABLED: true
       OB_BRIDGE_NAME: notifications-stage
       PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
-      QUARKUS_REST_CLIENT_OB_URL: https://event-bridge-event-bridge-stable.apps.ob-stable.0b9l.p1.openshiftapps.com
+      QUARKUS_REST_CLIENT_OB_URL: https://gjklh2bmbuaio30.api.openshift.com
       QUARKUS_REST_CLIENT_KC_URL: https://sso.redhat.com
       RBAC_S2S_READ_TIMEOUT: 120000
       SENTRY_DSN: https://fbb2970a5a3c454fa6543707138145c1@o490301.ingest.sentry.io/6193703?environment=
       SENTRY_ENABLED: true
+      SOURCES_ENABLED: false
       RECIPIENT_PROVIDER_USE_IT_IMPL: true
+      RHEL_ADVISOR_DAILY_DIGEST_ENABLED: true
       NOTIFICATIONS_USE_DEFAULT_TEMPLATE: true
     # upstream:
     #   instance:
@@ -181,7 +185,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-engine.yaml version
-    ref: 98573b655d7975aa66a2b9d586d92aacaf9ad594
+    ref: 41ac032e469c30ab62cb311c7e47f950d4d3a054
     parameters:
       CLOUDWATCH_ENABLED: true
       MEMORY_LIMIT: 2Gi
@@ -226,13 +230,15 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: 98573b655d7975aa66a2b9d586d92aacaf9ad594
+    ref: 0aec12a47be858257c7783117355621099844082
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       CRONTAB_AGGREGATION_JOB: 0 * * * *
       NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_DSN: https://39032857c8214cedaf226c4a26709b5b@o490301.ingest.sentry.io/5987783?environment=
       SENTRY_ENABLED: true
+      NOTIFICATIONS_AGGREGATOR_ORG_PREF_ENABLED: false
     # upstream:
     #   instance:
     #     $ref: /dependencies/ci-ext/ci-ext.yml
@@ -245,10 +251,11 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: 98573b655d7975aa66a2b9d586d92aacaf9ad594
+    ref: 41ac032e469c30ab62cb311c7e47f950d4d3a054
     parameters:
       CLOUDWATCH_ENABLED: true
       NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_DSN: https://39032857c8214cedaf226c4a26709b5b@o490301.ingest.sentry.io/5987783?environment=
       SENTRY_ENABLED: true
     promotion:
       publish:
@@ -272,12 +279,13 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: 7050785eee4c3daddd8d7018f725c784e04a0c85
+    ref: 719853cfc7a8c43a5be56c534bbab6afb5b6deff
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_DSN: https://04a2375b90274bf6a4bcb1d81f8d0e16@o490301.ingest.sentry.io/5826611?environment=
       SENTRY_ENABLED: true
     # upstream:
     #   instance:
@@ -291,11 +299,12 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: 7050785eee4c3daddd8d7018f725c784e04a0c85
+    ref: 719853cfc7a8c43a5be56c534bbab6afb5b6deff
     parameters:
       CLOUDWATCH_ENABLED: true
       MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_DSN: https://04a2375b90274bf6a4bcb1d81f8d0e16@o490301.ingest.sentry.io/5826611?environment=
       SENTRY_ENABLED: true
     promotion:
       publish:
@@ -320,6 +329,8 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: RedHatInsights-notifications-frontend-gh-build-master
+    parameters:
+      ENV_NAME: env-stage
 
 # user preferences frontend
 - name: user-preferences
@@ -340,3 +351,6 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: RedHatInsights-user-preferences-frontend-gh-build-master
+    parameters:
+      ENV_NAME: env-stage
+

@@ -23,7 +23,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: assisted-app-sre-ci
 
 managedResourceTypes:
@@ -46,8 +46,13 @@ resourceTemplates:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: openshift-assisted-prow-jobs-scraper-gh-build-main
     parameters:
-      SUSPEND: "true"
       PROW_JOBS_SCRAPER_SUSPEND: "true"
+      JOBS_AUTO_REPORT_LOG_LEVEL: "DEBUG"
+      JOBS_AUTO_REPORT_SUSPEND: "true"
+      JOBS_AUTO_WEEKLY_REPORT_LOG_LEVEL: "DEBUG"
+      JOBS_AUTO_WEEKLY_REPORT_SUSPEND: "true"
+      JOBS_AUTO_MONTHLY_REPORT_LOG_LEVEL: "DEBUG"
+      JOBS_AUTO_MONTHLY_REPORT_SUSPEND: "true"
   - ref: main
     namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
@@ -55,6 +60,13 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: openshift-assisted-prow-jobs-scraper-gh-build-main
+    parameters:
+      JOBS_AUTO_REPORT_SCHEDULE: "@hourly"
+      JOBS_AUTO_WEEKLY_REPORT_SCHEDULE: "@hourly"
+      JOBS_AUTO_MONTHLY_REPORT_SCHEDULE: "@hourly"
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
-    ref: 5b4db1274df61edb8f41e8ef696a5a7bb9a7bbcd
+    ref: 11c9825a7366c6e32f0f5706f53cfeb8df06c384
+    parameters:
+      JOBS_AUTO_REPORT_SCHEDULE: "0 8 * * 1"
+      JOBS_AUTO_WEEKLY_REPORT_SCHEDULE: "0 8 * * 1"

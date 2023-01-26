@@ -18,7 +18,7 @@ deployResources:
     memory: 600Mi
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: cloudigrade-cicd-events
 managedResourceTypes:
 - ClowdApp
@@ -71,7 +71,6 @@ resourceTemplates:
       DJANGO_SENTRY_SAMPLE_RATE_DEFAULT: '0.1'
       DJANGO_SENTRY_SAMPLE_RATE_BY_VIEW_NAME: |
         {
-        "v2-concurrent-list":0.05,
         "internal-user-list":0.025,
         "internal-availability-status":0.025,
         "health_check:health_check_home":0.0,
@@ -92,7 +91,7 @@ resourceTemplates:
       WATCHTOWER_USE_QUEUES: 'true'
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: b9f7fee2d01bf8f00d31bd274f8baf5081d5b4d5
+    ref: f6a4cb0a0ed65eacfc96f1d7cd5dce2d5ac0555c
     promotion:
       auto: true
       subscribe:
@@ -101,7 +100,7 @@ resourceTemplates:
       - channel: cloudigrade-stage-post-deploy-tests-success-channel
         data:
         - parent_saas: cloudigrade-test
-          target_config_hash: 504b40028f8fe4a6
+          target_config_hash: 8b27630473d1b827
           type: parent_saas_config
     parameters:  # all other parameters have default values
       API_REPLICA_COUNT: '3'
@@ -120,7 +119,6 @@ resourceTemplates:
       DJANGO_SENTRY_SAMPLE_RATE_DEFAULT: '0.1'
       DJANGO_SENTRY_SAMPLE_RATE_BY_VIEW_NAME: |
         {
-        "v2-concurrent-list":0.01,
         "internal-user-list":0.005,
         "internal-availability-status":0.005,
         "health_check:health_check_home":0.0,
@@ -160,7 +158,7 @@ resourceTemplates:
   # Production
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: bf2a6d06b472424d7f58a94b7c6acaf0283f8cb4
+    ref: cffdff54e1d171a0033d3f5841e306570f4b65f4
     parameters:
       POSTIGRADE_MIN_REPLICAS: '8'
     promotion:
@@ -183,7 +181,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: b9f7fee2d01bf8f00d31bd274f8baf5081d5b4d5
+    ref: f6a4cb0a0ed65eacfc96f1d7cd5dce2d5ac0555c
     promotion:
       auto: true
       subscribe:
@@ -192,5 +190,21 @@ resourceTemplates:
       - channel: cloudigrade-stage-post-deploy-tests-success-channel
         data:
         - parent_saas: cloudigrade-test
-          target_config_hash: 504b40028f8fe4a6
+          target_config_hash: 8b27630473d1b827
+          type: parent_saas_config
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: f6a4cb0a0ed65eacfc96f1d7cd5dce2d5ac0555c
+    promotion:
+      auto: true
+      subscribe:
+      - cloudigrade-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: cloudigrade-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: cloudigrade-test
+          target_config_hash: 8b27630473d1b827
           type: parent_saas_config

@@ -1,0 +1,106 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: assisted-installer
+name: assisted-installer-2022-12-01
+app:
+  $ref: /services/assisted-installer/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/openshift/assisted-service:
+    - branch: master
+      total: 92
+      success: 92
+    - branch: master
+      total: 9
+      success: 9
+    https://github.com/openshift/assisted-image-service:
+    - branch: master
+      total: 3
+      success: 3
+    https://github.com/openshift-assisted/assisted-events-scrape:
+    - branch: master
+      total: 2
+      success: 2
+    https://github.com/openshift-assisted/prow-jobs-scraper:
+    - branch: master
+      total: 18
+      success: 14
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: assisted-installer-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: app-sre-prod-04
+    namespace: assisted-installer-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: assisted-installer-stage
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 7
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 4
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 9
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 8
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 2
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 2
+  - cluster: app-sre-stage-01
+    namespace: assisted-installer-integration
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 12
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 6
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 14
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 13
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 9
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 7
+  - cluster: app-sre-prod-04
+    namespace: assisted-installer-production
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 7
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 4
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 8
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 7
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 2
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 2
+  service_slo:
+  - cluster: app-sre-prod-04
+    namespace: assisted-installer-production
+    slo_name: availability
+    slo_doc_name: assisted-installer
+    slo_value: 99.9646825536238
+    slo_target: 85.0
+  - cluster: app-sre-prod-04
+    namespace: assisted-installer-production
+    slo_name: latency
+    slo_doc_name: assisted-installer
+    slo_value: 99.9506038097884
+    slo_target: 90.0

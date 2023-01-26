@@ -10,7 +10,7 @@ pipelinesProvider:
   $ref: /services/github-mirror/pipelines/tekton.github-mirror-pipelines.appsrep05ue1.yaml
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: sd-app-sre-info
 managedResourceTypes:
 - Deployment
@@ -25,6 +25,13 @@ imagePatterns:
 allowedSecretParameterPaths:
 - app-sre/integrations-output/terraform-resources
 
+deployResources:
+  requests:
+    cpu: 400m
+    memory: 900Mi
+  limits:
+    cpu: 400m
+    memory: 900Mi
 parameters:
   GITHUB_USERS: app-sre-bot:cs-sre-bot:InsightsDroid:sre-platform-bot:app-sre-fedramp-bot
 resourceTemplates:
@@ -53,7 +60,7 @@ resourceTemplates:
       - github-mirror-stage-deploy-success-channel
   - namespace:
       $ref: /services/github-mirror/namespaces/github-mirror-production.yaml
-    ref: 1a193fa9a63b77d82dcf4e590da1e2a3eef2d03a
+    ref: 669fe7b7b422994297fd67b979115bd10c770be9
     promotion:
       auto: true
       subscribe:
@@ -62,7 +69,7 @@ resourceTemplates:
       - channel: github-mirror-stage-post-deploy-tests-success-channel
         data:
         - parent_saas: saas-github-mirror-test
-          target_config_hash: 0928b63ec55f0dc3
+          target_config_hash: 8fc3f406681bbc56
           type: parent_saas_config
     parameters:
       GITHUB_MIRROR_URL: https://github-mirror.devshift.net
@@ -83,7 +90,7 @@ resourceTemplates:
       name: app-sre-github-mirror-gh-build-master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 1a193fa9a63b77d82dcf4e590da1e2a3eef2d03a
+    ref: 669fe7b7b422994297fd67b979115bd10c770be9
     promotion:
       auto: true
       subscribe:
@@ -92,5 +99,25 @@ resourceTemplates:
       - channel: github-mirror-stage-post-deploy-tests-success-channel
         data:
         - parent_saas: saas-github-mirror-test
-          target_config_hash: 0928b63ec55f0dc3
+          target_config_hash: 8fc3f406681bbc56
+          type: parent_saas_config
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-github-mirror-gh-build-master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: 669fe7b7b422994297fd67b979115bd10c770be9
+    promotion:
+      auto: true
+      subscribe:
+      - github-mirror-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: github-mirror-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-github-mirror-test
+          target_config_hash: 8fc3f406681bbc56
           type: parent_saas_config

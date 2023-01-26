@@ -1,0 +1,22 @@
+---
+$schema: /app-interface/change-type-1.yml
+
+labels: {}
+
+name: saas-file-namespace-target
+description: |
+  Allow approving additional targets in saas files referencing an owned namespace.
+
+priority: high
+
+contextType: datafile
+contextSchema: /openshift/namespace-1.yml
+
+changes:
+- provider: jsonPath
+  changeSchema: /app-sre/saas-file-2.yml
+  jsonPathSelectors:
+  - resourceTemplates[*].targets[?(@.namespace.'$ref')=='{{ ctx_file_path }}']
+  context:
+    selector: resourceTemplates[*].targets[*].namespace.'$ref'
+    when: added

@@ -1,0 +1,35 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: goalert
+
+name: ci-int-goalert-images-jobs
+
+description: 'goalert-images container build'
+
+app:
+  $ref: /services/fedramp-tools/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: goalert
+    label: fedramp-tools
+    node: app-sre
+    gl_group: service
+    gl_project: goalert
+    quay_org: app-sre
+    build_deploy_script_path: 'make build-push'
+    pr_check_script_path: 'make build'
+    backup_ecr_push_creds_account_region: 'app-sre/us-east-1'
+    jobs:
+    - 'gl-build-master':
+        display_name: goalert build main
+        branch: main
+    - 'gl-pr-check':
+        display_name: goalert pr-check

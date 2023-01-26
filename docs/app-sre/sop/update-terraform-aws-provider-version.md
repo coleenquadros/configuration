@@ -103,7 +103,7 @@ The way that we fixed it for `insights-stage` account was to remove the paramete
 
 [Example MR for insights-stage](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/40620)
 
-More context about the problem can be found in this [Slack thread](https://coreos.slack.com/archives/GGC2A0MS8/p1654201187564619?thread_ts=1654083991.496599&cid=GGC2A0MS8)
+More context about the problem can be found in this [Slack thread](https://redhat-internal.slack.com/archives/GGC2A0MS8/p1654201187564619?thread_ts=1654083991.496599&cid=GGC2A0MS8)
 
 **Terraform adds tags to Redis Clusters**
 

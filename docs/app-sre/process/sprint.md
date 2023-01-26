@@ -58,7 +58,7 @@ These are the team values and standards we adhere to throughout this set of guid
 
 ### During the sprint
 
-- Provide a daily summary of your activity on the [#sd-app-sre-daily](https://coreos.slack.com/messages/sd-app-sre-daily) Slack channel
+- Provide a daily summary of your activity on the [#sd-app-sre-daily](https://redhat-internal.slack.com/messages/sd-app-sre-daily) Slack channel
   - Links to Jira stories or relevant documentation are extremely helpful but are voluntary
 - Drag Jira stories from ToDo -> In Progress -> Review (where applicable) -> Done
   - Keyboard shortcut: type a period and then start typing the status, ooh.. ahh!

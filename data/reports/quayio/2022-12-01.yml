@@ -1,0 +1,95 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: quayio
+name: quayio-2022-12-01
+app:
+  $ref: /services/quayio/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/quay/quay:
+    - branch: master
+      total: 23
+      success: 22
+    https://github.com/quay/quay-db-jobs:
+    - branch: master
+      total: 3
+      success: 0
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: quays02ue1
+    namespace: opensearch-dashboards
+    post_deploy_job: false
+  - cluster: quayp05ue1
+    namespace: opensearch-dashboards
+    post_deploy_job: false
+  - cluster: app-sre-stage-01
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: quayp04ue2
+    namespace: opensearch-dashboards
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: quays02ue1
+    namespace: quay-mysql-diag-stage
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 1
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 1
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 1
+  - cluster: quays02ue1
+    namespace: quay
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 8
+      deployment_validation_operator_exposed_services:
+        Failed: 8
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 4
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 12
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 12
+  - cluster: quayp05ue1
+    namespace: quay
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 5
+      deployment_validation_operator_exposed_services:
+        Failed: 11
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 2
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 10
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 10
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 1
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 1
+  - cluster: quayp05ue1
+    namespace: quay-mysql-diag-prod
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 1
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 1
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 1
+  - cluster: quayp04ue2
+    namespace: quay
+    validations:
+      deployment_validation_operator_exposed_services:
+        Failed: 9
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 2
+  service_slo: null

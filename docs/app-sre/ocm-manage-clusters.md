@@ -3,7 +3,7 @@
 OSDv4 clusters are managed via OCM.
 
 - Production: https://console.redhat.com/openshift
-- Staging: https://qaprodauth.cloud.redhat.com/openshift
+- Staging: https://qaprodauth.console.redhat.com/openshift
 
 ## Creating an Account
 
@@ -121,7 +121,7 @@ More info: https://api.openshift.com
 ## OCM cluster creation and query
 
 The AppSRE team can create clusters in the staging environment when you login:  
-`--url staging` and UI for stage is https://qaprodauth.cloud.redhat.com/openshift/  
+`--url staging` and UI for stage is https://qaprodauth.console.redhat.com/openshift/  
 
 
 ### Creating a cluster

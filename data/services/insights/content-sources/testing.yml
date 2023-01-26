@@ -1,0 +1,43 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  platform: insights
+  service: content-sources
+name: content-sources-testing
+description: content-sources acceptance testing
+app:
+  $ref: /services/insights/content-sources/app.yml
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: content-services-dev
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-poc-pipelines.appsres03ue1.yaml
+publishJobLogs: true
+imagePatterns:
+- quay.io/cloudservices
+
+managedResourceTypes:
+- ClowdJobInvocation
+- Job
+
+resourceTemplates:
+- name: content-sources-testing
+  url: https://github.com/content-services/content-sources-backend
+  path: /deployments/testing.yaml
+  targets:
+  - namespace:
+      $ref: /services/insights/content-sources/namespaces/content-sources-stage.yml
+    ref: 9eabc2c1b5361bc2cf8d3c5615f532fc0f1c4bdb
+    promotion:
+      auto: true
+      subscribe:
+      - content-sources-stage-deploy-success-channel
+      publish:
+      - content-sources-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: content-sources-stage-deploy-success-channel
+        data:
+        - parent_saas: content-sources
+          target_config_hash: 8270c89b856d0a13
+          type: parent_saas_config

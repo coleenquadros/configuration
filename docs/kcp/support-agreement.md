@@ -7,7 +7,7 @@ in app-interface. Instead, KCP will use only a selected set of features.
 The KCP service itself will not be supported by AppSRE. The application support & oncall is fully on the KCP team side. As such, KCP is not subject to the [standard AppSRE contract](https://gitlab.cee.redhat.com/app-sre/contract). Note this hybrid SRE model is very new as of 2022-10-03. Further adaptations, discussions, agreements should be expected.
 
 AppSRE supports the tooling around app-interface, as it does for all its tenants.
-The KCP team can get support from @app-sre-ic in [#sd-app-sre](https://coreos.slack.com/archives/CCRND57FW) on this tooling, for the features that are agreed to be used, as listed in the next section. 
+The KCP team can get support from @app-sre-ic in [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) on this tooling, for the features that are agreed to be used, as listed in the next section. 
 
 ## App-interface features agreed to be used by KCP
 

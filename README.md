@@ -1,13 +1,11 @@
 # App-Interface
 
-This repository serves as a central coordination point for hosted services being
-run by the Application SRE team. Many or all of the portions of the contract
-defined herein will be handled through automation after changes are accepted to
-this repository by the appropriate parties.
+This repository serves as a central coordination point for hosted services
+operated by the Application SRE team. Once the appropreiate parties accept changes to this repository, many or all portions of the contract defined herein are automated.
 
 If you are a team looking to run your service with the App SRE team, please follow the [onboarding-app](/docs/app-sre/onboarding-app.md) guide.
 
-The Application SRE team is responsible of fulfilling the contract defined in
+The Application SRE team is responsible for fulfilling the contract defined in
 this repository.
 
 [TOC]
@@ -15,14 +13,14 @@ this repository.
 ## Overview
 
 This repository contains of a collection of files under the `data` folder.
-Whatever is present inside that folder constitutes the App-SRE contract.
+This folder contains everything that constitutes the APP SRE contract. 
 
 These files can be `yaml` or `json` files, and they must validate against some
 [well-defined json schemas](https://github.com/app-sre/qontract-schemas).
 
-The path of the files do not have any effect on the integrations (automation
+The files' path does not affect the integrations (automation
 components that feed off the contract), but the contents of the files do. They
-will all contain:
+will all contain the following:
 
 - `$schema`: which maps to a well defined [schema](https://github.com/app-sre/qontract-schemas).
 - `labels`: arbitrary labels that can be used to perform queries, etc.
@@ -55,12 +53,11 @@ The word _qontract_ comes from _queryable-contract_.
 ## Workflow
 
 The main use case happens when an interested party wants to submit a contract
-amendment. Some examples would be:
+amendment. Here are some examples:
 
 - Adding a new user and granting access to certain teams / services.
 - Submitting a new application to be hosted by the Application SRE team.
-- Modifying the SLO of an application.
-- etc.
+- Modifying the SLO of an application, etc.
 
 All contract amendments must be formally defined. Formal definitions are
 expressed as json schemas. You can find the supported schemas here:
@@ -88,22 +85,20 @@ https://github.com/app-sre/qontract-schemas.
 - When you create a MR, it's not necessary to immediately ping the @app-sre-ic in #sd-app-sre. The IC will eventually see it and merge it. It's only necessary to ping the IC if the MR is urgent or if a day has passed and the IC has not commented anything.
 - If your PR only contains changes to saas-files, you can auto-approve, see here: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md#approval-process
 - Even if you have rights to merge the PR, please refrain from doing so. If you need it merged urgently, ping @app-sre-ic in #sd-app-sre.
-- If an AppSRE team members adds the `lgtm` label, it will be automerged by a bot.
+- If an AppSRE team member adds the `lgtm` label, it will be automerged by a bot.
 - The AppSRE team members will also refrain from manually merging PRs and will use labels instead to allow the bot to automatically merge them. In App-Interface the order of the PRs is important, and if we manually merge, it will affect waiting times for other users.
 - Please remove the comment from the MR description template and fill in the information, this is crucial for MR reviewing. The easier reviewers can understand your intention, the faster your MR will get a response.
-- Please follow git [best practices](https://service.pages.redhat.com/dev-guidelines/docs/appsre/git/)
+- Please follow Git [best practices](https://service.pages.redhat.com/dev-guidelines/docs/appsre/git/)
 
-## Local validation of datafile modifications / contract amendment
+## Local Validation of Datafile Modifications / Contract Amendment
 
-Before submitting a MR with a datafile modification / contract amendment, the
-user has the option to validate the changes locally.
+Before submitting a MR with a datafile modification / contract amendment, you have the option to validate the changes locally.
 
 Two things can be checked: (1) JSON schema validation (2) run integrations with
 `--dry-run` option.
 
 Both scripts rely on a temporary directory which defaults to `temp/`, but can be
-overridden with the env var `TEMP_DIR`. The contents of this directory will
-contain the results of the manual pr check.
+overridden with the env var `TEMP_DIR`. The contents of this directory contain the results of the manual pr check.
 
 ### JSON schema validation
 
@@ -155,12 +150,12 @@ The GraphQL public endpoint is reachable (with authentication) here:
 
 If you are querying app-interface, help us avoid breaking your queries by submitting a `query-validation` to let us know what schemas you are relying on. Here is an [example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/39455/diffs?commit_id=5964ea57ebefbe8cc309233457ce356f9897d873). We try to make our schemas backwards compatible, but in case of any issues, we expect a response within 1-2 business days.
 
-**IMPORTANT**: in order to use the GraphQL UI you need to click on the Settings
+**IMPORTANT**: To use the GraphQL UI, select the Settings
 wheel icon (top-right corner) and replace `omit` with `include` in
 `request.credentials`.
 
 To get credentials to query app-interface, submit a Credentials Request form in a merge request.
-The request itself is a file with the following structure:
+The request is a file with the following structure:
 * `$schema` - must be `/app-interface/credentials-request-1.yml`
 * `labels` - labels to be added to the request (currently not used by automation)
 * `name` - name of the request object. must be unique
@@ -566,27 +561,6 @@ In order to get access to Sentry, a user has to have:
     * Example: [dev](/data/teams/ocm/roles/dev.yml) role.
 
 ---
-### Create a GlitchTip Project for an onboarded App (`/app-sre/app-1.yml`)
-
-The structure of this parameter is the following:
-
-```yaml
-glitchtipProjects:
-- name: <name of the project - lower case max 64 characters>
-  description: <description of the project>
-  platform: <project language>
-  teams:
-  - $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre-stage.yml`>
-  - ...
-  organization:
-    $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example `/dependencies/glitchtip/glitchtip-stage.yml`>
-- ...
-```
-
-The name, description, platform, teams, and organization fields are required. The name must be unique within an organization. The project name - organization combination must be globally unique.
-
-In order to add or remove a Glitchtip project, an MR must be sent to the appropriate App datafile, and the project needs to be added to or removed from the project's array.
-
 ### Create a Glitchtip Organization (`/dependencies/glitchtip-organization-1.yml`)
 
 A glitchtip project is related to a glitchtip organization, and all projects in an organization can be accessed by all organization members.
@@ -604,6 +578,27 @@ instance:
   $ref: /dependencies/glitchtip/glitchtip-stage.yml
 
 ```
+
+### Create a GlitchTip Project for an onboarded App (`/dependencies/glitchtip-project-1.yml`)
+
+To define your glitchtip project, create a file in `/data/dependencies/glitchtip/projects/` with a structure like the following:
+```yaml
+name: <name of the project - lower case max 64 characters>
+description: <description of the project>
+app:
+  $ref: <app datafile (`/app-sre/app-1.yml`)>
+platform: <project language>
+teams:
+- $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre-stage.yml`>
+- ...
+organization:
+  $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example `/dependencies/glitchtip/glitchtip-stage.yml`>
+
+```
+
+The name, app, description, platform, teams, and organization fields are required. The name must be unique.
+
+
 
 Please note that the organization's name must be unique.
 
@@ -645,6 +640,8 @@ In order to get access to Glitchtip, a user has to have the following:
   ```
   E.g.: [app-sre role](data/teams/app-sre/roles/app-sre.yml)
 
+
+---
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
 [services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
@@ -1549,6 +1546,11 @@ The Secret will contain the following fields:
 
 RDS instances can be entirely self-serviced via App-Interface.
 
+App-Interface supports the following RDS engine types:
+
+- postgres
+- mysql
+
 In order to create or update an RDS database, you need to add them to the `externalResources` field.
 
 - `provider`: must be `rds`
@@ -1597,13 +1599,13 @@ For more information about the versions that RDS supports:
 
 ###### PostgreSQL
 
-| Version      | Minimum minor version | Notes |
-| ----------- | ----------- | ----------- |
-| 14      | \>= 14.1      | Announced as the minimum required version by email from AWS |
-| 13      | \>= 13.3      | Announced as the minimum required version by email from AWS |
-| 12   | \>= 12.7        | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
-| 11   | \>= 11.12       | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
-| 10   | \>= 10.17       | To be deprecated around Nov 2022 (https://www.postgresql.org/support/versioning/). Use (upgrade to) a more recent major version. |
+| Version | Minimum minor version | Notes                                                                                                                                                                                                      |
+|---------|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 14      | \>= 14.3              | Announced as the minimum required version by email from AWS                                                                                                                                                |
+| 13      | \>= 13.7              | Announced as the minimum required version by email from AWS                                                                                                                                                |
+| 12      | \>= 12.11             | Announced as the minimum required version by email from AWS                                                                                                                                                |
+| 11      | \>= 11.16             | Announced as the minimum required version by email from AWS                                                                                                                                                |
+| ~~10~~  |                       | **End of life, do not use.**                                                                                                                                                 |
 
 ###### MySQL
 
@@ -2273,10 +2275,6 @@ Example:
 ...
 peering:
   connections:
-  - provider: account-vpc
-    name: hive-stage-01_app-sre
-    vpc:
-      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
   - provider: cluster-vpc-requester
     name: hive-stage-01_app-sre-stage-01
     cluster:
@@ -2347,7 +2345,7 @@ To manage a User group via App-Interface:
 2. **Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).**
 **Note:** Skip this step if the user group is not populated based on app-interface. i.e. if it is populated based on an external source of truth, such as an OWNERS file or PagerDuty.
 
-3. **Add the group in the `managedUsergroups` section of the** [coreos slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/coreos.yml) **dependency file**
+3. **Add the group in the `managedUsergroups` section of the** [redhat-internal slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/redhat-internal.yml) **dependency file**
 
 Examples:
 * An example for the `app-sre-team` User group permission can be found [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml)
@@ -2444,7 +2442,7 @@ Once the MR is merged, an integration called `aws-iam-password-reset` will delet
 
 A different integration, called `terraform-users` will realize that the user does not have a login profile and will re-create it. At this point, the user has a new random password.
 
-The curious reader can follow [#sd-app-sre-reconcile](https://coreos.slack.com/archives/CS0E65QCV) to see when these two actions have completed.
+The curious reader can follow [#sd-app-sre-reconcile](https://redhat-internal.slack.com/archives/CS0E65QCV) to see when these two actions have completed.
 
 Once the new password is in place, it needs to be picked up by an app-interface-output created by a `qontract-cli` command called `terraform-users-credentials` (the repository is refreshed once every 10 minutes).
 
@@ -2878,6 +2876,40 @@ This will result in a Secret being created in the consuming namespace. The Secre
 - `client_id` - Client ID to use for authentication
 - `client_secret` - Client Secret to use for authentication
 
+### Enable GitLab repo synchronization
+There are instances when it is desired to maintain an exact copy of a GitLab repository within a network-isolated environment (ex: FedRamp).
+
+For these instances, the optional `gitlabSync` attribute can be added within the `codeComponents` for the relevant repository:
+```yaml
+codeComponents:
+- name: homeless-templates
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/app-sre/homeless-templates
+  gitlabSync:
+    sourceProject:
+      name: homeless-templates
+      group: app-sre
+      branch: main
+    destinationProject:
+      name: homeless-templates-sync
+      group: app-sre-services
+      branch: main
+
+```
+`sourceProject` specifies the project to target within `gitlab.cee.redhat.com`
+
+`destinationProject` specifies where to maintain the copy in FedRamp GitLab instance.
+
+Once a `gitlabSync` is merged, the source project/branch will be monitored for any commits. When commits are detected, a sync process will be triggered. Updates are visible on the destination project within 10 minutes.
+
+**Considerations:** 
+* synchronizing from `gitlab.cee.redhat.com` to the primary GitLab instance within FedRamp is the only supported pairing at this time. If you desire to utilize this functionality for another GitLab instance, please reach out within #sd-app-sre
+* the destination project must already exist
+* the AppSRE bot (@app-sre-bot) must be a member of both projects and be assigned the `maintainer` role
+* if the branch specified for destination project is `Protected` (default branch) the destination project must allow force pushes from maintainers to the specified branch  
+  * This can be adjusted by navigating to: `Settings > Repository > Protected branches` in the destination project
+
+
 ### Write and run Prometheus rules tests
 
 Please follow [this guide](/docs/app-sre/prometheus-rules-tests-in-app-interface.md) to know to do it.
@@ -2890,6 +2922,74 @@ This process can be done in two ways.
   * Once that MR is merged, you can open a second MR in app-interface to add the line `delete: true` within the namespace file.
 * Method two
   * Open a MR to add the line `delete: true` on the related namespace file and delete the targets from the saas file.
+
+
+### How to enable replication between Vault instances
+
+To enable replication between two different vault instances create a replication section on the vault instance file that will act as the "source" vault.
+
+The common config for all the different providers is the authentication and the destination instance, this can be configured as this example:
+
+```yaml
+replication:
+- vaultInstance:
+    $ref: destination/vault/instance/file.yml
+  sourceAuth:
+    provider: "approle"
+    secretEngine: "kv_v1"
+    roleID:
+      path: "path/to/source_vault/role_id"
+      field: "role_id"
+    secretID:
+      path: "path/to/source_vault/secret"
+      field: "secret_id"
+
+  destAuth:
+    provider: "approle"
+    secretEngine: "kv_v1"
+    roleID:
+      path: "path/to/destination_vault/role_id"
+      field: "role_id"
+    secretID:
+      path: "path/to/destination_vault//secret"
+      field: "secret_id"
+```
+
+The replication can be configured using two different providers, `jenkins` and `policy`.
+
+#### Jenkins
+
+Jenkins provider on vault replication integration allow to copy all the secrets used by a given jenkins instance from the source vault instance to the destination instance. An example config for this would be:
+
+```yaml
+  paths:
+  - provider: "jenkins"
+    jenkinsInstance:
+      $ref: dependencies/jenkins_instance_file.yml
+```
+
+And optionlly, the secrets to copy can be limited by a vault policy with the following configuration:
+
+```yaml
+  paths:
+  - provider: "jenkins"
+    jenkinsInstance:
+      $ref: dependencies/jenkins_instance_file.yml
+    policy:
+      $ref: policy/path/policy.yml
+```
+
+#### Policy
+
+Policy provider on vault replication integration allow to copy all the secrets under the paths on the policy. An example configuration would be:
+
+```yaml
+  - provider: "policy"
+    policy:
+      $ref: policy/path/policy.yml
+```
+
+Real examples can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/config/prod/devshift-net.yml)
 
 ## Design
 

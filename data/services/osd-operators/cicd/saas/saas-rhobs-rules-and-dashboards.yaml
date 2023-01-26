@@ -14,7 +14,7 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-srep-info
 
 managedResourceTypes:
@@ -33,8 +33,14 @@ resourceTemplates:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: main
   - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: main
+  - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 3af9b6d959c6300138aca72fb6562e8768f062e2
+    ref: 25ddc40459c027f6eb14ee7ff469c5cbaf0e92e7
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: 25ddc40459c027f6eb14ee7ff469c5cbaf0e92e7
 # Targets for below configs are decided based on the RHOBS instance hosting the tenant, in this case:
 # data/services/rhobs/observatorium-mst/cicd/saas-tenants.yaml
 - name: osd-rhobs-rules
@@ -49,18 +55,18 @@ resourceTemplates:
   - name: observatorium-mst-production
     namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
-    ref: 82082b8f609245f55aed0c59fb96094f61b813f3
+    ref: 4bb58d369a5f518f3ac62ffaade90eece971b180
 - name: hypershift-platform-rhobs-rules
   url: https://gitlab.cee.redhat.com/service/rhobs-rules-and-dashboards
-  path: /rules/hypershift-platform
-  provider: directory
+  path: /rules/hypershift-platform/template.yaml
   targets:
-  - name: observatorium-mst-stage
+  - name: rhobsp02ue1-stage
     namespace:
-      $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-mst-stage.yml
+      $ref: /services/rhobs/observatorium-mst/namespaces/rhobsp02ue1/observatorium-mst-production.yml
     ref: main
-  - name: observatorium-mst-production
+    parameters:
+      TENANT: hypershift-platform-staging
+  - name: rhobsp02ue1-production
     namespace:
-      $ref: /services/rhobs/observatorium-mst/namespaces/telemeter-prod-01/observatorium-mst-production.yml
-    ref: 27ac46661423d8315bf0586c4d36b4ee511c9f04
-
+      $ref: /services/rhobs/observatorium-mst/namespaces/rhobsp02ue1/observatorium-mst-production.yml
+    ref: ab4a97f38c28c73704f8b72159285fcf5c7703e0

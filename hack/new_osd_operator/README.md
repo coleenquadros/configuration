@@ -70,7 +70,7 @@ For the 2nd MR, `git add/commit/push` the remaining files.
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   data/dependencies/slack/coreos.yml
+	modified:   data/dependencies/slack/redhat-internal.yml
 	modified:   data/teams/sd-sre/roles/saas-approver.yml
 	modified:   data/teams/sd-sre/roles/sre-operator-all-coreos-slack.yml
 

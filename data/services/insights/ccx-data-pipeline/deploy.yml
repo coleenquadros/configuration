@@ -24,7 +24,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: ccx-dev-notifications
 
 managedResourceTypes:
@@ -32,6 +32,7 @@ managedResourceTypes:
 - ConfigMap
 - HorizontalPodAutoscaler
 - Service
+- Frontend
 
 imagePatterns:
 - quay.io/cloudservices
@@ -61,7 +62,7 @@ resourceTemplates:
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 6cf3df093c19de877d0847081e40bef330fcabe3
+    ref: c8b458d8e2e41348bbd63d81d322679c9b7ba61f
     parameters:
       MIN_REPLICAS: "32"
       MAX_REPLICAS: "32"
@@ -175,7 +176,7 @@ resourceTemplates:
       IRSP_INTERNAL_RULES_ORGANIZATIONS_CSV_FILE: "/internal-rules-organizations/internal_rules_organizations.csv"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: e3601d4083cc3578ef1f5c6722f33dd30d9f84b6
+    ref: 4105ef93b23522ec78ab71e302c22388d6f487ab
     delete: false
     parameters:
       MIN_REPLICAS: "3"
@@ -257,7 +258,7 @@ resourceTemplates:
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: e3baa3bd9932f24229b1d1a53a160e519a1ce31f
+    ref: ffab8ed0faf96149bf2924a7c9549ff2340c1949
     delete: false
     parameters:
       CPU_LIMIT: "250m"
@@ -331,7 +332,7 @@ resourceTemplates:
       MAX_REPLICAS: "3"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: e4686cab12d47eff7698d71d81f3ddd1cc67f7e3
+    ref: cfc2d57dd5a5a924cea6fd3de2db7f62cffcca4a
     parameters:
       MIN_REPLICAS: "3"
       MAX_REPLICAS: "6"
@@ -404,7 +405,7 @@ resourceTemplates:
       MAX_REPLICAS: "1"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: ab4f843c43db593766d13f5f53b65e1c880ddbbb
+    ref: a2e135d89fcf7b710143d592164df31afb9b6c28
     parameters:
       MIN_REPLICAS: "1"
       MAX_REPLICAS: "1"
@@ -463,18 +464,20 @@ resourceTemplates:
       CONTENT_SERVICE_PORT: 10000
       JOB_SCHEDULE__NOTIFICATION_BACKEND: "*/3 * * * *"
       JOB_SCHEDULE__SERVICE_LOG: "4-59/3 * * * *"
-      NOTIFICATION_RESEND_COOLDOWN_NOTIFICATION_BACKEND: "29m"
-      NOTIFICATION_RESEND_COOLDOWN_SERVICE_LOG: ""
+      NOTIFICATION_RESEND_COOLDOWN_NOTIFICATION_BACKEND: "24 hours"
+      NOTIFICATION_RESEND_COOLDOWN_SERVICE_LOG: "1 week"
       PLATFORM_UI_HOSTNAME: console.stage.redhat.com
       TEMPLATE_RENDERER_SERVER: "http://insights-content-template-renderer-svc:8000/"
       SERVICE_LOG__URL: "https://api.stage.openshift.com/api/service_logs/v1/cluster_logs"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 5bf97770234d106c0fac3fcc9f30e9d65910f0f9
+    ref: 4b0c4b3f903c2b0b82be9cbf4ede451475e3621f
     parameters:
       CONTENT_SERVICE_PORT: 10000
       JOB_SCHEDULE__NOTIFICATION_BACKEND: "*/15 * * * *"
       JOB_SCHEDULE__SERVICE_LOG: "8-59/15 * * * *"
+      NOTIFICATION_RESEND_COOLDOWN_NOTIFICATION_BACKEND: "1 week"
+      NOTIFICATION_RESEND_COOLDOWN_SERVICE_LOG: "1 week"
       PLATFORM_UI_HOSTNAME: console.redhat.com
       TEMPLATE_RENDERER_SERVER: "http://insights-content-template-renderer-svc:8000/"
       SERVICE_LOG__URL: "https://api.openshift.com/api/service_logs/v1/cluster_logs"
@@ -519,11 +522,11 @@ resourceTemplates:
       OUTPUT: "S3"
       MEMORY_REQUEST: 5Gi
       MEMORY_LIMIT: 8Gi
-      ACTIVE_DEADLINE_SECONDS: "3600" # 60 minutes
-      TABLES_TO_IGNORE: ""
+      ACTIVE_DEADLINE_SECONDS: "10800" # 180 minutes
+      TABLES_TO_IGNORE: "migration_info,notification_types,states,event_targets"
       DB_NAME: ccx-notification-writer
-      SELECT_LIMIT: "10"
-      TEST_DATE: 08/24/2022
+      SELECT_LIMIT: "-1"
+      TEST_DATE: 01/12/2023
     promotion:
       publish:
       - insights-notification-exporter-prod-ready-channel
@@ -568,6 +571,36 @@ resourceTemplates:
     disable: true # TODO: enable when there is any test running in ephemeral
     ref: internal
 
+- name: ccx-upgrades-inference
+  path: /deploy/clowdapp.yaml
+  url: https://gitlab.cee.redhat.com/ccx/ccx-upgrades-inference
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: main
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: c5e3a2757b73fd2c0b65fb6703de222a660af561
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # TODO: enable when there is any test running in ephemeral
+    ref: internal
+
+- name: ccx-upgrades-data-eng
+  path: /deploy/clowdapp.yaml
+  url: https://gitlab.cee.redhat.com/ccx/ccx-upgrades-data-eng
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: main
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: ab5313fefcf556badb0bc230367ef45c652b8ad6
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # TODO: enable when there is any test running in ephemeral
+    ref: internal
+
 ### Grafana Dashboards
 
 - name: grafana-dashboard-ccx-data-pipeline
@@ -581,6 +614,12 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: a184631d730e17075298f49fb6b2061e694658dc
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: a184631d730e17075298f49fb6b2061e694658dc
 
 - name: grafana-dashboard-insights-content-service
   url: https://github.com/RedHatInsights/insights-content-service
@@ -592,6 +631,12 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 8c073e975f6f8e838e302b1c5e1e62f421ec11bc
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
     ref: 8c073e975f6f8e838e302b1c5e1e62f421ec11bc
 
 - name: grafana-dashboard-insights-results-aggregator
@@ -605,6 +650,12 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: befd5f0b5f277d005558118fb1e9dbff2c930ef7
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: befd5f0b5f277d005558118fb1e9dbff2c930ef7
 
 - name: grafana-dashboard-insights-results-smart-proxy
   url: https://github.com/RedHatInsights/insights-results-smart-proxy
@@ -616,6 +667,12 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: b252d9fcddacc3e4f01b3f48f1bc0c25b876c237
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
     ref: b252d9fcddacc3e4f01b3f48f1bc0c25b876c237
 
 - name: grafana-dashboard-ccx-notification-service
@@ -629,6 +686,12 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: c49bf36eb7ef57b7eda0dd5f0d8896d2f568c7fc
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: c49bf36eb7ef57b7eda0dd5f0d8896d2f568c7fc
 
 - name: grafana-dashboard-ccx-notification-writer
   url: https://github.com/RedHatInsights/ccx-notification-writer
@@ -640,6 +703,12 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: f5de84a20cd3a1de53ea9c361fa8a92fd9c900bb
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
     ref: f5de84a20cd3a1de53ea9c361fa8a92fd9c900bb
 
 - name: grafana-dashboard-io-gathering-service
@@ -653,6 +722,12 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: ab3facbc9fabc365bd92775605cc62d6b3509bc7
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: main
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: ab3facbc9fabc365bd92775605cc62d6b3509bc7
 
 - name: grafana-dashboard-insights-sha-extractor
   url: https://gitlab.cee.redhat.com/ccx/ccx-sha-extractor
@@ -665,3 +740,25 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: ee1877e7d8f8d447522209bc9feb62a2ec11e394
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: ee1877e7d8f8d447522209bc9feb62a2ec11e394
+
+### OCP Advisor Frontend
+
+- name: ocp-advisor-frontend
+  path: /deploy/frontend.yml
+  url: https://github.com/RedHatInsights/ocp-advisor-frontend
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+    ref: b653a5fb4873330f236012069b1f64a2a6a96500
+    parameters:
+      ENV_NAME: env-stage

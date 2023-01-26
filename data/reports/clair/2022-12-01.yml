@@ -1,0 +1,58 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: clair
+name: clair-2022-12-01
+app:
+  $ref: /services/clair/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/quay/clair:
+    - branch: master
+      total: 6
+      success: 6
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: clairp01ue1
+    namespace: clair-production
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: clair-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 2
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 1
+  - cluster: clairp01ue1
+    namespace: clair-production
+    validations:
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 2
+  service_slo:
+  - cluster: clairp01ue1
+    namespace: clair-production
+    slo_name: Vulnerability report availability
+    slo_doc_name: clair
+    slo_value: 99.9915205097864
+    slo_target: 98.0
+  - cluster: clairp01ue1
+    namespace: clair-production
+    slo_name: Index report creation latency 70%
+    slo_doc_name: clair
+    slo_value: 84.8051642278561
+    slo_target: 70.0
+  - cluster: clairp01ue1
+    namespace: clair-production
+    slo_name: Index report creation availability
+    slo_doc_name: clair
+    slo_value: 97.4101678103136
+    slo_target: 95.0

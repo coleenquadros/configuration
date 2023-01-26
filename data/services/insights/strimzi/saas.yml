@@ -26,7 +26,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -59,6 +59,9 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
 - name: kafka-connect
   path: /deploys/openshift/kafka-connect.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -70,13 +73,13 @@ resourceTemplates:
     ref: master
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
-      KAFKA_CONNECT_VERSION: 3.0.0
+      KAFKA_CONNECT_VERSION: 3.1.0
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
     ref: 886340ec51f9bd583bcd5d0503d1069562b8d809
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
-      KAFKA_CONNECT_VERSION: 3.0.0
+      KAFKA_CONNECT_VERSION: 3.1.0
 - name: strimzi
   path: /deploys/openshift/amq-streams.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -91,11 +94,12 @@ resourceTemplates:
       KAFKA_CPU_LIMITS: 3
       KAFKA_MEMORY_REQUESTS: 20Gi
       KAFKA_MEMORY_LIMITS: 20Gi
-      KAFKA_NUM_REPLICAS: 3
+      KAFKA_NUM_REPLICAS: 0
       KAFKA_HEAP_OPTS_XMS: 6g
       KAFKA_HEAP_OPTS_XMX: 6g
       KAFKA_VOL_SIZE: 450Gi
-      KAFKA_VERSION: 3.0.0
+      KAFKA_VERSION: 3.1.0
+      ZOOKEEPER_NUM_REPLICAS: 0
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
     ref: 8505987f23127da44ec8874804515855a31e09f2
@@ -124,7 +128,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: 612b67677508a9cd038753d245c411b246fa980e
+    ref: 5243add5715eb24da7981d9ee68998ea70c116ee
 - name: kafka-schema-registry
   path: /deploys/openshift/schema-registry.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -170,20 +174,6 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
     ref: master
-- name: prometheus-kafka-consumer-group-exporter
-  hash_length: 7
-  path: /openshift.yaml
-  url: https://github.com/RedHatInsights/prometheus-kafka-consumer-group-exporter
-  targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
-    # New images are broken because Dockerfile tries to pull from docker.io
-    ref: 6a7a8abca447a3576e6da47007a21ad776a1f6e1
-    parameters:
-      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9092
-      AUTO_OFFSET_RESET: latest
-      GROUP_ID: lag_exporter_stage
-      IMAGE: quay.io/app-sre/prometheus-kafka-consumer-group-exporter
 - name: lightbend-lag-exporter
   path: /deploys/openshift/lightbend-lag-exporter.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -195,7 +185,7 @@ resourceTemplates:
       APPSRE_ENV: stage
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: ec3966e2bd68c15a0180c303cbc0500a096149af
+    ref: 19cc070a9a1e29f814b6b1bfa76f3b702b5c5303
     parameters:
       APPSRE_ENV: prod
 - name: kafka-mirrormaker2
@@ -213,7 +203,8 @@ resourceTemplates:
       AUTH_SECRET_NAME: mk-oauth-secret
       SRC_CLUSTER_ALIAS: platform-mq-stage
       TGT_CLUSTER_ALIAS: consoledot-test-stage
-      KAFKA_MM2_VERSION: 3.0.0
+      KAFKA_MM2_VERSION: 3.1.0
+      MM2_REPLICA_COUNT: 0
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
     ref: 886340ec51f9bd583bcd5d0503d1069562b8d809

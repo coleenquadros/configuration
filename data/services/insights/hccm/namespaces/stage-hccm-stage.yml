@@ -10,12 +10,6 @@ description: Insights hccm-stage on the Stage cluster under clowder / app interf
 cluster:
   $ref: /openshift/crcs02ue1/cluster.yml
 
-limitRanges:
-  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
-
-# quota:
-#   $ref: /services/insights/hccm/hccm-quota.yml
-
 app:
   $ref: /services/insights/hccm/app.yml
 
@@ -162,10 +156,19 @@ externalResources:
         - deletion
         - failover
         - maintenance
-        - backup
     parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-cost-management-stage.yml
     annotations:
       clowder/database: "koku"
+    # Replica instance for Gabi.
+  - provider: rds
+    identifier: cost-management-stage-readonly
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-cost-management-stage-1.yml
+    overrides:
+      username: "insights"
+      name: "koku"
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-cost-management-stage.yml
+    replica_source: koku-stage
+    output_resource_name: cost-stage-db-ro
   - provider: cloudwatch
     identifier: hccm-stage
     defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml

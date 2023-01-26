@@ -89,6 +89,11 @@ openshiftResources:
   variables:
     standby: true
     additional_config_vault_secret_version: 2
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-db-config-gabi.secret.yaml
+  variables:
+    additional_config_vault_secret_version: 2
 - provider: vault-secret
   path: app-interface/quayio-prod-us-east-2/quay/quay-extra-ca-certs
   version: 1
@@ -107,6 +112,9 @@ openshiftResources:
   path: /quay-p/quay/quay.web-allow-external.networkpolicy.yaml
 - provider: resource
   path: /quay-p/quay/quay-py3.web-allow-external.networkpolicy.yaml
+- provider: resource
+  path: /quay-p/quay/quay-py3-cloudflare.web-allow-external.networkpolicy.yaml
+
 
 managedExternalResources: true
 
@@ -145,6 +153,14 @@ externalResources:
     identifier: quayio-production-standby
     defaults: /terraform/resources/quayio-production/elasticache-standby-1.yml
     parameter_group: /terraform/resources/quayio-production/elasticache-parameter-group-1.yml
+  - provider: acm
+    identifier: wildcard-prod-quay-redhat-io-ue2
+    region: us-east-2
+    domain:
+      domain_name: '*.quay.io'
+      alternate_names:
+      - '*.quay.redhat.io'
+      - 'quay.io'
   - provider: alb
     identifier: quayio-production-alb02
     output_resource_name: quayio-production-alb
@@ -157,17 +173,156 @@ externalResources:
       default: false
       openshift_service: quay-load-balancer-service
     - name: quayio-production-py3
-      default: true
+      default: false
       openshift_service: quay-py3-load-balancer-service
     - name: quayio-cf
-      default: false
+      default: true
       openshift_service: quay-py3-cloudflare-load-balancer-service
     rules:
     - condition:
-        path: /v2/quayio-cloudflare-test/busybox/*
+        path: /v2/quayio-cloudflare-test/*
       action:
         - target: quayio-cf
           weight: 100
         - target: quayio-production-py3
           weight: 0
-
+    - condition:
+        path: /v2/openshift-release-dev/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/redhat/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/ansible/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/rh-osbs/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/ceph/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/cephcsi/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/redhat-dev/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/redhat-pending/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/redhat-prod/*
+      action:
+        - target: quayio-cf
+          weight: 0
+        - target: quayio-production-py3
+          weight: 100
+    - condition:
+        path: /v2/prometheus/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/argoproj/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/keycloak/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/cilium/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/signalfx/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/ascendio/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/getpantheon/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/team-helium/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/manhrd/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/domino/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0
+    - condition:
+        path: /v2/sysdig/*
+      action:
+        - target: quayio-cf
+          weight: 100
+        - target: quayio-production-py3
+          weight: 0

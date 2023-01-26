@@ -8,7 +8,7 @@ Severity: Pagerduty
 
 ## Impact
 
--  Edge Fleet Management is a Service that provides Management and Automation for RHEL for Edge. This includes provisioning, lifecycle management, custom image creation, upgrade deployment, upgrade validation, canary roll-outs, and inventory management. If there are no pods up in the production environment, customers aren't being able to use the fleet management product at all.
+- Edge Fleet Management is a Service that provides Management and Automation for RHEL for Edge. This includes provisioning, lifecycle management, custom image creation, upgrade deployment, upgrade validation, canary roll-outs, and inventory management. If there are no pods up in the production environment, customers won't be able to use the fleet management product at all.
 
 ## Summary
 
@@ -19,17 +19,16 @@ Usually caused caused by pods going offline or a Prometheus problem.
 
 ## Access required
 
--  Console access to the cluster+namespace pods are running in.
+- Console access to the cluster+namespace pods are running in.
 
 ## Steps
 
--  Log into the console / namespace and verify if all pods are running and receiving requests.
--  Check logs / events for Edge API pods.
--  Check if any deployments or changes in the application happened closer to the time the error started.
--  Check infrastructure metrics on the OpenShift console for edge-api-service (Deployments -> edge-api-service -> Metrics) and take notes.
--  Escalate the alert with all the information available to the engineering team that is responsible for the app.
+- Log into the console / namespace and verify if all pods are running and receiving requests.
+- Check logs / events for Edge API pods.
+- Check if any deployments or changes in the application happened closer to the time the error started.
+- Check infrastructure metrics on the OpenShift console for edge-api-service (Deployments -> edge-api-service -> Metrics) and take notes.
+- Escalate the alert with all the information available to the engineering team that is responsible for the app.
 
 ## Escalations
 
--  https://visual-app-interface.devshift.net/services#/services/insights/edge/app.yml
-
+- <https://visual-app-interface.devshift.net/services#/services/insights/edge/app.yml>

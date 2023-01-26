@@ -35,16 +35,27 @@ source $CURRENT_DIR/runners.sh
 echo "loading master bundle from s3://${AWS_S3_BUCKET}/bundle-archive/${MASTER_BRANCH_COMMIT_SHA}.json"
 download_s3 "${MASTER_BRANCH_COMMIT_SHA}" "${MASTER_BUNDLE_FILE}"
 if [ $? -ne 0 ]; then
-  export MASTER_BUNDLE_SHA256=""
-  INIT_BUNDLES="fs:///validate/${DATAFILES_BUNDLE_BASENAME}"
-  echo "unable to load master bundle... run qontract-server with only one bundle"
-  echo " * integration early exit dry-run disabled"
-  echo " * granular merge permissions disabled"
+  MASTER_WORKTREE_DIR="./master"
+  echo "Error: unable to load master bundle from S3, generating from master branch"
+  echo "The master bundle may be unable to be loaded due to a mismatch between A-I in the repo"
+  echo "and A-I in AWS S3, or network/authentication issues. This is not expected behavior and will require"
+  echo "further investigation by AppSRE engineers into the app interface build master job."
+  git worktree add ${MASTER_WORKTREE_DIR} master
+  
+  pushd ${MASTER_WORKTREE_DIR}  
+  mkdir -p validate
+  make schemas bundle validate
+  popd
+
+  cp ${MASTER_WORKTREE_DIR}/data.json "${MASTER_BUNDLE_FILE}"
+  git worktree remove master
+
 else
-  export MASTER_BUNDLE_SHA256=$(sha256sum ${MASTER_BUNDLE_FILE} | awk '{print $1}')
-  INIT_BUNDLES="fs:///validate/master.json,fs:///validate/${DATAFILES_BUNDLE_BASENAME}"
   echo "downloaded master branch bundle with SHA256 ${MASTER_BUNDLE_SHA256}"
 fi
+
+export MASTER_BUNDLE_SHA256=$(sha256sum ${MASTER_BUNDLE_FILE} | awk '{print $1}')
+INIT_BUNDLES="fs:///validate/master.json,fs:///validate/${DATAFILES_BUNDLE_BASENAME}"
 
 # write .env file
 cat <<EOF >${WORK_DIR}/.qontract-server-env

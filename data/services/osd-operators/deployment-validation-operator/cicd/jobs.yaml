@@ -1,0 +1,37 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: deployment-validation-operator
+
+name: ci-int-deployment-validation-operator-jobs
+
+description: ''
+
+app:
+  $ref: /services/osd-operators/deployment-validation-operator/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+# these jobs are running on ci.int despite originating from GitHub as they touch
+# resources within the Red Hat VPN and GitLab
+
+config:
+- project:
+    name: deployment-validation-operator
+    label: deployment-validation-operator
+    node: app-sre
+    gh_org: app-sre
+    gh_repo: deployment-validation-operator
+    quay_org: app-sre
+    jobs:
+    - 'gh-build-master':
+        node: app-interface # the only place where I can install pyyaml with python3
+        display_name: deployment-validation-operator build master
+        build_deploy_script_path: make build-push
+    - 'gh-build-tag-dvo':
+        display_name: deployment-validation-operator build tag
+        quay_org: deployment-validation-operator

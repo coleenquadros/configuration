@@ -77,6 +77,11 @@ Tenant must add new target namespaces with the following content:
       DB_DRIVER: <pgx or mysql, default is pgx (postgres)>
 ```
 
+Note that you need to remove the `promotion_data` attribute, should it exist, from the namespace definition. This
+attribute is part of the gated deployments mechanism and needs not to be added manually - it will be added automatically
+following the successful deployment of a particular GABI instance. This is especially important if you have based your
+namespaces definition on another existing one when adding your GABI instance deployment.
+
 ### Step 2: Cluster-Scoped Gabi Namespace
 
 Additionally, ensure a gabi-cluster-resource namespace exists for the cluster(s) your namespace(s) you're deploying in [this directory](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/namespaces). 
@@ -127,7 +132,7 @@ For each cluster you're deploying Gabi to, you will want to ensure that in each 
 
 ## Access Gabi Instances
 
-Once gabi is deployed, authorized users can use their person cluster token to access gabi enpoint. 
+Once gabi is deployed, authorized users can use their person cluster token to access gabi endpoint. 
 
 1. Login into the cluster console
 2. Make sure user have view access to the namespace that contains the gabi instance.

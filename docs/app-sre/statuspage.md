@@ -21,9 +21,6 @@ Please note, that the status page feature in app-interface does not support stat
 
 ## Automate status changes with monitoring probes
 
-Work is in progress to automate the state on statuspage based on Catchpoint and blackbox-exporter monitoring probes.
+The state of a statuspage component can be updated from a catchpoint monitoring probe as described in the [catchpoint docs](docs/app-sre/catchpoint.md). The process is not automated, since the catchpoint API lacks functionality to setup alerting.
 
-https://issues.redhat.com/browse/APPSRE-3905
-https://issues.redhat.com/browse/APPSRE-4161
-
-Until then, instructions to set this up manually can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/catchpoint.md)
+There is currently no support to set a status page component from blackbox-exporter metrics.

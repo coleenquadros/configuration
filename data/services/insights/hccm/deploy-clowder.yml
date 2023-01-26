@@ -24,7 +24,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -54,14 +54,14 @@ resourceTemplates:
   # Staging:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: ebf114e3ddd0bb481d621b1cd00e36fdce68d22b
+    ref: af3e9db66b8f3d3e41a189884f855a1b4228ae1f
     parameters:
-      CJI_INVOCATION: "04"
+      CJI_INVOCATION: "01"
 
   # Production:
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: ebf114e3ddd0bb481d621b1cd00e36fdce68d22b
+    ref: af3e9db66b8f3d3e41a189884f855a1b4228ae1f
     parameters:
       CJI_INVOCATION: "01"
 
@@ -76,12 +76,8 @@ resourceTemplates:
     disable: true # tells app-sre to not actually run the deploy job for this target
     ref: internal # altered by bonfire
     parameters:
-      ENABLE_PARQUET_PROCESSING: True
       ENABLE_HCS_DEBUG: True
       ENABLE_S3_ARCHIVING: True
-      ENABLE_TRINO_SOURCES: ''
-      ENABLE_TRINO_SOURCE_TYPE: 'GCP'
-      ENABLE_TRINO_ACCOUNTS: ''
       AUTO_DATA_INGEST: True
       RETAIN_NUM_MONTHS: 4
       PARQUET_PROCESSING_BATCH_SIZE: "500000"
@@ -130,6 +126,7 @@ resourceTemplates:
       # _MIGRATION_DIRECTIVE: ""
       # Enhanced Org Admin
       ENHANCED_ORG_ADMIN: True
+      UNLEASH_LOG_LEVEL: "ERROR"
 
 
   # Staging:
@@ -178,12 +175,12 @@ resourceTemplates:
       # Deployment specific variables:
       # koku-api
       KOKU_MIN_REPLICAS: 3
-      KOKU_CPU_REQUEST: 500m
+      KOKU_CPU_REQUEST: 100m
       KOKU_CPU_LIMIT: 1
       KOKU_MEMORY_REQUEST: 768Mi
       KOKU_MEMORY_LIMIT: 1536Mi
       # listener
-      LISTENER_MIN_REPLICAS: 2
+      LISTENER_MIN_REPLICAS: 3
       LISTENER_CPU_REQUEST: 200m
       LISTENER_CPU_LIMIT: 500m
       LISTENER_MEMORY_REQUEST: 512Mi
@@ -197,80 +194,80 @@ resourceTemplates:
       SCHEDULER_MEMORY_REQUEST: 256Mi
       SCHEDULER_MEMORY_LIMIT: 512Mi
       # sources-client
-      SOURCES_CLIENT_MIN_REPLICAS: 1
-      SOURCES_CLIENT_CPU_REQUEST: 100m
+      SOURCES_CLIENT_MIN_REPLICAS: 3
+      SOURCES_CLIENT_CPU_REQUEST: 50m
       SOURCES_CLIENT_CPU_LIMIT: 250m
       SOURCES_CLIENT_MEMORY_REQUEST: 256Mi
       SOURCES_CLIENT_MEMORY_LIMIT: 512Mi
       # sources-listener
       SOURCES_LISTENER_MIN_REPLICAS: 1
-      SOURCES_LISTENER_CPU_REQUEST: 100m
+      SOURCES_LISTENER_CPU_REQUEST: 50m
       SOURCES_LISTENER_CPU_LIMIT: 250m
       SOURCES_LISTENER_MEMORY_REQUEST: 256Mi
       SOURCES_LISTENER_MEMORY_LIMIT: 512Mi
       # workers global
       WORKER_PROC_ALIVE_TIMEOUT: 8
       # worker-celery
-      WORKER_CELERY_MIN_REPLICAS: 2
-      WORKER_CELERY_CPU_REQUEST: 200m
+      WORKER_CELERY_MIN_REPLICAS: 3
+      WORKER_CELERY_CPU_REQUEST: 50m
       WORKER_CELERY_CPU_LIMIT: 250m
       WORKER_CELERY_MEMORY_REQUEST: 512Mi
       WORKER_CELERY_MEMORY_LIMIT: 1Gi
       # worker-cost-model
-      WORKER_COST_MODEL_MIN_REPLICAS: 2
-      WORKER_COST_MODEL_CPU_REQUEST: 100m
+      WORKER_COST_MODEL_MIN_REPLICAS: 3
+      WORKER_COST_MODEL_CPU_REQUEST: 50m
       WORKER_COST_MODEL_CPU_LIMIT: 200m
-      WORKER_COST_MODEL_MEMORY_REQUEST: 300Mi
+      WORKER_COST_MODEL_MEMORY_REQUEST: 400Mi
       WORKER_COST_MODEL_MEMORY_LIMIT: 600Mi
       # worker-download
-      WORKER_DOWNLOAD_MIN_REPLICAS: 2
+      WORKER_DOWNLOAD_MIN_REPLICAS: 3
       WORKER_DOWNLOAD_CPU_REQUEST: 500m
       WORKER_DOWNLOAD_CPU_LIMIT: 1
       WORKER_DOWNLOAD_MEMORY_REQUEST: 5Gi
       WORKER_DOWNLOAD_MEMORY_LIMIT: 8Gi
       # worker-ocp
-      WORKER_OCP_MIN_REPLICAS: 2
-      WORKER_OCP_CPU_REQUEST: 100m
+      WORKER_OCP_MIN_REPLICAS: 3
+      WORKER_OCP_CPU_REQUEST: 75m
       WORKER_OCP_CPU_LIMIT: 200m
-      WORKER_OCP_MEMORY_REQUEST: 300Mi
+      WORKER_OCP_MEMORY_REQUEST: 600Mi
       WORKER_OCP_MEMORY_LIMIT: 600Mi
       # worker-priority
-      WORKER_PRIORITY_MIN_REPLICAS: 2
-      WORKER_PRIORITY_CPU_REQUEST: 250m
+      WORKER_PRIORITY_MIN_REPLICAS: 3
+      WORKER_PRIORITY_CPU_REQUEST: 75m
       WORKER_PRIORITY_CPU_LIMIT: 500m
       WORKER_PRIORITY_MEMORY_REQUEST: 1Gi
       WORKER_PRIORITY_MEMORY_LIMIT: 2Gi
       # worker-refresh
-      WORKER_REFRESH_MIN_REPLICAS: 2
-      WORKER_REFRESH_CPU_REQUEST: 100m
+      WORKER_REFRESH_MIN_REPLICAS: 3
+      WORKER_REFRESH_CPU_REQUEST: 50m
       WORKER_REFRESH_CPU_LIMIT: 200m
-      WORKER_REFRESH_MEMORY_REQUEST: 300Mi
+      WORKER_REFRESH_MEMORY_REQUEST: 420Mi
       WORKER_REFRESH_MEMORY_LIMIT: 600Mi
       # worker-summary
-      WORKER_SUMMARY_MIN_REPLICAS: 2
-      WORKER_SUMMARY_CPU_REQUEST: 100m
+      WORKER_SUMMARY_MIN_REPLICAS: 3
+      WORKER_SUMMARY_CPU_REQUEST: 75m
       WORKER_SUMMARY_CPU_LIMIT: 200m
-      WORKER_SUMMARY_MEMORY_REQUEST: 350Mi
-      WORKER_SUMMARY_MEMORY_LIMIT: 700Mi
+      WORKER_SUMMARY_MEMORY_REQUEST: 650Mi
+      WORKER_SUMMARY_MEMORY_LIMIT: 800Mi
       # worker-hcs
-      WORKER_HCS_MIN_REPLICAS: 1
-      WORKER_HCS_CPU_REQUEST: 100m
+      WORKER_HCS_MIN_REPLICAS: 3
+      WORKER_HCS_CPU_REQUEST: 75m
       WORKER_HCS_CPU_LIMIT: 200m
-      WORKER_HCS_MEMORY_REQUEST: 300Mi
+      WORKER_HCS_MEMORY_REQUEST: 425Mi
       WORKER_HCS_MEMORY_LIMIT: 600Mi
 
 
   # Production:
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: c00b6f338b5561162b92fbbb39329e95895c1adf
+    ref: 748a149a9adb30af6bda37ff1cffa37079c476d7
     parameters:
       ############# MIGRATIONS #############
       # Change these settings when deploying migrations to Production
       # Migrations Image Tag
-      DBM_IMAGE_TAG: 00a2bca
+      DBM_IMAGE_TAG: 498d476
       # Migrations Invocation
-      DBM_INVOCATION: "01"
+      DBM_INVOCATION: "00"
       # Migration directive is optional and should be in the form of:
       # <app>[:<migration>][,<app>[:<migration>]...]
       # Ex: "reporting:0200,api:0050"
@@ -291,7 +288,7 @@ resourceTemplates:
       ENABLE_TRINO_SOURCE_TYPE: 'GCP'
       ENABLE_TRINO_ACCOUNTS: 'acct7049367'
       QE_SCHEMA: 'acct6089719'
-      TRINO_DATE_STEP: 1
+      TRINO_DATE_STEP: 3  # 5
       AUTO_DATA_INGEST: True
       RETAIN_NUM_MONTHS: 5
       # INITIAL_INGEST_OVERRIDE: 'True'
@@ -325,7 +322,7 @@ resourceTemplates:
       SCHEDULER_MEMORY_REQUEST: 256Mi
       SCHEDULER_MEMORY_LIMIT: 512Mi
       # sources-client
-      SOURCES_CLIENT_MIN_REPLICAS: 1
+      SOURCES_CLIENT_MIN_REPLICAS: 3
       SOURCES_CLIENT_CPU_REQUEST: 250m
       SOURCES_CLIENT_CPU_LIMIT: 500m
       SOURCES_CLIENT_MEMORY_REQUEST: 256Mi
@@ -339,13 +336,13 @@ resourceTemplates:
       # workers global
       WORKER_PROC_ALIVE_TIMEOUT: 9
       # worker-celery
-      WORKER_CELERY_MIN_REPLICAS: 2
+      WORKER_CELERY_MIN_REPLICAS: 3
       WORKER_CELERY_CPU_REQUEST: 200m
       WORKER_CELERY_CPU_LIMIT: 1
       WORKER_CELERY_MEMORY_REQUEST: 1Gi
       WORKER_CELERY_MEMORY_LIMIT: 2Gi
       # worker-cost-model
-      WORKER_COST_MODEL_MIN_REPLICAS: 2  # 2
+      WORKER_COST_MODEL_MIN_REPLICAS: 3
       WORKER_COST_MODEL_CPU_REQUEST: 100m
       WORKER_COST_MODEL_CPU_LIMIT: 300m
       WORKER_COST_MODEL_MEMORY_REQUEST: 512Mi
@@ -357,7 +354,7 @@ resourceTemplates:
       WORKER_DOWNLOAD_MEMORY_REQUEST: 5Gi
       WORKER_DOWNLOAD_MEMORY_LIMIT: 8Gi
       # worker-ocp
-      WORKER_OCP_MIN_REPLICAS: 5  # 5
+      WORKER_OCP_MIN_REPLICAS: 7  # 7
       WORKER_OCP_CPU_REQUEST: 300m
       WORKER_OCP_CPU_LIMIT: 500m
       WORKER_OCP_MEMORY_REQUEST: 1Gi
@@ -369,19 +366,19 @@ resourceTemplates:
       WORKER_PRIORITY_MEMORY_REQUEST: 3Gi
       WORKER_PRIORITY_MEMORY_LIMIT: 5Gi
       # worker-refresh
-      WORKER_REFRESH_MIN_REPLICAS: 1  # 1
+      WORKER_REFRESH_MIN_REPLICAS: 3  # 3
       WORKER_REFRESH_CPU_REQUEST: 100m
       WORKER_REFRESH_CPU_LIMIT: 200m
       WORKER_REFRESH_MEMORY_REQUEST: 300Mi
       WORKER_REFRESH_MEMORY_LIMIT: 600Mi
       # worker-summary
-      WORKER_SUMMARY_MIN_REPLICAS: 6  # 4
+      WORKER_SUMMARY_MIN_REPLICAS: 8  # 4
       WORKER_SUMMARY_CPU_REQUEST: 100m
       WORKER_SUMMARY_CPU_LIMIT: 200m
       WORKER_SUMMARY_MEMORY_REQUEST: 512Mi
       WORKER_SUMMARY_MEMORY_LIMIT: 2Gi
       # worker-hcs
-      WORKER_HCS_MIN_REPLICAS: 1
+      WORKER_HCS_MIN_REPLICAS: 3
       WORKER_HCS_CPU_REQUEST: 100m
       WORKER_HCS_CPU_LIMIT: 200m
       WORKER_HCS_MEMORY_REQUEST: 300Mi
@@ -397,24 +394,24 @@ resourceTemplates:
     disable: true # tells app-sre to not actually run the deploy job for this target
     ref: internal # altered by bonfire
     parameters:
-      IMAGE_TAG: 3.1.2-metastore-009
+      IMAGE_TAG: 3.1.2-metastore-010
       S3_BUCKET_NAME: hccm-eph-s3
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 7fb88c1eff98c9b75fee9dba71f7d3733c2f2135
+    ref: ab1350614a39ae246c77fedd1bc97c56da3e4347
     parameters:
-      IMAGE_TAG: 3.1.2-metastore-009
+      IMAGE_TAG: 3.1.2-metastore-010
       S3_BUCKET_NAME: hccm-stage-s3
       CPU_REQUEST: 200m
       CPU_LIMIT: 500m
-      MEMORY_REQUEST: 8Gi
+      MEMORY_REQUEST: 6Gi
       MEMORY_LIMIT: 16Gi
       MAX_HEAP_SIZE: 14G
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 7fb88c1eff98c9b75fee9dba71f7d3733c2f2135
+    ref: ab1350614a39ae246c77fedd1bc97c56da3e4347
     parameters:
-      IMAGE_TAG: 3.1.2-metastore-009
+      IMAGE_TAG: 3.1.2-metastore-010
       MIN_REPLICAS: 1
       S3_BUCKET_NAME: hccm-prod-s3
       CPU_REQUEST: 200m
@@ -452,21 +449,21 @@ resourceTemplates:
   # Staging
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: e3697da83c6c3e02ab835b00740ed265acb6bcda
+    ref: 9f03f48c1fb15f80d527b175a78379d7b5cdf39f
     parameters:
-      CONFIGMAP_HASH: '000002' # when a `ref` update only contains changes to ConfigMaps, randomize this value to cause trino to redeploy
-      IMAGE_TAG: 392-001
+      CONFIGMAP_HASH: '000003' # when a `ref` update only contains changes to ConfigMaps, randomize this value to cause trino to redeploy
+      IMAGE_TAG: 405-002
       S3_BUCKET_NAME: hccm-stage-s3
       MACHINE_POOL_OPTION: memory-optimized
       COORDINATOR_REPLICAS: 1
       WORKER_REPLICAS: 3
-      COORDINATOR_CPU_REQUEST: 1
+      COORDINATOR_CPU_REQUEST: 600m
       COORDINATOR_CPU_LIMIT: 2
-      COORDINATOR_MEMORY_REQUEST: 24Gi
+      COORDINATOR_MEMORY_REQUEST: 12Gi
       COORDINATOR_MEMORY_LIMIT: 36Gi
-      WORKER_CPU_REQUEST: 1
+      WORKER_CPU_REQUEST: 300m
       WORKER_CPU_LIMIT: 2
-      WORKER_MEMORY_REQUEST: 10Gi
+      WORKER_MEMORY_REQUEST: 6Gi
       WORKER_MEMORY_LIMIT: 10Gi
       QUERY_MAX_MEMORY_PER_NODE: 6.5GB # (jvm max - heap headroom)
       QUERY_MAX_MEMORY: 19.5GB # (max per node * worker count)
@@ -478,7 +475,7 @@ resourceTemplates:
   # Production
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 39e834e7ccb82eb60bd24a44f70ce36aa14da269
+    ref: cad775dc9aa042f25ea05aceff3315cc0a26d62b
     parameters:
       CONFIGMAP_HASH: 'gffsf6' # when a `ref` update only contains changes to ConfigMaps, randomize this value to cause trino to redeploy
       IMAGE_TAG: 392-001
@@ -538,7 +535,11 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: master
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: project-koku-koku-daily-gh-build-main
     parameters:
       PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
       REPLICAS: 1
@@ -551,18 +552,20 @@ resourceTemplates:
       S3_BUCKET_NAME: hccm-stage-s3
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: e95293355d4ac58a8ddce5815cb05c8bbb739f1e
+    ref: bfc767d483bff7fe2b8d2682dfc57e7fc50b003a
     parameters:
       PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
       REPLICAS: 1
       APP_URL_PREFIX: /api/cost-management/v1/koku-daily/
       CPU_REQUEST: 100m
       CPU_LIMIT: 250m
-      MEMORY_REQUEST: 200Mi
-      MEMORY_LIMIT: 250Mi
+      MEMORY_REQUEST: 500Mi
+      MEMORY_LIMIT: 1Gi
       EMAIL_GROUPS: {"engineering": "cost-mgmt-metrics-eng@redhat.com", "marketing": "cost-mgmt-metrics-mkt@redhat.com"}
+      EMAIL_SCHEDULE: '0 17 * * *'
       S3_BUCKET_NAME: hccm-prod-s3
       S3_SCHEDULE: "0 19 * * *"
+      WEEKLY_REPORT_SCHEDULED_DAY: "3"
 
 - name: nise-populator
   path: /deploy/clowdapp.yaml
@@ -582,7 +585,7 @@ resourceTemplates:
       MEMORY_LIMIT: 2Gi
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 542bdf1422c56863956558d27ad7774ddb2d61be
+    ref: 991ca48b4afc734fffaeb1853d311b5f2095e826
     parameters:
       CPU_REQUEST: 250m
       CPU_LIMIT: 500m

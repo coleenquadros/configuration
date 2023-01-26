@@ -73,40 +73,146 @@ spec:
         service: image-builder
         env: prod
     - expr: |
-        sum(rate(image_builder_composer_total_failed_compose_requests[1d]))
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[1d]))
         /
-        sum(rate(total_compose_requests[1d]))
+        sum(rate(image_builder_composer_request_count{path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[1d]))
       record: image_builder_composer_total_failed_compose_requests:burnrate1d
     - expr: |
-        sum(rate(image_builder_composer_total_failed_compose_requests[1h]))
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[1h]))
         /
-        sum(rate(total_compose_requests[1h]))
+        sum(rate(image_builder_composer_request_count{path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[1h]))
       record: image_builder_composer_total_failed_compose_requests:burnrate1h
     - expr: |
-        sum(rate(image_builder_composer_total_failed_compose_requests[2h]))
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[2h]))
         /
-        sum(rate(total_compose_requests[2h]))
+        sum(rate(image_builder_composer_request_count{path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[2h]))
       record: image_builder_composer_total_failed_compose_requests:burnrate2h
     - expr: |
-        sum(rate(image_builder_composer_total_failed_compose_requests[30m]))
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[30m]))
         /
-        sum(rate(total_compose_requests[30m]))
+        sum(rate(image_builder_composer_request_count{path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[30m]))
       record: image_builder_composer_total_failed_compose_requests:burnrate30m
     - expr: |
-        sum(rate(image_builder_composer_total_failed_compose_requests[3d]))
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[3d]))
         /
-        sum(rate(total_compose_requests[3d]))
+        sum(rate(image_builder_composer_request_count{path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[3d]))
       record: image_builder_composer_total_failed_compose_requests:burnrate3d
     - expr: |
-        sum(rate(image_builder_composer_total_failed_compose_requests[5m]))
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[5m]))
         /
-        sum(rate(total_compose_requests[5m]))
+        sum(rate(image_builder_composer_request_count{path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[5m]))
       record: image_builder_composer_total_failed_compose_requests:burnrate5m
     - expr: |
-        sum(rate(image_builder_composer_total_failed_compose_requests[6h]))
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[6h]))
         /
-        sum(rate(total_compose_requests[6h]))
+        sum(rate(image_builder_composer_request_count{path="/api/image-builder-composer/v2/compose", method="POST", subsystem="composer"}[6h]))
       record: image_builder_composer_total_failed_compose_requests:burnrate6h
+    - alert: NonComposerErrors_2PercentBurn
+      annotations:
+        message: "High burn rate: {{ $value | humanizePercentage }} of non-compose requests are failing"
+        description: "{{ $value | humanizePercentage }} of non-compose requests have failed over the past hour"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
+      expr: |
+        sum(image_builder_composer_total_failed_requests:burnrate5m) > (13.44 * (1-0.95))
+        and
+        sum(image_builder_composer_total_failed_requests:burnrate1h) > (13.44 * (1-0.95))
+      for: 2m
+      labels:
+        severity: medium # will monitor for 7d and then update
+        service: image-builder
+        env: prod
+    - alert: NonComposerErrors_5PercentBurn
+      annotations:
+        message: "High burn rate: {{ $value | humanizePercentage }} of non-compose requests are failing"
+        description: "{{ $value | humanizePercentage }} of non-compose requests have failed over the past 6 hours"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
+      expr: |
+        sum(image_builder_composer_total_failed_requests:burnrate30m) > (5.6 * (1-0.95))
+        and
+        sum(image_builder_composer_total_failed_requests:burnrate6h) > (5.6 * (1-0.95))
+      for: 15m
+      labels:
+        severity: medium # will monitor for 7d and then update
+        service: image-builder
+        env: prod
+    - alert: NonComposerErrors_10PercentBurn
+      annotations:
+        message: "High burn rate: {{ $value | humanizePercentage }} of non-compose requests are failing"
+        description: "{{ $value | humanizePercentage }} of non-compose requests have failed over the past day"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
+      expr: |
+        (
+          sum(image_builder_composer_total_failed_requests:burnrate2h) > (2.8 * (1-0.95))
+          and
+          sum(image_builder_composer_total_failed_requests:burnrate1d) > (2.8 * (1-0.95))
+        )
+        or
+        (
+          sum(image_builder_composer_total_failed_requests:burnrate6h) > (1.00 * (1-0.95))
+          and
+          sum(image_builder_composer_total_failed_requests:burnrate3d) > (1.00 * (1-0.95))
+        )
+      for: 1h
+      labels:
+        severity: info
+        service: image-builder
+        env: prod
+    - expr: |
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[1d]))
+        /
+        sum(rate(image_builder_composer_request_count{path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[1d]))
+      record: image_builder_composer_total_failed_requests:burnrate1d
+    - expr: |
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[1h]))
+        /
+        sum(rate(image_builder_composer_request_count{path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[1h]))
+      record: image_builder_composer_total_failed_requests:burnrate1h
+    - expr: |
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[2h]))
+        /
+        sum(rate(image_builder_composer_request_count{path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[2h]))
+      record: image_builder_composer_total_failed_requests:burnrate2h
+    - expr: |
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[30m]))
+        /
+        sum(rate(image_builder_composer_request_count{path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[30m]))
+      record: image_builder_composer_total_failed_requests:burnrate30m
+    - expr: |
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[3d]))
+        /
+        sum(rate(image_builder_composer_request_count{path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[3d]))
+      record: image_builder_composer_total_failed_requests:burnrate3d
+    - expr: |
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[5m]))
+        /
+        sum(rate(image_builder_composer_request_count{path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[5m]))
+      record: image_builder_composer_total_failed_requests:burnrate5m
+    - expr: |
+        sum(rate(image_builder_composer_request_count{code=~"5.*", path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[6h]))
+        /
+        sum(rate(image_builder_composer_request_count{path!="/api/image-builder-composer/v2/compose", subsystem="composer"}[6h]))
+      record: image_builder_composer_total_failed_requests:burnrate6h
+    - alert: ComposerSlowResponse_FastBurn
+      annotations:
+        message: 'High burn rate: {{ $value | humanizePercentage }} of requests are slower than 200ms'
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
+      expr: |
+        (
+          image_builder_composer_http_requests:latency_rate1h{latency="0.2"} > (6.72*(1 - 0.95))
+          and
+          image_builder_composer_http_requests:latency_rate5m{latency="0.2"} > (6.72*(1 - 0.95))
+        ) 
+        or
+        (
+          image_builder_composer_http_requests:latency_rate6h{latency="0.2"} > (5.6*(1 - 0.95))
+          and
+          image_builder_composer_http_requests:latency_rate30m{latency="0.2"} > (5.6*(1 - 0.95))
+        )
+      labels:
+        latency: "0.2"
+        severity: medium
+        service: image-builder
+        env: prod
     - alert: ComposerSlowResponse_FastBurn
       annotations:
         message: 'High burn rate: {{ $value | humanizePercentage }} of requests are slower than 200ms'

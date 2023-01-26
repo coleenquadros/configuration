@@ -1,0 +1,102 @@
+apiVersion: hive.openshift.io/v1
+kind: SelectorSyncSet
+metadata:
+  annotations:
+    kubernetes.io/description: Mitigate https://issues.redhat.com/browse/APPSRE-6748
+      by deleting the insights-operator pod, resetting failures to 0, leading to a healthy status.
+  labels:
+    managed.openshift.io/gitRepoName: app-interface
+    managed.openshift.io/osd: 'true'
+  name: insights-operator-integration-hack
+spec:
+  clusterDeploymentSelector:
+    matchLabels:
+      api.openshift.com/managed: 'true'
+    matchExpressions:
+    - key: api.openshift.com/environment
+      operator: In
+      values:
+      - integration
+    - key: api.openshift.com/fedramp
+      operator: NotIn
+      values:
+      - 'true'
+  resourceApplyMode: Sync
+  resources:
+  - apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      annotations:
+        kubernetes.io/description: Mitigate https://issues.redhat.com/browse/APPSRE-6748
+          by deleting the insights-operator pod, resetting failures to 0, leading to a healthy status.
+      labels:
+        app: insights-operator-integration-hack
+      name: insights-operator-integration-hack
+      namespace: openshift-insights
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      annotations:
+        kubernetes.io/description: Mitigate https://issues.redhat.com/browse/APPSRE-6748
+          by deleting the insights-operator pod, resetting failures to 0, leading to a healthy status.
+      labels:
+        app: insights-operator-integration-hack
+      name: insights-operator-integration-hack
+      namespace: openshift-insights
+    rules:
+    - apiGroups: [""]
+      resources: ["pods"]
+      verbs: ["list", "delete"]
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      annotations:
+        kubernetes.io/description: Mitigate https://issues.redhat.com/browse/APPSRE-6748
+          by deleting the insights-operator pod, resetting failures to 0, leading to a healthy status.
+      labels:
+        app: insights-operator-integration-hack
+      name: insights-operator-integration-hack
+      namespace: openshift-insights
+    subjects:
+    - kind: ServiceAccount
+      name: insights-operator-integration-hack
+    roleRef:
+      kind: Role
+      name: insights-operator-integration-hack
+      apiGroup: rbac.authorization.k8s.io
+  - apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+      annotations:
+        kubernetes.io/description: Mitigate https://issues.redhat.com/browse/APPSRE-6748
+          by deleting the insights-operator pod, resetting failures to 0, leading to a healthy status.
+      labels:
+        app: insights-operator-integration-hack
+      name: insights-operator-integration-hack
+      namespace: openshift-insights
+    spec:
+      schedule: "0 * * * *"
+      jobTemplate:
+        spec:
+          template:
+            metadata:
+              labels:
+                app: insights-operator-integration-hack
+            spec:
+              serviceAccountName: insights-operator-integration-hack
+              restartPolicy: Never
+              containers:
+              - name: oc
+                image: quay.io/openshift/origin-cli:latest
+                command: ["/bin/sh", "-c"]
+                args:
+                - |
+                  oc delete pod -l app=insights-operator
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                    - ALL
+                  runAsNonRoot: true
+                  seccompProfile:
+                    type: RuntimeDefault

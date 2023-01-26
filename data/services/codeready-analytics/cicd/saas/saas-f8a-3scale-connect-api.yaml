@@ -1,0 +1,53 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: codeready-analytics
+  component: f8a-3scale-connect-api
+
+name: saas-crda-f8a-3scale-connect-api
+description: SaaS tracking file for codeready-analytics f8a-3scale-connect-api
+
+app:
+  $ref: /services/codeready-analytics/app.yml
+
+pipelinesProvider:
+  $ref: /services/codeready-analytics/pipelines/tekton.codeready-analytics-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-codeready-analytics-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/openshiftio/rhel-fabric8-analytics-f8a-3scale-connect-api
+
+authentication:
+  image:
+    path: app-sre/quay/openshiftio-pull
+    field: all
+
+resourceTemplates:
+- name: f8a-3scale-connect-api
+  url: https://github.com/fabric8-analytics/f8a-3scale-connect-api
+  path: /openshift/template.yaml
+  parameters:
+    DOCKER_REGISTRY: quay.io
+    DOCKER_IMAGE: openshiftio/rhel-fabric8-analytics-f8a-3scale-connect-api
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: 9d40ef56104548c48bc5cd963ba6d84269769518
+    parameters:
+      IMAGE_TAG: a782753 
+      REPLICAS: 1
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 9d40ef56104548c48bc5cd963ba6d84269769518
+    parameters:
+      IMAGE_TAG: ad9cfa3 
+      REPLICAS: 1

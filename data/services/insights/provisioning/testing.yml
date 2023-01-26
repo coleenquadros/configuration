@@ -1,0 +1,43 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  platform: insights
+  service: provisioning
+name: provisioning-testing
+description: provisioning acceptance testing
+app:
+  $ref: /services/insights/provisioning/app.yml
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: envision-team
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+publishJobLogs: true
+imagePatterns:
+- quay.io/cloudservices
+
+managedResourceTypes:
+- ClowdJobInvocation
+- Job
+
+resourceTemplates:
+- name: provisioning-testing
+  url: https://github.com/RHEnVision/provisioning-backend
+  path: /deploy/testing.yaml
+  targets:
+  - namespace:
+      $ref: /services/insights/provisioning/namespaces/provisioning-stage.yml
+    ref: a1a1fc0023a8f853a8979e18e40797347548f6c1
+    promotion:
+      auto: true
+      subscribe:
+      - provisioning-stage-deploy-success-channel
+      publish:
+      - provisioning-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: provisioning-stage-deploy-success-channel
+        data:
+        - parent_saas: provisioning
+          target_config_hash: d2272df9bec0577a
+          type: parent_saas_config

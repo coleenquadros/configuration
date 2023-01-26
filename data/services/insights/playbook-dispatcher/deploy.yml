@@ -24,7 +24,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
 
 managedResourceTypes:
@@ -67,11 +67,12 @@ resourceTemplates:
       RETURN_URL: https://cert.${PLATFORM_HOSTNAME}/api/ingress/v1/upload
   - namespace:
       $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
-    ref: a60b5e4ab21dec727ff3da9ba85aa16f4e44f2e7
+    ref: 01f91293e762df5d42dbeec88dfe6b8df57920c0
     parameters:
       LOG_LEVEL: info
       RETURN_URL: https://cert.${PLATFORM_HOSTNAME}/api/ingress/v1/upload
       POPULATOR_RUN_NUMBER: "2"
+      REPLICAS_API: 3
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -131,14 +132,25 @@ resourceTemplates:
           version: 3
   - namespace:
       $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
-    ref: a60b5e4ab21dec727ff3da9ba85aa16f4e44f2e7
+    ref: 047e256da507f29d0e0ae803a4b1d688eb74a2cb
+    # NOTE:  The ref above "pins" the deployment config to an older version of the config
+    # which is NOT configured to use managed kakfa.
     parameters:
+      IMAGE_TAG: 01f9129
+      # NOTE:  The IMAGE_TAG allows us to use a newer image, while the ref above allows
+      # us to use an older config (which is not configured to use managed kafka).
       EVENT_CONSUMER_REPLICAS: 0
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    # Set this ref to point at the tip of the ephemeral_config branch.
+    # The configuration in the ephemeral_config branch will need to be
+    # updated as we go along but it shouldn't contain "managed kafka"
+    # settings.
+    ref: 68f6d23c28b8f87401af546900961d4654db2e34
     disable: true
-    ref: internal
     parameters:
+      # Set the image tag to be the latest and greatest
+      IMAGE_TAG: 3ba24c0
       KAFKA_BOOTSTRAP_HOST: ephemeral-kafka-bootstrap
       KAFKA_BOOTSTRAP_PORT: 9092
       KAFKA_REPLICATION_FACTOR: '1'
@@ -197,4 +209,10 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: a60b5e4ab21dec727ff3da9ba85aa16f4e44f2e7
+    ref: 01f91293e762df5d42dbeec88dfe6b8df57920c0
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: 01f91293e762df5d42dbeec88dfe6b8df57920c0

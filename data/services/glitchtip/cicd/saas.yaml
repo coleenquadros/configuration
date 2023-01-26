@@ -16,8 +16,8 @@ pipelinesProvider:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
-  channel: managed-by-cssre
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: sd-app-sre-info
 
 authentication:
   image:
@@ -28,30 +28,81 @@ authentication:
 managedResourceTypes:
 - Deployment
 - Service
-- CronJob
 - ServiceAccount
 - ConfigMap
-- Job
 
 imagePatterns:
 - quay.io/cs-sre/glitchtip
+- quay.io/app-sre/glitchtip
+
+allowedSecretParameterPaths:
+- app-interface/app-sre/glitchtip
 
 resourceTemplates:
+- name: glitchtip-app-sre
+  url: https://github.com/app-sre/glitchtip
+  path: /openshift/template.yaml
+  parameters:
+    KEYCLOAK_URL: https://auth.redhat.com/auth
+    KEYCLOAK_REALM: EmployeeIDP
+  targets:
+  - namespace:
+      $ref: /services/glitchtip/namespaces/glitchtip-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-glitchtip-gh-build-main
+    parameters:
+      GLITCHTIP_DOMAIN: https://glitchtip.stage.devshift.net
+      GLITCHTIP_MAX_EVENT_LIFE_DAYS: 14
+    secretParameters:
+    - name: SECRET_KEY
+      secret:
+        path: app-interface/app-sre/glitchtip/stage/secret_key
+        field: secret_key
+        version: 1
+    # admin user
+    - name: API_USER_1_EMAIL
+      secret:
+        path: app-interface/app-sre/glitchtip/stage/users/admin
+        field: email
+        version: 1
+    - name: API_USER_1_PASSWORD
+      secret:
+        path: app-interface/app-sre/glitchtip/stage/users/admin
+        field: password
+        version: 1
+    # qontract-reconcile user
+    - name: API_USER_2_EMAIL
+      secret:
+        path: app-interface/app-sre/glitchtip/stage/users/qontract-reconcile
+        field: email
+        version: 1
+    - name: API_USER_2_TOKEN
+      secret:
+        path: app-interface/app-sre/glitchtip/stage/users/qontract-reconcile
+        field: token
+        version: 1
+    # CI/CD acceptance user
+    - name: API_USER_3_EMAIL
+      secret:
+        path: app-interface/app-sre/glitchtip/stage/users/acceptance
+        field: email
+        version: 2
+    - name: API_USER_3_TOKEN
+      secret:
+        path: app-interface/app-sre/glitchtip/stage/users/acceptance
+        field: token
+        version: 2
+    promotion:
+      publish:
+      - glitchtip-stage-deploy-success-channel
+
 - name: glitchtip
   url: https://github.com/rh-cssre/glitchtip-frontend
   path: /openshift/template.yaml
   targets:
-  - namespace:
-      $ref: /services/glitchtip/namespaces/glitchtip-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: rh-cssre-glitchtip-frontend-gh-build-master
-    parameters:
-      GLITCHTIP_DOMAIN: https://glitchtip.stage.devshift.net
-      KEYCLOAK_URL: https://auth.redhat.com/auth
-      KEYCLOAK_REALM: EmployeeIDP
   - namespace:
       $ref: /services/glitchtip/namespaces/glitchtip-production.yaml
     ref: master
@@ -65,13 +116,13 @@ resourceTemplates:
       KEYCLOAK_REALM: EmployeeIDP
 
 - name: glitchtip-observability
-  url: https://github.com/rh-cssre/glitchtip-frontend
-  path: /openshift/grafana
+  url: https://github.com/app-sre/glitchtip
+  path: /grafana
   provider: directory
   targets:
   - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
-    ref: master
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: main
   - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: a32178bcaea57aea9dca415c114ed2175658adfa
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: 91d9d044b9ee2af07a8ef6d61044580e008b4449

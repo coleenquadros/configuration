@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: push-deploy-event-to-changelog
+spec:
+  params:
+    - name: env_name
+      type: string
+    - name: app_name
+      type: string
+    - name: task_status
+      type: string
+  steps:
+    - name: push-deploy-event-to-changelog
+      image: {{ ubi8_ubi_minimal_image }}:{{ ubi8_ubi_minimal_image_tag }}
+      resources:
+        limits:
+          cpu: 20m
+          memory: 30Mi
+        requests:
+          cpu: 20m
+          memory: 30Mi
+      script: |
+        #!/usr/bin/env bash
+        echo "Sending deploy event to platform changelog"
+
+        # TODO: Send the commit ref as well
+        curl -X POST http://platform-changelog-api.platform-changelog-stage.svc.cluster.local:8000/api/v1/tekton '{"timestamp": now(), "status": $(params.task_status), "app": $(params.app_name), "env": $(params.env_name)}' -H "Content-Type: application/json"

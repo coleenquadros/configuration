@@ -31,4 +31,6 @@ The target response time for 90 percent of the requests should be less than or e
 
 ## Alerts
 
-TODO: There are no alert associated to this SLO yet as we are still performing relevant tests to gather more data in designing effective SLO-based alerts.
+The following are the multi-window, multi-burn-rate alerts that are associated with this SLO.
+
+- LatencyBudgetBurn

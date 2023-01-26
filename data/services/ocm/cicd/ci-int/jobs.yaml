@@ -25,8 +25,12 @@ config:
     gl_project: uhc-clusters-service
     jobs:
     - 'uhc-integration-tests':
-        display_name: UHC integration tests
+        display_name: UHC api tests (stage)
         environment: staging
+        upstream: service-uhc-clusters-service-gl-build-master
+    - 'uhc-integration-tests':
+        display_name: UHC api tests (integration)
+        environment: integration
         upstream: service-uhc-clusters-service-gl-build-master
 
 - project:
@@ -38,6 +42,17 @@ config:
     jobs:
     - 'ocm-integration-full-cycle-tests':
         display_name: Full Cycle Tests periodic stage
+        environment: staging
+
+- project:
+    name: full-cycle-upgrade-tests
+    label: sd-uhc
+    node: rhel8
+    gl_group: service
+    gl_project: uhc-clusters-service
+    jobs:
+    - 'ocm-upgrade-full-cycle-tests':
+        display_name: Upgrade Full Cycle Tests periodic stage
         environment: staging
 
 - project:
@@ -63,6 +78,9 @@ config:
         display_name: OCM UI deploy to cloud.redhat.com (prod-stable)
         mode: stable
         branch: "stable"
+    - 'ocm-cypress-smoke':
+        display_name: OCM UI smoke tests for staging
+        default_branch: master
 
 - project:
     name: ocm-resources
@@ -135,3 +153,34 @@ config:
     - 'gl-build-master':
         display_name: OCM Add-On Test Operator build image
         concurrent_build: false
+
+- project:
+    name: ocm-backend-ci-tests
+    label: sd-uhc
+    node: rhel8
+    gl_group: service
+    gl_project: ocm-backend-tests
+    quay_org: app-sre
+    jobs:
+    - 'ocm-backend-ci':
+        display_name: OCM Backend CI Tests by Profiles
+        environment: staging
+        default_channel: candidate
+        default_profiles: rosa-hypershift
+        cron_expression: '0 0 * * 1'
+    - 'gl-build-master':
+        display_name: OCM QE Test build image
+        branch: "master"
+        concurrent_build: false
+
+- project:
+    name: ocm-acceptance-tests
+    label: sd-uhc
+    node: rhel8
+    gl_group: ocm
+    gl_project: acceptance-tests
+    quay_org: app-sre
+    jobs:
+    - 'gl-build-master':
+        display_name: OCM Acceptance Tests push image
+        branch: "main"

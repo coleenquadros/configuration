@@ -1,0 +1,36 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/ccx-data-pipeline-prod/ccx.prometheusrules.yaml
+
+evaluation_interval: 30m
+
+tests:
+
+  - interval: 1m
+    input_series:
+      - series: aws_rds_free_storage_space_average{container="cloudwatch-exporter", dbinstance_identifier="ccx-notification-prod", namespace="app-sre-observability-production"}
+        values: '48318382080+0x59 41875931136+0x59 48318382080+0x59' # 45Gb free for 1 hour then 39Gb free for next hour then 45Gb for an hour
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: CCXNotificationDBLowStorageSpace
+        exp_alerts:
+      - eval_time: 2h
+        alertname: CCXNotificationDBLowStorageSpace
+        exp_alerts:
+          - exp_labels:
+              container: cloudwatch-exporter
+              dbinstance_identifier: ccx-notification-prod
+              namespace: app-sre-observability-production
+              service: insights
+              severity: high
+              app_team: ccx-data-pipeline
+              env: prod
+            exp_annotations:
+              message: "The current free storage space of DB instance ccx-notification-prod is less than 20%."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
+              dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20insights-prod&var-region=default&var-dbinstanceidentifier=ccx-notification-prod&from=now-7d&to=now"
+      - eval_time: 150m
+        alertname: CCXNotificationDBLowStorageSpace
+        exp_alerts:

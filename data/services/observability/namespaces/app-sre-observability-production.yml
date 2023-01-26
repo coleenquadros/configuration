@@ -21,6 +21,7 @@ networkPoliciesAllow:
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 - $ref: /services/observability/shared-resources/grafana.yml
+- $ref: /services/observability/shared-resources/grafana-dashboards.yml
 
 managedRoles: true
 
@@ -37,21 +38,7 @@ openshiftResources:
   path: /observability/grafana.route.yaml
   variables:
     environment: ''
-    host: grafana.app-sre.devshift.net
-- provider: resource
-  path: /observability/grafana-via-openshift.route.yaml
-# Promlens
-- provider: vault-secret
-  path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-api-token
-  version: 1
-  annotations:
-    qontract.recycle: "true"
-- provider: vault-secret
-  path: osd-sre/promlens
-  name: promlens-license
-  version: 3
-  annotations:
-    qontract.recycle: "true"
+    host: grafana.ext.devshift.net
 ## PushGateway
 - provider: resource-template
   type: jinja2
@@ -71,7 +58,7 @@ openshiftResources:
 ## Hypershift-platform Observatorium Credentials
 - provider: vault-secret
   path: osd-sre/rhobs-hypershift-platform
-  version: 3
+  version: 4
   name: hypershift-token-refresher
   annotations:
     qontract.recycle: "true"
@@ -96,136 +83,6 @@ openshiftResources:
   name: rhoc-token-refresher
 
 # ConfigMaps
-## Grafana Dashboards
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-appsre-grafana.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-openshift-router.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-appsre-alb.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-appsre-aws-waf.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-appsre-cloudflare.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-appsre-rds.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-appsre-sqs.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-appsre-elasticache.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-blackbox-exporter.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-cpu-throttling.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-osdv3-tenant-compute-resources.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-osdv4-tenant-compute-resources.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-playground.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-prometheus-health.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-cluster.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-namespace-pods.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-namespace-workloads.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-node-pods.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-pod.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-workload.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-k8s-networking-cluster.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-k8s-use-cluster.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-k8s-use-node.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-che-graphite.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-jenkins-overview.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-sd-scale.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-sd-cicd.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-hive.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-hive-capacity.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-rhche.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-uhc-clusters-service.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-clusters-service-valet.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-uhc-gateway.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-bayesian-monitoring.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-bayesian-availability.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-aws-account-operator.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-pagerduty-operator.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-certman-operator.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-elasticsearch.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-cincinnati-valet.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-devfile-registry.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-devfile-registry-redhat.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-ephemeral-cluster.configmap.yaml
-  validate_json: true
 ## Cloudwatch exporters
 - provider: resource-template
   path: /observability/cloudwatch-exporter/cloudwatch-exporter-config.configmap.yaml
@@ -272,52 +129,6 @@ openshiftResources:
   path: /observability/cloudwatch-exporter/crc/cloudwatch-exporter-config.configmap.yaml
   variables:
     rds_delay_seconds: 120
-## OCM-Quay
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-ocm-quay.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-ocm-quay-aws-resources.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-ocm-quay-api.configmap.yaml
-  validate_json: true
-## Quay
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-quay.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-quay-by-service.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-quayio-prod-aws-resources.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-quay-api.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-quay-apis-by-service.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-deadmanssnitch-operator.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-rate-limiting.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-quay-gc.configmap.yaml
-  validate_json: true
-  ### Kas Fleet Manager
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-kas-fleet-manager-prod-slos.configmap.yaml
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-kas-fleet-manager-metrics.configmap.yaml
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-kas-fleet-manager-kafka-and-strimzi-version-upgrade-information.configmap.yaml
-### MAS-SSO
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-sso-mas-monitoring.configmap.yaml
-  validate_json: true
 
 # Secrets
 ## Blackbox Exporter
@@ -334,10 +145,11 @@ openshiftResources:
   path: /observability/grafana/grafana-config.secret.yaml
   variables:
     auto_assign_org_role: Viewer
-    external_url: https://grafana.app-sre.devshift.net
+    external_url: https://grafana.ext.devshift.net
 - provider: vault-secret
-  path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-proxy-config
-  version: 3
+  name: grafana-proxy-config
+  path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-proxy-config-ext
+  version: 1
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-proxy-config-openshift
   version: 2
@@ -507,25 +319,6 @@ externalResources:
       cluster:
         $ref: /openshift/app-sre-prod-01/cluster.yml
       access_level: read-only
-  ## app-sre-prod-03 cloudwatch access
-  - provider: aws-iam-service-account
-    identifier: app-sre-prod-03-cloudwatch-access
-    user_policy:
-      {
-        "Version": "2012-10-17",
-        "Statement": [{
-          "Action": [
-            "sts:AssumeRole"
-          ],
-          "Effect": "Allow",
-          "Resource": "*"
-        }]
-      }
-    output_resource_name: app-sre-prod-03-cloudwatch-access
-    aws_infrastructure_access:
-      cluster:
-        $ref: /openshift/app-sre-prod-03/cluster.yml
-      access_level: read-only
   ## app-sre-prod-04 cloudwatch access
   - provider: aws-iam-service-account
     identifier: app-sre-prod-04-cloudwatch-access
@@ -601,25 +394,6 @@ externalResources:
     aws_infrastructure_access:
       cluster:
         $ref: /openshift/app-sre-stage-01/cluster.yml
-      access_level: read-only
-  ## app-sre-stage-02 cloudwatch access
-  - provider: aws-iam-service-account
-    identifier: app-sre-stage-02-cloudwatch-access
-    user_policy:
-      {
-        "Version": "2012-10-17",
-        "Statement": [{
-          "Action": [
-            "sts:AssumeRole"
-          ],
-          "Effect": "Allow",
-          "Resource": "*"
-        }]
-      }
-    output_resource_name: app-sre-stage-02-cloudwatch-access
-    aws_infrastructure_access:
-      cluster:
-        $ref: /openshift/app-sre-stage-02/cluster.yml
       access_level: read-only
   ## clairp01ue1 cloudwatch access
   - provider: aws-iam-service-account

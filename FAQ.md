@@ -2,7 +2,7 @@
 
 This document serves as a first tier support for issues around app-interface.
 
-For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-sre](https://coreos.slack.com/messages/CCRND57FW) on CoreOS Slack.
+For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) on CoreOS Slack.
 
 ## ToC
 
@@ -22,9 +22,18 @@ If your MR is urgent or time sensitive requests, see [contacting AppSRE](#contac
 
 ### Contacting AppSRE
 
-You can catch the AppSRE team in the `#sd-app-sre` channel of `coreos.slack.com`.
+You can catch the AppSRE team in the `#sd-app-sre` channel of `redhat-internal.slack.com`.
 
-To create a request, please open an issue in the [APPSRE Project](https://issues.redhat.com/projects/APPSRE/issues) in JIRA.
+To create a request, please open an issue in one of the following Jira projects:
+
+* [APPSRE](https://issues.redhat.com/projects/APPSRE/issues) for feature requests or other consultation with the AppSRE team
+  * Example(s):
+    * Request to support a new cloud resource type in app-interface
+    * Propose an enhancement to an existing app-interface integration
+* [ASIC](https://issues.redhat.com/projects/ASIC/issues) for issues requiring the attention of the AppSRE interrupt catcher, but aren't impacting production services
+  * Example(s):
+    * A build job is failing for a reason believed to be related to the build infrastructure
+    * Need assistance troubleshooting a failed deployment
 
 For *time sensitive* requests, please ping `@app-sre-ic` in the `#sd-app-sre` channel.
 
@@ -37,7 +46,7 @@ If you have an urgent matter affecting production that needs to be addressed as 
 
 Start by accessing the Visual App-Interface at https://visual-app-interface.devshift.net.  Using the side bar, navigate to the [Permissions](https://visual-app-interface.devshift.net/permissions) section.
 
-Find a permission that matches the access you require. For this example, choose [ci-ext](https://visual-app-interface.devshift.net/permissions#/dependencies/ci-ext/permissions/ci-ext.yml)
+Find a permission that matches the access you require. For this example, choose [ci-ext-read-only](https://visual-app-interface.devshift.net/permissions#/dependencies/ci-ext/permissions/ci-ext-read-only.yml)
 
 choosing a permission will take you to the Permission's page, in which you can view a list of `Roles` who grant this permission.  Choose the role that best matches your requirement and submit a merge request to app-interface adding that role to your user file.
 
@@ -60,16 +69,16 @@ Problem: I Can not log in to https://ci.ext.devshift.net.
 
 Managed to log in but having issues? Maybe even seeing this error message? `"Access denied: <your-red-hat-username> is missing the Overall/Read permission"`
 
-Access is managed via app-interface. The role that grants access is [ci-ext-ro-access](/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml).
+Access is managed via app-interface. The role that grants access is [ci-ext-access](/data/dependencies/ci-ext/roles/ci-ext-access.yml).
 
 If you don't have a user file on app-interface:
 
 1. Submit a MR to app-interface adding your user file
-1. Add the [ci-ext-ro-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml) role to your user file in the same MR.
+1. Add the [ci-ext-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-access.yml) role to your user file in the same MR.
 
 If you already have a user file
 
-1. Make sure that your user has the [ci-ext-ro-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml) role assigned, if it's not the case, submit a MR adding the role to your user file.
+1. Make sure that your user has the [ci-ext-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-access.yml) role assigned, if it's not the case, submit a MR adding the role to your user file.
 
 *Note that the permission could be granted to your user via a role that has the permission assigned, check if any of the roles assigned to your user have the access to ci-ext*
 
@@ -375,7 +384,7 @@ The users in this page are granted a `view` permission in the `telemeter-product
 
 ### Accessing DataHub
 
-DataHub is not managed by the AppSRE team, but you can find the process to [request access here](https://help.datahub.redhat.com/docs/interacting-with-telemetry-data). To report issues with Datahub (ex: timeouts with telemeter-lts-dashboards.datahub.redhat.com) see [this help page](https://help.datahub.redhat.com/docs/data-hub-report-issues) or reach out to [#forum-telemetry](https://coreos.slack.com/messages/forum-telemetry) on Slack for additional info.
+DataHub is not managed by the AppSRE team, but you can find the process to [request access here](https://help.datahub.redhat.com/docs/interacting-with-telemetry-data). To report issues with Datahub (ex: timeouts with telemeter-lts-dashboards.datahub.redhat.com) see [this help page](https://help.datahub.redhat.com/docs/data-hub-report-issues) or reach out to [#forum-telemetry](https://redhat-internal.slack.com/archives/CEG5ZJQ1G) on Slack for additional info.
 
 ### Jenkins Vault plugin upgrade
 

@@ -8,7 +8,7 @@ name: bayesian-production
 description: production namespace for bayesian
 
 cluster:
-  $ref: /openshift/app-sre-prod-03/cluster.yml
+  $ref: /openshift/app-sre-prod-01/cluster.yml
 
 app:
   $ref: /services/codeready-analytics/app.yml
@@ -17,7 +17,7 @@ environment:
   $ref: /products/codeready-analytics/environments/production.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-03.yml
+  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
 
 grafanaUrl: "https://grafana.app-sre.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods?var-datasource=dsaas-cluster-prometheus&var-namespace=bayesian-production"
 
@@ -60,7 +60,9 @@ openshiftResources:
     version: 2
   - provider: vault-secret
     path: app-interface/dsaas/bayesian-production/coreapi-postgres
-    version: 1
+    version: 2
+    annotations:
+      qontract.recycle: "true"
   - provider: vault-secret
     path: app-interface/dsaas/bayesian-production/gemini-server
     version: 1
@@ -80,6 +82,9 @@ openshiftResources:
     version: 8
     annotations:
       qontract.recycle: "true"
+  - provider: vault-secret
+    path: app-interface/dsaas-stg/bayesian-preview/cvejob
+    version: 2
   - provider: vault-secret
     path: app-interface/dsaas/bayesian-production/github
     version: 1
@@ -123,11 +128,8 @@ externalResources:
     $ref: /aws/osio/account.yml
   resources:
   - provider: rds
-    identifier: prodbayesian
+    identifier: prodbayesian-20221211
     defaults: /terraform/resources/osio/rds-6.yml
-    overrides:
-      username: coreapi
-      allocated_storage: 200
     output_resource_name: bayesian-rds
   - provider: s3
     identifier: gremlin-tarballs

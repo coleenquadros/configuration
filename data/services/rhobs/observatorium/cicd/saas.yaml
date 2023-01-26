@@ -23,7 +23,7 @@ deployResources:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: team-monitoring-info
 
 authentication:
@@ -84,11 +84,11 @@ resourceTemplates:
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-testing
       OBSERVATORIUM_TRACES_NAMESPACE: observatorium-traces-testing
       OPA_AMS_IMAGE_TAG: master-2021-07-14-d517f70
-      GUBERNATOR_IMAGE_TAG: 1.0.0-rc.1
+      GUBERNATOR_IMAGE_TAG: v2.0.0-rc.36
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       MEMCACHED_IMAGE_TAG: 1.5-146
-      OBSERVATORIUM_API_IMAGE_TAG: main-2022-10-11-v0.1.2-264-g53d6ae8
+      OBSERVATORIUM_API_IMAGE_TAG: main-2023-01-24-v0.1.2-318-g5f4fdf4
       SERVICE_ACCOUNT_NAME: observatorium
       DPTP_ORGANIZATION_ID: 1oZtjZXK3EP4kJSaYXwMmorAqnS
       JAEGER_COLLECTOR_NAMESPACE: observatorium-testing
@@ -101,22 +101,24 @@ resourceTemplates:
       SLEEP_DURATION_SECONDS: '15'
       MANAGED_TENANTS: 'rhobs'
       OBSCTL_RELOADER_IMAGE: 'quay.io/app-sre/obsctl-reloader'
-      OBSCTL_RELOADER_IMAGE_TAG: 'f021479'
+      OBSCTL_RELOADER_IMAGE_TAG: 'a39316a'
       RHOBS_RELOADER_SECRET_NAME: observatorium-rhobs-testing
+      LOG_RULES_ENABLED: false
       AVALANCHE_REPLICAS: '0'
       UP_REPLICAS: '0'
   - namespace:
       $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
-    ref: cd2a8a66da2d9b028290c6470fbf79ddff6d46a1
+    ref: 165e479e26962d1211e8c88a6e86519b94725b0a
     parameters:
       NAMESPACE: observatorium-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-stage
       OPA_AMS_IMAGE_TAG: master-2021-07-14-d517f70
-      GUBERNATOR_IMAGE_TAG: 1.0.0-rc.1
+      GUBERNATOR_IMAGE_TAG: v2.0.0-rc.36
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       MEMCACHED_IMAGE_TAG: 1.5-146
-      OBSERVATORIUM_API_IMAGE_TAG: main-2022-08-23-v0.1.2-242-g23af39e
+      OBSERVATORIUM_API_LOG_LEVEL: debug
+      OBSERVATORIUM_API_IMAGE_TAG: main-2023-01-24-v0.1.2-318-g5f4fdf4
       SERVICE_ACCOUNT_NAME: observatorium
       JAEGER_COLLECTOR_NAMESPACE: observatorium-stage
       RULES_OBJSTORE_IMAGE_TAG: main-2022-09-21-9df4d2c
@@ -129,8 +131,9 @@ resourceTemplates:
       SLEEP_DURATION_SECONDS: '15'
       MANAGED_TENANTS: 'rhobs'
       RHOBS_RELOADER_SECRET_NAME: rhobs-tenant-staging
+      LOG_RULES_ENABLED: false
       OBSCTL_RELOADER_IMAGE: 'quay.io/app-sre/obsctl-reloader'
-      OBSCTL_RELOADER_IMAGE_TAG: '95d2b04'
+      OBSCTL_RELOADER_IMAGE_TAG: 'a39316a'
       METRICS_WRITE_SERVICE_NAME: observatorium-thanos-receive
       METRICS_WRITE_SERVICE_PORT: '19291'
     promotion:
@@ -138,16 +141,17 @@ resourceTemplates:
       - observatorium-stage-deploy-success-channel
   - namespace:
       $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
-    ref: cd2a8a66da2d9b028290c6470fbf79ddff6d46a1
+    ref: 165e479e26962d1211e8c88a6e86519b94725b0a
     parameters:
       NAMESPACE: observatorium-production
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-production
       OPA_AMS_IMAGE_TAG: master-2021-07-14-d517f70
-      GUBERNATOR_IMAGE_TAG: 1.0.0-rc.1
+      GUBERNATOR_IMAGE_TAG: v2.0.0-rc.36
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       MEMCACHED_IMAGE_TAG: 1.5
-      OBSERVATORIUM_API_IMAGE_TAG: main-2022-08-23-v0.1.2-242-g23af39e
+      OBSERVATORIUM_API_LOG_LEVEL: info
+      OBSERVATORIUM_API_IMAGE_TAG: main-2023-01-24-v0.1.2-318-g5f4fdf4
       SERVICE_ACCOUNT_NAME: observatorium
       JAEGER_COLLECTOR_NAMESPACE: observatorium-production
       RULES_OBJSTORE_IMAGE_TAG: main-2022-09-21-9df4d2c
@@ -159,8 +163,9 @@ resourceTemplates:
       SLEEP_DURATION_SECONDS: '15'
       MANAGED_TENANTS: 'rhobs'
       RHOBS_RELOADER_SECRET_NAME: rhobs-tenant-production
+      LOG_RULES_ENABLED: false
       OBSCTL_RELOADER_IMAGE: 'quay.io/app-sre/obsctl-reloader'
-      OBSCTL_RELOADER_IMAGE_TAG: '95d2b04'
+      OBSCTL_RELOADER_IMAGE_TAG: 'a39316a'
       METRICS_WRITE_SERVICE_NAME: 'observatorium-thanos-receive'
       METRICS_WRITE_SERVICE_PORT: '19291'
 - name: jaeger
@@ -219,8 +224,8 @@ resourceTemplates:
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-testing
       TELEMETER_NAMESPACE: telemeter-testing
       SERVICE_ACCOUNT_NAME: observatorium
-      IMAGE: quay.io/observatorium/parca
-      IMAGE_TAG: 'v0.12.0'
+      IMAGE: quay.io/app-sre/parca
+      IMAGE_TAG: 'v0.15.0'
       STORAGE_ACTIVE_MEMORY: '20000000000'
       PARCA_CPU_REQUEST: '2'
       PARCA_MEMORY_REQUEST: '8Gi'
@@ -228,7 +233,7 @@ resourceTemplates:
       PARCA_MEMORY_LIMITS: '50Gi'
   - namespace:
       $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
-    ref: 3a0f87be669ba0387859590d4cc9c5a1cbc19930
+    ref: 15ebfb85975ef14507b20efbc3f67230705c314e
     parameters:
       NAMESPACE: observatorium-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-stage
@@ -236,11 +241,11 @@ resourceTemplates:
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-mst-stage
       TELEMETER_NAMESPACE: telemeter-stage
       SERVICE_ACCOUNT_NAME: observatorium
-      IMAGE: quay.io/observatorium/parca
-      IMAGE_TAG: 'v0.12.0'
+      IMAGE: quay.io/app-sre/parca
+      IMAGE_TAG: 'v0.15.0'
   - namespace:
       $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
-    ref: 3a0f87be669ba0387859590d4cc9c5a1cbc19930
+    ref: 15ebfb85975ef14507b20efbc3f67230705c314e
     parameters:
       NAMESPACE: observatorium-production
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-production
@@ -248,8 +253,8 @@ resourceTemplates:
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-mst-production
       TELEMETER_NAMESPACE: telemeter-production
       SERVICE_ACCOUNT_NAME: observatorium
-      IMAGE: quay.io/observatorium/parca
-      IMAGE_TAG: 'v0.12.0'
+      IMAGE: quay.io/app-sre/parca
+      IMAGE_TAG: 'v0.15.0'
       STORAGE_ACTIVE_MEMORY: '20000000000'
       PARCA_CPU_REQUEST: '2'
       PARCA_MEMORY_REQUEST: '8Gi'

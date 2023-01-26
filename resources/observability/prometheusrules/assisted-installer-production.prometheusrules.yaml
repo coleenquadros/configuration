@@ -1,3 +1,5 @@
+# <!subteam^S01TBNAAPRU> is @edge-support
+#https://api.slack.com/reference/surfaces/formatting#mentioning-groups
 ---
 $schema: /openshift/prometheus-rule-1.yml
 apiVersion: monitoring.coreos.com/v1
@@ -285,6 +287,7 @@ spec:
         annotations:
           message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} not ready
           runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#assisted-installer-service-is-down"
+          redhat_cloud_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/{{ $labels.namespace }}/pods/{{ $labels.pod }}"
         # get minimum value for time window. This will ensure that we get constantly "not ready" status
         # when alerting
         expr: min(kube_pod_status_ready{namespace="assisted-installer-production",pod=~"(assisted-image-service-[0-9]+|assisted-service-[0-9a-z]{9}-[0-9a-z]{5})",condition="false"}) by (pod, namespace) + min(kube_pod_status_ready{namespace="assisted-installer-production",pod=~"(assisted-image-service-[0-9]+|assisted-service-[0-9a-z]{9}-[0-9a-z]{5})",condition="unknown"}) by (pod, namespace) > 0
@@ -294,7 +297,9 @@ spec:
           service: assisted-installer
       - alert: Assisted Installer - Memory usage is above 90%
         annotations:
-          message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} usages is above 90%({{ $value }})
+          message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} usages is above 90%({{ $value }}) <!subteam^S01TBNAAPRU>
+          redhat_cloud_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/{{ $labels.namespace }}/pods/{{ $labels.pod }}"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#memory-consumption-is-too-high"
         expr: sum(container_memory_working_set_bytes{namespace="assisted-installer-production", container="assisted-service"}) by (pod, namespace) / sum(kube_pod_container_resource_limits{namespace="assisted-installer-production", container="assisted-service", resource="memory"}) BY (pod, namespace) * 100 > 90
         for: 1m
         labels:
@@ -302,10 +307,139 @@ spec:
           service: assisted-installer
       - alert: Assisted Installer - Memory usage is above 80%
         annotations:
-          message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} usages is above 80%({{ $value }})
+          message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} usages is above 80%({{ $value }}) <!subteam^S01TBNAAPRU>
+          redhat_cloud_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/{{ $labels.namespace }}/pods/{{ $labels.pod }}"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#memory-consumption-is-too-high"
         expr: sum(container_memory_working_set_bytes{namespace="assisted-installer-production", container="assisted-service"}) by (pod, namespace) / sum(kube_pod_container_resource_limits{namespace="assisted-installer-production", container="assisted-service", resource="memory"}) BY (pod, namespace) * 100 > 80
         for: 1m
         labels:
           severity: info
           service: assisted-installer
 
+      - alert: Assisted Installer - Service is crashing
+        annotations:
+          message: Assisted Installer container '{{ $labels.container }}' of pod '{{ $labels.pod }}' is crashing <!subteam^S01TBNAAPRU>
+          redhat_cloud_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/assisted-installer-production/pods/{{ $labels.pod }}"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#container-restarting"
+        expr: |
+          sum(increase(kube_pod_container_status_restarts_total{namespace="assisted-installer-production",pod=~"^assisted-service-.*$"}[10m]))
+          by (pod,container)
+          >= 2
+        for: 1m
+        labels:
+          severity: warning
+          service: assisted-installer
+
+      - alert: Assisted Installer - Image service is crashing
+        annotations:
+          message: Assisted Installer container '{{ $labels.container }}' of pod '{{ $labels.pod }}' is crashing <!subteam^S01TBNAAPRU>
+          redhat_cloud_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/assisted-installer-production/pods/{{ $labels.pod }}"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#container-restarting"
+        expr: |
+          sum(increase(kube_pod_container_status_restarts_total{namespace="assisted-installer-production",pod=~"^assisted-image-service-.*$"}[10m]))
+          by (pod,container)
+          >= 2
+        for: 1m
+        labels:
+          severity: warning
+          service: assisted-installer
+
+      # http requests rate recorded metrics. Useful to calculate z-score
+      - expr: |
+          sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))
+        labels:
+          service: assisted-installer
+        record: assisted_installer_http_requests:rate10m
+
+      - expr: |
+          avg_over_time(sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))[1w:10m])
+        labels:
+          service: assisted-installer
+        record: assisted_installer_http_requests:rate1w
+
+      - expr: |
+          stddev_over_time(sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc"}[10m]))[1w:10m])
+        labels:
+          service: assisted-installer
+        record: assisted_installer_http_requests:stddev1w
+
+      # CPU recorded metrics. Useful to calculate z-score
+      - expr: |
+          avg(rate(container_cpu_usage_seconds_total{namespace="assisted-installer-production",pod=~"assisted-service-.*"}[10m]))
+        labels:
+          service: assisted-installer
+        record: assisted_installer_cpu_usage:rate10m
+
+      - expr: |
+          avg_over_time(avg(rate(container_cpu_usage_seconds_total{namespace="assisted-installer-production",pod=~"assisted-service-.*"}[10m]))[1w:10m])
+        labels:
+          service: assisted-installer
+        record: assisted_installer_cpu_usage:rate1w
+
+      - expr: |
+          stddev_over_time(avg(rate(container_cpu_usage_seconds_total{namespace="assisted-installer-production",pod=~"assisted-service-.*"}[10m]))[1w:10m])
+        labels:
+          service: assisted-installer
+        record: assisted_installer_cpu_usage:stddev1w
+
+      - alert: "Assisted Installer - Anomaly detected: Incoming http requests z-score outside normal range"
+        annotations:
+          message: Assisted Installer Incoming http requests z-score is {{ $value }} <!subteam^S01TBNAAPRU>
+          redhat_cloud_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/assisted-installer-production/pods"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#anomaly-detected"
+        # return z-score value unless z-score value falls within -3 / +3 range
+        expr: |
+          (
+            (assisted_installer_http_requests:rate10m - assisted_installer_http_requests:rate1w)
+            /
+            assisted_installer_http_requests:stddev1w
+          )
+          unless (
+            (
+              (assisted_installer_http_requests:rate10m - assisted_installer_http_requests:rate1w)
+              /
+              assisted_installer_http_requests:stddev1w
+            )
+            < 3 > -3
+          )
+        for: 10m
+        labels:
+          severity: warning
+          service: assisted-installer
+
+      - alert: "Assisted Installer - Anomaly detected: CPU usage z-score outside normal range"
+        annotations:
+          message: Assisted Installer Incoming CPU usage z-score is {{ $value }} <!subteam^S01TBNAAPRU>
+          redhat_cloud_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/assisted-installer-production/pods"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#anomaly-detected"
+        # return z-score value unless z-score value falls within -3 / +3 range
+        expr: |
+          (
+            (assisted_installer_cpu_usage:rate10m - assisted_installer_cpu_usage:rate1w)
+            /
+            assisted_installer_cpu_usage:stddev1w
+          )
+          unless (
+            (
+              (assisted_installer_cpu_usage:rate10m - assisted_installer_cpu_usage:rate1w)
+              /
+              assisted_installer_cpu_usage:stddev1w
+            )
+            < 3 > -3
+          )
+        for: 1h
+        labels:
+          severity: warning
+          service: assisted-installer
+
+      - alert: "Assisted Installer - Container restarted"
+        annotations:
+          message: "Assisted Installer container {{ $labels.container }} in pod {{ $labels.pod }} restarted due to {{ $labels.reason }} <!subteam^S01TBNAAPRU>"
+          redhat_cloud_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/{{ $labels.namespace }}/pods/{{ $labels.pod }}"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#container-restarting"
+        expr: |
+          increase(kube_pod_container_status_restarts_total{namespace="assisted-installer-production"}[10m]) * on(namespace, container, pod) group_left(reason) topk by (pod, container) (1, kube_pod_container_status_last_terminated_reason{namespace="assisted-installer-production"}) > 0
+        for: 1m
+        labels:
+          severity: warning
+          service: assisted-installer

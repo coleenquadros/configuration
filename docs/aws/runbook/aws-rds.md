@@ -8,6 +8,12 @@
 
 ## SOPs
 
+### Required database engine upgrades
+
+AWS will periodically force minor version upgrades for a variety of reasons. The following resources describe what is required of AppSRE for notifying tenants and ensuring upgrade compliance:
+
+* [AppSRE RDS database engine upgrade coordination](/docs/aws/sop/appsre-rds-database-engine-upgrade-coordination.md)
+
 ### Database Engine Upgrades
 
 These SOPs cover database major and minor engine upgrades:

@@ -274,7 +274,7 @@ managedResourceTypes:
 
 1. Make RBAC changes and allow network traffic from `openshift-customer-monitoring` on all relevant namespaces. For example, see PR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/10168/diffs. Note that you'll need to do the same for the `hive` namespace on the cluster
 
-1. Add federation config for shard metrics in [/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml](/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml)
+1. Add federation config for shard metrics in [/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig-internal.secret.yaml](/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig-internal.secret.yaml)
     - You can copy the block from another shard
     - Make sure the targets hostnames match the cluster hostname
     - Ensure the appsre_env label is set to the correct environment

@@ -1,0 +1,67 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: jvm-build-service
+
+name: jvm-build-service
+
+parentApp:
+  $ref: /services/stonesoup/app.yml
+
+description: |
+    Automated rebuilds of java components for HACBS app builds
+
+architectureDocument: https://docs.google.com/document/d/1tQ2_IW4tGdIGyTrhdD-FHYLStIv-xxWznd0NpUrOzVI/edit#
+sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/stonesoup/sop
+
+# TODO!
+grafanaUrls: []
+
+onboardingStatus: InProgress
+
+serviceOwners:
+- name: Stuart Douglas
+  email: sdouglas@redhat.com
+- name: Michal Kovarik
+  email: mkovarik@redhat.com
+- name: HACBS Tech Leads
+  email: hacbs-tech-leads@redhat.com
+
+serviceNotifications:
+- name: Red Hat Outage List
+  email: outage-list@redhat.com
+
+escalationPolicy:
+  $ref: /teams/stonesoup/escalation-policies/general-policy.yml
+
+dependencies:
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/quay/service.yml
+
+codeComponents:
+- name: jvm-build-service
+  resource: upstream
+  url: https://github.com/redhat-appstudio/jvm-build-service
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  teams:
+  - permissions:
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-stonesoup.yml
+    role: read
+  items:
+  - name: hacbs-jvm-build-request-processor
+    description: Public repo for JVM Build Request Processor
+    public: true
+  - name: hacbs-jvm-cache
+    description: Public repo for JVM Build Service Cache
+    public: true
+  - name: hacbs-jvm-controller
+    description: Public repo for JVM Build Service Controller
+    public: true
+  - name: hacbs-jvm-sidecar
+    description: Public repo for JVM Build Service Sidecar
+    public: true

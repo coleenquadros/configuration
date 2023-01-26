@@ -10,12 +10,6 @@ description: Insights sources-stage on the Stage cluster under e2e-deploy/ocdepl
 cluster:
   $ref: /openshift/crcs02ue1/cluster.yml
 
-limitRanges:
-  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
-
-quota:
-  $ref: /services/insights/default-quota.yml
-
 app:
   $ref: /services/insights/sources/app.yml
 
@@ -31,6 +25,7 @@ networkPoliciesAllow:
 - $ref: /services/insights/catalog-inventory/namespaces/stage-catalog-inventory-stage.yml
 - $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
 - $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+- $ref: /services/insights/rhsm-api-proxy/namespaces/stage-rhsm-api-proxy-stage.yml
 - $ref: /services/insights/cloud-connector/namespaces/stage.yml
 - $ref: /services/insights/marketplace-gateway/namespaces/stage.yml
 - $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
@@ -99,23 +94,24 @@ externalResources:
   resources:
   - provider: rds
     identifier: sources-stage
-    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-stage-insights-sources.yml
+    defaults: /terraform/resources/insights/stage/rds/postgres14-rds-sources-stage.yml
     overrides:
+      apply_immediately: true
       username: "insights"
       name: "sources_production"
       instance_class: db.t3.medium
-    parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-sources-stage.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres14-parameter-group-sources-stage.yml
     output_resource_name: sources-db
     enhanced_monitoring: true
     # Replica instance for Gabi.
   - provider: rds
     identifier: sources-stage-readonly
-    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-stage-insights-sources.yml
+    defaults: /terraform/resources/insights/stage/rds/postgres14-rds-sources-stage.yml
     overrides:
       username: "insights"
       name: "sources_production"
       instance_class: db.t3.medium
-    parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-sources-stage.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres14-parameter-group-sources-stage.yml
     replica_source: sources-stage
     output_resource_name: sources-stage-db-ro
   - provider: cloudwatch

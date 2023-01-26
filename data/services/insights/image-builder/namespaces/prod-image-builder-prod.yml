@@ -26,6 +26,7 @@ networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
 - $ref: /services/insights/gateway/namespaces/3scale-prod.yml
 - $ref: /services/insights/edge/namespaces/edge-prod.yml
+- $ref: /services/insights/provisioning/namespaces/provisioning-prod.yml
 
 managedRoles: true
 
@@ -43,15 +44,14 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
   version: 9
-# TODO: delete the following config map after 10764f59 is deployed
-- provider: resource
-  path: /insights-prod/image-builder-prod/accounts_quotas.configmap.yml
-  validate_json: true
 - provider: resource
   path: /insights-prod/image-builder-prod/config_files.configmap.yml
   validate_json: true
 - provider: vault-secret
   path: app-interface/image-builder/production/splunk
+  version: 2
+- provider: vault-secret
+  path: insights/secrets/insights-prod/image-builder-prod/floorist-bucket
   version: 2
 
 
@@ -65,7 +65,7 @@ externalResources:
   - provider: cloudwatch
     identifier: image-builder-prod
     defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-    output_resource_name: image-builder-cloudwatch
+    output_resource_name: cloudwatch
     es_identifier: kibana-elasticsearch
   - provider: rds
     identifier: image-builder-prod
@@ -78,3 +78,4 @@ externalResources:
 
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+- $ref: /services/insights/shared-resources/metrics-export-prod.yml

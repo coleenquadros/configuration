@@ -41,3 +41,7 @@ Each template test file should include the following fields:
 - `expectedResult`: path to a resource with the exected result of the templating to compare to
 
 Here is an [exmaple](test_data/services/deployment-validation-operator/test/templatetests.yaml) for a template test file for the DVO alerts mentioned in the previous section.
+
+## Skipping resources
+
+In order to skip certain resources to have its correspondent alert, the mechanism we use is adding labels to a related object of the query, e.g. a `/app-sre/app-1.yml` or a `/openshift/namespace-1.yml`. For example, [this template](/resources/observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter-templated.prometheusrules.yaml.j2) documents how to skip the creation of certain CloudWatch alerts adding a label to the namespace where the AWS resource is defined.

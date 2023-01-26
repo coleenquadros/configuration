@@ -10,12 +10,6 @@ description: Insights rbac-stage on the Stage cluster under e2e-deploy/ocdeploye
 cluster:
   $ref: /openshift/crcs02ue1/cluster.yml
 
-limitRanges:
-  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
-
-quota:
-  $ref: /services/insights/rbac/rbac-quota.yml
-
 app:
   $ref: /services/insights/rbac/app.yml
 
@@ -86,7 +80,7 @@ openshiftResources:
     qontract.recycle: "true"
 - provider: vault-secret
   path: insights/secrets/backoffice/preprod/insights-rbac
-  version: 4
+  version: 7
 
 managedExternalResources: true
 
@@ -101,6 +95,13 @@ externalResources:
     parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-rbac-stage.yml
     output_resource_name: rbac-db
     enhanced_monitoring: true
+  # Replica instance for GABI
+  - provider: rds
+    identifier: rbac-stage-readonly
+    defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-rbac-stage.yml
+    replica_source: rbac-stage
+    output_resource_name: rbac-stage-db-ro
   - provider: cloudwatch
     identifier: rbac-stage
     defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
@@ -110,3 +111,6 @@ externalResources:
     identifier: rbac-stage-elasticache
     defaults: /terraform/resources/insights/stage/elasticache/elasticache-rbac-1.yml
     output_resource_name: in-memory-db
+
+glitchtipProjects:
+- $ref: /dependencies/glitchtip/projects/glitchtip-production/insights-rbac-stage.yml

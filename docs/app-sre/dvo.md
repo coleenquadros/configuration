@@ -10,7 +10,7 @@ This document described the AppSRE usage of DVO and the requirements from tenant
 
 AppSRE leverages DVO to enforce deployment best practices, in order to increase service reliability.
 
-DVO is installed on every cluster managed by AppSRE as part of the [cluster onboarding SOP](./docs/app-sre/sop/app-interface-onboard-cluster.md#step-6-deployment-validation-operator-dvo).
+DVO is installed on every OSD cluster as part of [SDE-1113](https://issues.redhat.com/browse/SDE-1113).
 
 This allows DVO to collect information for services running on each cluster and expose it as Prometheus metrics. These metrics can be viewed in Prometheus instances installed per cluster. Metrics have a prefix of `deployment_validation_operator_`.
 
@@ -75,7 +75,6 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=latest-tag
 #### deployment_validation_operator_minimum_three_replicas
 
 Excluded resource kinds: ReplicaSet
-Excluded resource names: openshift-acme
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=minimum-three-replicas
 
@@ -86,14 +85,12 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=privileged-po
 #### deployment_validation_operator_no_liveness_probe
 
 Excluded resource kinds: CronJob, Job, ReplicaSet
-Excluded resource names: openshift-acme
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=no-liveness-probe
 
 #### deployment_validation_operator_no_readiness_probe
 
 Excluded resource kinds: CronJob, Job, ReplicaSet
-Excluded resource names: openshift-acme
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=no-readiness-probe
 
@@ -112,10 +109,6 @@ Excluded resource names (regex):
 - `.*-catalog-[0-9a-z]{5}` (OLM Catalog Pods)
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=unset-memory-requirements
-
-### Exceluded metrics
-
-Some metrics are excluded for various reasons. The complete list can be found in the DVO [ConfigMap](./resources/services/deployment-validation-operator/dvo.configmap.yaml).
 
 ## Disable DVO checks
 

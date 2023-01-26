@@ -7,16 +7,12 @@ name: app-sre
 permissions:
 # github
 - $ref: /teams/app-sre/permissions/github-app-sre-owner.yml
+- $ref: /teams/app-sre/permissions/github-RedHatInsights-app-sre.yml
 # gitlab
 - $ref: /dependencies/gitlab/permissions/app-sre-member.yml
 # jenkins
-- $ref: /dependencies/ci-int/permissions/ci-int.yml
 - $ref: /dependencies/ci-int/permissions/ci-int-admin.yml
 - $ref: /dependencies/ci-ext/permissions/ci-ext-admin.yml
-# vault
-- $ref: /dependencies/vault/permissions/app-sre.yml
-- $ref: /dependencies/vault/permissions/app-sre-quay.yml
-- $ref: /dependencies/vault/permissions/devtools-osio.yml
 # slack
 - $ref: /teams/app-sre/permissions/app-sre-team-coreos-slack.yml
 # quay
@@ -27,9 +23,6 @@ permissions:
 - $ref: /dependencies/quay/permissions/quay-membership-rhoas-app-sre.yml
 # observability
 - $ref: /services/observability/permissions/observability-access.yml
-# extra clusters
-- $ref: /teams/insights/github-teams/openshift-stage-cluster-access.yml
-- $ref: /openshift/osd4-wkld/permissions/auth.yml
 # Unleash
 - $ref: /dependencies/unleash/permissions/app-interface.yml
 - $ref: /dependencies/unleash/permissions/insights-perf-read-only.yml
@@ -45,16 +38,14 @@ oidc_permissions:
 - $ref: /dependencies/vault/permissions/oidc/prod/app-sre.yml
 - $ref: /dependencies/vault/permissions/oidc/prod/devtools-osio.yml
 - $ref: /dependencies/vault/permissions/oidc/stage/app-sre.yml
-- $ref: /dependencies/vault/permissions/oidc/stage/devtools-osio.yml
+- $ref: /dependencies/vault/permissions/oidc/stage/vault-version-testing.yml
+- $ref: /dependencies/vault/permissions/oidc/ci-ext/app-sre.yml
 
 access:
 # OSDv4 clusters - managed using OCM
 ## AppSRE production
 - cluster:
     $ref: /openshift/app-sre-prod-01/cluster.yml
-  group: dedicated-admins
-- cluster:
-    $ref: /openshift/app-sre-prod-03/cluster.yml
   group: dedicated-admins
 - cluster:
     $ref: /openshift/app-sre-prod-04/cluster.yml
@@ -68,9 +59,6 @@ access:
 ## AppSRE stage
 - cluster:
     $ref: /openshift/app-sre-stage-01/cluster.yml
-  group: dedicated-admins
-- cluster:
-    $ref: /openshift/app-sre-stage-02/cluster.yml
   group: dedicated-admins
 - cluster:
     $ref: /openshift/appsres03ue1/cluster.yml
@@ -195,10 +183,6 @@ access:
 - cluster:
     $ref: /openshift/rhobsp02ue1/cluster.yml
   group: dedicated-admins
-## HACBS re-provision
-- cluster:
-    $ref: /openshift/hacbss02ue1/cluster.yml
-  group: dedicated-admins
 
 aws_groups:
 - $ref: /aws/app-sre/groups/App-SRE-admin.yml
@@ -248,7 +232,10 @@ user_policies:
 glitchtip_roles:
 - organization:
     $ref: /dependencies/glitchtip/organizations/app-sre-stage.yml
-  role: member
+  role: owner
+- organization:
+    $ref: /dependencies/glitchtip/organizations/app-sre.yml
+  role: owner
 
 glitchtip_teams:
 - $ref: /dependencies/glitchtip/teams/app-sre.yml
@@ -275,6 +262,10 @@ self_service:
   - $ref: /services/dashdot/namespaces/app-sre-stage-01.yml
   - $ref: /services/dashdot/namespaces/app-sre-prod-01.yml
 - change_type:
+    $ref: /app-interface/changetype/app-owner.yml
+  datafiles:
+  - $ref: /services/observability/app.yml
+- change_type:
     $ref: /app-interface/changetype/saas-file-self-service.yml
   datafiles:
   - $ref: /services/github-mirror/cicd/deploy.yaml
@@ -290,7 +281,6 @@ self_service:
   - $ref: /services/observability/cicd/saas/saas-rds-exporter.yaml
   - $ref: /services/observability/cicd/saas/saas-domain-exporter.yaml
   - $ref: /services/observability/cicd/saas/saas-grafana-loki-token-refresher.yaml
-  - $ref: /services/observability/cicd/saas/saas-grafana.yaml
   - $ref: /services/observability/cicd/saas/saas-grafana-instance.yaml
   - $ref: /services/observability/cicd/saas/saas-cluster-logging-operator.yaml
   - $ref: /services/observability/cicd/saas/saas-nginx-proxy.yaml
@@ -301,19 +291,17 @@ self_service:
   - $ref: /services/observability/cicd/saas/saas-loki-for-netobserv.yaml
   - $ref: /services/observability/cicd/saas/saas-mk-token-refresher.yaml
   - $ref: /services/observability/cicd/saas/saas-observability-per-cluster.yaml
-  - $ref: /services/app-sre/cicd/ci-int/saas-openshift-acme.yaml
   - $ref: /services/sentry/cicd/saas.yaml
-  - $ref: /services/quayio/saas/quay-mysql-diag.yaml
   - $ref: /services/dashdot/cicd/saas-dashdotdb.yaml
   - $ref: /services/visual-app-interface.devshift.net/cicd/saas.yaml
-  - $ref: /services/visual-app-interface.devshift.net/cicd/saas-int.yaml
-  - $ref: /services/app-interface/cicd/ci-ext/saas-qontract-manager.yaml
+  - $ref: /services/app-interface/cicd/ci-ext/saas-qontract-dashboards.yaml
   - $ref: /services/app-interface/cicd/ci-int/saas-qontract-api.yaml
   - $ref: /services/app-interface/cicd/ci-int/saas-qontract-manager-int.yaml
   - $ref: /services/app-interface/cicd/ci-ext/saas-qontract-server.yaml
   - $ref: /services/app-interface/cicd/ci-int/saas-qontract-server-int.yaml
   - $ref: /services/app-interface/vault-manager/cicd/saas-vault-manager.yaml
   - $ref: /services/app-interface/git-partition-sync/cicd/saas-git-partition-sync-producer.yaml
+  - $ref: /services/app-interface/go-qontract-reconcile/cicd/saas-go-qontract-reconcile.yaml
   - $ref: /services/vault.devshift.net/cicd/saas.yaml
   - $ref: /services/vault.devshift.net/cicd/saas-ci-ext.yaml
   - $ref: /services/rate-limiting/cicd/saas.yaml
@@ -323,12 +311,14 @@ self_service:
   - $ref: /services/observability/cicd/saas/saas-odfms-token-refresher.yaml
   - $ref: /services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml
   - $ref: /services/observability/cicd/saas/saas-pyrra.yaml
+  - $ref: /services/observability/cicd/saas/saas-infra-dashboards.yaml
+  - $ref: /services/glitchtip/cicd/saas.yaml
+  - $ref: /services/glitchtip/cicd/test.yaml
   # quayio banner
   - $ref: /services/quayio/saas/quayio-banner.yaml
   # tenant monitoring saas files
   - $ref: /services/container-security-operator/cicd/saas.yaml
   - $ref: /services/assisted-installer/cicd/saas-monitoring.yaml
-  - $ref: /services/deployment-validation-operator/cicd/saas.yaml
   - $ref: /services/osd-operators/cicd/saas/saas-deployment-validation-operator.yaml
   - $ref: /services/rhobs/telemeter/cicd/saas-monitoring.yaml
   - $ref: /services/rhobs/observatorium/cicd/saas-monitoring.yaml

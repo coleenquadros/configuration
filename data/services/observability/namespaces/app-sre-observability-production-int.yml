@@ -1,0 +1,115 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-sre-observability-production
+description: production namespace for the app-sre observability stack
+
+cluster:
+  $ref: /openshift/appsrep05ue1/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsrep05ue1.yml
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+- $ref: /services/observability/shared-resources/grafana.yml
+- $ref: /services/observability/shared-resources/grafana-dashboards.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- Secret
+- Route
+
+openshiftResources:
+# Secrets
+## Blackbox Exporter
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/blackbox-exporter/blackbox-exporter-config.secret.yaml
+## SignalFX Prometheus Exporter
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/signalfx-exporter/signalfx-exporter-config.secret.yaml
+## Grafana
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-production/app-sre-observability-htpasswd
+  version: 1
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/grafana/grafana-config.secret.yaml
+  variables:
+    auto_assign_org_role: Viewer
+    external_url: https://grafana.app-sre.devshift.net
+- provider: vault-secret
+  name: grafana-proxy-config
+  path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-proxy-config
+  version: 3
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-proxy-config-openshift
+  version: 2
+- provider: resource-template
+  type: jinja2
+  path: /observability/grafana.route.yaml
+  variables:
+    environment: ''
+    host: grafana.app-sre.devshift.net
+    cert_manager_issuer_name: letsencrypt-devshiftnet-dns
+- provider: resource
+  path: /observability/grafana-via-openshift.route.yaml
+# Promlens
+- provider: vault-secret
+  name: grafana-api-token
+  path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-api-token-int
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+## OSD Observatorium Credentials
+- provider: vault-secret
+  path: osd-sre/hive-production/observatorium-tenant/grafana-proxy-credentials
+  version: 1
+## Hypershift-platform Observatorium Credentials
+- provider: vault-secret
+  path: osd-sre/rhobs-hypershift-platform
+  version: 4
+  name: hypershift-token-refresher
+  annotations:
+    qontract.recycle: "true"
+## Managed Services Managed Kafka Observatorium credentials
+- provider: vault-secret
+  path: managed-services-ci/RHOSAK/Prod/observatorium-token-refresher/production
+  version: 1
+  name: mk-token-refresher
+## ODFMS Observatorium credentials
+- provider: vault-secret
+  path: mt-sre/tenants/odf/secrets/odfms-prod-token-refresher
+  annotations:
+    qontract.recycle: "true"
+  version: 2
+  name: odfms-prod-token-refresher
+## RHOC Observatorium credentials
+- provider: vault-secret
+  path: app-interface/managed-connectors-api/production/service/observatorium
+  version: 1
+  name: rhoc-token-refresher
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: grafana-production-int
+    defaults: /terraform/resources/grafana/rds-1.yml
+    output_resource_name: grafana-db

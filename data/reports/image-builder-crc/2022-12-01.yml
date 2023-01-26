@@ -1,0 +1,68 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: image-builder-crc
+name: image-builder-crc-2022-12-01
+app:
+  $ref: /services/insights/image-builder/app.yml
+date: '2022-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/osbuild/image-builder:
+    - branch: master
+      total: 61
+      success: 44
+    - branch: master
+      total: 16
+      success: 16
+    https://github.com/RedHatInsights/image-builder-frontend:
+    - branch: master
+      total: 27
+      success: 27
+    - branch: master
+      total: 19
+      success: 16
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: crcs02ue1
+    namespace: image-builder-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: image-builder-prod
+    post_deploy_job: false
+  - cluster: app-sre-stage-01
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcp01ue1
+    namespace: image-builder-prod
+    validations:
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 2
+  - cluster: crcs02ue1
+    namespace: image-builder-stage
+    validations:
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 1
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: image-builder-prod
+    slo_name: image-builder latency
+    slo_doc_name: image-builder
+    slo_value: 99.1602790183518
+    slo_target: 95.0
+  - cluster: crcp01ue1
+    namespace: image-builder-prod
+    slo_name: image-builder compose success
+    slo_doc_name: image-builder
+    slo_value: -0.234463906358182
+    slo_target: 95.0

@@ -15,7 +15,7 @@ pipelinesProvider:
 
 slack: # configure where to send notifications of success/failure of deployments
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: sd-ops-services-dev
 
 managedResourceTypes:
@@ -48,7 +48,6 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
     SENTRY_ENABLE: true
     SENTRY_PROJECT: 35
     SENTRY_URL: https://sentry.stage.devshift.net
-    CNA_MODULES_TAG: latest
     ENABLE_OCM_MOCK: false
   targets:
   - namespace:
@@ -73,14 +72,14 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
       KUBE_NAMESPACE_NAME: /secrets/runtime/kube.namespace
   - namespace:
       $ref: /services/cna/namespaces/prod.yml
-    ref: 4defd074c48c0329f5dc1a98befdf8e5cfd1f1b1
+    ref: 6fadd7367d1abec6401a6be76b6c00f6eb8a7dd4
     parameters:
       DATABASE_SECRET_NAME: cna-production-rds
       IAM_SECRET_NAME: cna-service-iam
       OCM_BASE_URL: https://api.openshift.com
       SENTRY_PROJECT: 1027
       SENTRY_URL: https://sentry.devshift.net
-      REPLICAS: 1
+      REPLICAS: 0
 - name: cna-dashboards
   url: https://gitlab.cee.redhat.com/service/cna-management
   path: /dashboards
@@ -93,6 +92,9 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
         instance:
           $ref: /dependencies/ci-int/ci-int.yml
         name: service-cna-management-gl-build-main
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+      ref: main
 #    - namespace:
-#        $ref: /services/observability/namespaces/app-sre-observability-production.yml
+#        $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
 #      ref: fb7964ec8fe379b6cdad1c9d103b87430c09cd11 # FIXME once debugged

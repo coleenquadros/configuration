@@ -13,7 +13,7 @@ app:
 
 slack:
   workspace:
-    $ref: /dependencies/slack/coreos.yml
+    $ref: /dependencies/slack/redhat-internal.yml
   channel: envision-team
 
 pipelinesProvider:
@@ -56,6 +56,8 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RHEnVision-provisioning-frontend-gh-build-main
+    parameters:
+      ENV_NAME: env-stage
 
 - name: provisioning-backend
   path: /deploy/clowdapp.yaml
@@ -75,6 +77,28 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RHEnVision-provisioning-backend-gh-build-main
+    promotion:
+      publish:
+      - provisioning-stage-deploy-success-channel
     parameters:
+      LOGGING_LEVEL: trace
+      DATABASE_LOGGING_LEVEL: debug
+      FLOORIST_QUERY_PREFIX: "hms_analytics/provisioning/stage"
       ENV_NAME: stage
       IMAGEBUILDER_URL: http://${IMAGEBUILDER_HOST}:${IMAGEBUILDER_PORT}
+  - namespace: # PROD api
+      $ref: /services/insights/provisioning/namespaces/provisioning-prod.yml
+    ref: 2a560d524040312ba3984197b8902dce3f1b1007
+    parameters:
+      LOGGING_LEVEL: debug
+      DATABASE_LOGGING_LEVEL: debug
+      ENV_NAME: prod
+      IMAGEBUILDER_URL: http://${IMAGEBUILDER_HOST}:${IMAGEBUILDER_PORT}
+- name: provisioning-dashboards
+  url: https://github.com/RHEnVision/provisioning-backend
+  path: /deploy/dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: main

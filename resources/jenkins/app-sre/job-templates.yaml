@@ -211,6 +211,7 @@
         secrets:
         - *app_sre_bot_key
         - *ansible-reader-role-creds
+        - *ansible-ec2-inventory
     builders:
     - shell: |
         trap "rm -f ${{WORKSPACE}}/ansible/app-sre-bot.key" EXIT SIGINT
@@ -234,6 +235,7 @@
         secrets:
         - *app_sre_bot_key
         - *ansible-reader-role-creds
+        - *ansible-ec2-inventory
     builders:
     - shell: |
         trap "rm -f ${{WORKSPACE}}/ansible/app-sre-bot.key" EXIT SIGINT
@@ -248,6 +250,26 @@
     <<: *gl_timed
 
 - job-template:
+    id: 'jenkins-worker-housekeeping-update-host'
+    job_name: 'jenkins-worker-housekeeping-update-host'
+    name: '{job_name}'
+    commands: ''
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *ansible-ec2-inventory
+    publishers:
+    - git:
+        push-merge: false
+        push-only-if-success: true
+        branches:
+        - branch:
+            name: "master"
+    cron_expression: H/5 * * * *
+    <<: *gl_timed
+
+- job-template:
     id: 'gl-build-master-infra'
     name: '{gl_group}-{gl_project}-gl-build-{branch}'
     wrappers:
@@ -258,6 +280,7 @@
         secrets:
         - *packer-account
         - *ansible-reader-role-creds
+        - *app_sre_bot_push_token
     <<: *gl_build_master
 
 - job-template:

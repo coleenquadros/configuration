@@ -30,6 +30,20 @@ To on-board a new GitHub org to app-interface, perform the following operations:
     * Add the new permission to the `app-sre-bot` role. [example](/data/teams/app-sre/roles/app-sre-github-bot.yml#L8) and to other users as required.
 
 4. To create teams in the GitHub org through app-interface, submit a merge request:
-    * Create a new permission to allow adding users to this team. [example](/data/dependencies/ci-ext/permissions/ci-ext.yml)
-        * This example will create a team called `ci-ext` in the `app-sre` GitHub org.
+    * Create a new permission to allow adding users to this team:
+        ```yml
+        ---
+        $schema: /access/permission-1.yml
+
+        labels: {}
+
+        name: github-example
+        description: access to something using github auth
+
+        service: github-org-team
+        org: app-sre
+        team: github-example
+        ```
+        * This example will create a team called `github-example` in the `app-sre` GitHub org.
+
     * Add the new permission to roles as required.

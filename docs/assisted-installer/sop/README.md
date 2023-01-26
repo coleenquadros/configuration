@@ -214,3 +214,114 @@ We must find out why this is happening
 - if not close to 0, check why we are not ingesting as many events
   - many events that are not being imported (deleted clusters?)
   - issues with some type of documents in elasticsearch/scraper logic?
+
+## Memory Consumption is too high
+
+### Severity: Warning
+
+### Impact
+Possibly pods will get OOMKilled, and some requests might return 500.
+If the problem is severe and restart happen too frequently, we might get service downtime.
+
+
+### Summary
+Pods are consuming much more memory than expected.
+This can be due to several reasons.
+
+### Access required
+
+To mitigate this issue, the only requirement is the ability to change MEMORY_LIMIT/MEMORY_REQUEST
+openshift template parameters in the manifest (they can be changed [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/assisted-installer/cicd/saas.yaml#L73) ).
+To solve this issue, we must first identify the root cause.
+
+### Steps
+- Check if the pod is being OOMKilled or it's risking to be OOMKilled
+- If there is no real risk, or minor risk, this can be raised to @edge-support in CoreOS slack
+- If we are having many OOMKills, we can mitigate this by increasing MEMORY_LIMIT/MEMORY_REQUESTS
+- Run a deeper analysis to understand what's the root cause behind this. This might be due to a memory leak of many forms, due to our own code, third part libraries, or underlying data not properly handled
+
+### Escalations
+- If `@edge-support` is unresponsive, ping the `@assistedinstaller-team` user on Slack channel #team-assisted-installer-alert
+
+
+## Anomaly detected
+
+### Severity: Warning
+
+### Impact
+Depending on what is the anomaly, this might be having an effect on the product (or might have soon)
+degrading the quality of service.
+
+
+### Summary
+Anomalies could be related to incoming http requests, CPU usage, events generation.
+
+### Access required
+
+Grafana access is usually enough to determine what impact is the anomaly having on the product.
+
+### Steps
+- Deterimne impact of the anomaly on the product
+- Share findings with `@edge-support` and decide best route to take
+
+### Escalations
+- If `@edge-support` is unresponsive, ping the `@assistedinstaller-team` user on Slack channel #team-assisted-installer-alert
+
+
+## Pods restarting
+
+### Severity: Warning
+
+### Impact
+Some connections will be killed resulting in 500s.
+If the problem is severe and restart happen too frequently, we might get service downtime.
+
+
+### Summary
+This can be due to uncaught exceptions, panics, and the likes or OOMKills.
+Not always OOMKills are marked as such: if the pod it's not above its limit but there is no memory
+in the node, it can get be marked as Error instead of OOMKilled, although the reason it's still related.
+
+### Access required
+
+Depending on the solution, we need different level of access.
+
+* Access to Grafana [log dashboard](https://grafana.app-sre.devshift.net/d/F8vaevHVz/assisted-installer-logs?orgId=1)
+* Ability to change MEMORY_LIMIT and/or MEMORY_REQUEST [parameters](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/assisted-installer/cicd/saas.yaml#L73)
+
+### Steps
+- Check why the containers are being restarted
+- If this is due to panic/uncaught exception or some other code error, escalate to `@edge-support` or `@assisted-installer-team`
+- If this is due to memory consumption, we need to run a deeper investigation on why this is happening
+
+### Escalations
+- If `@edge-support` is unresponsive, ping the `@assistedinstaller-team` user on Slack channel #team-assisted-installer-alert
+
+## Opensearch disk filling up
+
+### Severity: Warning
+
+### Impact
+If Opensearch used disk space reaches 80%, the server will start rejecting writes, to avoid filling up disk and causing even more serious issues.
+
+### Summary
+This can be due to some rogue process, or simply maintenance neglection.
+
+### Access required
+
+Access to opensearch:
+* [Opensearch production](https://kibana-assisted.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/_dashboards/app/home/)
+* [Opensearch stage](https://kibana-assisted-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/_dashboards/app/home/)
+
+
+### Steps
+- Go to dev-tools tab
+- Check what index (if any) is taking up too much space
+- If there is data that can be deleted, then we can delete it right away and mitigate the alert
+- If there is no data that can be deleted, we can increase disk size from `/resources/terraform/assisted-installer/elasticsearch*.yaml` files (according to the target environment)
+- This process will take time, if we want to mitigate the impact, we can [force merge](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-forcemerge.html) the indexes with the most number of segments/data
+
+Note: we can follow [AWS guide](https://aws.amazon.com/premiumsupport/knowledge-center/opensearch-deleted-documents/)
+
+### Escalations
+`@edge-cloud-team` can help with this, alternatively `@assistedinstaller-team` can be pinged.

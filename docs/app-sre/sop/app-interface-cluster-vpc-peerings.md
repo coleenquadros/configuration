@@ -50,7 +50,7 @@ Additional resources may still be required at this point. We have automated the 
 
 More info on [OSD peering doc](https://docs.openshift.com/dedicated/4/cloud_infrastructure_access/dedicated-aws-peering.html)
 
-## OSDv4 Cluster to Cluster VPN peering
+## OSDv4 Cluster to Cluster VPC peering
 
 To add a VPC peering between two OSDv4 clusters managed in app-interface, perform the following operations:
 

@@ -1,8 +1,9 @@
 ## Glitchtip architecture
 
 
-Glitchtip is An Open source Error tracking software and a upstream fork of Sentry. The staging environment is available via https://glitchtip.stage.devshift.net and
-the production environment is in progress.
+### Service Description
+
+Glitchtip is An Open source Error tracking software and a upstream fork of Sentry. The staging environment is available via https://glitchtip.stage.devshift.net and the production environment is in available via https://glitchtip.devshift.net
 
 ## The Architecture
 
@@ -47,6 +48,9 @@ Glitchtip's front-end is written in Angular js and Node JS, along with some type
     5% on average and 30% during the load test. The production instance is db.t3.small.
     The S3 bucket space consumed is almost none at the moment but will grow as the Glitchtip service will start being used. The
     space is occupied only by the attachments uploaded by the users. Therefore we do not expect a dramatic change.
+	
+- The production instance of Glitchtip has 2 instances of "worker" and "web" components with similar requirements. We estimate that when the service gets used the resource consumption could approach the value
+seen in the load test occasionally, scaling the components is the best strategy if the resource consumption exceeds the estimation.
 
 ### Resource consumption for glitchtip components
 #### Resource consumption for beat deployment

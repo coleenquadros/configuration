@@ -1,0 +1,203 @@
+---
+$schema: /app-sre/scorecard-2.yml
+
+labels:
+  service: stonesoup
+
+app:
+  $ref: /services/stonesoup/integration-service/app.yml
+
+date: "2022-10-25"
+
+acceptanceCriteria:
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/CONTINUITY-0001-data-continuity.md
+- name: CONTINUITY-0001
+  # Only yellow in that we don't have links to pipeline-service or kcp data backup details.
+  status: yellow
+  comment: >
+    Data consists of [IntegrationTestScenarios](https://redhat-appstudio.github.io/book/ref/integration-service.html#integrationtestscenario)
+    CRDs for user provided configuration and integration `PipelineRun` results stored by
+    pipeline-service. Losing this data would have a significant negative impact for users. There is
+    no independent DR plan to recover data for integration-service. We depend on DR plans to be
+    provided by the KCP and pipeline-service teams. Keeping status "yellow" here until those links
+    can be provided.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/CONTINUITY-0002-disaster-recovery-plan.md
+- name: CONTINUITY-0002
+  status: yellow
+  comment: See comment for CONTINUITY-0001
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/CONTINUITY-0003-data-management.md
+- name: CONTINUITY-0003
+  status: green
+  comment: Mostly not applicable for integration-service, except for the [IntegrationTestScenario](https://redhat-appstudio.github.io/book/ref/integration-service.html#integrationtestscenario) which will need to maintain backwards compatibility.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/INCIDENT-MGMT-0001-contact-information.md
+- name: INCIDENT-MGMT-0001
+  status: green
+  comment: JIRA and Slack details are defined in `/teams/stonesoup/`
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/INCIDENT-MGMT-0002-service-description.md
+- name: INCIDENT-MGMT-0002
+  status: yellow
+  comment: The service is defined in `/services/stonesoup/integration-service/` and in the [Managed Developer Experience](https://docs.google.com/document/d/1Fnre7cZ18COW6pOttwOeB_zgZH3VAEnkAN3-s8ZDhhI/edit#) design index, but we are moving architectural descriptions of these services to [redhat-appstudio/book](https://github.com/redhat-appstudio/book) which will be rendered to [github.io](https://redhat-appstudio.github.io/book/). Keeping this "yellow" until that is done.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/INCIDENT-MGMT-0003-provide-metadata-for-your-service.md
+- name: INCIDENT-MGMT-0003
+  status: green
+  comment: Metadata is available in `/services/stonesoup/`.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/INCIDENT-MGMT-0004-service-escalation-policies.md
+- name: INCIDENT-MGMT-0004
+  status: red
+  comment: The [acceptance criteria](https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/INCIDENT-MGMT-0004-service-escalation-policies.md) here is empty. Need a better indication of what is being asked.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/INCIDENT-MGMT-0005-documented-internal-and-external-dependencies.md
+- name: INCIDENT-MGMT-0005
+  status: green
+  comment: Dependencies are declared both here in `/services/stonesoup/` as well as in the [exd/catalog](https://gitlab.cee.redhat.com/exd/catalog/-/blob/master/services/integration-service.yaml#L36).
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/INCIDENT-MGMT-0006-ability-to-map-a-container-image-tag-to-a-code-version.md
+- name: INCIDENT-MGMT-0006
+  status: green
+  comment: This should become supported in the stonesoup UI once we get out of MVP and start using stonesoup to build and deliver integration-service. For now, images at [quay.io/redhat-appstudio/integration-service](https://quay.io/repository/redhat-appstudio/integration-service?tab=tags) are given a tag matching the commit that the image was built from.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/INCIDENT-MGMT-0007-known-failure-scenarios-have-an-sop.md
+- name: INCIDENT-MGMT-0007
+  status: red
+  comment: No SOPs are written at this time.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/INCIDENT-MGMT-0008-cee-and-sre-are-enabled-to-support-the-workload.md
+- name: INCIDENT-MGMT-0008
+  status: red
+  comment: CEE onboarding has not yet begun at this time. Tracking in [HACBS-488](https://issues.redhat.com/browse/HACBS-488).
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/OBSERVABILITY-0001-service-implements-sre-observability-requirements.md
+- name: OBSERVABILITY-0001
+  status: yellow
+  comment: The service exposes prometheus metrics, but we haven't yet gathered those into a dashboard with promql expressions based on our target SLIs. Tracking in [ASC-198](https://issues.redhat.com/browse/ASC-198).
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/OBSERVABILITY-0002-service-defines-and-tracks-slos.md
+- name: OBSERVABILITY-0002
+  status: yellow
+  comment: SLOs are described in [Service Level Objectives for Stone Soup Services](https://docs.google.com/document/d/1OVVZeCmv6o2qsZ1BhPaVPVzkJSa8cxLAN5ImF1eugOE/edit) and metrics are exposed, but they are not yet collected into a dashboard for service management. Tracking in [ASC-198](https://issues.redhat.com/browse/ASC-198).
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/OBSERVABILITY-0003-slo-driven-alerts-with-sops.md
+- name: OBSERVABILITY-0003
+  status: red
+  comment: No alert rules yet. No SOPs yet.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/OBSERVABILITY-0004-grafana-dashboard-for-slis-and-slos.md
+- name: OBSERVABILITY-0004
+  status: red
+  comment: No dashboard yet. Tracking in [ASC-198](https://issues.redhat.com/browse/ASC-198).
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/OBSERVABILITY-0005-logging.md
+- name: OBSERVABILITY-0005
+  status: yellow
+  comment: We expect logging will be forwarded to cloudwatch. Tracking in [ASC-173](https://issues.redhat.com/browse/ASC-173).
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/OBSERVABILITY-0006-error-budget-policy.md
+- name: OBSERVABILITY-0006
+  status: red
+  comment: No SLO response policy yet.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELEASING-0001-release-process.md
+- name: RELEASING-0001
+  status: green
+  comment: The [testing strategy](https://docs.google.com/document/d/1EBr_krGumqYSq8jLzr2kdK0eyRKKDnl_X63PfjkeZQ4/edit) and [upgrade strategy](https://docs.google.com/document/d/1sjTyi5XBWwzIrgxIg5CUiiUAFXNCEnmtFcHTxuc9dvw/edit) are both documented.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELEASING-0002-no-moving-tags-for-images.md
+- name: RELEASING-0002
+  status: green
+  comment: stonesoup pins images to digests when propagating updates to the gitops repo.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELEASING-0003-staging-and-production-environments.md
+- name: RELEASING-0003
+  status: yellow
+  comment: We really only have a stage environment at the moment, but we intend to split that into prod and stage before accepting real workloads.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELEASING-0004-automated-and-repeatable-release-process.md
+- name: RELEASING-0004
+  status: green
+  comment: Releases are fully automated.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELEASING-0005-gating-promotion-to-production-against-testing-in-staging.md
+- name: RELEASING-0005
+  status: yellow
+  comment: We actually don't run e2e tests in the staging environment. Instead, we clone the staging environment, creating an ephemeral instance, and run e2e tests against that. If we were to begin also running tests against a static stage environment, that would constitute a new feature in integration-service.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELIABILITY-0001-service-runs-on-openshift-dedicated.md
+- name: RELIABILITY-0001
+  status: green
+  comment: Currently running on OSD.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELIABILITY-0002-define-requests-and-limits.md
+- name: RELIABILITY-0002
+  status: green
+  comment: Both requests and limits are defined.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELIABILITY-0003-dependency-management-plan.md
+- name: RELIABILITY-0003
+  status: red
+  comment: I don't understand this requirement. Let's talk about it and we can re-assess status afterwards.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELIABILITY-0004-customer-brought-ssl-certificate-policies.md
+- name: RELIABILITY-0004
+  status: green
+  comment: integration-service doesn't bring any ssl certificates of its own.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELIABILITY-0005-kube-api-considerations.md
+- name: RELIABILITY-0005
+  status: green
+  comment: integration-service consumes the kube API exclusively (no other API exists). These kinds of considerations are foundational quality concerns for us.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELIABILITY-0006-horizontally-scalable.md
+- name: RELIABILITY-0006
+  status: red
+  comment: foo bar
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELIABILITY-0007-kubernetes-best-practices-for-resiliency.md
+- name: RELIABILITY-0007
+  status: yellow
+  comment: We scale by adding additional shards - which unfortunately means we cannot scale integration-service independent of the other appstudio/stonesoup services. The shard is the unit of scale.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELIABILITY-0008-service-tolerant-to-osd-upgrades-without-disruption.md
+- name: RELIABILITY-0008
+  status: green
+  comment: We expect OSD upgrades to be a non-issue.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELIABILITY-0009-load-and-stress-testing.md
+- name: RELIABILITY-0009
+  status: red
+  comment: Explicit load and stress testing have not yet been done. See [test strategy](https://docs.google.com/document/d/1EBr_krGumqYSq8jLzr2kdK0eyRKKDnl_X63PfjkeZQ4/edit).
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELIABILITY-0010-life-cycle-tests.md
+- name: RELIABILITY-0010
+  status: red
+  comment: I don't understand this requirement as it is written. What does it mean to be "life-cycled" as a verb?
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/RELIABILITY-0011-capacity-plan-including-scalability-constraints.md
+- name: RELIABILITY-0011
+  status: green
+  comment: I think this is described in the [onboarding questionnaire](https://docs.google.com/document/d/1Xfr_fhY3JcDoHfVEa5UzeGzQTw7tKonJEh5Zz6Q7deY/edit#heading=h.d08cwrb74182).
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/SECURITY-0001-delivery-of-secrets-and-rotation-policies.md
+- name: SECURITY-0001
+  status: yellow
+  comment: We'll be using vault.devshift.net for secrets management. Leaving this yellow until we actually have that implemented and in place.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/SECURITY-0002-supply-chain-approved-pipeline.md
+- name: SECURITY-0002
+  status: green
+  comment: We are using stonesoup to build, which will be a [SOA-approved pipeline](https://issues.redhat.com/browse/PSSCOPS-826) by the time we go live.
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/SECURITY-0003-cve-response-process.md
+- name: SECURITY-0003
+  status: green
+  comment: This is also covered in [SSML](https://issues.redhat.com/browse/SSML-9078).
+
+# https://gitlab.cee.redhat.com/service/sres-acceptance-criteria/-/blob/main/acs/SECURITY-0004-compliance-requirements.md
+- name: SECURITY-0004
+  status: green
+  comment: No specialized security environment needs at this time.
