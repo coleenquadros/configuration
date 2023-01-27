@@ -32,7 +32,6 @@ managedResourceTypes:
 - ConfigMap
 
 imagePatterns:
-- quay.io/cs-sre/glitchtip
 - quay.io/app-sre/glitchtip
 
 allowedSecretParameterPaths:
@@ -99,21 +98,44 @@ resourceTemplates:
       publish:
       - glitchtip-stage-deploy-success-channel
 
-- name: glitchtip
-  url: https://github.com/rh-cssre/glitchtip-frontend
-  path: /openshift/template.yaml
-  targets:
+  # production instance
   - namespace:
       $ref: /services/glitchtip/namespaces/glitchtip-production.yaml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: rh-cssre-glitchtip-frontend-gh-build-master
+    ref: cac8e8efd7c8fe65602fbcfe879a765e7064bd9e
     parameters:
       GLITCHTIP_DOMAIN: https://glitchtip.devshift.net
-      KEYCLOAK_URL: https://auth.redhat.com/auth
-      KEYCLOAK_REALM: EmployeeIDP
+    secretParameters:
+    - name: SECRET_KEY
+      secret:
+        path: app-interface/app-sre/glitchtip/prod/secret_key
+        field: secret_key
+        version: 1
+    # admin user
+    - name: API_USER_1_EMAIL
+      secret:
+        path: app-interface/app-sre/glitchtip/prod/users/admin
+        field: email
+        version: 1
+    - name: API_USER_1_PASSWORD
+      secret:
+        path: app-interface/app-sre/glitchtip/prod/users/admin
+        field: password
+        version: 1
+    # qontract-reconcile user
+    - name: API_USER_2_EMAIL
+      secret:
+        path: app-interface/app-sre/glitchtip/prod/users/qontract-reconcile
+        field: email
+        version: 1
+    - name: API_USER_2_TOKEN
+      secret:
+        path: app-interface/app-sre/glitchtip/prod/users/qontract-reconcile
+        field: token
+        version: 1
+    # promotion:
+    #   auto: true
+    #   subscribe:
+    #   - glitchtip-stage-post-deploy-tests-success-channel
 
 - name: glitchtip-observability
   url: https://github.com/app-sre/glitchtip
