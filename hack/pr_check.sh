@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -exvo pipefail
+set -evo pipefail
 CURRENT_DIR=$(dirname "$0")
 
 GIT_DIFF_TREE="git diff-tree --name-status -r remotes/origin/master..HEAD -- *yml *yaml"
@@ -81,10 +81,8 @@ echo "Report written to: ${REPORT}"
 # Exit if there was a validation error
 [ "$exit_status" != "0" ] && exit $exit_status
 
-set +x
 # Validation worked, so we are good to run the integrations
 echo "$CONFIG_TOML" | base64 -d > ${TEMP_DIR}/config.toml
-set -x
 
 ./$CURRENT_DIR/manual_reconcile.sh ${TEMP_DIR}/validate/data.json ${TEMP_DIR}/config.toml ${IS_TEST_DATA} || exit_status=$?
 
