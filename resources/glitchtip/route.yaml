@@ -2,18 +2,23 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   annotations:
-    openshift.io/host.generated: "true"
     cert-manager.io/issuer-kind: ClusterIssuer
     cert-manager.io/issuer-name: letsencrypt-prod-http
+    haproxy.router.openshift.io/balance: source
+    haproxy.router.openshift.io/timeout: 5m
   labels:
-    glitchtip: glitchtip-web
+    app.kubernetes.io/component: web
+    app.kubernetes.io/name: glitchtip
   name: glitchtip-route
 spec:
-  host: "glitchtip.stage.devshift.net"
+  host: "{{ host }}"
   port:
     targetPort: "8000"
   to:
     kind: Service
     name: glitchtip-web
     weight: 100
+  tls:
+    insecureEdgeTerminationPolicy: Redirect # redirect http to https
+    termination: edge
   wildcardPolicy: None
