@@ -2968,7 +2968,9 @@ Jenkins provider on Vault replication integration allows to copy all the secrets
       $ref: dependencies/jenkins_instance_file.yml
 ```
 
-And optionally, the secrets to copy can be limited by a Vault policy with the following configuration:
+And optionally, the secrets to copy can be limited by a Vault policy, if specified, the integration will return an error in case any of the secrets is not part of the policy
+
+Example configuration:
 
 ```yaml
   paths:
