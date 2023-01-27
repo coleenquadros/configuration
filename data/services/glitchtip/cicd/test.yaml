@@ -1,29 +1,22 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: saas-glitchtip
-
 name: saas-glitchtip-test
 description: SaaS tracking file for Glichtip post deployment tests
-
 app:
   $ref: /services/glitchtip/app.yml
-
 pipelinesProvider:
   $ref: /services/glitchtip/pipelines/tekton.glitchtip-pipelines.appsrep05ue1.yml
-
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
   channel: sd-app-sre-info
-
 managedResourceTypes:
 - Job
 - ServiceAccount
 
 publishJobLogs: true
-
 imagePatterns:
 - quay.io/app-sre/glitchtip-acceptance
 
@@ -37,7 +30,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/glitchtip/namespaces/glitchtip-stage.yml
-    ref: 5dd82ea2687bf7deb53b933c1718d3255a6b9aa8
+    ref: cac8e8efd7c8fe65602fbcfe879a765e7064bd9e
     parameters:
       GLITCHTIP_URL: https://glitchtip.stage.devshift.net
     secretParameters:
@@ -55,3 +48,9 @@ resourceTemplates:
       auto: true
       subscribe:
       - glitchtip-stage-deploy-success-channel
+      promotion_data:
+      - channel: glitchtip-stage-deploy-success-channel
+        data:
+        - parent_saas: saas-glitchtip
+          target_config_hash: 0e1888ccc5cd5981
+          type: parent_saas_config
