@@ -19,7 +19,7 @@ The template should have best practices built into it, but it's worth stating th
 * Any engineer on the team can fill in for the engineer that was originally scheduled to perform the work (emergencies happen)
 * Provides documentation of exactly what changed which could be useful in the future
 
-Template: [Maintenance Window Runbook](https://docs.google.com/document/d/1BpJXvU40qvvRV4k6hCQCQWPtCtEtLGQVt0wEyFnx-Ks/edit)
+To create a runbook, **make a copy of**: [Maintenance Window Runbook](https://docs.google.com/document/d/1BpJXvU40qvvRV4k6hCQCQWPtCtEtLGQVt0wEyFnx-Ks/edit)
 
 ## Useful Resources
 

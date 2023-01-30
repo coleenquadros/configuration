@@ -39,6 +39,34 @@
     <<: *gl_build_master
 
 - job-template:
+    id: 'gl-pr-check-osd-aws-privatelink-terraform-hypershift'
+    name: 'gl-pr-check-osd-aws-privatelink-terraform-hypershift'
+    pr_check_script_path: ./scripts/cicd.sh check
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *srep_privatelink_aws_credentials
+    <<: *gl_pr_check
+
+- job-template:
+    id: 'gl-build-master-osd-aws-privatelink-terraform-hypershift'
+    name: 'gl-build-master-osd-aws-privatelink-terraform-hypershift'
+    build_deploy_script_path: ./scripts/cicd.sh apply
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *srep_privatelink_aws_credentials
+    <<: *gl_build_master
+
+- job-template:
     id: 'gl-pr-check-aws-payer-accounts-terraform'
     name: 'gl-pr-check-aws-payer-accounts-terraform'
     pr_check_script_path: ./hack/cicd.sh check

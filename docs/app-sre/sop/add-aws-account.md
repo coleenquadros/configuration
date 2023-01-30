@@ -153,9 +153,39 @@ automationToken:
   field: all
 
 premiumSupport: true
+
+terraformState:
+  $ref: /aws/<example-aws-account>/state.yml
 ```
 
 Update the `automationToken` field to point to the vault secret created earlier for this AWS account.  Also update the `uid` and `consoleUrl` fields with the AWS `Account ID` obtained from whomever created the AWS account.  Lastly, update the `name` in the yaml to be the name of the AWS account.
+
+#### Adding a terraform state section in the AWS account yaml file
+
+The `terraformState` field is an optional field that can be enabled to display terrform state bucket information within app-interface. To do so you can set up a `state.yml` file within app-interface:
+```yaml
+---
+$schema: /dependencies/terraform-state-1.yml
+
+provider: s3
+
+bucket: <name-of-bucket-containing-terraform-state-information>
+region: <aws-region>
+integrations:
+- integration: <name-of-intergration>
+  key: <name-of-terraform-state-file>
+...
+- integration: <name-of-intergration>
+  key: <name-of-terraform-state-file>
+```
+An example of this can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/state.yml).
+
+This file can then be referenced within the AWS account yaml file by ading the following section:
+```yaml
+terraformState:
+  $ref: /aws/<example-aws-account>/state.yml
+```
+An example of this can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/account.yml)
 
 ### Create AWS policies and groups
 

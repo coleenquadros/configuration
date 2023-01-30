@@ -50,14 +50,17 @@ This section provides helpful information and an overview of the steps that your
 2. Confirm the upgrade path using the [AWS docs](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion). Note that you may need to upgrade the minor version of your database engine for a major version upgrade to be available.
 3. Identify a time window that works for the development team and AppSRE to upgrade the stage database.
    1. Open a JIRA ticket in [AppSRE backlog](https://issues.redhat.com/browse/appsre) for AppSRE approval and resource allocation for the upgrade.
-4. Write step-by-step instructions from developers for stopping the service before upgrade and starting the service after upgrade. If we do not want to stop the service during the upgrade time, we will need dev teams to monitor the service during upgrade process and document the expected behavior.
+4. The service team writes a [runbook](/docs/app-sre/maintenance-windows.md#Runbooks) for performing the upgrade that includes step-by-step instructions for carrying out all aspects of the upgrade. This should include several pieces of information:
+   * Write step-by-step instructions for stopping the service before upgrade and starting the service after upgrade. If we do not want to stop the service during the upgrade time, we will need dev teams to monitor the service during upgrade process and document the expected behavior.
+   * Create any merge requests ahead of time and link to them from the runbook
+   * An example can be found [here](https://docs.google.com/document/d/1EbY27pT6M_LXPKH01emMBbww7WkUrgXXSQff9t-EjiI/edit#heading=h.uh9g57272rj1)
 5. After successfully upgrading your stage database, reach out to stakeholders and get approval to upgrade production.
    1. **RDS upgrade will result in downtime for your application. Plan for 6 hour outage for the upgrade.**
 6. Identify a time window that works for the development team and AppSRE to upgrade the production database.
    1. Open a JIRA ticket in [AppSRE backlog](https://issues.redhat.com/browse/appsre) for AppSRE approval and resource allocation for the upgrade.
    2. Upgrades should be started early in the morning. AppSRE will not approve upgrades that start after 10am ET.
 7. Notify your customers of the planned outage by posting the necessary banners on `Pendo` and `Statuspage`.
-8. Execute the upgrade in production.
+8. **The AppSRE team will execute the [runbook created by the development team](/docs/app-sre/maintenance-windows.md#Runbooks)**
 
 ### Note About Upgrading Read-Replicas
 

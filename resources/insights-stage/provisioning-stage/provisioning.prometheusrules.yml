@@ -1,0 +1,68 @@
+
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: provisioning-stage
+spec:
+  groups:
+  - name: provisioning-stage
+    rules:
+    
+    - alert: ProvisioningHTTPRequestsDurationLimit
+      expr: | 
+        rate(provisioning_http_request_duration_ms_bucket{exported_service="provisioning"}[1h]) >= 0.2
+      for: 5m
+      labels:
+        service: provisioning
+        severity: medium
+        env: stage
+      annotations:
+        message: "REST API requests response time over 200 ms per hour"
+    
+    - alert: ProvisioningHTTPRequestsSuccessPercentage
+      expr: | 
+          ((1 - rate(provisioning_http_request_total{exported_service="provisioning", code=~"5.*"}[1h])) / rate(provisioning_http_request_total{exported_service="provisioning"}[1h]))*100 < 95
+      for: 5m
+      labels:
+        service: provisioning
+        severity: medium
+        env: stage
+      annotations:
+        message: "REST API requests succeeded under 95% per hour"
+
+    - alert: ProviosioningComponentAbsent
+      expr: | 
+        absent(up{job="provisioning-backend-api",namespace="provisioning-stage"} == 1)
+      for: 5m
+      labels:
+        service: provisioning
+        severity: medium
+        env: stage
+      annotations:
+        message: "There is no pod serving provisioning application in the provisioning-stage namespace"
+
+    - alert: ProviosioningResponseTimeOver10Seconds
+      expr: |
+        histogram_quantile(0.95, sum(rate(provisioning_http_request_duration_ms_bucket{namespace="provisioning-stage",exported_service="provisioning"}[5m])) by (le)) > 10
+      for: 5m
+      labels:
+        service: provisioning
+        severity: medium
+        env: stage
+      annotations:
+        message: "the 95th Percentile response time for the service is greater than 10 seconds"
+
+    - alert: ProviosioningResponse5XXIn1Hour
+      expr: | 
+        (sum(rate(provisioning_http_request_total{code=~"^(?:5..)$", exported_service="provisioning"}[1h]))/sum(rate(provisioning_http_request_total{exported_service="provisioning"}[1h]))) * 100 > 10
+      for: 5m
+      labels:
+        service: provisioning
+        severity: medium
+        env: stage
+      annotations:
+        message: "Alerts when there is more than 10 5xx response on average for a 1 hour window"

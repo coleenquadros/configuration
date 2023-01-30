@@ -13,6 +13,14 @@ app:
 pipelinesProvider:
   $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
 
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 1Gi
+  limits:
+    cpu: 300m
+    memory: 1Gi
+
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
@@ -44,6 +52,22 @@ resourceTemplates:
     delete: true
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: master
+    parameters:
+      TOKEN_REFRESHER_IMAGE: "quay.io/observatorium/token-refresher"
+      TOKEN_REFRESHER_IMAGE_TAG: master-2022-07-25-45890c4
+      TOKEN_REFRESHER_SECRET_NAME: "grafana-loki-token-refresher"
+      REPLICAS: 3
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: master
+    parameters:
+      TOKEN_REFRESHER_IMAGE: "quay.io/observatorium/token-refresher"
+      TOKEN_REFRESHER_IMAGE_TAG: master-2022-07-25-45890c4
+      TOKEN_REFRESHER_SECRET_NAME: "grafana-loki-token-refresher"
+      REPLICAS: 3
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
     ref: master
     parameters:
       TOKEN_REFRESHER_IMAGE: "quay.io/observatorium/token-refresher"

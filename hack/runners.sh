@@ -13,6 +13,7 @@ run_int() {
   if [ -n "$EARLY_EXIT" ] && [ -n "$MASTER_BUNDLE_SHA256" ]; then
     EARLY_EXIT_ENV="-e EARLY_EXIT_COMPARE_SHA=$MASTER_BUNDLE_SHA256"
   fi
+  [ -n "$CHECK_ONLY_AFFECTED_SHARDS" ] && CHECK_ONLY_AFFECTED_SHARDS_ENV="-e CHECK_ONLY_AFFECTED_SHARDS=true"
 
   echo "INTEGRATION $INTEGRATION_NAME" >&2
 
@@ -29,6 +30,7 @@ run_int() {
     $GITLAB_PR_SUBMITTER_QUEUE_URL_ENV \
     $APP_INTERFACE_STATE_ENV \
     $EARLY_EXIT_ENV \
+    $CHECK_ONLY_AFFECTED_SHARDS_ENV \
     -e CHANGE_TYPE_PROCESSING_MODE=${CHANGE_TYPE_PROCESSING_MODE:-"limited"} \
     -e RECONCILE_IMAGE_TAG=$IMAGE \
     -w / \
@@ -178,11 +180,13 @@ run_account_notifier() {
   local status
 
   STARTTIME=$(date +%s)
+  [ -n "$STATE" ] && APP_INTERFACE_STATE_ENV="-e APP_INTERFACE_STATE_BUCKET=$app_interface_state_bucket -e APP_INTERFACE_STATE_BUCKET_ACCOUNT=$app_interface_state_bucket_account"
 
   docker run --rm -t \
     -v ${WORK_DIR}/config:/config:z \
     -e GRAPHQL_SERVER=${GRAPHQL_SERVER} \
     -e DRY_RUN=true \
+    $APP_INTERFACE_STATE_ENV \
     -e RUN_ONCE=true \
     ${GO_RECONCILE_IMAGE}:${GO_RECONCILE_IMAGE_TAG} account-notifier -c /config/config.toml \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-account-notifier.txt

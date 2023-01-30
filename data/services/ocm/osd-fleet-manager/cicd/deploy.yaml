@@ -1,23 +1,17 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: ocm
-
 name: osd-fleet-manager
 description: SaaS file for OSD Fleet Manager
-
 app:
   $ref: /services/ocm/osd-fleet-manager/app.yml
-
 pipelinesProvider:
   $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
-
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
   channel: team-uhc-info
-
 managedResourceTypes:
 - Deployment
 - Service
@@ -32,7 +26,6 @@ authentication:
   image:
     path: app-sre/quay/app-sre-pull
     field: all
-
 resourceTemplates:
 - name: osd-fleet-manager
   url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
@@ -47,7 +40,7 @@ resourceTemplates:
       name: service-osd-fleet-manager-gl-build-main
     promotion:
       publish:
-        - ocm-osdfm-deployed-int
+      - ocm-osdfm-deployed-int
     parameters:
       ENVIRONMENT: integration
       OCM_URL: ${OCM_BASE_URL}
@@ -55,19 +48,16 @@ resourceTemplates:
       ENABLE_PROVISION_SHARD_RECONCILIATION: true
       ENABLE_ACCOUNT_RECONCILIATION: true
       ENABLE_NETWORK_RECONCILIATION: true
-      # TODO we shouldn't need to provide OIDC info at all, see https://issues.redhat.com/browse/SDA-6676
       OIDCS3_BUCKET_NAME: oidc-bucket-integration
       AWS_BASE_DOMAIN: i3.devshift.org
       EXTERNAL_DNS_DOMAIN_FILTER: i3.devshift.org
       CLUSTER_EXPIRATION_TIME_DELTA_DAYS: 3650
       SENTRY_ENABLE: false
-      # This override can be used to force ACM to deploy a specific hypershift operator image
-      # HYPERSHIFT_OPERATOR_IMAGE: "quay.io/hypershift/hypershift-operator:config-fix-20221221"
       SUPPORTED_CLOUD_PROVIDERS: |-
         - name: aws
           regions:
             - name: us-west-2
-      CLUSTER_TEMPLATES: |-2
+      CLUSTER_TEMPLATES: |2-
           # HyperShift Service Cluster
           hs-sc:
             name_prefix: "hs-sc-"
@@ -96,34 +86,38 @@ resourceTemplates:
             private: false
       ENABLE_SIMPLE_IDENTITY_PROVIDER: true
       READ_ONLY_USERS:
-        - "fleet-manager-debug"
+      - fleet-manager-debug
       DEVELOPER_USERS:
-        - "fleet-manager-debug"
-      CLUSTER_CHANNEL: "candidate"
+      - fleet-manager-debug
+      CLUSTER_CHANNEL: candidate
       ENABLE_CLUSTER_AUTO_UPGRADE: false
-      CLUSTER_AUTO_UPGRADE_CRON: "0 4 * * *"
-      RHOBS_URL: "https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform-staging/api/v1/receive"
-      RHOBS_ENV: "int"
-      TELEMETER_SERVER_URL: "https://infogw.api.integration.devshift.net"
-      RHOBS_TELEMETER_URL: "https://infogw.api.integration.devshift.net/metrics/v1/receive"
-      MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: "80"
-      MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: "80"
+      CLUSTER_AUTO_UPGRADE_CRON: 0 4 * * *
+      RHOBS_URL: https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform-staging/api/v1/receive
+      RHOBS_ENV: int
+      TELEMETER_SERVER_URL: https://infogw.api.integration.devshift.net
+      HCP_TELEMETER_URL: https://infogw.api.integration.devshift.net/metrics/v1/receive
+      MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: '80'
+      MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: '80'
       DISABLE_ENABLED_REGION_CHECK: true
   - namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
-    ref: b96973de214932c2864268da5c84ecc1ddc6f827
+    ref: fbd21673c1f321e359f36a0c2afd636f92dfabdc
     promotion:
       auto: true
       subscribe:
       - ocm-osdfm-deployed-int
       publish:
       - ocm-osdfm-deployed-stage
+      promotion_data:
+      - channel: ocm-osdfm-deployed-int
+        data:
+        - parent_saas: osd-fleet-manager
+          target_config_hash: 048ef5dc65056019
+          type: parent_saas_config
     parameters:
       ENVIRONMENT: stage
       OCM_URL: ${OCM_BASE_URL}
-      # TODO scale to 3 replicas once deployed successfully
       REPLICAS: 1
-      # TODO we shouldn't need to provide OIDC info at all, see https://issues.redhat.com/browse/SDA-6676
       OIDCS3_BUCKET_NAME: oidc-bucket-integration
       ENABLE_PROVISION_SHARD_RECONCILIATION: true
       ENABLE_ACCOUNT_RECONCILIATION: true
@@ -134,16 +128,13 @@ resourceTemplates:
       SENTRY_ENABLE: true
       SENTRY_PROJECT: 39
       SENTRY_URL: https://sentry.stage.devshift.net
-      # This override can be used to force ACM to deploy a specific hypershift operator image
-      # HYPERSHIFT_OPERATOR_IMAGE: "registry.redhat.io/multicluster-engine/hypershift-rhel8-operator@sha256:6dbb72145f0b53a86e6e4845a820d7bd94a79828c062aa0ebac37b8cc54287ac"
-      # HYPERSHIFT_OPERATOR_IMAGE: "quay.io/hypershift/hypershift-operator:config-fix-20221221"
       SUPPORTED_CLOUD_PROVIDERS: |-
         - name: aws
           regions:
             - name: us-west-2
             - name: us-east-2
             - name: us-east-1
-      CLUSTER_TEMPLATES: |-2
+      CLUSTER_TEMPLATES: |2-
           # HyperShift Service Cluster
           hs-sc:
             name_prefix: "hs-sc-"
@@ -172,39 +163,31 @@ resourceTemplates:
             private: false
       ENABLE_SIMPLE_IDENTITY_PROVIDER: true
       READ_ONLY_USERS:
-        - "fleet-manager-debug"
-      CLUSTER_CHANNEL: "candidate"
+      - fleet-manager-debug
+      CLUSTER_CHANNEL: candidate
       ENABLE_CLUSTER_AUTO_UPGRADE: false
-      CLUSTER_AUTO_UPGRADE_CRON: "0 4 * * *"
-      RHOBS_URL: "https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform-staging/api/v1/receive"
-      RHOBS_ENV: "staging"
-      TELEMETER_SERVER_URL: "https://infogw.api.stage.openshift.com"
-      RHOBS_TELEMETER_URL: "https://infogw.api.stage.openshift.com/metrics/v1/receive"
-      # The max hosted cluster count defines the maximum allowed HCs on any given MC
-      MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: "80"
-      # The threshold value is a percentage of the above max hosted cluster count that will trigger scaling of mgmt clusters
-      MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: "80"
-      # This controls whether new mgmt clusters will be created when the above threshold is met
-      # Supported values are: "manual", "auto", or "none"
-      DATAPLANE_CLUSTER_SCALING_TYPE: "manual"
+      CLUSTER_AUTO_UPGRADE_CRON: 0 4 * * *
+      RHOBS_URL: https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform-staging/api/v1/receive
+      RHOBS_ENV: staging
+      TELEMETER_SERVER_URL: https://infogw.api.stage.openshift.com
+      HCP_TELEMETER_URL: https://infogw.api.stage.openshift.com/metrics/v1/receive
+      MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: '80'
+      MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: '80'
+      DATAPLANE_CLUSTER_SCALING_TYPE: manual
   - namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
-    ref: 11cf225548d95fa904de19b5127ec0ebdb9cfc7c
+    ref: 78a1126417e8c4e1cbde7b45c75b619890b0621b
     parameters:
       ENVIRONMENT: production
       OCM_URL: ${OCM_BASE_URL}
-      # TODO scale to 3 replicas once deployed successfully
       REPLICAS: 1
-      # TODO we shouldn't need to provide OIDC info at all, see https://issues.redhat.com/browse/SDA-6676
       OIDCS3_BUCKET_NAME: oidc-bucket-production
       ENABLE_PROVISION_SHARD_RECONCILIATION: true
       ENABLE_ACCOUNT_RECONCILIATION: true
       ENABLE_NETWORK_RECONCILIATION: true
       AWS_BASE_DOMAIN: p3.openshiftapps.com
       EXTERNAL_DNS_DOMAIN_FILTER: p3.openshiftapps.com
-      # CLUSTER_EXPIRATION_TIME_DELTA_DAYS: 3650
       SENTRY_ENABLE: false
-      # TODO: Figure out the proper sentry project
       SENTRY_PROJECT: 1
       SENTRY_URL: https://sentry.devshift.net
       SUPPORTED_CLOUD_PROVIDERS: |-
@@ -212,7 +195,7 @@ resourceTemplates:
           regions:
             - name: us-east-1
             - name: eu-west-1
-      CLUSTER_TEMPLATES: |-2
+      CLUSTER_TEMPLATES: |2-
           # HyperShift Service Cluster
           hs-sc:
             name_prefix: "hs-sc-"
@@ -243,24 +226,24 @@ resourceTemplates:
             private: false
       ENABLE_SIMPLE_IDENTITY_PROVIDER: true
       READ_ONLY_USERS:
-        - "fleet-manager-debug"
+      - fleet-manager-debug
       # NOTE CLUSTER_CHANNEL should remain 'candidate' until 4.12 is available in prod stable, then it should be 'stable'.
-      CLUSTER_CHANNEL: "candidate"
+      CLUSTER_CHANNEL: candidate
       ENABLE_CLUSTER_AUTO_UPGRADE: false
-      RHOBS_URL: "https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform/api/v1/receive"
-      RHOBS_ENV: "prod"
-      TELEMETER_SERVER_URL: "https://infogw.api.openshift.com"
-      RHOBS_TELEMETER_URL: "https://infogw.api.openshift.com/metrics/v1/receive"
-      MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: "40"
-      MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: "80"
+      RHOBS_URL: https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform/api/v1/receive
+      RHOBS_ENV: prod
+      TELEMETER_SERVER_URL: https://infogw.api.openshift.com
+      HCP_TELEMETER_URL: https://infogw.api.openshift.com/metrics/v1/receive
+      MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: '40'
+      MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: '80'
 - name: osd-fleet-manager-dashboards
   url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
   path: /dashboards
   provider: directory
   targets:
-    - namespace:
-        $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
-      ref: main
-    - namespace:
-        $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
-      ref: 11cf225548d95fa904de19b5127ec0ebdb9cfc7c
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: main
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: 11cf225548d95fa904de19b5127ec0ebdb9cfc7c
