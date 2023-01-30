@@ -40,28 +40,6 @@ config:
     - 'gl-pr-check-app-interface':
         display_name: schema validator pr-check
         concurrent_build: true
-        pr_check_script_path: ./hack/pr_check.sh
-        job_type: ''
-    - 'gl-periodic-job-app-interface':
-        node: app-interface-long-running
-        display_name: periodic e2e tests
-        job_type: e2e-tests
-        ci_cmd: ./hack/e2e_tests.sh
-        cron_expression: 'H 10 * * *'
-        timeout: 120
-
-- project:
-    name: app-interface-steahan-test
-    label: app-interface
-    node: app-interface
-    gl_group: steahan
-    gl_project: app-interface
-    environment: stage
-    jobs:
-    # This job is for testing changes to gl-pr-check-app-interface
-    - 'gl-pr-check-app-interface':
-        display_name: schema validator pr-check manual testing
-        concurrent_build: true
         # This is a temporary workaround to prevent changes to the hack directory from running MR checks
         pr_check_script_path: |
             if git diff --quiet --exit-code origin/master..HEAD -- ./hack/; then
@@ -70,7 +48,14 @@ config:
                 echo "Found unauthorized hack/ folder change, MR will not run."
                 exit 2
             fi
-        job_type: '-manual-testing'
+        job_type: ''
+    - 'gl-periodic-job-app-interface':
+        node: app-interface-long-running
+        display_name: periodic e2e tests
+        job_type: e2e-tests
+        ci_cmd: ./hack/e2e_tests.sh
+        cron_expression: 'H 10 * * *'
+        timeout: 120
 
 - project:
     name: qontract-api
