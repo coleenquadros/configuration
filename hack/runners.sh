@@ -186,7 +186,7 @@ run_account_notifier() {
     -v ${WORK_DIR}/config:/config:z \
     -e GRAPHQL_SERVER=${GRAPHQL_SERVER} \
     -e DRY_RUN=true \
-    -e $APP_INTERFACE_STATE_ENV \
+    $APP_INTERFACE_STATE_ENV \
     -e RUN_ONCE=true \
     ${GO_RECONCILE_IMAGE}:${GO_RECONCILE_IMAGE_TAG} account-notifier -c /config/config.toml \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-account-notifier.txt
