@@ -180,11 +180,13 @@ run_account_notifier() {
   local status
 
   STARTTIME=$(date +%s)
+  [ -n "$STATE" ] && APP_INTERFACE_STATE_ENV="-e APP_INTERFACE_STATE_BUCKET=$app_interface_state_bucket -e APP_INTERFACE_STATE_BUCKET_ACCOUNT=$app_interface_state_bucket_account"
 
   docker run --rm -t \
     -v ${WORK_DIR}/config:/config:z \
     -e GRAPHQL_SERVER=${GRAPHQL_SERVER} \
     -e DRY_RUN=true \
+    -e $APP_INTERFACE_STATE_ENV \
     -e RUN_ONCE=true \
     ${GO_RECONCILE_IMAGE}:${GO_RECONCILE_IMAGE_TAG} account-notifier -c /config/config.toml \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-account-notifier.txt
