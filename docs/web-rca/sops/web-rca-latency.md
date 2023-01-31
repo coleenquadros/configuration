@@ -11,7 +11,7 @@ Web RCA service API is having an abnormally high number of requests with high la
 ### Access required
 - View access to the stage or prod cluster + namespace that pods are running in.
   - Stage: https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/web-rca-stage/pods
-  - Production: https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/web-rca-production/pods 
+  - Production: https://console-openshift-console.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com/k8s/ns/web-rca-production/pods 
 
 ### Steps
 - Log into the console and verify if web-rca pods are up/stuck etc.
