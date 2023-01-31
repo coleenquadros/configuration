@@ -37,4 +37,4 @@ Ask a Glitchtip admin to resend the invitation by deleting your Glitchtip organi
 
 ## How can I login to the Glitchtip admin interface? (AppSRE only)
 
-The Glitchtip admin interface is available at https://glitchtip.devshift.net/admin/. The credentials are stored in [vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/glitchtip-production/admin).
+The Glitchtip admin interface is available at https://glitchtip.devshift.net/admin/. The credentials are stored in [vault](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/glitchtip/prod/users/admin).
