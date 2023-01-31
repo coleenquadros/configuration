@@ -1,0 +1,68 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: hypershift-cert-manager-integration
+description: |
+  hypershift-cert-manager namespace.
+  It hosts the cert-manager creds secret to manage Route53 records, allowing DNS challenge.
+  This secret is distributed onto management clusters using SelectorSyncSet
+
+cluster:
+  $ref: /openshift/hivei01ue1/cluster.yml
+
+app:
+  $ref: /services/hypershift/app.yml
+
+environment:
+  $ref: /products/hypershift/environments/integration.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: hypershift-cert-manager-route53
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:GetChange",
+            ],
+            "Resource": "arn:aws:route53:::change/*",
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:ChangeResourceRecordSets",
+              "route53:ListResourceRecordSets"
+            ],
+            "Resource": [
+              "arn:aws:route53:::hostedzone/Z0943698IMV8KDK5VDM1"
+              # Add any other zone below
+              # "arn:aws:route53:::hostedzone/XXXX"
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:ListHostedZonesByName"
+            ],
+            "Resource": "*"
+          }
+        ]
+      }
+    output_resource_name: hypershift-cert-manager-route53
+
+# managedResourceTypes:
+# - Secret
+
+# sharedResources:
+# - $ref: /services/hypershift/shared-resources/hypershift-cert-manager-route53-creds-integration.yaml
