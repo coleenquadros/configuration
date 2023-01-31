@@ -1,0 +1,39 @@
+{#
+  It would make sense to create a generic secret-SelectorSyncSet-template.yaml 
+  in a git repo and use it within saas files that need to deploy secrets via 
+  SelectorSyncSets. This would avoid using the cluster-scope namespace and
+  duplicate it on all hive shards. It would also be reusable by other components
+  needing to deploy secrets.
+  Going the app-interface resource way for now for simplicity ;-)
+#}
+---
+apiVersion: hive.openshift.io/v1
+kind: SelectorSyncSet
+metadata:
+  labels:
+    managed.openshift.io/osd: 'true'
+  name: hypershift-cert-manager-route53-creds-{{ environment }}
+spec:
+  clusterDeploymentSelector:
+    matchExpressions:
+    # @patmarti: commenting this as I am not sure this label is relevant
+    # - key: api.openshift.com/environment
+    #   operator: In
+    #   values:
+    #   - {{ environment }}
+    - key: ext-hypershift.openshift.io/cluster-type
+      operator: In
+      values:
+      - management-cluster
+    - key: api.openshift.com/fedramp
+      operator: NotIn
+      values:
+      - 'true'
+  resourceApplyMode: Sync
+  secretMappings:
+  - sourceRef:
+      name: {{ secret_name }}
+      namespace: {{ source_namespace }}
+    targetRef:
+      name: {{ secret_name }}
+      namespace: {{ target_namespace | default("cert-manager") }}
