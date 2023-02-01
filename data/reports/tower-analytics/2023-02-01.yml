@@ -1,0 +1,92 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: tower-analytics
+name: tower-analytics-2023-02-01
+app:
+  $ref: /services/insights/tower-analytics/app.yml
+date: '2023-02-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/tower-analytics-frontend:
+    - branch: master
+      total: 4
+      success: 0
+    - branch: master
+      total: 12
+      success: 12
+    https://gitlab.cee.redhat.com/automation-analytics/automation-analytics-backend:
+    - branch: master
+      total: 14
+      success: 14
+  container_vulnerabilities:
+  - cluster: crcs02ue1
+    namespace: tower-analytics-stage
+    vulnerabilities:
+      Low: 4
+      Critical: 46
+      High: 157
+      Medium: 330
+      Unknown: 91
+  - cluster: crcp01ue1
+    namespace: tower-analytics-prod
+    vulnerabilities:
+      High: 210
+      Critical: 84
+      Unknown: 168
+      Medium: 1218
+  - cluster: appsres03ue1
+    namespace: tower-analytics-stage-tests
+    vulnerabilities:
+      High: 3
+  post_deploy_jobs:
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: app-sre-stage-01
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: tower-analytics-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: tower-analytics-prod
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcp01ue1
+    namespace: tower-analytics-prod
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+  - cluster: crcs02ue1
+    namespace: tower-analytics-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 4
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 9
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 9
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: tower-analytics-prod
+    slo_name: Request latency
+    slo_doc_name: tower-analytics
+    slo_value: 99.4188600267862
+    slo_target: 90.0
+  - cluster: crcp01ue1
+    namespace: tower-analytics-prod
+    slo_name: Requests result in successful (non-5xx) response
+    slo_doc_name: tower-analytics
+    slo_value: 99.9955097772066
+    slo_target: 90.0

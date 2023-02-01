@@ -1,0 +1,78 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: host-inventory
+name: host-inventory-2023-02-01
+app:
+  $ref: /services/insights/host-inventory/app.yml
+date: '2023-02-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/insights-host-inventory:
+    - branch: master
+      total: 12
+      success: 12
+    - branch: master
+      total: 12
+      success: 12
+    https://github.com/RedHatInsights/insights-inventory-frontend:
+    - branch: master
+      total: 8
+      success: 8
+  container_vulnerabilities:
+  - cluster: crcs02ue1
+    namespace: host-inventory-stage
+    vulnerabilities:
+      Medium: 234
+      Low: 10
+      High: 77
+      Unknown: 90
+  - cluster: crcp01ue1
+    namespace: host-inventory-prod
+    vulnerabilities:
+      Medium: 546
+      High: 164
+      Low: 22
+      Unknown: 120
+  post_deploy_jobs:
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: host-inventory-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: host-inventory-prod
+    post_deploy_job: false
+  - cluster: insights-perf
+    namespace: host-inventory-devel-perf
+    post_deploy_job: false
+  - cluster: app-sre-stage-01
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcp01ue1
+    namespace: host-inventory-prod
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 6
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 6
+  - cluster: crcs02ue1
+    namespace: host-inventory-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+  service_slo: null
