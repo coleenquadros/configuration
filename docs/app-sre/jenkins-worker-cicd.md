@@ -8,29 +8,29 @@ Continuous Delivery means deploying instances via AWS Auto Scaling groups (ASGs)
 
 ## Continuous Integration
 
-We use the Ansible Packer provisioner to build different AMIs based on different base AMIs (we are using CentOS 7, RHEL 7, and RHEL 8) and run different roles. Packer configuration can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/packer). Each new commit [that makes changes](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/build_images.sh#L51-56) under that folder will trigger a building process for all types of worker nodes. The roles configuration for each kind of node can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/packer/ansible/jenkins-worker.yaml). To add a new type would also require adding a new source in packer [config](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/packer/worker.pkr.hcl#L40-80) 
+We use the Ansible Packer provisioner to build different AMIs based on different base AMIs (we are using CentOS 7, RHEL 7, and RHEL 8) and run different roles. Packer configuration can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/packer). Each new commit [that makes changes](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/build_images.sh#L51-56) under that folder will trigger a building process for all types of worker nodes. The roles configuration for each kind of node can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/packer/ansible/jenkins-worker.yaml). To add a new type would also require adding a new source in packer [config](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/packer/worker.pkr.hcl#L40-80).
 
 For security, all AMIs are built in [app-sre-ci](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-ci/account.yml) account. Once the AMIs get built successfully, they will be shared into `app-sre` account via [aws-ami-share](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/aws_ami_share.py). Sharing configuration can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-ci/account.yml#L47-50)
 
-If the new commit for infra repo does not make any change to the Packer configuration, the build job will only [update the previous Packer build AMIs tag](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/build_images.sh#L87-98). So we can still trace AMIs via infra latest commit sha. 
-
 ## Continuous Delivery
 
-We use [terraform-resources](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#manage-aws-autoscaling-group-via-app-interface-openshiftnamespace-1yml) to create and manage auto-scaling groups. One example can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/namespaces/app-sre-ci.yaml#L96-116). 
+We use [terraform-resources](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#manage-aws-autoscaling-group-via-app-interface-openshiftnamespace-1yml) to create and manage auto-scaling groups. One example can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/namespaces/app-sre-ci.yaml#L96-116).
 
-`images` helps us to trace the latest amis and trigger Instance refresh when new amis get to build. 
+`images` helps us to trace the latest amis and trigger Instance refresh when new amis get to build.
 
 `extra_tags` helps us to trace these dynamic instances for monitoring and running housekeeping jobs.
+
+Once an AMI has been correctly built and shared with the AWS account where the ASG is defined, in order to make it use the `ref` has to be updated. Due to the scale-in protection the plugin does it make take a while for the changes to take place. If absolutely needed, the instances can be manually terminated until [this work](/docs/app-sre/design-docs/jenkins-worker-fleet.md) is completed.
 
 ## Jenkins Plugin
 
 Jenkins master node require IAM role to be able to manage its own node. Policy can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/terraform/app-sre/app-sre-ci/ci-int-nodes.tf#L131-187)
 
-We use groovy script to manage cloud configuration which can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ci-int-jenkins-worker.groovy). Need to use [Script Console](https://www.jenkins.io/doc/book/managing/script-console/) to update it manually. 
+We use groovy script to manage cloud configuration which can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ci-int-jenkins-worker.groovy). Need to use [Script Console](https://www.jenkins.io/doc/book/managing/script-console/) to update it manually.
 
 For EC2 Fleet cloud plugin, we can easily add an existing ASG to Jenkins with this [function](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ci-int-jenkins-worker.groovy#L228-304)
 
-TODO: we need a new integration so we can define Jenkins cloud in app-interface and auto-update it in Jenkins instances.
+TODO: we need a new integration so we can define Jenkins cloud in app-interface and auto-update it in Jenkins instances. See [this design doc](/docs/app-sre/design-docs/jenkins-worker-fleet.md).
 
 ## Monitoring
 
