@@ -1,0 +1,21 @@
+---
+$schema: /vault-config/policy-1.yml
+
+labels:
+  service: vault.devshift.net
+
+name: "stonesoup-stage-approle-policy"
+instance:
+  $ref: /services/vault.devshift.net/config/ci-ext/ci-ext.yml
+# Read only permissions on ci-ext.
+# All writes should be done on teh internal production vault
+rules: |
+  path "stonesoup/metadata/" {
+    capabilities = ["list", "read"]
+  }
+  path "stonesoup/*" {
+    capabilities = ["list", "read"]
+  }
+  path app-sre/integrations-output/terraform-resources/app-sre-stage-01/stonesoup-infra-stage/* {
+    capabilities = ["list", "read"]
+  }
