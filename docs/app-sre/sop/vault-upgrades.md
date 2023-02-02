@@ -17,10 +17,10 @@ Review CVE reports for versions that patch vulnerabilities affecting components 
 **NOTE:** Per [Vault's upgrade documentation](https://developer.hashicorp.com/vault/docs/upgrading), large jumps are supported (ex: 1.5.4 to 1.9.2). However, the upgrade guides for all major versions in between (1.6, 1.7, and 1.8 for this example) must be reviewed for specific steps.
 
 ## Upgrade stage
+* Trigger the [vault stage backup cronjob](https://console-openshift-console.apps.appsres03ue1.5nvu.p1.openshiftapps.com/k8s/ns/vault-stage/cronjobs/vault-backup) 
+* Manually scale the vault deployment to `1` replica
 * Ensure an image tag exists for the desired version within [quay.io/app-sre/vault](https://quay.io/repository/app-sre/vault?tab=tags)
 * Create an MR that updates [image tag for vault.stage.devshift.net target](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/cicd/saas.yaml#L61)
-
-NOTE: in the proceeding section on performing upgrades for production instances there is a step to backup the s3 data store before upgrading. That step is absent for stage. By default, AppSRE vault instances are backed up automatically every `12h`. Due to the data within stage being infrequently updated, reliance on the last automated backup is sufficient.
 
 ## Evaluation
 
@@ -132,6 +132,7 @@ S3: trigger the vault backup cronjob. example: [vault.devshift.net cronjob](http
 RDS: [create a database snapshot](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_CreateSnapshot.html)
 
 ## Upgrade
+* Manually scale the vault deployment to `1` replica
 Create an MR that updates the image tag parameter for desired instance.  
 * [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/cicd/saas.yaml#L82)
 * **this should match existing image tag for vault.stage.devshift.net**
