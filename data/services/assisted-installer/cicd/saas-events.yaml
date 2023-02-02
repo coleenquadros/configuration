@@ -31,6 +31,7 @@ managedResourceTypes:
 
 imagePatterns:
 - quay.io/app-sre/assisted-events-scrape
+- quay.io/app-sre/assisted-events-stream
 - quay.io/app-sre/auto-report
 - quay.io/openshift/origin-oauth-proxy
 
@@ -164,4 +165,17 @@ resourceTemplates:
   url: https://github.com/openshift-assisted/assisted-events-stream
   path: /openshift/template.yaml
   provider: openshift-template
-  targets: []
+  targets:
+  - ref: master
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: openshift-assisted-assisted-events-stream-gh-build-master
+    promotion:
+      publish:
+      - assisted-events-stream-integration-deploy-success-channel
+    parameters:
+      KAFKA_EVENT_STREAM_TOPIC: events-stream-integration
+      IMAGE_NAME: quay.io/app-sre/assisted-events-stream
