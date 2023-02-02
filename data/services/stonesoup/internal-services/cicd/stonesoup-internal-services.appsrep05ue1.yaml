@@ -1,0 +1,80 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: stonesoup-internal-services
+name: stonesoup-internal-services-production
+description: 'SaaS tracking file for stonesoup-internal-services'
+
+app:
+  $ref: /services/stonesoup/app.yml
+
+pipelinesProvider:
+  $ref: /services/stonesoup/internal-services/pipelines/tekton-stonesoup-internal-services.appsrep05ue1.yaml
+
+deployResources:
+  requests:
+    cpu: 900m
+    memory: 2500Mi
+  limits:
+    cpu: 900m
+    memory: 2500Mi
+
+managedResourceTypes:
+  - Pipeline
+  - Task
+  - ServiceAccount
+  - CustomResourceDefinition
+  - Deployment
+  - RoleBinding
+  - Role
+  - ClusterRoleBinding
+  - ClusterRole
+  - Service
+
+clusterAdmin: true
+
+imagePatterns:
+  - quay.io/redhat-appstudio/internal-services
+  - quay.io/openshift/origin-kube-rbac-proxy
+
+resourceTemplates:
+  - name: stonesoup-internal-services-tekton-iib-resources
+    url: https://github.com/hacbs-release/internal-services-resources
+    path: /openshift/iib-template.yaml
+    #parameters:
+    #  REGISTRY_IMG: quay.io/app-sre/configuration-anomaly-detection
+    targets:
+      - namespace:
+          $ref: /services/stonesoup/internal-services/namespaces/stonesoup-internal-services.appsrep05ue1.yaml
+        ref: 5882a1079bf64b23a3ae37aa13ba4ecc9be8d111
+  - name: stonesoup-internal-services-tekton-errata-resources
+    url: https://github.com/hacbs-release/internal-services-resources
+    path: /openshift/errata-template.yaml
+    targets:
+      - namespace:
+          $ref: /services/stonesoup/internal-services/namespaces/stonesoup-internal-services.appsrep05ue1.yaml
+        ref: 5882a1079bf64b23a3ae37aa13ba4ecc9be8d111
+  - name: stonesoup-internal-services-tekton-service-account-resources
+    url: https://github.com/hacbs-release/internal-services-resources
+    path: /openshift/service-account-template.yaml
+    targets:
+      - namespace:
+          $ref: /services/stonesoup/internal-services/namespaces/stonesoup-internal-services.appsrep05ue1.yaml
+        ref: 5882a1079bf64b23a3ae37aa13ba4ecc9be8d111
+  - name: stonesoup-internal-services-controller
+    url: https://github.com/hacbs-release/internal-services-resources
+    path: /openshift/internal-services-controller
+    provider: directory
+    targets:
+      - namespace:
+          $ref: /services/stonesoup/internal-services/namespaces/stonesoup-internal-services.appsrep05ue1.yaml
+        ref: 5882a1079bf64b23a3ae37aa13ba4ecc9be8d111
+  - name: stonesoup-internal-services-internal-request
+    url: https://github.com/hacbs-release/internal-services-resources
+    path: /openshift/internal-services-internal-request
+    provider: directory
+    targets:
+      - namespace:
+          $ref: /services/stonesoup/internal-services/namespaces/stonesoup-internal-services.appsrep05ue1.yaml
+        ref: 5882a1079bf64b23a3ae37aa13ba4ecc9be8d111
