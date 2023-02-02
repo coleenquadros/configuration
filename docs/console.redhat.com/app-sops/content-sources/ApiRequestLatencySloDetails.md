@@ -6,7 +6,7 @@ Measurement of the proportion of HTTP requests to the content sources API that r
 
 ## SLI Rationale
 
-This directly relates to a healthy user experience as a fast return results in a responsive user experience.
+This directly relates to a healthy user experience, as a fast return results in a responsive user experience.
 
 ## Implementation details
 
@@ -20,7 +20,7 @@ The validate endpoint is excluded because it sometimes reaches out to the intern
 
 ## SLO Rationale
 
-The target is for 95% of requests to return within 100ms, but the target may be adjusted in the future based on volume of traffic. 
+The target is for 95% of requests to return within 100ms, but the target may be adjusted in the future based on the volume of traffic. 
 
 ## Alerts
 
@@ -30,7 +30,7 @@ The alerts are:
 - `ContentSourcesLatency5mto1hrOr30mto6hBudgetBurn`
 - `ContentSourcesLatency2hto1dOr6hto3dBudgetBurn`
 
-Links to prometheus rules: 
+Links to Prometheus rules: 
 - [Stage prometheus rules][stage rules].
 - [Production prometheus rules][prod rules].
 

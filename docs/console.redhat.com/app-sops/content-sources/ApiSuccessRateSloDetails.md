@@ -14,7 +14,7 @@ This SLI is represented by the expression:
 
 * 	sum(rate(content_sources_http_status_histogram_count{status!=”5xx”}[{{window}}])) / sum(rate(content_sources_http_status_histogram_count[{{window}}]))
 
-The “content_sources_http_status_histogram_count{status!=”5xx”}” metric, which counts the number of successful requests, is divided by the “content_sources_http_status_histogram_count” metric, which counts the number of total requests. The resulting ratio is the success rate of all http requests.
+The “content_sources_http_status_histogram_count{status!=”5xx”}” metric, which counts the number of successful requests, is divided by the “content_sources_http_status_histogram_count” metric, which counts the number of total requests. The resulting ratio is the success rate of all HTTP requests.
 
 ## SLO Rationale
 
@@ -30,7 +30,7 @@ The alerts are:
   - `ContentSources2hto1dErrorBudgetBurn`
   - `ContentSources6hto3dErrorBudgetBurn`
 
-Links to prometheus rules: 
+Links to Prometheus rules: 
 - [Stage prometheus rules][stage rules].
 - [Production prometheus rules][prod rules].
 
