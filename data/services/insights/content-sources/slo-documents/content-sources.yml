@@ -1,0 +1,40 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: content-sources
+
+name: content-sources
+
+app:
+  $ref: /services/insights/content-sources/app.yml
+
+namespaces:
+- $ref: /services/insights/content-sources/namespaces/content-sources-prod.yml
+
+slos:
+- name: API success rate
+  SLIType: availability
+  SLISpecification: The proportion of non-500 HTTP requests
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/content-sources/ApiSuccessRateSloDetails.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(content_sources_http_status_histogram_count{status!="5xx"}[7d])) / sum(rate(content_sources_http_status_histogram_count[7d]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /insights-prod/content-sources-prod/content-sources-prod.prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/content-sources/content-sources
+
+- name: API request latency
+  SLIType: latency
+  SLISpecification: The proportion of HTTP requests that return within 100ms
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/content-sources/ApiRequestLatencySloDetails.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(content_sources_http_status_histogram_bucket{le="0.1",path!="/api/content-sources/v1.0/repository_parameters/validate"}[7d])) / sum(rate(content_sources_http_status_histogram_bucket[7d]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /insights-prod/content-sources-prod/content-sources-prod.prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/content-sources/content-sources
