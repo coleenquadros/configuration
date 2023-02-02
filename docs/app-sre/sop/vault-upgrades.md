@@ -37,7 +37,7 @@ Copy the outputted token
 **NOTE:** If any issues are encountered while completing the checklist, a rollback should be performed. See [Rollback](#rollback) section for details.
 
 1) Verify that the vault deployment is healthy  
-    a) Review logs within the leader pod for errors  
+    a) Review logs within the leader pod for errors (`/v1/sys/leader` endpoint)  
     b) Shell to leader pod and confirm [audit log file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/config/prod/audit-backends/file-audit.yml#L15) exists  
     c) Confirm UI is reachable and log in
 
@@ -120,6 +120,8 @@ Copy the outputted token
 ## Announcement
 Notification of upgrade via email should be made at least 2 business days in advance.  
 At a minimum this email should contain: 
+* date and time of upgrade
+* anticipated duration of upgrade
 * if downtime is anticipated. If so, the expected duration
 * minor changes to workflows (ex: "within the UI, the oidc login has moved to x location")
     * major/breaking changes should be addressed while evaluating stage
