@@ -18,7 +18,8 @@ Review CVE reports for versions that patch vulnerabilities affecting components 
 
 ## Upgrade stage
 * Trigger the [vault stage backup cronjob](https://console-openshift-console.apps.appsres03ue1.5nvu.p1.openshiftapps.com/k8s/ns/vault-stage/cronjobs/vault-backup) 
-* Manually scale the vault deployment to `1` replica
+* Manually scale the vault deployment to `0` replica
+    * this is done to ensure that incompatability issues are not encountered by a newer image replica co-existing aloneside original replicas
 * Ensure an image tag exists for the desired version within [quay.io/app-sre/vault](https://quay.io/repository/app-sre/vault?tab=tags)
 * Create an MR that updates [image tag for vault.stage.devshift.net target](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/cicd/saas.yaml#L61)
 
@@ -132,7 +133,8 @@ S3: trigger the vault backup cronjob. example: [vault.devshift.net cronjob](http
 RDS: [create a database snapshot](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_CreateSnapshot.html)
 
 ## Upgrade
-* Manually scale the vault deployment to `1` replica
+* Manually scale the vault deployment to `0` replica
+    * this is done to ensure that incompatability issues are not encountered by a newer image replica co-existing aloneside original replicas
 Create an MR that updates the image tag parameter for desired instance.  
 * [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/cicd/saas.yaml#L82)
 * **this should match existing image tag for vault.stage.devshift.net**
