@@ -123,6 +123,15 @@ The very high-level explanation is that the `inspect-delay` timeout in HAProxy, 
 
 The most likely cause of this issue is transient networking issues between the client and ingress router. These sorts of issues are not rare in AWS, particularly for a single EC2 host, or a single AZ. As seen in APPSRE-1564, we were able to reproduce this issue by simulating packet loss at the client using `tc`. This slowed down the TCP and TLS handshake enough that it doesn't complete within the inspection window (`inspect-delay` timeout).
 
+If you're seeing a large number of these errors, you can identify whether it's a single node, or multiple nodes in the same availability zone, with a CloudWatch Insights query like:
+
+```
+fields kubernetes.host, message
+| filter message like 'SSLCertVerificationError'
+| stats count(kubernetes.host) as ct by kubernetes.host
+| sort by ct desc
+```
+
 #### Options for fixing this issue
 
 * `tlsInspectDelay` could be increased on the Ingress Operator, but this could leave us more suspectible to denial of service attacks (the client can send packets very slowly). So, in most cases this should probably be avoided.
