@@ -1,7 +1,7 @@
 # App-Interface
 
 This repository serves as a central coordination point for hosted services
-operated by the Application SRE team. Once the appropreiate parties accept changes to this repository, many or all portions of the contract defined herein are automated.
+operated by the Application SRE team. Once the appropriate parties accept changes to this repository, many or all portions of the contract defined herein are automated.
 
 If you are a team looking to run your service with the App SRE team, please follow the [onboarding-app](/docs/app-sre/onboarding-app.md) guide.
 
@@ -134,7 +134,7 @@ Source code can be found here: https://github.com/app-sre/visual-qontract
 An internal instance is reachable (behind the VPN) here:
 <https://visual-app-interface.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/graphql>.
 
-A public instance is rechable (authentication via GH) here:
+A public instance is reachable (authentication via GH) here:
 <https://visual-app-interface.devshift.net>.
 
 ## Querying the App-interface
@@ -225,7 +225,7 @@ Please create the request file [here](/data/app-interface/requests).
 - Management of OpenShift rolebindings
 - Management of Quay repos.
 - Management of Quay mirrors.
-- Management of Quay organisation members.
+- Management of Quay organization members.
 - Management of Sentry users.
 - Management of Sentry teams.
 - Management of Sentry projects.
@@ -650,7 +650,7 @@ Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qon
 
 A namespace declaration can contain labels. These will be applied as kubernetes labels on the namespace resource. Note that
 * labels must conform to [Kubernetes Labels constraints](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set).
-* labels set by other means (eg an operator) will not be overriden. If a conflict exists, an error will be thrown.
+* labels set by other means (eg an operator) will not be overridden. If a conflict exists, an error will be thrown.
 
 Notes:
 * If the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
@@ -1015,7 +1015,7 @@ In summary, the user `dwelch` (username within Red Hat IdP) will have an entity 
 #### Manage vault policies (`/vault-config/policy-1.yml`)
 Policies provide a declarative way to grant or forbid access to certain paths and operations in Vault
 
-Exmaple:
+Example:
 ```yaml
 ---
 $schema: /vault-config/policy-1.yml
