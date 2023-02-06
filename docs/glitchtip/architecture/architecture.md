@@ -15,10 +15,9 @@ As soon as a PR is merged to the [`main` branch](https://github.com/app-sre/glit
 flowchart TD
     A[PR merged] --> B[Trigger 'glitchtip build main' jenkins job]
     B --> C[Deploy to stage]
-    A --> D[Trigger test saas deployment]
-    C -->|ready| E[Wait for stage deployment to be ready]
-    D --> E
-    E --> F[Run acceptance tests]
+    C --> D[Trigger test saas deployment]
+    D --> F[Run acceptance tests]
+    F --> G[Deploy to production]
 ```
 
 The acceptance tests are defined in the [glitchtip repo](https://github.com/app-sre/glitchtip/tree/main/acceptance) repository.
