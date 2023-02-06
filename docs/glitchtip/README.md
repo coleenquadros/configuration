@@ -1,63 +1,58 @@
 # Glitchtip
 
-Glitchtip is An open source Error Tracking Software and a upstream fork of Sentry. The staging environment is available via https://glitchtip.stage.devshift.net and the productions environment is available via https://glitchtip.devshift.net
+Glitchtip is an open-source error-tracking software and a fork of Sentry.
 
-## The Architecture
-
-Glitchtip's Front-end is written in Angular Js and Node JS, along with some typescript and Its backend is written and python Django, It uses PostgreSQL as its backend database and Redis for a caching layer.
-in [The Architecture Document](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/glitchtip/architecture/architecture.md).
+The production environment is available via https://glitchtip.devshift.net, and the staging environment (AppSRE only) is reachable via https://glitchtip.stage.devshift.net.
 
 ## Features
 
- * [Error Tracking](https://glitchtip.com/documentation/error-tracking) 
+ * [Error Tracking](https://glitchtip.com/documentation/error-tracking)
  * [Organization and Project Management](https://glitchtip.com/documentation/uptime-monitoring)
  * [Sentry Client Integration](https://glitchtip.com/sdkdocs)
- * [Application Performance Monitoring]() 
- * [Uptime Monitoring](https://glitchtip.com/documentation/uptime-monitoring) 
+ * [Uptime Monitoring](https://glitchtip.com/documentation/uptime-monitoring)
  * [Integrations](https://glitchtip.com/documentation/integrations)
 
-## User Interface
+## End-USer Documentation
 
-UI for Glitchtip and source code is available here: https://github.com/rh-cssre/glitchtip-frontend
+The official end-user documentation is available at https://glitchtip.com/documentation, and how to integrate it into your application can be found in the [app-interface documentation](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#create-a-glitchtip-organization-dependenciesglitchtip-organization-1yml).
 
-## Glitchtip Backend repo
+## The Architecture
 
-The Glitchtip backend repository is available here: https://github.com/rh-cssre/glitchtip-backend
+The Glitchtip application consists of a web front-end, written in AngularJS, and a backend implemented in Python Django. PostgreSQL (AWS RDS) is the backend database, and elastic-cache (Redis on AWS) is the caching layer.
+See [the Architecture Document](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/glitchtip/architecture/architecture.md) for more details.
 
-## How to use Glitchtip
+## Repositories
 
+Glitchtip is composed of three repositories:
 
-The staging instance of Glitchtip is available at https://glitchtip.stage.devshift.net.
-The production instance of Glitchtip is available at https://glitchtip.devshift.net
-
-
-## Documentation
-
-Please, see the [Glitchtip Architecture
-Document](https://gitlab.cee.redhat.com/service/https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/glitchtip/docs/architecture.md)
-for information about the architecture of the software.
+* Upstream [glitchtip-frontend](https://gitlab.com/glitchtip/glitchtip-frontend)
+* Upstream [glitchtip-backend](https://gitlab.com/glitchtip/glitchtip-backend)
+* [AppSRE Glitchtip](https://github.com/app-sre/glitchtip)
 
 
-## SOP's
+## SOPs
 
-List of available SOP's
+List of available SOPs
 
-- [load-testing](docs/glitchtip/sops/load-testing.md)
-
-- [glitchtip-migration-sop](docs/glitchtip/sops/glitchtip-migration-sop.md)
-
-- [PrometheusFailedToScrapGlitchTipWeb](docs/glitchtip/sops/prometheus-failed-to-scrape-glitcthip-web.md)
-
+- [Prometheus Failed To Scrape GlitchTip Web](docs/glitchtip/sops/prometheus-failed-to-scrape-glitchtip-web.md)
 - [glitchtip-availability](docs/glitchtip/sops/glitchtip-availability.md)
-
 - [glitchtip-latency](docs/glitchtip/sops/glitchtip-latency.md)
+- [load-testing](docs/glitchtip/sops/load-testing.md)
+- [new-instance](docs/glitchtip/sops/new-instance.md)
 
- 
-## Contributing
+## Django Admin Interface (AppSRE only)
 
-See [CONTRIBUTING](https://gitlab.cee.redhat.com/cssre/cssre-docs/-/blob/main/development/howto/glitchtip/getting-started.md) for information on setting up development environment and on how to contribute to the project.
+Glitchtip allows administrators to manage the application via an admin web interface (Django admin interface).
+
+| Environment | URL                                         | Credentials                                                                                                               |
+| ----------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Production  | https://glitchtip.devshift.net/admin/       | [admin user in vault](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/glitchtip/prod/users/admin)  |
+| Staging     | https://glitchtip.stage.devshift.net/admin/ | [admin user in vault](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/glitchtip/stage/users/admin) |
+
+## Notes
+
+The qontract-reconcile glitchtip integration manages organizations where the automation account (e.g., `sd-app-sre+glitchtip@redhat.com`) has the owner role! Glitchtip doesn't have the global admin concept; an organization's role handles the permissions. The integration can't see or access other organizations; therefore, it can't control those.
 
 ## Contact
 
-Please use our [team mailing list](mailto:cloud-services-sre@redhat.com), if you wish to reach out to the Glitchtip service owners for more information.
-
+Don't hesitate to get in touch with the AppSRE team via the [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) Slack channel.

@@ -1,14 +1,16 @@
 # SOP
 
-## Glitchtip Low Availability
+## Prometheus Failed To Scrape GlitchTip Web
 
 ### Severity: Medium
 
 ### Impact
-Users are getting errors on API requests.
+
+Monitoring is not working.
 
 ### Summary
-Glitchtip service API is returning an abnormally high number of 5xx Error requests.
+
+Prometheus is not able to scrape the glitchtip-web service.
 
 ### Access required
 
@@ -19,6 +21,13 @@ View access to the stage or prod clusters and namespaces that pods are running i
 - Review the logs of the pods to see if there are any errors.
 - Optionally, try to restart the pods or manually trigger the deployment pipeline.
 
+TODO: Determine the procedure for this alert.
+1. Resolution
+2. Log capture
+3. Issue tracking
+
+* https://glitchtip.devshift.net/api/0/observability/django/
+* TODO prometheus token
 
 ### Escalations
 - Ping `@app-sre-ic` in `#sd-app-sre` on Slack

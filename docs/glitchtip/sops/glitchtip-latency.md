@@ -1,3 +1,5 @@
+# SOP
+
 ## Glitchtip High Latency
 
 ### Severity: Medium
@@ -9,15 +11,14 @@ Users are experiencing high/slower latency on API requests.
 Glitchtip service API is having an abnormally high number of requests with high latency.
 
 ### Access required
-- View access to the stage or prod cluster + namespace that pods are running in.
-  - Stage: https://visual-app-interface.devshift.net/services#/services/glitchtip/app.yml
-  - Production: 
+
+View access to the stage or prod clusters and namespaces that pods are running in ([glitchtip in visual-app-interface](https://visual-app-interface.devshift.net/services#/services/glitchtip/app.yml)).
 
 ### Steps
 - Log into the console and verify if glitchtip pods are up/stuck etc.
-- Optionally try to remove the pods and have it re-created from the same deployment config. Manually trigger the deployment pipeline.
-- Increase the memory limit and redeploy. The reason for increasing the limits is discussed in the Glitchtip load testing [doc](./load-testing.md)
+- Review the logs of the pods to see if there are any errors.
+- Optionally, try to restart the pods or manually trigger the deployment pipeline.
+
 
 ### Escalations
-- Ping in `#forum-glitchtip` on Slack
-- Ping in `#cssre-team-chat` on Slack
+- Ping `@app-sre-ic` in `#sd-app-sre` on Slack
