@@ -375,7 +375,7 @@ Next up, change all your panels to send queries to this datasource
 
 **Adding a postgres data source to Grafana requires manager approval. This is an exceptional request that requires a very valid use-case.**
 
-**Grafana does not sanity checks on queries, i.e., you can fire ANY query you like from Grafana.**
+**Grafana does not sanity checks on queries. EVERY app-interface user can fire ANY query against your database. E.g., DROP TABLE users; could be sent to your database by every app-interface user.**
 
 It is of uttmost importance to only add read-replicas as data sources, because Grafana
 has no sanity checks. By using a read-replica, you can limit the amount of damage that
