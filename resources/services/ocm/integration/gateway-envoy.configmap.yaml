@@ -250,11 +250,16 @@ data:
                       x_forwarded_for: "%REQ(X-FORWARDED-FOR)%"
                       x_request_id: "%REQ(X-REQUEST-ID)%"
                 filter:
-                  header_filter:
-                    header:
-                      name: x-envoy-original-path
-                      # Match both /api/assisted-install/ and /api/assisted-images
-                      prefix_match: /api/assisted-
+                  or_filter:
+                    filters:
+                    - header_filter:
+                        header:
+                          name: x-envoy-original-path
+                          prefix_match: /api/assisted-images
+                    - header_filter:
+                        header:
+                          name: :path
+                          prefix_match: /api/assisted-install
                 typed_config:
                   "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
                   path: /dev/stdout
