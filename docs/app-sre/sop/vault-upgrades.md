@@ -18,10 +18,11 @@ Review CVE reports for versions that patch vulnerabilities affecting components 
 
 ## Upgrade stage
 * Trigger the [vault stage backup cronjob](https://console-openshift-console.apps.appsres03ue1.5nvu.p1.openshiftapps.com/k8s/ns/vault-stage/cronjobs/vault-backup) 
-* Manually scale the vault deployment to `0` replica
+* Change the vault k8s deployment strategy to `Recreate` ([example](https://gitlab.cee.redhat.com/service/vault-devshift-net/-/merge_requests/52/diffs#77f031dd616efd80f5713f8c009d99075d45e56b_35_31))
     * this is done to ensure that incompatability issues are not encountered by a newer image replica co-existing aloneside original replicas
 * Ensure an image tag exists for the desired version within [quay.io/app-sre/vault](https://quay.io/repository/app-sre/vault?tab=tags)
 * Create an MR that updates [image tag for vault.stage.devshift.net target](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/cicd/saas.yaml#L61)
+* Change the vault k8s deployment strategy back to `RollingUpdate` ([example](https://gitlab.cee.redhat.com/service/vault-devshift-net/-/merge_requests/53/diffs#77f031dd616efd80f5713f8c009d99075d45e56b))
 
 ## Evaluation
 
@@ -133,11 +134,12 @@ S3: trigger the vault backup cronjob. example: [vault.devshift.net cronjob](http
 RDS: [create a database snapshot](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_CreateSnapshot.html)
 
 ## Upgrade
-* Manually scale the vault deployment to `0` replica
+* Change the vault k8s deployment strategy to `Recreate` ([example](https://gitlab.cee.redhat.com/service/vault-devshift-net/-/merge_requests/52/diffs#77f031dd616efd80f5713f8c009d99075d45e56b_35_31))
     * this is done to ensure that incompatability issues are not encountered by a newer image replica co-existing aloneside original replicas
-Create an MR that updates the image tag parameter for desired instance.  
-* [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/cicd/saas.yaml#L82)
-* **this should match existing image tag for vault.stage.devshift.net**
+* Create an MR that updates the image tag parameter for desired instance.
+    * [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/cicd/saas.yaml#L82)
+    * **this should match existing image tag for vault.stage.devshift.net**
+* Change the vault k8s deployment strategy back to `RollingUpdate` ([example](https://gitlab.cee.redhat.com/service/vault-devshift-net/-/merge_requests/53/diffs#77f031dd616efd80f5713f8c009d99075d45e56b))
 
 ## Evaluate
 1. Review [production vault-manager](https://console-openshift-console.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/k8s/ns/app-interface-production/deployments/vault-manager/pods) logs
@@ -163,3 +165,4 @@ In the event that an upgrade yields unexpected behavior, perform the following a
 3. [Restore rds HA coordination database from snapshot](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html)
 4. Revert MR changing image tag
     * this will automatically scale the deployment back up
+5. Change Deployment Strategy back to `RollingUpdate` ([example](https://gitlab.cee.redhat.com/service/vault-devshift-net/-/merge_requests/53/diffs#77f031dd616efd80f5713f8c009d99075d45e56b))
