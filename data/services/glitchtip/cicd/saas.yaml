@@ -1,30 +1,22 @@
-
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: saas-glitchtip
-
 name: saas-glitchtip
 description: SaaS tracking file for Glichtip
-
 app:
   $ref: /services/glitchtip/app.yml
-
 pipelinesProvider:
   $ref: /services/glitchtip/pipelines/tekton.glitchtip-pipelines.appsrep05ue1.yml
-
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
   channel: sd-app-sre-info
-
 authentication:
   image:
     path: cs-sre/creds/quay/pull
     field: all
     version: 3
-
 managedResourceTypes:
 - Deployment
 - Service
@@ -61,7 +53,6 @@ resourceTemplates:
         path: app-interface/app-sre/glitchtip/stage/secret_key
         field: secret_key
         version: 1
-    # admin user
     - name: API_USER_1_EMAIL
       secret:
         path: app-interface/app-sre/glitchtip/stage/users/admin
@@ -72,7 +63,6 @@ resourceTemplates:
         path: app-interface/app-sre/glitchtip/stage/users/admin
         field: password
         version: 1
-    # qontract-reconcile user
     - name: API_USER_2_EMAIL
       secret:
         path: app-interface/app-sre/glitchtip/stage/users/qontract-reconcile
@@ -83,7 +73,6 @@ resourceTemplates:
         path: app-interface/app-sre/glitchtip/stage/users/qontract-reconcile
         field: token
         version: 1
-    # CI/CD acceptance user
     - name: API_USER_3_EMAIL
       secret:
         path: app-interface/app-sre/glitchtip/stage/users/acceptance
@@ -101,7 +90,7 @@ resourceTemplates:
   # production instance
   - namespace:
       $ref: /services/glitchtip/namespaces/glitchtip-production.yaml
-    ref: cac8e8efd7c8fe65602fbcfe879a765e7064bd9e
+    ref: c5c28aff83e8aeb20b5c95e2fdf2c74670afe6d8
     parameters:
       GLITCHTIP_DOMAIN: https://glitchtip.devshift.net
     secretParameters:
@@ -110,7 +99,6 @@ resourceTemplates:
         path: app-interface/app-sre/glitchtip/prod/secret_key
         field: secret_key
         version: 1
-    # admin user
     - name: API_USER_1_EMAIL
       secret:
         path: app-interface/app-sre/glitchtip/prod/users/admin
@@ -121,7 +109,6 @@ resourceTemplates:
         path: app-interface/app-sre/glitchtip/prod/users/admin
         field: password
         version: 1
-    # qontract-reconcile user
     - name: API_USER_2_EMAIL
       secret:
         path: app-interface/app-sre/glitchtip/prod/users/qontract-reconcile
@@ -137,6 +124,12 @@ resourceTemplates:
       subscribe:
       - glitchtip-stage-post-deploy-tests-success-channel
 
+      promotion_data:
+      - channel: glitchtip-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: saas-glitchtip-test
+          target_config_hash: d04eb5bd1f69d65d
+          type: parent_saas_config
 - name: glitchtip-observability
   url: https://github.com/app-sre/glitchtip
   path: /grafana
