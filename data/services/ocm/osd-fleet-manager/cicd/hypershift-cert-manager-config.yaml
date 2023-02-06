@@ -1,0 +1,60 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: ocm
+name: hypershift-cert-manager-config
+description: SaaS file for Hypershift cert-manager configuration
+
+# copied from osd-fleet-manager
+app:
+  $ref: /services/ocm/osd-fleet-manager/app.yml
+
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+
+# copied from osd-fleet-manager
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-uhc-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns: []
+
+allowedSecretParameterPaths:
+- app-sre/integrations-output/terraform-resources/hivei01ue1/osd-fleet-manager-integration/hypershift-cert-manager-route53
+
+resourceTemplates:
+- name: hypershift-cert-manager-config-integration
+  url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
+  path: /templates/cert-manager-config.yaml
+
+  parameters:
+    # this should probably be updated to something else
+    CLUSTER_ISSUER_EMAIL: sd-app-sre+hypershift-cert-manager@redhat.com
+  secretParameters:
+  - name: ROUTE53_ACCESS_KEY_ID
+    secret:
+      path: app-sre/integrations-output/terraform-resources/hivei01ue1/osd-fleet-manager-integration/hypershift-cert-manager-route53
+      field: aws_access_key_id
+      version: 1
+  - name: ROUTE53_SECRET_ACCESS_KEY
+    secret:
+      path: app-sre/integrations-output/terraform-resources/hivei01ue1/osd-fleet-manager-integration/hypershift-cert-manager-route53
+      field: aws_secret_access_key
+      version: 1
+
+  targets:
+  - name: hypershift-cert-manager-config-integration-hivei01ue1
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/hive/osd-fleet-manager-hivei01ue1.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-osd-fleet-manager-gl-build-main
+    promotion:
+      publish:
+      - hypershift-cert-manager-config-integration-hivei01ue1
