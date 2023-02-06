@@ -117,6 +117,40 @@ externalResources:
     identifier: app-interface-stage-cloudwatch
     defaults: /terraform/resources/cloudwatch-1.yml
     output_resource_name: app-interface-cloudwatch
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  - provider: s3
+    identifier: git-partition-sync-stage
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: git-partition-sync-s3-stage
+  - provider: aws-iam-service-account
+    identifier: git-partition-sync-stage
+    variables:
+      bucket: git-partition-sync-stage
+      region: us-east-1
+      endpoint: s3.us-east-1.amazonaws.com
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:ListBucket"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${bucket}",
+              "arn:aws:s3:::${bucket}/*",
+            ]
+          }
+        ]
+      }
+    output_resource_name: git-partition-sync-aws-creds-stage
 
 glitchtipProjects:
 - $ref: /dependencies/glitchtip/projects/glitchtip-stage/app-interface-stage.yml
