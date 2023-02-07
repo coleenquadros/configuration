@@ -26,12 +26,13 @@ imagePatterns: []
 allowedSecretParameterPaths:
 - osd-sre/hive-integration/certman-operator/lets-encrypt-account
 - app-sre/integrations-output/terraform-resources/hivei01ue1/osd-fleet-manager-integration/hypershift-cert-manager-route53
+- osd-sre/hive-stage/certman-operator/lets-encrypt-account
+- app-sre/integrations-output/terraform-resources/hive-stage-01/osd-fleet-manager-stage/hypershift-cert-manager-route53
 
 resourceTemplates:
 - name: hypershift-cert-manager-config-integration
   url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
   path: /templates/cert-manager-config.yaml
-
   parameters:
     # value taken from resources/hive-integration/certman-operator/certman-operator.configmap.yaml
     CLUSTER_ISSUER_EMAIL: sd-sre-platform@redhat.com
@@ -57,11 +58,10 @@ resourceTemplates:
       path: app-sre/integrations-output/terraform-resources/hivei01ue1/osd-fleet-manager-integration/hypershift-cert-manager-route53
       field: aws_secret_access_key
       version: 1
-
   targets:
   - name: hypershift-cert-manager-config-integration-hivei01ue1
     namespace:
-      $ref: /services/ocm/osd-fleet-manager/namespaces/hive/osd-fleet-manager-hivei01ue1.yml
+      $ref: /services/ocm/osd-fleet-manager/namespaces/hive/osd-fleet-manager-integration-hivei01ue1.yml
     ref: main
     upstream:
       instance:
@@ -70,3 +70,45 @@ resourceTemplates:
     promotion:
       publish:
       - hypershift-cert-manager-config-integration-hivei01ue1
+
+- name: hypershift-cert-manager-config-stage
+  url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
+  path: /templates/cert-manager-config.yaml
+  parameters:
+    # this should probably be updated to something else
+    CLUSTER_ISSUER_EMAIL: sd-sre-platform@redhat.com
+  secretParameters:
+  - name: LETSENCRYPT_PRIVATE_KEY_B64
+    secret:
+      path: osd-sre/hive-stage/certman-operator/lets-encrypt-account
+      field: private-key_qb64
+      version: 1
+  - name: ROUTE53_ACCESS_KEY_ID
+    secret:
+      path: app-sre/integrations-output/terraform-resources/hive-stage-01/osd-fleet-manager-stage/hypershift-cert-manager-route53
+      field: aws_access_key_id
+      version: 1
+  - name: ROUTE53_SECRET_ACCESS_KEY
+    secret:
+      path: app-sre/integrations-output/terraform-resources/hive-stage-01/osd-fleet-manager-stage/hypershift-cert-manager-route53
+      field: aws_secret_access_key
+      version: 1
+  targets:
+  - name: hypershift-cert-manager-config-stage-hive-stage-01
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/hive/osd-fleet-manager-stage-hive-stage-01.yml
+    ref: 32db5bbc0231508b998b7c8d99c590d182b9033b
+    promotion:
+      subscribe:
+      - hypershift-cert-manager-config-integration-hivei01ue1
+      publish:
+      - hypershift-cert-manager-config-stage-hive-stage-01
+  - name: hypershift-cert-manager-config-stage-hives02ue1
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/hive/osd-fleet-manager-stage-hives02ue1.yml
+    ref: 32db5bbc0231508b998b7c8d99c590d182b9033b
+    promotion:
+      subscribe:
+      - hypershift-cert-manager-config-integration-hivei01ue1
+      publish:
+      - hypershift-cert-manager-config-stage-hives02ue1
