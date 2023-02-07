@@ -1341,13 +1341,13 @@ Note: If terminal cannot find `gpg` after install, your executable may be named 
 
 1. Download and install the GPG command line tools for your operating system. We generally recommend installing the latest version for your operating system.
 2. Open Terminal.
-3. Generate a GPG key pair. Your key must use RSA.
+3. Generate a GPG key pair. Your key can be RSA or ECC.
 ```
 $ gpg --full-generate-key
 ```
 4. A series of prompts directs you through the process. Press the Enter key to assign a default value if desired.
-      1. The first prompt asks you to select what kind of key you prefer. Select `RSA and RSA`. An RSA/RSA key allows you not only to sign communications, but also to encrypt files.
-      2. Choose the key size: `4096`.
+      1. The first prompt asks you to select what kind of key you prefer. Select `RSA and RSA` or `ECC (sign and encrypt)`. It allows you not only to sign communications, but also to encrypt files.
+      2. Choose the key size: `4096` (`RSA` path) or elliptic curve: `Curve 25519` (`ECC` path).
       3. Choose when the key will expire. You may set this to  `0 = key does not expire`.
       4. Before the gpg application asks for signature information, the following prompt appears: `Is this correct (y/N)?`. Review and enter `y`.
       5. Enter your name and email address for your GPG key. Remember this process is about authenticating you as a real individual. For this reason, include your real name.
