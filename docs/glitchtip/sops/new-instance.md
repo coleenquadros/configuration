@@ -11,6 +11,9 @@ All API users are stored in Vault and created/reconciled by the [glitchtip-web d
 1. Create a `qontract-reconcile` account for the glitchtip q-r integration.
    1. `email = sd-app-sre+glitchtip@redhat.com`
    1. `token` generate one (less 64 chars) using a password manager or `python -c 'import secrets; print(secrets.token_urlsafe(63))'`
+1. Create an `observability` account for prometheus.
+   1. `email = sd-app-sre+observability@redhat.com`
+   1. `token` generate one (less 64 chars) using a password manager or `python -c 'import secrets; print(secrets.token_urlsafe(63))'`
 
 **secret_key**
 1. Generate a new Django `secret_key` using `python -c 'import secrets; print(secrets.token_urlsafe(128))'`
