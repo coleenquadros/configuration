@@ -12,7 +12,7 @@ This SOP explains how to setup a local development environment for app-interface
 
 Unless specified, this guide assumes that you are setting up a development environment to use with the real [app-interface](https://gitlab.cee.redhat.com/service/app-interface) data.
 
-## Install basic tools (MacOs, optional)
+## Install basic tools
 
 If you are running MacOs, you may want to install the GNU version of some common tools like grep, coreutils, find, awk or sed. They are availbale with homebrew, for instance:
 
@@ -21,6 +21,12 @@ brew install findutils
 ```
 and perhaps make your brew-installed tools override the default MacOs ones.
 
+Other tools need to be installed:
+
+* [helm](https://helm.sh/docs/intro/install/)
+* [amtool](https://github.com/prometheus/alertmanager/releases)
+* [oc](https://access.redhat.com/downloads/content/290/ver=4.10/rhel---8/4.10.15/x86_64/product-software) check `OC_VERSION` in [qontract-reconcile](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py)
+* [terraform](https://developer.hashicorp.com/terraform/downloads) check `TERRAFORM_VERSION` in [qontract-reconcile](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py)
 
 ## Setup Repo
 
@@ -117,7 +123,7 @@ It is encouraged that development work is done using this repository and not usi
 
     ```sh
     $ cd qontract-server
-    $ APP_INTERFACE_PATH=$PWD/../app-interface make dev
+    $ APP_INTERFACE_PATH=$PWD/../../service/app-interface-dev-data make dev
     ```
 
 1. Sign in to Vault and copy the content of [app-interface-dev-config-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface-dev-config-toml) into a file called `config.dev.toml`.
