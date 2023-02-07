@@ -318,9 +318,17 @@ resourceTemplates:
     OIDCS3_BUCKET_NAME: oidc-bucket-production
     READ_ONLY_USERS:
     - fleet-manager-debug
-    REPLICAS: 0
+    REPLICAS: 1
     RHOBS_URL: https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform/api/v1/receive
     RHOBS_ENV: prod
+    SECTOR_ASSIGNMENT_POLICY: |-
+      rules:
+      # us-east-1 clusters go to the green sector
+      - predicate:
+          region: us-east-1
+        sector: green
+      # put everything else into the blue sector
+      - sector: blue
     SENTRY_ENABLE: false
     SENTRY_PROJECT: 1028
     SENTRY_URL: https://sentry.devshift.net
@@ -373,6 +381,7 @@ resourceTemplates:
       OIDCS3_BUCKET_NAME: oidc-bucket-production
       ENABLE_PROVISION_SHARD_RECONCILIATION: true
       ENABLE_ACCOUNT_RECONCILIATION: true
+      ENABLE_GLOBAL_WORKERS: false
       ENABLE_NETWORK_RECONCILIATION: true
       ENABLE_CERT_MANAGER_ADDON: true
       AWS_BASE_DOMAIN: p3.openshiftapps.com
