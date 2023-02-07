@@ -1,5 +1,7 @@
 # Upgrading the OS in Jenkins
 
+DEPRECATION NOTICE: We're moving to EC2 Fleet Manager to manage worker nodes dynamically. We have already completed ci-int whereas ci-ext still has static nodes. See [this doc](/docs/app-sre/jenkins-worker-cicd.md) to have more information on how to handle dynamic nodes.
+
 To upgrade RPMs in ci-int, ci-ext and their nodes, use the
 [`node-upgrade`](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-upgrade.yml)
 playbook, like

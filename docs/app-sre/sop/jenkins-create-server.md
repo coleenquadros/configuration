@@ -1,5 +1,7 @@
 # Steps to install new or reinstall ci-int jenkins master on OpenStack
 
+DEPRECATION NOTICE: We're moving to EC2 Fleet Manager to manage worker nodes dynamically. We have already completed ci-int whereas ci-ext still has static nodes. See [this doc](/docs/app-sre/jenkins-worker-cicd.md) to have more information on how to handle dynamic nodes.
+
 ## Start OpenStack VM
 
 1. Define OpenStack instance in ansible like [MR](https://gitlab.cee.redhat.com/app-sre/infra/merge_requests/2)

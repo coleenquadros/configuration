@@ -1,4 +1,7 @@
 # Jenkins disk space cleanup steps
+
+DEPRECATION NOTICE: We're moving to EC2 Fleet Manager to manage worker nodes dynamically. We have already completed ci-int whereas ci-ext still has static nodes. See [this doc](/docs/app-sre/jenkins-worker-cicd.md) to have more information on how to handle dynamic nodes.
+
 ## Example alert
 ```
 Device /dev/vda1 of node 10.0.132.76:9100 will be full within the next 24 hours.

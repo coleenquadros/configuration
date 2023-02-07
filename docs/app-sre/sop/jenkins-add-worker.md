@@ -1,5 +1,7 @@
 [TOC]
 
+DEPRECATION NOTICE: We're moving to EC2 Fleet Manager to manage worker nodes dynamically. We have already completed ci-int whereas ci-ext still has static nodes. See [this doc](/docs/app-sre/jenkins-worker-cicd.md) to have more information on how to handle dynamic nodes.
+
 # Prework
   - Fork the infra repo from [here](https://gitlab.cee.redhat.com/app-sre/infra)
   - If we need a RHEL worker node, perform the following to make rhel gold images available in the AWS account.

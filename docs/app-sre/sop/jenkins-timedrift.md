@@ -1,5 +1,7 @@
 # Resolve time drift issue on jenkins nodes. This procedure can be used for any hosts managed by ansible in AppSRE [infra](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/ansible/playbooks) repo.
 
+DEPRECATION NOTICE: We're moving to EC2 Fleet Manager to manage worker nodes dynamically. We have already completed ci-int whereas ci-ext still has static nodes. See [this doc](/docs/app-sre/jenkins-worker-cicd.md) to have more information on how to handle dynamic nodes.
+
 ## Issue Description
 Jenkins nodes using ntpd service have a time drift and looses ability to synchronize time.
 This was observed on our ci-int infrastructure which points to Red Hat internal time servers.
