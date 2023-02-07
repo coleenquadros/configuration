@@ -265,6 +265,100 @@ resourceTemplates:
     parameters:
       DEPLOYMENT_NAME: main
       ENABLE_GLOBAL_WORKERS: true
+- name: osd-fleet-manager-production
+  url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
+  path: /templates/named-service-template.yml
+  parameters:
+    AWS_BASE_DOMAIN: p3.openshiftapps.com
+    CLUSTER_CHANNEL: candidate
+    CLUSTER_TEMPLATES: |2-
+        # HyperShift Service Cluster
+        hs-sc:
+          name_prefix: "hs-sc-"
+          # if channel is not stable, needs to match name from
+          # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
+          openshift_version: "4.12.1-candidate"
+          multi_az: true
+          ccs: true
+          compute_machine_type: m5.4xlarge
+          compute_autoscale: true
+          compute_autoscale_min_replicas: 3
+          compute_autoscale_max_replicas: 9
+          compute_nodes: 3
+          network_type: OVNKubernetes
+          private: false
+
+        # HyperShift Management Cluster
+        hs-mc:
+          name_prefix: "hs-mc-"
+          # if channel is not stable, needs to match name from
+          # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
+          openshift_version: "4.12.1-candidate"
+          multi_az: true
+          ccs: true
+          compute_machine_type: m5.4xlarge
+          compute_autoscale: true
+          compute_autoscale_min_replicas: 3
+          compute_autoscale_max_replicas: 60
+          network_type: OVNKubernetes
+          private: false
+    ENABLE_ACCOUNT_RECONCILIATION: true
+    ENABLE_CERT_MANAGER_ADDON: true
+    ENABLE_CLUSTER_AUTO_UPGRADE: false
+    ENABLE_GLOBAL_WORKERS: false
+    ENABLE_NETWORK_RECONCILIATION: true
+    ENABLE_PROVISION_SHARD_RECONCILIATION: true
+    ENABLE_SIMPLE_IDENTITY_PROVIDER: true
+    ENVIRONMENT: production
+    EXTERNAL_DNS_DOMAIN_FILTER: p3.openshiftapps.com
+    HCP_TELEMETER_URL: https://infogw.api.openshift.com/metrics/v1/receive
+    MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: '40'
+    MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: '80'
+    OCM_URL: ${OCM_BASE_URL}
+    OIDCS3_BUCKET_NAME: oidc-bucket-production
+    READ_ONLY_USERS:
+    - fleet-manager-debug
+    REPLICAS: 0
+    RHOBS_URL: https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform/api/v1/receive
+    RHOBS_ENV: prod
+    SENTRY_ENABLE: false
+    SENTRY_PROJECT: 1028
+    SENTRY_URL: https://sentry.devshift.net
+    SUPPORTED_CLOUD_PROVIDERS: |-
+      - name: aws
+        regions:
+          - name: us-east-1
+          - name: eu-west-1
+    TELEMETER_SERVER_URL: https://infogw.api.openshift.com
+  targets:
+  - name: osd-fleet-manager-production-red
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
+    ref: 635805b505f7e18ca3065ca2a45915896443f44c
+    promotion:
+      publish:
+      - ocm-osdfm-deployed-production-red
+    parameters:
+      DEPLOYMENT_NAME: red
+  - name: osd-fleet-manager-production-green
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
+    ref: 635805b505f7e18ca3065ca2a45915896443f44c
+    promotion:
+      publish:
+      - ocm-osdfm-deployed-production-green
+    parameters:
+      DEPLOYMENT_NAME: green
+  - name: osd-fleet-manager-production-blue
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
+    ref: 635805b505f7e18ca3065ca2a45915896443f44c
+    promotion:
+      publish:
+      - ocm-osdfm-deployed-production-blue
+    parameters:
+      DEPLOYMENT_NAME: blue
+      ENABLE_GLOBAL_WORKERS: true
 - name: osd-fleet-manager
   url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
   path: /templates/service-template.yml
