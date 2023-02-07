@@ -31,9 +31,12 @@ name: glitchtip-<INSTANCE-NAME>
 description: glitchtip-<INSTANCE-NAME> access information
 consoleUrl: <GLITCHTIP-URL>
 
-automationUserEmail: <QONTRACT-RECONCILE-EMAIL created above>
+automationUserEmail:
+  path: <VAULT-PATH-TO-QONTRACT-RECONCILE-SECRET created above>
+  field: email
+  version: 1
 automationToken:
-  path: <VAULT-PATH-TO-QONTRACT-RECONCILE-TOKEN created above>
+  path: <VAULT-PATH-TO-QONTRACT-RECONCILE-SECRET created above>
   field: token
   version: 1
 ```
