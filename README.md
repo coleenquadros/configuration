@@ -257,6 +257,7 @@ Please create the request file [here](/data/app-interface/requests).
 - Management of notification e-mails.
 - Management of SQL Queries.
 - Creation of SLI related performance parameters recording rules.
+- Management of layer 7 service networks (Skupper networks).
 
 ### Planned integrations
 
@@ -2292,6 +2293,129 @@ peering:
       $ref: /openshift/hive-stage-01/cluster.yml
 ```
 
+### Management of layer 7 service networks (Skupper networks)
+
+[Skupper](skupper.io) is a layer seven service interconnect. It enables secure communication across Kubernetes clusters with no VPNs or special firewall rules.
+
+With Skupper, your application can span multiple cloud providers, data centers, and regions.
+
+Some features to highlight:
+
+* **Simple to set up**
+  * No changes to your existing application required
+  * Transparent HTTP/1.1, HTTP/2, gRPC, and TCP communication
+* **Secure by design**
+  * Communicate across clusters without exposing service ports on the internet
+  * Inter-cluster communication is secured by mutual TLS
+* **Connect anywhere**
+  * Multicloud, hybrid cloud, and edge-to-edge connectivity
+  * Secure access from the public cloud to private cloud services without VPNs
+  * Add and remove new clusters dynamically
+* **Smart routing**
+  * Dynamic load balancing based on service capacity
+  * Cost- and locality-aware traffic forwarding
+  * Redundant routes for high availability in the face of network failures
+
+The installation and the configuration can be entirely self-service via App-Interface.
+In order to use this integration, you have to define a *skupper-network* and *skupper-sites* via the namespace definition files.
+
+Let's start with the *skupper-network* definition.
+
+* `$schema: /dependencies/skupper-network-1.yml`
+* `identifier` a unique identifier for the skupper network
+* `siteConfigDefaults` **required** Default configuration for all skupper sites. This configuration will be merged with the site-specific configuration from the namespace file.
+  * `skupperSiteController` **required** Skupper site-controller image and version. Use the latest available version; see [Skupper releases](https://github.com/skupperproject/skupper/releases), e.g.: `quay.io/skupper/skupper-site-controller:1.2.0`
+  * `clusterLocal` Boolean value indicating if the site is cluster local or not. If `true`, the site will be accessible only from within the cluster. If `false`, the site will be accessible from outside the cluster. The default value is `false`.
+  * `console` Boolean value indicating if the skupper console (web-UI) should be enabled or not. The default value is `true`.
+  * `consoleAuthentication` Skupper console authentication method. Currently, only `openshift` is supported. The default value is `openshift`.
+  * `consoleIngress` Determines how the skupper console is exposed. Possible values are `route`, `loadbalancer`,  and `none`. The default value is `route`.
+  * `controllerCpuLimit` CPU limit for the skupper controller. The default value is `500m`.
+  * `controllerCpu` CPU request for the skupper controller. The default value is `200m`.
+  * `controllerMemoryLimit` Memory limit for the skupper controller. The default value is `128Mi`.
+  * `controllerMemory` Memory request for the skupper controller. The default value is `128Mi`.
+  * `controllerPodAntiaffinity` Pod antiaffinity label matches to control the placement of controller pods. The default value is `skupper.io/component=controller`.
+  * `controllerServiceAnnotations` Annotations (string with `key=value,anotherkey=value, ...`) to be added to the skupper controller service. The default value is `managed-by=qontract-reconcile`.
+  * `edge` Boolean value indicating if the site is edge or not. An edge site is a namespace hosted on an internal cluster that is not accessible from outside the Red Hat VPN. Services hosted on an edge site are reachable within the Skupper network regardless of the cluster connectivity. The default value is `false` for non-internal clusters and `true` for internal clusters.
+  * `ingress` Determines how the Skupper router is exposed. Possible values are `route`, `loadbalancer`,  `ingress`, and `none`. The default value is `route`.
+  * `routerConsole` Boolean value indicating if the skupper router console (apache QPID web-UI) should be enabled or not. The default value is `false`.
+  * `routerCpuLimit` CPU limit for the skupper router. The default value is `500m`.
+  * `routerCpu` CPU request for the skupper router. The default value is `200m`.
+  * `routerLogging` Log level for the skupper router. Possible values are `trace`, `debug`, `info`, `notice`, `warning`, and `error`. The default value is `error`.
+  * `routerMemoryLimit` Memory limit for the skupper router. The default value is `156Mi`.
+  * `routerMemory` Memory request for the skupper router. The default value is `156Mi`.
+  * `routerPodAntiaffinity` Pod antiaffinity label matches to control the placement of router pods. The default value is `skupper.io/component=router`.
+  * `routerServiceAnnotations` Annotations (string with `key=value,anotherkey=value, ...`) to be added to the skupper router service. The default value is `managed-by=qontract-reconcile`.
+  * `routers` Replica count of skupper routers. The default value is `3`.
+  * `serviceController` Boolean value indicating if the skupper service controller should be enabled or not. The default value is `true`.
+  * `serviceSync` Boolean value indicating if the skupper service controller should synchronize the skupper services. The default value is `true`.
+
+E.g.:
+
+```yaml
+---
+$schema: /dependencies/skupper-network-1.yml
+
+identifier: skupper-network-01
+
+siteConfigDefaults:
+  skupperSiteController: quay.io/skupper/site-controller:1.2.0
+```
+
+Now define the *skupper-sites* via the namespace definition file (`/openshift/namespace-1.yml`).
+
+* `skupperSite`
+  * `network` **required**
+    * `$ref` Reference to the *skupper-network* definition file.
+  * `delete` Boolean value indicating if the skupper site should be deleted or not. The default value is `false`.
+  * `config` The available configuration options are the same as the ones defined in the *skupper-network* definition file, except `skupperSiteController`, because the Skupper version must be the same for all sites in the same network.
+
+> :warning: **Attention**
+>
+> Skupper currently does not support changing the skupper configuration after the sites have been created. If you want to adapt the configuration, you have to delete the affected skupper site and re-create it again by using the `delete: true` option.
+
+E.g.:
+
+```yaml
+---
+$schema: /openshift/namepsace-1.yml
+
+...
+
+skupperSite:
+  network:
+    $ref: <path to skupper-network definition file>
+```
+
+> :information_source: **Note**
+>
+> A Skupper network must have at least two sites.
+
+To create a Skupper service, you need to annotate your deployment, your statefulset, or your Kubernetes service with the following annotation:
+
+* `skupper.io/proxy` Defines the protocol to be used for the service. Possible values are `tcp`, `http`, and `http2`. The default value is `tcp`.
+  * tcp supports any protocol overlayed on TCP; for example, HTTP1 and HTTP2 work when you specify tcp.
+  * If you specify http or http2, the IP address reported by a client may not be accessible.
+  * All service network traffic is converted to AMQP messages in order to traverse the service network.
+  * TCP is implemented as a single streamed message, whereas HTTP1 and HTTP2 are implemented as request/response message routing.
+* `skupper.io/address` Defines the name (address) of the service. The default value, when annotating a service, is the name of the k8s service. Must be specified for deployments and statefulsets.
+* `skupper.io/port` Defines the service and target port(s). Format is either
+  * `servicePort` Service port to be exposed and target port are the same. E.g., `8080`.
+  * `servicePort:targetPort` Service port to be exposed and target port are different. E.g., `80:8080`.
+  * `servicePort:targetPort,servicePort:targetPort` Expose multiple ports. E.g., `80:8080,443:8443`.
+
+Deployment annotation example:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+  annotations:
+    skupper.io/proxy: http
+    skupper.io/address: my-service
+    skupper.io/port: 8080:8080
+...
+```
 
 ### Share resources between AWS accounts via App-Interface (`/aws/account-1.yml`)
 
