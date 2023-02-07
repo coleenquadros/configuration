@@ -1,0 +1,49 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: osd-fleet-manager
+
+name: osd-fleet-manager
+
+app:
+  $ref: /services/ocm/osd-fleet-manager/app.yml
+
+namespaces:
+- $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
+
+slos:
+#- name: TODO OSDFM Added Latency TODO
+#  SLIType: latency
+#  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain percentafe of the time
+#  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/osd-fleet-manager/slos/fleet-manager-added-latency.md
+#  SLOParameters:
+#    window: 28d
+#  expr: TODO
+#  SLOTarget: 0.95
+#  SLOTargetUnit: percent_0_1
+#  prometheusRules: /observability/prometheusrules/osd-fleet-manager-production.prometheusrules.yaml
+#  dashboard: /to/do
+
+- name: saturation-level
+  SLIType: correctness
+  SLISpecification: Saturation level in each and every service cluster in each and every region shall never exceeds a given value between the configured High Saturation Threshold and the full level (100%). The given value to consider here is 90% as the High Saturation Threshold is currently at 80%
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/osd-fleet-manager/slos/fleet-manager-saturation.md
+  SLOParameters:
+    window: 28d
+  expr: 
+    sum by (region, service_cluster) (rate(fleet_manager_management_cluster_hosted_cluster_count{job="fleet-manager-metrics",namespace="osd-fleet-manager-production"}[{{window}}]))
+    /
+    (
+    sum by (region, service_cluster) (rate(fleet_manager_available_management_clusters_by_service_cluster_count{job="fleet-manager-metrics",namespace="osd-fleet-manager-production"}[{{window}}])) 
+    *
+    sum by (region, service_cluster) (rate(fleet_manager_max_desired_hosted_cluster_count{job="fleet-manager-metrics",namespace="osd-fleet-manager-production"}[{{window}}]))
+    )
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/osd-fleet-manager-production.prometheusrules.yaml
+  dashboard: https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1
+
+
+
+
