@@ -1,23 +1,17 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: osd-operators
-
-name: saas-sae # saas-splunk-audit-exporter
+name: saas-sae
 description: SaaS tracking file for splunk-audit-exporter
-
 app:
   $ref: /services/osd-operators/app.yml
-
 pipelinesProvider:
   $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
-
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
   channel: team-srep-info
-
 managedResourceTypes:
 - SelectorSyncSet
 
@@ -25,15 +19,10 @@ imagePatterns:
 - quay.io/app-sre/splunk-audit-exporter
 
 use_channel_in_image_tag: false
-
 resourceTemplates:
 - name: hypershift-splunk-audit-exporter
   url: https://gitlab.cee.redhat.com/service/splunk-audit-exporter
   path: /hack/deploy/hypershift/policy.yaml
-  # HACK: This seems to be a problem, because this is not really an operator deployment.
-  # So the build jobs for this deployment builds the images with a prefixed version (x.Y.Z-<HASH>) that is not something the CICD pipeline handles.
-  # As this prefixed version increments every build and the SHA is appended it is not something that is contained in any automatically filled out parameter.
-  # Changing the image-build is tracked in: https://issues.redhat.com/browse/OSD-15075
   parameters:
     IMAGE_TAG: 0.1.32-2324fab
   targets:
@@ -46,25 +35,37 @@ resourceTemplates:
       name: service-splunk-audit-exporter-gl-build-master
     promotion:
       publish:
-        - hypershift-splunk-audit-exporter-deployment-hivei01ue1
+      - hypershift-splunk-audit-exporter-deployment-hivei01ue1
   - namespace:
       $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
-    ref: ad40923438b97156691278cfa6823a4015f256e9
+    ref: 2324fab6106acaa99f33af0607fc99d5f7e747aa
     promotion:
       auto: true
       publish:
-        - hypershift-splunk-audit-exporter-deployment-hive-stage-01
+      - hypershift-splunk-audit-exporter-deployment-hive-stage-01
       subscribe:
-        - hypershift-splunk-audit-exporter-deployment-hivei01ue1
+      - hypershift-splunk-audit-exporter-deployment-hivei01ue1
+      promotion_data:
+      - channel: hypershift-splunk-audit-exporter-deployment-hivei01ue1
+        data:
+        - parent_saas: saas-sae
+          target_config_hash: 12ddc650c6cea89c
+          type: parent_saas_config
   - namespace:
       $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
-    ref: ad40923438b97156691278cfa6823a4015f256e9
+    ref: 2324fab6106acaa99f33af0607fc99d5f7e747aa
     promotion:
       auto: true
       publish:
-        - hypershift-splunk-audit-exporter-deployment-hives02ue1
+      - hypershift-splunk-audit-exporter-deployment-hives02ue1
       subscribe:
-        - hypershift-splunk-audit-exporter-deployment-hivei01ue1
+      - hypershift-splunk-audit-exporter-deployment-hivei01ue1
+      promotion_data:
+      - channel: hypershift-splunk-audit-exporter-deployment-hivei01ue1
+        data:
+        - parent_saas: saas-sae
+          target_config_hash: 12ddc650c6cea89c
+          type: parent_saas_config
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml
     ref: 2324fab6106acaa99f33af0607fc99d5f7e747aa
@@ -86,7 +87,6 @@ resourceTemplates:
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep07ue2/cluster-scope.yml
     ref: 2324fab6106acaa99f33af0607fc99d5f7e747aa
-  # TODO: Is this target needed if we only want to deploy to ACM clusters?
   - namespace:
       $ref: /services/osd-operators/namespaces/ssotest01ue1/cluster-scope.yml
     ref: master
