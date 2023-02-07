@@ -373,12 +373,14 @@ Next up, change all your panels to send queries to this datasource
 
 #### Adding a Postgres DB as a data source
 
-**Adding a postgres data source to Grafana requires manager approval**
+**Adding a postgres data source to Grafana requires manager approval. This is an exceptional request that requires a very valid use-case.**
 
-Currently, every Grafana user will have read-access to any database you are adding.
-This includes Grafana users from other tenants too.
+**Grafana does not sanity checks on queries. EVERY app-interface user can fire ANY query against your database. E.g., DROP TABLE users; could be sent to your database by every app-interface user.**
+
 It is of uttmost importance to only add read-replicas as data sources, because Grafana
-has no sanity checks.
+has no sanity checks. By using a read-replica, you can limit the amount of damage that
+could be done. Every Grafana user will have access to any database you are adding.
+This includes Grafana users from other tenants of app-interface too.
 
 1. Submit a MR to app-interface to add a read replica for your RDS instance. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6f6e26253356a63853c9b4424a81bb5919f851b8/data/services/assisted-installer/namespaces/assisted-installer-production.yml#L90-98
 1. Once the MR is merged and the read replica is provisioned, submit another MR to add the read replica as a data source to Grafana by adding `grafana_datasource: true` to the RDS definition added in the previous MR.
