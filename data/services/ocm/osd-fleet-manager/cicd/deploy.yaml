@@ -42,7 +42,7 @@ resourceTemplates:
         # HyperShift Service Cluster
         hs-sc:
           name_prefix: "hs-sc-"
-          # if channel is not stable, needs to match name from 
+          # if channel is not stable, needs to match name from
           # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
           # openshift_version: "openshift-v4.12.0-rc.1-candidate"
           multi_az: true
@@ -56,7 +56,7 @@ resourceTemplates:
         # HyperShift Management Cluster
         hs-mc:
           name_prefix: "hs-mc-"
-          # if channel is not stable, needs to match name from 
+          # if channel is not stable, needs to match name from
           # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
           # openshift_version: "openshift-v4.12.0-rc.1-candidate"
           multi_az: true
@@ -158,7 +158,7 @@ resourceTemplates:
         # HyperShift Service Cluster
         hs-sc:
           name_prefix: "hs-sc-"
-          # if channel is not stable, needs to match name from 
+          # if channel is not stable, needs to match name from
           # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
           openshift_version: "4.12.1-candidate"
           multi_az: true
@@ -172,7 +172,7 @@ resourceTemplates:
         # HyperShift Management Cluster
         hs-mc:
           name_prefix: "hs-mc-"
-          # if channel is not stable, needs to match name from 
+          # if channel is not stable, needs to match name from
           # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
           openshift_version: "4.12.1-candidate"
           multi_az: true
@@ -270,171 +270,6 @@ resourceTemplates:
   path: /templates/service-template.yml
   targets:
   - namespace:
-      $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
-    ref: main
-    delete: true
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: service-osd-fleet-manager-gl-build-main
-    promotion:
-      publish:
-      - ocm-osdfm-deployed-int
-    parameters:
-      ENVIRONMENT: integration
-      OCM_URL: ${OCM_BASE_URL}
-      REPLICAS: 0
-      ENABLE_PROVISION_SHARD_RECONCILIATION: true
-      ENABLE_ACCOUNT_RECONCILIATION: true
-      ENABLE_NETWORK_RECONCILIATION: true
-      ENABLE_CERT_MANAGER_ADDON: true
-      OIDCS3_BUCKET_NAME: oidc-bucket-integration
-      AWS_BASE_DOMAIN: i3.devshift.org
-      EXTERNAL_DNS_DOMAIN_FILTER: i3.devshift.org
-      CLUSTER_EXPIRATION_TIME_DELTA_DAYS: 3650
-      SENTRY_ENABLE: false
-      HYPERSHIFT_OPERATOR_OVERRIDING_DATA: |2-
-            # openshift/hypershift.git branch release-4.13 commit 139955c0d99e13dc882fa01663457d896aa9f836
-            hypershift-operator: quay.io:443/acm-d/hypershift-rhel8-operator@sha256:b7ffc7943f14ef464ea0644bce1e3850928d24ce8c482b70994887a7b04804fd
-            apiserver-network-proxy: quay.io:443/acm-d/apiserver-network-proxy-rhel8@sha256:281c31c439d4116a7180519370955254d1845e57fb0c2b9b55a84e4798bec9ce
-            aws-encryption-provider: quay.io:443/acm-d/aws-encryption-provider-rhel8@sha256:5c1afc24ccc9ef5c41f78a6561fc43c6f653bc772c752a656f01d8596ffccaa8
-            cluster-api: quay.io:443/acm-d/cluster-api-rhel8@sha256:c6edc4a5f6cc09f6ac733350615d8c134993af83e8d07025e3aa4dec596a2488
-            cluster-api-provider-agent: quay.io:443/acm-d/cluster-api-provider-agent-rhel8@sha256:7dd4c639450284a8a4893fad89b49183a244deeaf05bc25370446316593a51e3
-            cluster-api-provider-aws: quay.io:443/acm-d/cluster-api-provider-aws-rhel8@sha256:1915ed9c08b461fcaefbf9f7933c5c0b805e175698abde1335d3814ebb5e8148
-            cluster-api-provider-azure: quay.io:443/acm-d/cluster-api-provider-azure-rhel8@sha256:404bde6e2915b24cf46352d9352128392c50c4efd790845be413982ef5154b43
-            cluster-api-provider-kubevirt: quay.io:443/acm-d/cluster-api-provider-kubevirt-rhel8@sha256:8d7f489b7040e2c528e51e46b290074fc161a42cdf3120c2cc0544b3ca97dde9
-      SUPPORTED_CLOUD_PROVIDERS: |-
-        - name: aws
-          regions:
-            - name: us-west-2
-      CLUSTER_TEMPLATES: |2-
-          # HyperShift Service Cluster
-          hs-sc:
-            name_prefix: "hs-sc-"
-            # if channel is not stable, needs to match name from 
-            # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
-            # openshift_version: "openshift-v4.12.0-rc.1-candidate"
-            multi_az: true
-            ccs: true
-            compute_machine_type: m5.xlarge
-            compute_autoscale: false
-            compute_nodes: 3
-            network_type: OVNKubernetes
-            private: false
-
-          # HyperShift Management Cluster
-          hs-mc:
-            name_prefix: "hs-mc-"
-            # if channel is not stable, needs to match name from 
-            # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
-            # openshift_version: "openshift-v4.12.0-rc.1-candidate"
-            multi_az: true
-            ccs: true
-            compute_machine_type: m5.4xlarge
-            compute_autoscale: true
-            compute_autoscale_min_replicas: 3
-            compute_autoscale_max_replicas: 36
-            network_type: OVNKubernetes
-            private: false
-      ENABLE_SIMPLE_IDENTITY_PROVIDER: true
-      READ_ONLY_USERS:
-      - fleet-manager-debug
-      DEVELOPER_USERS:
-      - fleet-manager-debug
-      CLUSTER_CHANNEL: stable
-      ENABLE_CLUSTER_AUTO_UPGRADE: false
-      CLUSTER_AUTO_UPGRADE_CRON: 0 4 * * *
-      RHOBS_URL: https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform-staging/api/v1/receive
-      RHOBS_ENV: int
-      TELEMETER_SERVER_URL: https://infogw.api.integration.openshift.com
-      HCP_TELEMETER_URL: https://infogw.api.integration.openshift.com/metrics/v1/receive
-      MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: '80'
-      MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: '80'
-      DISABLE_ENABLED_REGION_CHECK: true
-      ENABLE_GLOBAL_WORKERS: false
-      SECTOR: nil
-  - namespace:
-      $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
-    ref: 635805b505f7e18ca3065ca2a45915896443f44c
-    delete: true
-    promotion:
-      auto: true
-      subscribe:
-      - ocm-osdfm-deployed-int
-      publish:
-      - ocm-osdfm-deployed-stage
-      promotion_data:
-      - channel: ocm-osdfm-deployed-int
-        data:
-        - parent_saas: osd-fleet-manager
-          target_config_hash: ca6102eabe7c64c4
-          type: parent_saas_config
-    parameters:
-      ENVIRONMENT: stage
-      OCM_URL: ${OCM_BASE_URL}
-      REPLICAS: 0
-      OIDCS3_BUCKET_NAME: oidc-bucket-integration
-      ENABLE_PROVISION_SHARD_RECONCILIATION: true
-      ENABLE_ACCOUNT_RECONCILIATION: true
-      ENABLE_NETWORK_RECONCILIATION: true
-      ENABLE_CERT_MANAGER_ADDON: true
-      AWS_BASE_DOMAIN: s3.devshift.org
-      EXTERNAL_DNS_DOMAIN_FILTER: s3.devshift.org
-      CLUSTER_EXPIRATION_TIME_DELTA_DAYS: 3650
-      SENTRY_ENABLE: true
-      SENTRY_PROJECT: 39
-      SENTRY_URL: https://sentry.stage.devshift.net
-      SUPPORTED_CLOUD_PROVIDERS: |-
-        - name: aws
-          regions:
-            - name: us-west-2
-            - name: us-east-2
-            - name: us-east-1
-      CLUSTER_TEMPLATES: |2-
-          # HyperShift Service Cluster
-          hs-sc:
-            name_prefix: "hs-sc-"
-            # if channel is not stable, needs to match name from 
-            # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
-            openshift_version: "4.12.1-candidate"
-            multi_az: true
-            ccs: true
-            compute_machine_type: m5.4xlarge
-            compute_autoscale: false
-            compute_nodes: 3
-            network_type: OVNKubernetes
-            private: false
-
-          # HyperShift Management Cluster
-          hs-mc:
-            name_prefix: "hs-mc-"
-            # if channel is not stable, needs to match name from 
-            # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
-            openshift_version: "4.12.1-candidate"
-            multi_az: true
-            ccs: true
-            compute_machine_type: m5.4xlarge
-            compute_autoscale: true
-            compute_autoscale_min_replicas: 3
-            compute_autoscale_max_replicas: 36
-            network_type: OVNKubernetes
-            private: false
-      ENABLE_SIMPLE_IDENTITY_PROVIDER: true
-      READ_ONLY_USERS:
-      - fleet-manager-debug
-      CLUSTER_CHANNEL: candidate
-      ENABLE_CLUSTER_AUTO_UPGRADE: false
-      CLUSTER_AUTO_UPGRADE_CRON: 0 4 * * *
-      RHOBS_URL: https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform-staging/api/v1/receive
-      RHOBS_ENV: staging
-      TELEMETER_SERVER_URL: https://infogw.api.stage.openshift.com
-      HCP_TELEMETER_URL: https://infogw.api.stage.openshift.com/metrics/v1/receive
-      MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: '80'
-      MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: '80'
-      DATAPLANE_CLUSTER_SCALING_TYPE: manual
-      ENABLE_GLOBAL_WORKERS: false
-      SECTOR: nil
-  - namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
     ref: 78a1126417e8c4e1cbde7b45c75b619890b0621b
     parameters:
@@ -460,7 +295,7 @@ resourceTemplates:
           # HyperShift Service Cluster
           hs-sc:
             name_prefix: "hs-sc-"
-            # if channel is not stable, needs to match name from 
+            # if channel is not stable, needs to match name from
             # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
             openshift_version: "4.12.1-candidate"
             multi_az: true
@@ -476,7 +311,7 @@ resourceTemplates:
           # HyperShift Management Cluster
           hs-mc:
             name_prefix: "hs-mc-"
-            # if channel is not stable, needs to match name from 
+            # if channel is not stable, needs to match name from
             # https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/integration
             openshift_version: "4.12.1-candidate"
             multi_az: true
