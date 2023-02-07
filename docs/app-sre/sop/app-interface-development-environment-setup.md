@@ -103,28 +103,6 @@ Your Qontract GraphQL server will be available at `http://localhost:4000/graphql
     ```
     or you can choose to add it in your *profile or *rc files but be aware it take effect on the whole system.
 
-
-## Configure qontract-reconcile
-
-1. Sign in to Vault through OIDC. Copy the value of `data_base64` in [ci-int/qontract-reconcile-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml).
-1. Decode the content to create a `config.debug.toml` file in `qontract-reconcile` directory with command `echo <content> | base64 -d > config.debug.toml`
-1. Set graphql server in `config.debug.toml` to `http://localhost:4000/graphql`.
-
-## Run an integration locally
-
-### Inside your environment
-
-```sh
-$ cd qontract-reconcile
-$ qontract-reconcile --config config.debug.toml --dry-run --log-level DEBUG <integration-name>
-```
-
-### Inside docker
-
-```sh
-make dev-reconcile-loop dev-reconcile-loop INTEGRATION_NAME=<integration-name> DRY_RUN=<--dry-run|--no-dry-run> INTEGRATION_EXTRA_ARGS=<integration-args> SLEEP_DURATION_SECS=<natural number>
-```
-
 ## Using development data
 
 We are trying to move towards using development data when doing development work. This is currently hard because to perform development we need data, which has to be created.
@@ -150,6 +128,17 @@ It is encouraged that development work is done using this repository and not usi
     $ cd qontract-reconcile
     $ qontract-reconcile --config config.dev.toml --dry-run --log-level DEBUG <integration-name>
     ```
+
+## Debugging production issues in qontract-reconcile
+
+Sometimes we need to debug production issues locally or need production data to verify a fix. The goal should be to move away from this as much as possible, using [**development data**](#using-development-data) instead. This section describes creating a debug configuration to be used when necessary.
+
+1. Login to Vault: `vault login -method=oidc -address=https://vault.devshift.net`
+2. Write the **production** debug config to your `qontract-reconcile` directory: `vault kv get -field=data -address=https://vault.devshift.net app-sre/creds/app-interface-debug-config-toml > config.debug.toml`
+
+**Note:** These are privileged credentials and should be handled with care. This AppRole is only used by developers, so in the case of a leak, the `secret_id` can be immediately revoked (see [Recycle Vault AppRole secret_id](/docs/app-sre/vault.md#recycle-vault-approle-secret_id)) without affecting production integrations and MR checks.
+
+You can now [run qontract-reconcile](https://github.com/app-sre/qontract-reconcile#usage) with `--config config.debug.toml` for stage/production debugging.
 
 ## Creating a new integration
 
