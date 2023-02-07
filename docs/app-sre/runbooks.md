@@ -15,6 +15,7 @@ This is the place for all runbooks that don't have their own category.
 
 ### Qontract Integrations
 * [Dyn Traffic Director](/docs/app-sre/runbook/integration-dyn-traffic-director.md)
+* [GitLab Housekeeping](/docs/app-sre/runbook/integration-gitlab-housekeeping.md) - this integration controls rebasing/merging MRs managed by app-interface
 
 ### OpenShift
 * [Ingress Routers](/docs/app-sre/runbook/openshift-ingress-routers.md)
