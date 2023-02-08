@@ -108,8 +108,8 @@ Kafka Service Fleet Manager (all of the replicas or pods) are down.
   - Search Error/exception events with keywords "Kafka Service Fleet Manager " and with text "image", "deployment" etc.
 - Investigate the metrics in Grafana for any possible evidences of the crash.
   - Application: Volume, Latency, Error
-      - Stage: https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1
-      - Production: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+      - Stage: https://grafana.stage.devshift.net/d/ynZ7TU3Fv/kas-fleet-manager-slos?orgId=1
+      - Production: https://grafana.app-sre.devshift.net/d/ynZ7TU3Fv/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
   - CPU, Network, Memory, IO
       - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=managed-services-stage
       - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=managed-services-production
@@ -142,8 +142,8 @@ Kafka Service Fleet Manager is not performing normally and is returning an abnor
 
 - Investigate the metrics in Grafana for any possible cause of the issue
   - Application: Volume, Latency, Error
-      - Stage: https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1
-      - Production: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+      - Stage: https://grafana.stage.devshift.net/d/ynZ7TU3Fv/kas-fleet-manager-slos?orgId=1
+      - Production: https://grafana.app-sre.devshift.net/d/ynZ7TU3Fv/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
   - CPU, Network, Memory, IO
       - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=managed-services-stage
       - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=managed-services-production
@@ -237,7 +237,7 @@ Kafka Service Fleet Manager is not provisioning OSD cluster normally and is not 
 kas-fleet-manager-rds
 
 ### Steps
-- Check the Dependencies: OCM Cluster Service panel in the Kas Fleet Manager Metrics dasboard - https://grafana.app-sre.devshift.net/d/WLBv_KuMz/kas-fleet-manager-metrics?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-consoleurl=https:%2F%2Fconsole-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
+- Check the Dependencies: OCM Cluster Service panel in the Kas Fleet Manager Metrics dasboard - https://grafana.app-sre.devshift.net/d/z1CmsruDn/kas-fleet-manager-metrics?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-consoleurl=https:%2F%2Fconsole-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
 - Check Sentry to investigate possible causes.
   - Stage: https://sentry.stage.devshift.net/sentry/managed-services-stage/
   - Production: https://sentry.devshift.net/sentry/managed-services-prod/

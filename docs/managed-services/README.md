@@ -68,7 +68,7 @@ Authentication is done via *MAS-SSO*. Authorization is done via Keycloak roles a
 >NOTE: The agnet endpoints can be found in our [repo](https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/blob/main/openapi/kas-fleet-manager-private.yaml) 
 
 #### Reconcilers
-In order to check which pod is the leader of a specific reconciler, you can check the leader pods panel in the [Grafana dashboard](https://grafana.app-sre.devshift.net/d/WLBv_KuMz/kas-fleet-manager-metrics?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-consoleurl=https:%2F%2Fconsole-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com)
+In order to check which pod is the leader of a specific reconciler, you can check the leader pods panel in the [Grafana dashboard](https://grafana.app-sre.devshift.net/d/z1CmsruDn/kas-fleet-manager-metrics?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-consoleurl=https:%2F%2Fconsole-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com)
 
 **Impact if not available:**
 If any of the reconcilers are unavailable, parts of the service would be unavailable for all users. For example, if the preparing Kafka reconciler is unavailable, all new Kafka instances would be stuck in a `preparing` status. the Kafka creation latency SLO will pick up on this scenario.
