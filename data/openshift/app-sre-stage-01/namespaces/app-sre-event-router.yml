@@ -10,7 +10,7 @@ cluster:
   $ref: /openshift/app-sre-stage-01/cluster.yml
 
 app:
-  $ref: /services/rate-limiting/app.yml
+  $ref: /services/observability/app.yml
 
 environment:
   $ref: /products/app-sre/environments/stage.yml
@@ -22,10 +22,21 @@ managedResourceTypes:
 - ServiceAccount
 - ClusterRole
 - ClusterRoleBinding
-- ConfigMap
-- Deployment
-- Template
+# - Template
+
+managedRoles: true
+
+managedResourceNames:
+- resource: ClusterRole
+  resourceNames:
+    - event-reader
+- resource: ClusterRoleBinding
+  resourceNames:
+  - event-reader-binding
 
 openshiftResources:
-- provider: resource-template
-  path: /setup/cluster-logging/event-router.yaml
+- provider: resource
+  path: /setup/cluster-logging/event-router-clusterrole.yaml
+
+# - provider: resource-template
+#   path: /setup/cluster-logging/event-router.yaml
