@@ -24,6 +24,7 @@ managedResourceTypes:
 imagePatterns: []
 
 allowedSecretParameterPaths:
+- osd-sre/hive-integration/certman-operator/lets-encrypt-account
 - app-sre/integrations-output/terraform-resources/hivei01ue1/osd-fleet-manager-integration/hypershift-cert-manager-route53
 
 resourceTemplates:
@@ -32,9 +33,20 @@ resourceTemplates:
   path: /templates/cert-manager-config.yaml
 
   parameters:
-    # this should probably be updated to something else
-    CLUSTER_ISSUER_EMAIL: sd-app-sre+hypershift-cert-manager@redhat.com
+    # value taken from resources/hive-integration/certman-operator/certman-operator.configmap.yaml
+    CLUSTER_ISSUER_EMAIL: sd-sre-platform@redhat.com
   secretParameters:
+  # not used according to https://community.letsencrypt.org/t/locating-the-mac-key-for-a-letsencrypt-account-created-by-cert-manager/129567/5
+  # - name: LETSENCRYPT_ACCOUNT_URL_B64
+  #   secret:
+  #     path: osd-sre/hive-integration/certman-operator/lets-encrypt-account
+  #     field: account-url_qb64
+  #     version: 1
+  - name: LETSENCRYPT_PRIVATE_KEY_B64
+    secret:
+      path: osd-sre/hive-integration/certman-operator/lets-encrypt-account
+      field: private-key_qb64
+      version: 1
   - name: ROUTE53_ACCESS_KEY_ID
     secret:
       path: app-sre/integrations-output/terraform-resources/hivei01ue1/osd-fleet-manager-integration/hypershift-cert-manager-route53
