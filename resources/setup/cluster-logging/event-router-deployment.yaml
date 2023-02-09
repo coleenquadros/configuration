@@ -1,0 +1,41 @@
+kind: Deployment 
+apiVersion: apps/v1
+metadata:
+  name: eventrouter
+  namespace: app-sre-event-router
+  labels:
+    component: eventrouter
+    logging-infra: eventrouter
+    provider: openshift
+spec:
+  selector:
+    matchLabels:
+      component: eventrouter
+      logging-infra: eventrouter
+      provider: openshift
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: eventrouter
+        logging-infra: eventrouter
+        provider: openshift
+      name: eventrouter
+    spec:
+      serviceAccount: eventrouter
+      containers:
+        - name: kube-eventrouter
+          image: ${IMAGE}:${IMAGE_VERSION}
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: ${CPU}
+              memory: ${MEMORY}
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/eventrouter
+      volumes:
+        - name: config-volume
+          configMap:
+            name: eventrouter
+
