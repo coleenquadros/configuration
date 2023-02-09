@@ -21,8 +21,7 @@ python3 setup.py install
 
 # prepare vault environment variables
 export VAULT_ADDR=https://vault.devshift.net
-export TOKEN=Z<YOUR_TOKEN>
-vault login -method=github token=$TOKEN
+vault login -method=oidc
 
 # get the config file from vault using the CLI:
 vault kv get -field=data_base64 app-sre/ci-int/qontract-reconcile-toml | base64 -d > config.debug.toml
@@ -46,9 +45,8 @@ To run the vault-manager integration manually, perform the following steps:
 ```
 # prepare vault environment variables
 export VAULT_ADDR=https://vault.devshift.net
-export TOKEN=<YOUR_TOKEN>
 export DISABLE_IDENTITY=true
-vault login -method=github token=$TOKEN
+vault login -method=oidc
 
 gql_data=$(vault kv get -format=json app-sre/creds/app-interface/production/basic-auth)
 export GRAPHQL_SERVER="$(echo $gql_data | jq -r .data.base_url)/graphql"

@@ -48,7 +48,7 @@ The 2FA TOTP codes for each account can be retrieved from Vault. The exact path 
 
 Example
 ```sh
-vault login -method=github -address=https://vault.devshift.net
+vault login -method=oidc -address=https://vault.devshift.net
 vault read totp/app-sre/code/sd-app-sre+cloudflare-app-sre
 ```
 

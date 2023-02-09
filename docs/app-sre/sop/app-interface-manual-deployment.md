@@ -11,7 +11,7 @@
  1. Export each key in this secret as an environment variable: https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface/production/s3:
     ```sh
     $ export VAULT_ADDR=https://vault.devshift.net
-    $ vault login -method=github # enter your GH token
+    $ vault login -method=oidc
     $ ENV_VARS=$(vault read app-sre/creds/app-interface/production/s3 -format=json | jq -r ".data|to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]")
     $ for v in $ENV_VARS; do export $v; done
     ```
