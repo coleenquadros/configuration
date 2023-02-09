@@ -24,9 +24,8 @@ managedResourceTypes:
 imagePatterns: []
 
 allowedSecretParameterPaths:
-- osd-sre/hive-integration/certman-operator/lets-encrypt-account
+- app-interface/osd-fleet-manager/integration/le-privatekey
 - app-sre/integrations-output/terraform-resources/hivei01ue1/osd-fleet-manager-integration/hypershift-cert-manager-route53
-- osd-sre/hive-stage/certman-operator/lets-encrypt-account
 - app-sre/integrations-output/terraform-resources/hive-stage-01/osd-fleet-manager-stage/hypershift-cert-manager-route53
 
 resourceTemplates:
@@ -34,19 +33,12 @@ resourceTemplates:
   url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
   path: /templates/cert-manager-config.yaml
   parameters:
-    # value taken from resources/hive-integration/certman-operator/certman-operator.configmap.yaml
     CLUSTER_ISSUER_EMAIL: sd-sre-platform@redhat.com
   secretParameters:
-  # not used according to https://community.letsencrypt.org/t/locating-the-mac-key-for-a-letsencrypt-account-created-by-cert-manager/129567/5
-  # - name: LETSENCRYPT_ACCOUNT_URL_B64
-  #   secret:
-  #     path: osd-sre/hive-integration/certman-operator/lets-encrypt-account
-  #     field: account-url_qb64
-  #     version: 1
   - name: LETSENCRYPT_PRIVATE_KEY_B64
     secret:
-      path: osd-sre/hive-integration/certman-operator/lets-encrypt-account
-      field: private-key_qb64
+      path: app-interface/osd-fleet-manager/integration/le-privatekey
+      field: private_key
       version: 1
   - name: ROUTE53_ACCESS_KEY_ID
     secret:
@@ -75,13 +67,12 @@ resourceTemplates:
   url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
   path: /templates/cert-manager-config.yaml
   parameters:
-    # this should probably be updated to something else
     CLUSTER_ISSUER_EMAIL: sd-sre-platform@redhat.com
   secretParameters:
   - name: LETSENCRYPT_PRIVATE_KEY_B64
     secret:
-      path: osd-sre/hive-stage/certman-operator/lets-encrypt-account
-      field: private-key_qb64
+      path: app-interface/osd-fleet-manager/integration/le-privatekey
+      field: private_key
       version: 1
   - name: ROUTE53_ACCESS_KEY_ID
     secret:
@@ -99,6 +90,7 @@ resourceTemplates:
       $ref: /services/ocm/osd-fleet-manager/namespaces/hive/osd-fleet-manager-stage-hive-stage-01.yml
     ref: 68e69deb4e57f615440101bbd40249d45db62a02
     promotion:
+      auto: false
       subscribe:
       - hypershift-cert-manager-config-integration-hivei01ue1
       publish:
@@ -108,6 +100,7 @@ resourceTemplates:
       $ref: /services/ocm/osd-fleet-manager/namespaces/hive/osd-fleet-manager-stage-hives02ue1.yml
     ref: 68e69deb4e57f615440101bbd40249d45db62a02
     promotion:
+      auto: false
       subscribe:
       - hypershift-cert-manager-config-integration-hivei01ue1
       publish:
