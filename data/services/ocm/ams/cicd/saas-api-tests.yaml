@@ -1,0 +1,51 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: uhc
+name: saas-ocm-api-tests
+description: SaaS tracking file for OCM API Tests
+app:
+  $ref: /services/ocm/ams/app.yml
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+deployResources:
+  requests:
+    cpu: 600m
+    memory: 2000Mi
+  limits:
+    cpu: 600m
+    memory: 2000Mi
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-uhc-info
+managedResourceTypes:
+  - Deployment
+  - Service
+imagePatterns:
+  - quay.io/app-sre/ocm-api-tests
+  - quay.io/centos/centos
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+resourceTemplates:
+  - name: api-tests
+    url: https://gitlab.cee.redhat.com/service/api-tests
+    path: /templates/service-template.yml
+    parameters:
+      DEPLOYMENT_NAME: ocm-api-tests-int
+      ENVIRONMENT: production
+      IMAGE_REGISTRY: quay.io
+      IMAGE_REPOSITORY: app-sre/ocm-api-tests
+      JWKS_URL: https://api.openshift.com/.well-known/jwks.json
+    targets:
+      - namespace:
+          $ref: /services/ocm/namespaces/uhc-integration.yml
+        ref: 8c35f1adfcc644df8e8d638b2c28989dad0f9691
+        promotion:
+          publish:
+            - ocm-apitests-deployed-int
+        parameters:
+          OCM_URL: ${OCM_BASE_URL}
+          UHC_TOKEN_URL: ${SSO_BASE_URL}/protocol/openid-connect/token
