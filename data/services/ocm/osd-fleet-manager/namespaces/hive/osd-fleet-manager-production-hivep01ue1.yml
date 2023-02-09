@@ -1,0 +1,62 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: osd-fleet-manager-production
+description: |
+  osd-fleet-manager namespace on hive production.
+  Used to deploy resources on service and/or management clusters with SelectorSyncSets
+
+cluster:
+  $ref: /openshift/hivep01ue1/cluster.yml
+
+app:
+  $ref: /services/ocm/osd-fleet-manager/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: hypershift-cert-manager-route53-production
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:GetChange",
+            ],
+            "Resource": "arn:aws:route53:::change/*",
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:ChangeResourceRecordSets",
+              "route53:ListResourceRecordSets"
+            ],
+            "Resource": [
+              # p3.openshiftapps.com
+              "arn:aws:route53:::hostedzone/Z0993289OF2UH2YBRGNP"
+              # Add any other zone below, with proper ending commas
+              # "arn:aws:route53:::hostedzone/XXXX"
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:ListHostedZonesByName"
+            ],
+            "Resource": "*"
+          }
+        ]
+      }
+    output_resource_name: hypershift-cert-manager-route53
