@@ -1143,7 +1143,7 @@ Request a new TOTP code:
 The TOTP engine cannot be interacted with via the Vault UI. The Vault CLI or API must be used
 - Login to Vault
   ```sh
-  vault login -method=github -address=https://vault.devshift.net
+  vault login -method=oidc -address=https://vault.devshift.net
   ```
 - Read a TOTP code
   ```sh

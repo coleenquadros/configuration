@@ -36,7 +36,7 @@ Credentials to the Dyn Management Portal can be found in Vault at https://vault.
 The 2FA TOTP code can be retrieved from Vault under path `totp/app-sre/code/sd-app-sre@dyn`. **However at this time the TOTP secrets engine cannot be viewed via the Vault UI**
 
 ```sh
-vault login -method=github -address=https://vault.devshift.net
+vault login -method=oidc -address=https://vault.devshift.net
 vault read totp/app-sre/code/sd-app-sre@dyn
 ```
 
