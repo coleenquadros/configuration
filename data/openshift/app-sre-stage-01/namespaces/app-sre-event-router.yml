@@ -10,7 +10,7 @@ cluster:
   $ref: /openshift/app-sre-stage-01/cluster.yml
 
 app:
-  $ref: /services/rate-limiting/app.yml
+  $ref: /services/observability/app.yml
 
 environment:
   $ref: /products/app-sre/environments/stage.yml
@@ -18,11 +18,25 @@ environment:
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
+managedResourceTypes:
+- ServiceAccount
+- ClusterRole
+- ClusterRoleBinding
+# - Template
+
 managedRoles: true
 
-managedResourceTypes:
-- Template
+managedResourceNames:
+- resource: ClusterRole
+  resourceNames:
+    - event-reader
+- resource: ClusterRoleBinding
+  resourceNames:
+  - event-reader-binding
 
 openshiftResources:
-- provider: resource-template
-  path: /setup/cluster-logging/event-router.yaml
+- provider: resource
+  path: /setup/cluster-logging/event-router-clusterrole.yaml
+
+# - provider: resource-template
+#   path: /setup/cluster-logging/event-router.yaml
