@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: hypershift
+
+name: rhobs-hypershift-prometheus
+description: |
+  Prometheus instance dedicated to scraping rhobs-hypershift ServiceMonitors and push 
+  metrics to RHOBS hypershift
+
+app:
+  $ref: /services/ocm/osd-fleet-manager/app.yml
+
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+
+# copied from osd-fleet-manager
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-uhc-info
+
+managedResourceTypes:
+- Prometheus
+- ServiceMonitor
+- Service
+- Secret
+
+imagePatterns: []
+
+resourceTemplates:
+- name: prometheus-rhobs-hypershift
+  # url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
+  # path: /templates/rhobs-hypershift-prometheus.yaml
+  url: https://gitlab.cee.redhat.com/patmarti/osd-fleet-manager
+  path: /templates/rhobs-hypershift-prometheus.yaml
+  targets:
+  - name: prometheus-rhobs-hypershift-stage
+    namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: 9c4bacd40908bfbdc55028bfb9efd1bee1ffb9d1
+    parameters:
+      # needs to match  the url in the RHOBS_CREDS_SECRET_NAME=rhobs-hypershift-credential secret
+      # REMOTE_WRITE_RHOBS_URL: https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/hypershift-platform/api/v1/receive
+      REMOTE_WRITE_RHOBS_URL: https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform-staging/api/v1/receive
