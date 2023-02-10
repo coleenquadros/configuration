@@ -1,0 +1,73 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: application-service
+
+name: application-service
+
+parentApp:
+  $ref: /services/stonesoup/app.yml
+
+description: |
+  Application service is responsible for the lifecycle management of applications and components in Stonesoup.  
+  It also supports a component discovery mechanism that is used to facilitate the creation of components.
+
+architectureDocument: https://docs.google.com/document/d/1axzNOhRBSkly3M2Y32Pxr1MBpBif2ljb-ufj0_aEt74/edit#heading=h.p6krojy5oe1s
+sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/stonesoup/sop
+
+grafanaUrls:
+  - title: Gitops Repo Creation Metrics
+    url: https://grafana-appstudio-workload-monitoring.apps.appstudio-stage.x99m.p1.openshiftapps.com/d/5jB4nloVk/gitops-repo-creation-metrics?orgId=1
+
+onboardingStatus: InProgress
+
+serviceOwners:
+- name: HAS Team
+  email: has-notifications@redhat.com
+
+serviceNotifications:
+- name: Red Hat Outage List
+  email: outage-list@redhat.com
+
+escalationPolicy:
+  $ref: /teams/stonesoup/escalation-policies/general-policy.yml
+
+dependencies:
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/quay/service.yml
+
+codeComponents:
+- name: application-service
+  resource: upstream
+  url: https://github.com/redhat-appstudio/application-service
+- name: application-api
+  resource: upstream
+  url: https://github.com/redhat-appstudio/application-api
+- name: gitops-repo-pruner
+  resource: upstream
+  url: https://github.com/redhat-appstudio/gitops-repo-pruner
+
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  teams:
+  - permissions:
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-stonesoup.yml
+    role: read
+  items:
+  - name: application-service
+    description: application service controller
+    public: true
+  - name: cdq-analysis
+    description: component detection query job
+    public: true
+    # The repo is not owned by HAS but the image is maintained by the team
+  - name: gitops-generator
+    description: gitops generator image
+    public: true
+  - name: gitops-repo-pruner
+    description: internal service to remove invalid gitops repos
+    public: true
