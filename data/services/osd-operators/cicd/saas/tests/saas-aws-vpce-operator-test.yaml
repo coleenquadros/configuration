@@ -1,0 +1,42 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: osd-operators
+name: saas-avo-test
+description: SaaS test file for AVO post deployment tests
+app:
+  $ref: /services/osd-operators/app.yml
+pipelinesProvider:
+  $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-srep-info
+managedResourceTypes:
+- Job
+- ServiceAccount
+
+publishJobLogs: true
+imagePatterns:
+- quay.io/app-sre/aws-vpce-operator-registry
+- quay.io/openshift/origin-tools
+
+resourceTemplates:
+- name: saas-avo-test
+  url: https://github.com/openshift/aws-vpce-operator
+  path: /hack/tests/avo-acceptance-test.yaml
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
+    ref: 82d8a2e40d108dad8606f0b21b4962ae7e7fe59b
+    promotion:
+      auto: true
+      subscribe:
+      - aws-vpce-operator-success-channel-hivei01ue1
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
+    ref: 82d8a2e40d108dad8606f0b21b4962ae7e7fe59b
+    promotion:
+      auto: true
+      subscribe:
+      - aws-vpce-operator-success-channel-hivei01ue1
