@@ -26,11 +26,7 @@ Once an AMI has been correctly built and shared with the AWS account where the A
 
 Jenkins master node require IAM role to be able to manage its own node. Policy can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/terraform/app-sre/app-sre-ci/ci-int-nodes.tf#L131-187)
 
-We use groovy script to manage cloud configuration which can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ci-int-jenkins-worker.groovy). Need to use [Script Console](https://www.jenkins.io/doc/book/managing/script-console/) to update it manually.
-
-For EC2 Fleet cloud plugin, we can easily add an existing ASG to Jenkins with this [function](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ci-int-jenkins-worker.groovy#L228-304)
-
-TODO: we need a new integration so we can define Jenkins cloud in app-interface and auto-update it in Jenkins instances. See [this design doc](/docs/app-sre/design-docs/jenkins-worker-fleet.md).
+Once the ASG has been created, we can define Jenkins worker fleets in app-interface and auto-update it in Jenkins instances via JCasC(Jenkins Configuration as Code) with the help of [jenkins-worker-fleet](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/jenkins_worker_fleets.py). One example can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-int/ci-int.yml#L20-28). 
 
 ## Monitoring
 
