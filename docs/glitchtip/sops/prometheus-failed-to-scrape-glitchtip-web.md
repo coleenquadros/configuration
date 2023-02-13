@@ -17,17 +17,12 @@ Prometheus is not able to scrape the glitchtip-web service.
 View access to the stage or prod clusters and namespaces that pods are running in ([glitchtip in visual-app-interface](https://visual-app-interface.devshift.net/services#/services/glitchtip/app.yml)).
 
 ### Steps
-- Log into the console and verify if glitchtip pods are up/stuck etc.
-- Review the logs of the pods to see if there are any errors.
+- Log into the console.
+- Review the logs of
+  - the `init-api-users` init-container of the `glitchtip-web` pods. This container is responsible for creating the prometheus API user.
+  - `web` container of the `glitchtip-web`  pods. This container is responsible for serving the web UI.
 - Optionally, try to restart the pods or manually trigger the deployment pipeline.
 
-TODO: Determine the procedure for this alert.
-1. Resolution
-2. Log capture
-3. Issue tracking
-
-* https://glitchtip.devshift.net/api/0/observability/django/
-* TODO prometheus token
 
 ### Escalations
 - Ping `@app-sre-ic` in `#sd-app-sre` on Slack

@@ -6,14 +6,33 @@ evaluation_interval: 1m
 tests:
   - interval: 1m
     input_series:
-      - series: kube_pod_container_status_ready{namespace="glitchtip-stage",container="web"}
+      - series: up{job="glitchtip-web", namespace="glitchtip", pod="web"}
         values: '1+0x5 0+0x5'
     alert_rule_test:
       - eval_time: 5m
-        alertname: GlitchtipContainersDown
+        alertname: PrometheusFailedToScrapeGlitchTipWeb
         exp_alerts: []
       - eval_time: 10m
-        alertname: GlitchtipContainersDown
+        alertname: PrometheusFailedToScrapeGlitchTipWeb
+        exp_alerts:
+          - exp_labels:
+              service: glitchtip
+              severity: medium
+            exp_annotations:
+              message: "Prometheus failed to scrape glitchtip-web."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/prometheus-failed-to-scrape-glitchtip-web.md"
+              dashboard: "https://grafana.app-sre.devshift.net/d/GRUqV30Vk/glitchtip-dashboard?orgId=1"
+
+  - interval: 1m
+    input_series:
+      - series: kube_pod_container_status_ready{namespace="glitchtip-production",container="web"}
+        values: '1+0x5 0+0x5'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: GlitchtipWebDown
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: GlitchtipWebDown
         exp_alerts:
           - exp_labels:
               service: glitchtip
@@ -21,11 +40,52 @@ tests:
               container: web
             exp_annotations:
               message: "Glitchtip web deployment is down."
-              dashboard: "https://grafana.stage.devshift.net/d/rY6BflQnz/glitchtip-dashboard"
-              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
+              dashboard: "https://grafana.app-sre.devshift.net/d/GRUqV30Vk/glitchtip-dashboard?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-pod-ready.md"
+
+  - interval: 1m
+    input_series:
+      - series: kube_pod_container_status_ready{namespace="glitchtip-production",container="worker"}
+        values: '1+0x5 0+0x5'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: GlitchtipWorkerDown
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: GlitchtipWorkerDown
+        exp_alerts:
+          - exp_labels:
+              service: glitchtip
+              severity: medium
+              container: worker
+            exp_annotations:
+              message: "Glitchtip worker deployment is down."
+              dashboard: "https://grafana.app-sre.devshift.net/d/GRUqV30Vk/glitchtip-dashboard?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-pod-ready.md"
+
+  - interval: 1m
+    input_series:
+      - series: kube_pod_container_status_ready{namespace="glitchtip-production",container="beat"}
+        values: '1+0x5 0+0x5'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: GlitchtipBeatDown
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: GlitchtipBeatDown
+        exp_alerts:
+          - exp_labels:
+              service: glitchtip
+              severity: medium
+              container: beat
+            exp_annotations:
+              message: "Glitchtip beat deployment is down."
+              dashboard: "https://grafana.app-sre.devshift.net/d/GRUqV30Vk/glitchtip-dashboard?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-pod-ready.md"
+
   - interval : 1m
     input_series:
-      - series: kube_deployment_status_replicas_unavailable{namespace="glitchtip-stage",deployment="glitchtip-web"}
+      - series: kube_deployment_status_replicas_unavailable{namespace="glitchtip-production",deployment="glitchtip-web"}
         values: '0+0x5 1+0x5 2+0x5'
     alert_rule_test:
       - eval_time: 5m
@@ -37,21 +97,43 @@ tests:
           - exp_labels:
               service: glitchtip
               severity: medium
-              namespace: glitchtip-stage
+              namespace: glitchtip-production
               deployment: glitchtip-web
             exp_annotations:
-              message: "Glitchtip deployment glitchtip-web has 1 pods not running."
-              dashboard: "https://grafana.stage.devshift.net/d/rY6BflQnz/glitchtip-dashboard"
-              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
+              message: "Glitchtip deployment glitchtip-web has 1 pod(s) not running."
+              dashboard: "https://grafana.app-sre.devshift.net/d/GRUqV30Vk/glitchtip-dashboard?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-pod-ready.md"
       - eval_time: 16m
         alertname: GlitchtipDeploymentUnderReplicated
         exp_alerts:
           - exp_labels:
               service: glitchtip
               severity: medium
-              namespace: glitchtip-stage
+              namespace: glitchtip-production
               deployment: glitchtip-web
             exp_annotations:
-              message: "Glitchtip deployment glitchtip-web has 2 pods not running."
-              dashboard: "https://grafana.stage.devshift.net/d/rY6BflQnz/glitchtip-dashboard"
-              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-availability.md"
+              message: "Glitchtip deployment glitchtip-web has 2 pod(s) not running."
+              dashboard: "https://grafana.app-sre.devshift.net/d/GRUqV30Vk/glitchtip-dashboard?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-pod-ready.md"
+
+  - interval : 1m
+    input_series:
+      - series: haproxy_backend_http_responses_total{route="glitchtip-route",code="5xx"}
+        values: '0+10x10'
+      - series: haproxy_backend_http_responses_total{route="glitchtip-route"}
+        values: '100+100x10'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: GlitchtipErrorRateHigh
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: GlitchtipErrorRateHigh
+        exp_alerts:
+          - exp_labels:
+              service: glitchtip
+              severity: medium
+              route: glitchtip-route
+            exp_annotations:
+              message: "Glitchtip route glitchtip-route is failing to handle 9.091% of the requests."
+              dashboard: "https://grafana.app-sre.devshift.net/d/GRUqV30Vk/glitchtip-dashboard?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/glitchtip-error-500.md"

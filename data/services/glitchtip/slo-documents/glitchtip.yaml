@@ -10,36 +10,34 @@ app:
   $ref: /services/glitchtip/app.yml
 
 namespaces:
-  - $ref: /services/glitchtip/namespaces/glitchtip-stage.yml
+  - $ref: /services/glitchtip/namespaces/glitchtip-production.yaml
 
 slos:
 - name: Availability of HTTP Requests
-  dashboard: https://grafana.stage.devshift.net/d/8hKIWxr7z/glitchtip-slo?orgId=1
+  dashboard: https://grafana.app-sre.devshift.net/d/8hKIWxr7z/glitchtip-slo?orgId=1
   SLIType: availability
   SLISpecification: The proportion of the total number of successful HTTP responses and the total number of HTTP requests.
-  # TODO: Refine SLOTarget as more performance and load testing data are available.
   SLOTarget: 95.0
   SLOTargetUnit: percent_0_100
   SLOParameters:
     window: 28d
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/glitchtip/slos/availability-of-http-requests.md
   expr: |
-    sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-stage", code!="5xx"}[28d])) by (exported_namespace)
+    sum(rate(haproxy_backend_http_responses_total{exported_namespace="glitchtip-production", code!="5xx"}[{{window}}])) by (exported_namespace)
     /
-    sum(rate(haproxy_backend_connections_total{backend=~".*https.*", exported_namespace="glitchtip-stage"}[28d])) by (exported_namespace) * 100 >= 95
-  prometheusRules: /observability/prometheusrules/glitchtip-stage-prometheusrules.yaml
+    sum(rate(haproxy_backend_connections_total{backend=~".*https.*", exported_namespace="glitchtip-production"}[{{window}}])) by (exported_namespace) * 100 >= 95
+  prometheusRules: /observability/prometheusrules/glitchtip-production-prometheusrules.yaml
 - name: Latency of HTTP Requests
-  dashboard: https://grafana.stage.devshift.net/d/8hKIWxr7z/glitchtip-slo?orgId=1
+  dashboard: https://grafana.app-sre.devshift.net/d/8hKIWxr7z/glitchtip-slo?orgId=1
   SLIType: latency
   SLISpecification: The proportion of the number of HTTP requests with latencies less than 400 milliseconds and the total number of HTTP requests.
-  # TODO: Refine SLOTarget as more performance and load testing data are available.
   SLOTarget: 90.0
   SLOTargetUnit: percent_0_100
   SLOParameters:
     window: 28d
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/glitchtip/slos/latency-of-http-requests.md
   expr: |
-    sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{le="0.5", job="glitchtip-web"}[28d])) by(job)
+    sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{le="0.5", job="glitchtip-web"}[{{window}}])) by(job)
     /
-    sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{le="+Inf", job="glitchtip-web"}[28d])) by(job) * 100 >= 90
-  prometheusRules: /observability/prometheusrules/glitchtip-stage-prometheusrules.yaml
+    sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{le="+Inf", job="glitchtip-web"}[{{window}}])) by(job) * 100 >= 90
+  prometheusRules: /observability/prometheusrules/glitchtip-production-prometheusrules.yaml
