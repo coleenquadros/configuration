@@ -45,8 +45,9 @@ The following documentations are _must_ read for anyone considering a _major eng
 
 This section provides helpful information and an overview of the steps that your team will need to perform for a PostgreSQL major version upgrade.
 
-1. The upgrade duration is based on how large your database is and other factors like whether you have read-replicas. For those services with high availability requirements, a dry-run upgrade may be best to get a better estimate of how long the upgrade will take.
+1. The upgrade duration is based on how much storage your database uses, whether you have read-replicas, and other factors. A **dry-run upgrade is highly recommended for services with high availability requirements**. A stage database is rarely a good representation of how long a production database will take to upgrade.
    * You should be prepared for the upgrade to take up to **6 hours**. Someone from AppSRE team will need to be available for the duration of the upgrade.
+   * A dry-run upgrade typically involves [restoring the RDS instance from a backup](/README.md#restoring-rds-databases-from-backups) and then upgrading the restored database.
 2. Confirm the upgrade path using the [AWS docs](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion). Note that you may need to upgrade the minor version of your database engine for a major version upgrade to be available.
 3. Identify a time window that works for the development team and AppSRE to upgrade the stage database.
    1. Open a JIRA ticket in [AppSRE backlog](https://issues.redhat.com/browse/appsre) for AppSRE approval and resource allocation for the upgrade.
@@ -65,6 +66,12 @@ This section provides helpful information and an overview of the steps that your
 ### Note About Upgrading Read-Replicas
 
 Upgrading RDS instances that have read-replicas is a bit more complicated for PostgreSQL. AWS recommends that you **delete and recreate read-replicas after the source instance has upgraded to a different major version.**
+
+### Known issues
+
+This section tracks any issues related to major version upgrades.
+
+1. Databases with many schemas - databases with many schemas, typically a result of a tenant-per-schema configuration which can lead to thousands or more schemas, can take a very long time to complete a major version upgrade (24+ hours for tens of thousands of schemas)
 
 ## app-interface changes for upgrading
 
