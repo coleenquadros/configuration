@@ -12,7 +12,7 @@ The production environment is available via https://glitchtip.devshift.net, and 
  * [Uptime Monitoring](https://glitchtip.com/documentation/uptime-monitoring)
  * [Integrations](https://glitchtip.com/documentation/integrations)
 
-## End-USer Documentation
+## End-User Documentation
 
 The official end-user documentation is available at https://glitchtip.com/documentation, and how to integrate it into your application can be found in the [app-interface documentation](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#create-a-glitchtip-organization-dependenciesglitchtip-organization-1yml).
 
@@ -28,6 +28,21 @@ Glitchtip is composed of three repositories:
 * Upstream [glitchtip-frontend](https://gitlab.com/glitchtip/glitchtip-frontend)
 * Upstream [glitchtip-backend](https://gitlab.com/glitchtip/glitchtip-backend)
 * [AppSRE Glitchtip](https://github.com/app-sre/glitchtip)
+
+## CI/CD Pipeline
+
+As soon as a PR is merged to the [`main` branch](https://github.com/app-sre/glitchtip), the CI/CD pipeline is triggered. The pipeline is defined in the [glitchtip saas](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/glitchtip/cicd/saas.yaml) and the [glitchtip test sass](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/glitchtip/cicd/test.yaml) in app-interface. The flow of the pipeline is as follows:
+
+```mermaid
+flowchart TD
+    A[PR merged] --> B[Trigger 'glitchtip build main' jenkins job]
+    B --> C[Deploy to stage]
+    C --> D[Trigger test saas deployment]
+    D --> F[Run acceptance tests]
+    F --> G[Deploy to production]
+```
+
+The acceptance tests are defined in the [glitchtip repo](https://github.com/app-sre/glitchtip/tree/main/acceptance) repository.
 
 
 ## SOPs
