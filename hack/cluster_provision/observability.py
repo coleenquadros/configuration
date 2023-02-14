@@ -1,18 +1,14 @@
 """Generate Observability configs for a cluster."""
-import json
 import logging
 import os
-import sys
-from io import StringIO
+from contextlib import contextmanager
 from typing import Any, Dict, Mapping, MutableMapping
 from urllib.parse import urlparse
 
 from .common import cluster_config_exists
 from .common import create_file_from_template
-from .common import get_base_yaml
 from .common import get_yaml_attribute
 from .common import read_yaml_from_file
-from .common import render_template_as_str
 from .common import write_yaml_to_file
 
 log = logging.getLogger(__name__)
@@ -69,9 +65,6 @@ APPSRE_OBSERVABILITY_NS_ROLE = (
 NGINX_SAAS_FILE = "{data_dir}/services/observability/cicd/saas/" "saas-nginx-proxy.yaml"
 
 # GRAFANA
-GRAFANA_DATASOURCES_PATH = (
-    "{data_dir}/../resources/observability/grafana/" "grafana-datasources.secret.yaml"
-)
 GRAFANA_SHARED_RESOURCES_PATH = "{data_dir}/services/observability/shared-resources/grafana.yml"
 GRAFANA_CLUSTERS_SOURCE_PATH = "{data_dir}/openshift"
 
@@ -144,18 +137,6 @@ def _add_target_to_resource_template(
 def _get_cluster_yaml_attribute(data_dir: str, cluster: str, attr: str) -> Any:
     path = f"{data_dir}/openshift/{cluster}/cluster.yml"
     data = get_yaml_attribute(path, attr)
-    return data
-
-
-def _cluster_is_private(data_dir: str, cluster: str) -> bool:
-    spec = _get_cluster_yaml_attribute(data_dir, cluster, "spec")
-    return spec.get("private", False)
-
-
-def _cluster_console_url(data_dir: str, cluster) -> str:
-    # https://console-openshift-console.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com
-    data = _get_cluster_yaml_attribute(data_dir, cluster, "consoleUrl")
-    data = data.removeprefix("https://console-openshift-console.")
     return data
 
 
@@ -319,28 +300,14 @@ def _add_appsre_observability_ns_to_nginx_saas(data_dir: str, cluster: str) -> N
     _add_target_to_resource_template(saas_path, "nginx-proxy", entry)
 
 
-def _get_grafana_json_datasources(file_path: str):
-    # Remove base64 non_yaml compliant lines
-    content = ""
-    with open(file_path, mode="r", encoding="utf8") as file:
-        for line in file.readlines():
-            if "b64encode" not in line:
-                content = content + line
-
-    yaml_obj = get_base_yaml()
-    yaml_obj.explicit_start = False
-    yaml_obj.preserve_quotes = True
-    yaml_obj.width = 65535
-
-    # Load the data
-    data = yaml_obj.load(content)
-    datasources_yaml = data["data"]["datasources.yaml"]
-
-    # Parse the data as JSON
-    stream = StringIO()
-    yaml_obj.dump(datasources_yaml, stream)
-    json_data = json.loads(stream.getvalue())
-    return json_data
+def _get_slug_from_console_url(console_url: str) -> str:
+    if not console_url:
+        raise Exception(
+            "Can not find consoleUrl in cluster.yml. Is the cluster"
+            "provisioned successfully?"
+        )
+    hostname = urlparse(console_url).hostname
+    return ".".join(hostname.split(".")[2:5])
 
 
 def _get_cluster_name_slugs(clusters_source_path: str) -> Dict[str, str]:
@@ -354,21 +321,18 @@ def _get_cluster_name_slugs(clusters_source_path: str) -> Dict[str, str]:
         content = read_yaml_from_file(file)
         if content["$schema"] == "/openshift/cluster-1.yml":
             name = content["name"]
-            console_url: str = content["consoleUrl"]
-            hostname = urlparse(console_url).hostname
-            slug = ".".join(hostname.split(".")[2:5])
+            slug = _get_slug_from_console_url(content["consoleUrl"])
             name_slugs[name] = slug
     return name_slugs
 
 
-def _patch_grafana_shared_resources_clusters(grafana_shared_resources_path: str, name_slugs: Dict[str, str]) -> None:
+@contextmanager
+def _patch_grafana_shared_resources_clusters(grafana_shared_resources_path: str) -> None:
     grafana_shared_resources = read_yaml_from_file(grafana_shared_resources_path)
-
     for resource in grafana_shared_resources["openshiftResources"]:
         if resource["path"] == "/observability/grafana/grafana-datasources.secret.yaml":
-            for cluster in resource["variables"]["clusters"]:
-                cluster["slug"] = name_slugs[cluster["name"]]
-
+            yield resource["variables"]["clusters"]
+            break
     write_yaml_to_file(grafana_shared_resources_path, grafana_shared_resources)
 
 
@@ -377,80 +341,31 @@ def refresh_grafana_datasources(data_dir: str) -> None:
     clusters_source_path = GRAFANA_CLUSTERS_SOURCE_PATH.format(data_dir=data_dir)
     name_slugs = _get_cluster_name_slugs(clusters_source_path)
     grafana_shared_resources_path = GRAFANA_SHARED_RESOURCES_PATH.format(data_dir=data_dir)
-    _patch_grafana_shared_resources_clusters(grafana_shared_resources_path, name_slugs)
+
+    with _patch_grafana_shared_resources_clusters(grafana_shared_resources_path) as clusters:
+        for c in clusters:
+            c["slug"] = name_slugs[c["name"]]
+
+    log.info("Grafana datasources refreshed successfully")
 
 
 def configure_grafana_datasources(data_dir: str, cluster: str) -> None:
     """Configures grafana datasources"""
     _check_data_and_cluster_exists(data_dir, cluster)
 
-    file_path = GRAFANA_DATASOURCES_PATH.format(data_dir=data_dir)
+    console_url = _get_cluster_yaml_attribute(data_dir, cluster, "consoleUrl")
+    slug = _get_slug_from_console_url(console_url)
+    grafana_shared_resources_path = GRAFANA_SHARED_RESOURCES_PATH.format(data_dir=data_dir)
 
-    # Get the json data
-    json_data = _get_grafana_json_datasources(file_path)
+    with _patch_grafana_shared_resources_clusters(grafana_shared_resources_path) as clusters:
+        for c in clusters:
+            if c["name"] == cluster:
+                c["slug"] = slug
+                break
+        else:
+            clusters.append({"name": cluster, "slug": slug})
 
-    name1 = f"{cluster}-prometheus"
-    name2 = f"{cluster}-cluster-prometheus"
-
-    existent_datasources = [d["name"] for d in json_data["datasources"]]
-    exists = False
-    for name in [name1, name2]:
-        if name in existent_datasources:
-            exists = True
-            log.error(
-                "Datasource %s already exists in grafana-datasources-secret", name
-            )
-    if exists:
-        return
-
-    # Add data new datasources
-    tls_skip_verify = "false"
-    if _cluster_is_private(data_dir, cluster):
-        tls_skip_verify = "true"
-
-    console_url = _cluster_console_url(data_dir, cluster)
-    if not console_url:
-        raise Exception(
-            "Can not find consoleUrl in cluster.yml. Is the cluster"
-            "provisioned sucessfully ?"
-        )
-
-    data1 = {
-        "cluster": cluster,
-        "name": name1,
-        "tlsSkipVerify": tls_skip_verify,
-        "url": f"https://prometheus.{cluster}.devshift.net",
-    }
-    data2 = {
-        "cluster": cluster,
-        "name": name2,
-        "tlsSkipVerify": tls_skip_verify,
-        "url": f"https://prometheus-k8s-openshift-monitoring.{console_url}",
-    }
-
-    tpl1 = render_template_as_str("grafana-datasource.tpl", **data1)
-    tpl2 = render_template_as_str("grafana-datasource.tpl", **data2)
-    json1 = json.loads(tpl1)
-    json2 = json.loads(tpl2)
-    json_data["datasources"].extend([json1, json2])
-
-    # Format the output
-    txtdata = json.dumps(json_data, indent=4)
-
-    # This is ugly and I feel bad for it, but I cannot find another way to
-    # add spaces at the beggining of the json dumped objects
-    output = ""
-    for line in txtdata.splitlines():
-        output = f"{output}    {line}\n"
-
-    # Render a new template with the requried format
-    tpl = render_template_as_str("grafana-datasources-secret.tpl", datasources=output)
-
-    with open(file_path, mode="w", encoding="utf-8") as file:
-        file.write(tpl)
-
-    log.info("Grafana datasources for %s cluster added succesfully", cluster)
-    sys.exit(1)
+    log.info("Grafana datasources for %s cluster added successfully", cluster)
 
 
 def configure_customer_monitoring(
