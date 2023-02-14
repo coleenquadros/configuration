@@ -1,0 +1,46 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: uhc
+
+name: ci-int-ocm-ui-jobs
+
+description: ''
+
+app:
+  $ref: /services/ocm/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: uhc-portal
+    label: sd-uhc
+    node: rhel8
+    gl_group: service
+    gl_project: uhc-portal
+    quay_org: app-sre
+    jobs:
+    - 'ocm-pr-check-selenium':
+        display_name: OCM UI check merge request
+        concurrent_build: true
+    - 'ocm-portal-deploy':
+        display_name: OCM UI deploy to qaprodauth.cloud.redhat.com
+        mode: staging
+        branch: "master"
+    - 'ocm-portal-deploy':
+        display_name: OCM UI deploy to cloud.redhat.com/beta
+        mode: candidate
+        branch: "candidate"
+    - 'ocm-portal-deploy':
+        display_name: OCM UI deploy to cloud.redhat.com (prod-stable)
+        mode: stable
+        branch: "stable"
+    - 'ocm-cypress-smoke':
+        display_name: OCM UI smoke tests for staging
+        default_branch: master
+

@@ -1,0 +1,99 @@
+- job-template:
+    id: 'ocm-portal-deploy'
+    name: 'ocm-portal-deploy-{mode}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *uhc_insights_platform
+    builders:
+    - shell: |
+        #!/bin/bash
+        set -e
+        ./push_to_insights.sh {mode}
+    publishers:
+    - workspace-cleanup
+    <<: *gl_build_master
+
+- job-template:
+    id: 'ocm-pr-check-selenium'
+    name: '{gl_group}-{gl_project}-pr-check-selenium'
+    environment: staging
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *ocm_selenium_tests
+        - *quay_secret_pull
+    - ansicolor
+    publishers:
+    - archive:
+        artifacts: '*.log, run/output/embedded_files/**'
+        allow-empty: 'true'
+    - junit:
+        results: 'run/output/junit-report/*.xml'
+        test-stability: true
+        claim-build: true
+        measurement-plots: true
+        flaky-test-reports: true
+        junit-attachments: true
+        allow-empty-results: true
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier
+    <<: *gl_pr_check
+
+- job-template:
+    id: 'ocm-cypress-smoke'
+    name: '{gl_group}-{gl_project}-ocm-cypress-smoke'
+    environment: staging
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *ocm_selenium_tests
+        - *quay_secret_pull
+    - ansicolor
+    parameters:
+    - string:
+        name: ENVIRONMENT
+        default: 'staging'
+        description: 'Environment against test suite run. Ex: Staging/Production'
+    - string:
+        name: TAGS
+        default: 'smoke'
+        description: 'Specify the list of tag(s) seperated by commas(,). Tags could be the test categories, case names,cloud provider etc'
+    - string:
+        name: BROWSER
+        default: 'chrome'
+        description: 'Browser to run the test case(s)'
+    - string:
+        name: BRANCH
+        default: '{default_branch}'
+        description: 'The branch of uhc-portal repo for pipeline scripts'
+    branch: '${{BRANCH}}'
+    ci_cmd: ./cypress-qe-triggers.sh
+    cron_expression: '00 08 * * *'
+    publishers:
+    - archive:
+        artifacts: '*.log, run/output/embedded_files/**'
+        allow-empty: 'true'
+    - junit:
+        results: 'run/output/junit-report/*.xml'
+        test-stability: true
+        claim-build: true
+        measurement-plots: true
+        flaky-test-reports: true
+        junit-attachments: true
+        allow-empty-results: true
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier
+    <<: *gl_timed
+
