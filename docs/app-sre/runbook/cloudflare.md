@@ -177,6 +177,23 @@ In some cases it may be desirable to only partially manage DNS records in Cloudf
         ```
 1. Follow the `Finalizing` steps from `Importing a Cloudflare Zone`
 
+### Increase Cloudflare Quotas
+
+#### API rate limit
+
+The Cloudflare API has a rate limit of 1200 requests per 5 minutes as documented [here](https://developers.cloudflare.com/fundamentals/api/reference/limits/). The API rate limit is set on a per-user basis.
+
+The process to have the rate limit raised is to open a support ticket and copy Tim Flynn and Brian Ceppi on it
+
+
+#### Maximum record count per zone
+
+The maximum number of records per zone for Free accounts is 1000. The limit is 3500 for Enterprise accounts.
+
+This is set on a per-zone basis, so a requirement to have this limit increased is to have the zone already created
+
+The process to have the record limit increased is to open a support ticket and copy Tim Flynn and Brian Ceppi on it
+
 ## Helpful links & resources
 
 [Cloudflare status page](https://www.cloudflarestatus.com/)
