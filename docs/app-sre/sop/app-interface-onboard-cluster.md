@@ -393,6 +393,21 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 1. **IMPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notified by the browser.
 
+1. Add new grafana datasources for the new cluster:
+
+    You can do that with this command:
+      ```bash
+      hack/cluster_provision.py create-obs-grafana-datasources <cluster>
+      ```
+    **Double check the changes introduced, the destination file could have been modified with manual changes.**
+
+    Tip: There is one command to refresh all cluster info in shared grafana config,
+    just in case console url changed but forgot to update `slug`.
+
+      ```bash
+      hack/cluster_provision.py refresh-obs-grafana-datasources
+      ```
+
 ## Step 4 - Operator Lifecycle Manager
 
 1. Install the Operator Lifecycle Manager
