@@ -58,8 +58,13 @@ and error tracking of several Red Hat applications.
 
 ## State
 
-* Postgres database: Store events, issues, and other data. If unavailable, the application will have a major outage.
-* ElasticCache (Redis): Cache; if unavailable, the application will have an outage.
+### Postgres RDS
+
+The database stores all application-related data (events, issues, organizations, projects, ...). The RDS instance is backed up daily. If unavailable, the application will have a significant outage. All past events and issues will be lost in case of data loss. See [disaster-recovery](../sops/disaster-recovery.md) for how to recover from a data loss.
+
+### ElasticCache (Redis)
+
+Glitchtip uses Redis for the Celery background tasks (`glitchtip-workers`, `glitchtip-beat`) to coordinate the jobs. If unavailable, the application will have an outage. In case of data loss, nothing important will be lost.
 
 ## Load Testing
 
