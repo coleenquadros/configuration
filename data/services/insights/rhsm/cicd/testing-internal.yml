@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  platform: insights
+  service: rhsm
+
+name: rhsm-testing-internal
+
+description: rhsm internal cluster testing
+
+app:
+  $ref: /services/insights/content-sources/app.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-clouddot-info
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-poc-pipelines.appsres03ue1.yaml
+
+publishJobLogs: true
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/redhatqe
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+
+managedResourceTypes:
+- Job
+
+resourceTemplates:
+- name: rhsm-testing-internal
+  url: https://github.com/RedHatInsights/rhsm-subscriptions
+  path: /deploy/stage-internal-test-job.yaml
+  targets:
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/rhsm-stage-testing.yml
+    ref: 7db209d8a6b47def100d7661300c028c8e95b29a
+# Comment promotion until https://issues.redhat.com/browse/APPSRE-7037
+#    promotion:
+#      auto: true
+#      subscribe:
+#      - swatch-producer-aws-stage-deploy-success-channel
+#      publish:
+#      - rhsm-stage-post-deploy-tests-internal-success-channel
