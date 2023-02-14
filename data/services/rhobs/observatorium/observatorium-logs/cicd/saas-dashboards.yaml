@@ -20,6 +20,7 @@ slack:
 
 managedResourceTypes:
 - ConfigMap
+- PrometheusRule
 
 imagePatterns: []
 
@@ -31,15 +32,25 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
-    ref: 6bc4a550060a004673221b3126b50ceb8152d24d
+    ref: 7e9fc255e272521eacd23a21a5ca430766af132b
     parameters:
       OBSERVATORIUM_API_DATASOURCE: app-sre-stage-01-prometheus
       OBSERVATORIUM_API_NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-mst-stage
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
-    ref: 6bc4a550060a004673221b3126b50ceb8152d24d
+    ref: 7e9fc255e272521eacd23a21a5ca430766af132b
     parameters:
       OBSERVATORIUM_API_DATASOURCE: telemeter-prod-01-prometheus
       OBSERVATORIUM_API_NAMESPACE: observatorium-mst-production
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-mst-production
+- name: observatorium-logs-dashboard-rules
+  path: /resources/observability/grafana/observatorium-logs/grafana-dashboards-rules-template.yaml
+  url: https://github.com/rhobs/configuration
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: 7e9fc255e272521eacd23a21a5ca430766af132b
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+    ref: 7e9fc255e272521eacd23a21a5ca430766af132b
