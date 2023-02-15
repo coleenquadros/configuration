@@ -443,3 +443,15 @@ spec:
         labels:
           severity: warning
           service: assisted-installer
+
+      - alert: "Assisted Installer - Volume claim high disk usage"
+        annotations:
+          message: Assisted Installer ({{ $labels.namespace }}) volume claim {{ $labels.persistentvolumeclaim }} volume usage higher than 80% ({{ $value | printf "%.2f" }}%) <!subteam^S01T3MZGJ9M>
+          redhat_cloud_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/{{ $labels.namespace }}/persistentvolumeclaims/{{ $labels.persistentvolumeclaim }}"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#persistent-volume-claim-high-usage"
+        expr: |
+          100 * kubelet_volume_stats_used_bytes{namespace=~"assisted-installer.*"} / (kubelet_volume_stats_used_bytes{namespace=~"assisted-installer.*"} + kubelet_volume_stats_available_bytes{namespace=~"assisted-installer.*"}) > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: assisted-installer
