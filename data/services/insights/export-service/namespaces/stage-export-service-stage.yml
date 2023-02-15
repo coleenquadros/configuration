@@ -1,0 +1,67 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: export-service
+
+name: export-service
+description: |
+  The Export-Service provides a shared approach to allow customers to
+  request and download data archives from the apps running on the c.r.c
+  platform.
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+app:
+  $ref: /services/insights/export-service/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/export-service/receptor-psks # TODO: Where are these for exports
+  version: 4
+  annotations:
+    qontract.recycle: "true"
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources: # TODO: Do we need any other resources for exports?
+  - provider: cloudwatch
+    identifier: exports-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: exports-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres14-rds-rbac-stage.yml # TODO: Where is this for exports
+    old_parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-rbac-stage.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres14-parameter-group-rbac-stage.yml
+    output_resource_name: rbac-db
+    enhanced_monitoring: true
