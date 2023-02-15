@@ -426,3 +426,35 @@ tests:
         redhat_cloud_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/assisted-installer-production/pods/assisted-service-000-123"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#container-restarting"
 
+# Check PVC usage
+- interval: 1m
+  input_series:
+  - series: kubelet_volume_stats_used_bytes{namespace="assisted-installer-production",persistentvolumeclaim="assisted-image-service-assisted-image-service-1"}
+    values: 2000+100x80
+  - series: kubelet_volume_stats_available_bytes{namespace="assisted-installer-production",persistentvolumeclaim="assisted-image-service-assisted-image-service-1"}
+    values: 8000-100x80
+
+  alert_rule_test:
+    # 10m past threshold
+  - eval_time: 71m
+    alertname: "Assisted Installer - Volume claim high disk usage"
+    exp_alerts:
+    - exp_labels:
+        namespace: assisted-installer-production
+        persistentvolumeclaim: assisted-image-service-assisted-image-service-1
+        service: assisted-installer
+        severity: warning
+      exp_annotations:
+        message: Assisted Installer (assisted-installer-production) volume claim assisted-image-service-assisted-image-service-1 volume usage higher than 80% (91.00%) <!subteam^S01T3MZGJ9M>
+        redhat_cloud_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/assisted-installer-production/persistentvolumeclaims/assisted-image-service-assisted-image-service-1"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#persistent-volume-claim-high-usage"
+    # 9m past threshold: should not alert
+  - eval_time: 70m
+    alertname: "Assisted Installer - Volume claim high disk usage"
+    exp_alerts:
+      []
+    # ratio still within 80%: should not alert
+  - eval_time: 60m
+    alertname: "Assisted Installer - Volume claim high disk usage"
+    exp_alerts:
+      []

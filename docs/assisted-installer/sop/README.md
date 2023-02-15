@@ -325,3 +325,29 @@ Note: we can follow [AWS guide](https://aws.amazon.com/premiumsupport/knowledge-
 
 ### Escalations
 `@edge-cloud-team` can help with this, alternatively `@assistedinstaller-team` can be pinged.
+
+## Persistent Volume Claim High Usage
+
+### Severity: Warning
+
+### Impact
+Assisted image service pods won't start up if the disk is full. If all of the pods run out of disk space, we will have degraded service (image cannot be downloaded from SaaS)
+
+### Summary
+We need to make more space for the image service to be able to download images
+
+### Access required
+
+- Gitlab https://gitlab.cee.redhat.com/service/app-interface/
+
+
+### Steps
+- Check whether the PVC is running out of space
+  - [integration](https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/assisted-installer-integration/persistentvolumeclaims/)
+  - [stage](https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/assisted-installer-stage/persistentvolumeclaims/)
+  - [production](https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/assisted-installer-production/persistentvolumeclaims)
+
+- Create MR increasing the `PV_SIZE` parameter ([example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/58755))
+
+### Escalations
+`@edge-cloud-team` can help with this, alternatively `@assistedinstaller-team` can be pinged.
