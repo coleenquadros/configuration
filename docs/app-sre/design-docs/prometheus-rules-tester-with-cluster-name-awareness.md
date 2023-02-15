@@ -29,9 +29,18 @@ As a by-product of the refactoring work and in the spirit of reducing the build 
 
 ## Proposal
 
-The proposal is to add a new `openshift-resources` provider that is dedicated to Prometheus rules files and has a reference to the tests associated with it. For example:
+The proposal is to add a new provider to the `openshiftResources` property from the `/openshift/namespace.yml` object that is dedicated to Prometheus rules files and has a reference to the tests associated with it. For example:
 
 ```yaml
+---
+$schema: /openshift/namespace-1.yml
+
+(...)
+
+openshiftResources:
+
+(...)
+
 - provider: prometheus-rule
   type: extracurlyjinja2
   path: /observability/prometheusrules/aws-resources-privatelink.prometheusrules.yaml.j2
