@@ -16,6 +16,35 @@ Also make sure your AWS cli setup allows you to get STS session tokens.
 * [How to setup MFA for your AWS user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html#enable-virt-mfa-for-iam-user)
 * [How to get a session token](https://docs.aws.amazon.com/cli/latest/reference/sts/get-session-token.html) and [how to setup the ENV vars or a credentials file profile](https://docs.aws.amazon.com/cli/latest/topic/config-vars.html?highlight=aws_session_token#credentials)
 
+## Create New Bucket
+
+If you want to keep the old bucket alive while migrating data, apply the following changes
+
+1. Introduce the new s3 bucket in `externalResources` by copying the existing resource entry, but under a different provisioner (`account`) item.
+1. Make sure the new s3 bucket gets a different `identifier` and `output_resource_name`, e.g. by adding an `-new` or version (`-v1`) suffix to it.
+
+```yaml
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/<old-aws-account>/account.yml
+  resources:
+  - provider: s3
+    identifier: <old-bucket-identifier>
+    defaults: <s3-defaults-file>
+    output_resource_name: <bucket-secret-name>
+- provider: aws
+  provisioner:
+    $ref: /aws/<new-aws-account>/account.yml
+  resources:
+  - provider: s3
+    identifier: <new-bucket-identifier>
+    defaults: <s3-defaults-file>
+    output_resource_name: <bucket-secret-name>-new
+```
+
 ## Source Bucket
 
 Log into the source AWS account, and attach a bucket policy to the source S3 bucket to grant your $USER in the destination account **read only permissions** on it.
@@ -51,6 +80,35 @@ Make sure you have valid credentials (session token) for the destination AWS acc
 
 ```bash
 aws [--profile $your-profile] s3 sync s3://$SOURCE_BUCKET_NAME s3://$DESTINATION_BUCKET_NAME
+```
+
+## Switch
+
+1. Stop services writing to old bucket
+2. Rerun copy process again to ensure all data migrated
+3. Switch `output_resource_name` by updating `output_resource_name` of new bucket to the old one, and adding a `-old` suffix to the old bucket
+4. Start services again (revert step 1)
+
+```yaml
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+  $ref: /aws/<old-aws-account>/account.yml
+  resources:
+    - provider: s3
+      identifier: <old-bucket-identifier>
+      defaults: <s3-defaults-file>
+      output_resource_name: <bucket-secret-name>-old
+- provider: aws
+  provisioner:
+  $ref: /aws/<new-aws-account>/account.yml
+  resources:
+    - provider: s3
+      identifier: <new-bucket-identifier>
+      defaults: <s3-defaults-file>
+      output_resource_name: <bucket-secret-name>
 ```
 
 ## Cleanup
