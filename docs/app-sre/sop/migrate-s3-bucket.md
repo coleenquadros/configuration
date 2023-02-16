@@ -18,7 +18,7 @@ Also make sure your AWS cli setup allows you to get STS session tokens.
 
 ## Source Bucket
 
-Log into the source AWS account, and attach a bucket policy to the source S3 bucket to grant your $USER in the destination account read permissions on it.
+Log into the source AWS account, and attach a bucket policy to the source S3 bucket to grant your $USER in the destination account **read only permissions** on it.
 
 ```yaml
 {
@@ -28,11 +28,12 @@ Log into the source AWS account, and attach a bucket policy to the source S3 buc
             "Sid": "DelegateS3Access",
             "Effect": "Allow",
             "Principal": {
-                "AWS": "arn:aws:iam::$DESTINATION_ACCOUNT_ID:/user/$USER"
+                "AWS": "arn:aws:iam::$DESTINATION_ACCOUNT_ID:user/$USER"
             },
             "Action": [
-                "s3:ListBucket",
-                "s3:GetObject"
+                "s3:GetObject",
+                "s3:GetObjectTagging",
+                "s3:ListBucket"
             ],
             "Resource": [
                 "arn:aws:s3:::$SOURCE_BUCKET_NAME/*",
