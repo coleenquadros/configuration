@@ -20,7 +20,6 @@ networkPoliciesAllow:
 
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
-- $ref: /services/observability/shared-resources/grafana.yml
 
 managedRoles: true
 
@@ -31,13 +30,6 @@ managedResourceTypes:
 
 openshiftResources:
 # Routes
-## Grafana
-- provider: resource-template
-  type: jinja2
-  path: /observability/grafana.route.yaml
-  variables:
-    environment: -stage
-    host: grafana.stage.ext.devshift.net
 ## PushGateway
 - provider: resource-template
   type: jinja2
@@ -50,10 +42,6 @@ openshiftResources:
   path: /observability/jiralert/jiralert.route.yaml
   variables:
     host: jiralert.app-sre-stage.devshift.net
-## OSD Observatorium Credentials
-- provider: vault-secret
-  path: osd-sre/hive-stage/observatorium-tenant/grafana-proxy-credentials
-  version: 1
 ## Hypershift-platform Observatorium Credentials
 - provider: vault-secret
   path: osd-sre/rhobs-hypershift-platform-staging
@@ -87,26 +75,7 @@ openshiftResources:
     qontract.recycle: "true"
   name: acscs-token-refresher
 
-## Observatorium credentials for Lokis
-- provider: vault-secret
-  path: app-sre/creds/observatorium-appsre-staging
-  version: 1
-  name: grafana-loki-token-refresher
-  annotations:
-    qontract.recycle: "true"
-
 # ConfigMaps
-## Grafana Dashboards
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-rate-limiting.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-osd-network-verifier.configmap.yaml
-  validate_json: true
-- provider: resource-template
-  path: /observability/grafana/grafana-dashboard-network-observability.configmap.yaml
-  variables:
-    ref: main
 ## Cloudwatch exporters
 - provider: resource-template
   type: jinja2
@@ -139,20 +108,6 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /observability/domain-exporter/domain-exporter-config.secret.yaml
-## Grafana
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /observability/grafana/grafana-config.secret.yaml
-  variables:
-    auto_assign_org_role: Editor
-    external_url: https://grafana.stage.ext.devshift.net
-- provider: vault-secret
-  name: grafana-proxy-config
-  path: app-interface/app-sre/app-sre-observability-stage/grafana/grafana-proxy-config-ext
-  version: 1
-- provider: vault-secret
-  path: app-interface/app-sre/app-sre-observability-stage/grafana/grafana-proxy-config-openshift
-  version: 2
 ## Pushgateway
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-stage/pushgateway
@@ -267,13 +222,6 @@ externalResources:
     - AmazonRoute53ReadOnlyAccess
     - AmazonEC2ReadOnlyAccess
     output_resource_name: aws-resource-exporter-app-sre
-  ## Grafana temporary database
-  - provider: rds
-    identifier: grafana-stage
-    defaults: /terraform/resources/grafana/rds-stage-1.yml
-    output_resource_name: grafana-db
-    overrides:
-      snapshot_identifier: grafana-stage-20220217
   - provider: aws-iam-service-account
     identifier: aws-resource-exporter-cluster-scraper-stage-01
     output_resource_name: aws-resource-exporter-cluster-scraper-app-sre
