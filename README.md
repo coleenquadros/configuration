@@ -501,66 +501,6 @@ The supported fields in the container-image-mirror specification are:
 * `tagsExclude` (optional): list of tags to exclude from the mirroring. Regular
   expressions are supported.
 
-### Create a Sentry Project for an onboarded App (`/app-sre/app-1.yml`)
-
-The structure of this parameter is the following:
-
-```yaml
-sentryProjects:
-- team:
-    $ref: <sentry team datafile (`/dependencies/sentry-team-1.yml`), for example `/dependencies/sentry/teams/app-sre-stage.yml`>
-  projects:
-  - name: <name of the project>
-    description: <description of the project>
-    email_prefix: <email prefix for emails about the project>
-    platform: <project language>
-    sensitive_fields:
-    -  <sensitive field for the project>
-       ...
-    safe_fields:
-    -  <safe field for the project>
-       ...
-    auto_resolve_age: (optional) <integer hours for auto resolving, default never>
-    allowed_domains:
-    - <allowed domain for the project>
-      ...
-  - ...
-- ...
-```
-
-The name, description, email-prefix, and platform fields are required, whereas the other fields are optional.
-
-In order to add or remove a Sentry project, a MR must be sent to the appropriate App datafile and the project needs to be added to or removed from the projects array.
-
-### Create a Sentry Team (`/dependencies/sentry-team-1.yml`)
-
-Sentry projects are associated to sentry teams, with only the members of the team able to view the issues of the associated projects.
-
-To define a sentry team create a file in /data/dependencies/sentry/teams with a structure like the following:
-
-```yaml
----
-$schema: /dependencies/sentry-team-1.yml
-
-labels:
-  service: app-sre
-
-name: app-sre
-description: App-SRE official sentry-stage team
-instance:
-  $ref: /dependencies/sentry/sentry-stage.yml
-```
-
-The instance is a reference to a sentry instance.  This is the sentry instance where the team will be created.
-
-### Manage Sentry team membership via App-Interface (`/access/role-1.yml`)
-
-Sentry users and team membership can be entirely self-serviced via App-Interface.
-
-In order to get access to Sentry, a user has to have:
-* A `role` that includes a `sentry_teams` section, with one or more references to sentry team file(s).
-    * Example: [dev](/data/teams/ocm/roles/dev.yml) role.
-
 ---
 ### Create a Glitchtip Organization (`/dependencies/glitchtip-organization-1.yml`)
 
@@ -576,11 +516,12 @@ labels:
 name: <name of the organization - lower case max 64 characters>
 description: <description of the organization>
 instance:
-  $ref: /dependencies/glitchtip/glitchtip-stage.yml
+  $ref: /dependencies/glitchtip/glitchtip-production.yml
 
 ```
+Please note that the organization's name must be unique.
 
-### Create a GlitchTip Project for an onboarded App (`/dependencies/glitchtip-project-1.yml`)
+### Create a Glitchtip Project for an onboarded App (`/dependencies/glitchtip-project-1.yml`)
 
 To define your glitchtip project, create a file in `/data/dependencies/glitchtip/projects/` with a structure like the following:
 ```yaml
@@ -590,18 +531,25 @@ app:
   $ref: <app datafile (`/app-sre/app-1.yml`)>
 platform: <project language>
 teams:
-- $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre-stage.yml`>
+- $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre.yml`>
 - ...
 organization:
-  $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example `/dependencies/glitchtip/glitchtip-stage.yml`>
+  $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example `/dependencies/glitchtip/glitchtip-production.yml`>
 
 ```
 
 The name, app, description, platform, teams, and organization fields are required. The name must be unique.
 
+Now that the project is defined, you can add it either to an openshift namespace (`/openshift/namespace-1.yml`) - this is the preferred way - or to an app (`/app-sre/app-1.yml`).
 
+```yaml
+$schema: /openshift/namespace-1.yml
 
-Please note that the organization's name must be unique.
+...
+
+glitchtipProjects:
+- $ref: <glitchtip project datafile (`/dependencies/glitchtip-project-1.yml`), for example `/dependencies/glitchtip/projects/glitchtip-production/app-interface-prod.yml`
+```
 
 
 ### Create a Glitchtip Team (`/dependencies/glitchtip-team-1.yml`)
@@ -627,19 +575,18 @@ Please note that the team name must be unique within an organization.
 
 Glitchtip users and glitchtip team members can be entirely self-serviced via App-Interface.
 
-In order to get access to Glitchtip, a user has to have the following:
-* A publicly-visible GitHub email address; otherwise, `org_username@redhat.com` is being used.
-* A `role` that includes a `glitchtip_roles` and a `glitchtip_teams` sections.
-  ```yaml
-  glitchtip_roles:
-  - organization:
-      $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example `/dependencies/glitchtip/glitchtip-stage.yml`>
-    role: member
+Define or create a `role` that includes a `glitchtip_roles` and a `glitchtip_teams` sections.
 
-  glitchtip_teams:
-  - $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre.yml`>
-  ```
-  E.g.: [app-sre role](data/teams/app-sre/roles/app-sre.yml)
+```yaml
+glitchtip_roles:
+- organization:
+    $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example `/dependencies/glitchtip/glitchtip-production.yml`>
+role: member
+
+glitchtip_teams:
+- $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre.yml`>
+```
+E.g.: [app-sre role](data/teams/app-sre/roles/app-sre.yml)
 
 
 ---
