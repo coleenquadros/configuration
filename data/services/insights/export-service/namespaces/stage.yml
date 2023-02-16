@@ -25,9 +25,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedResourceTypes:
-- ServiceAccount
-
 openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rh-registry-pull
@@ -38,13 +35,6 @@ openshiftResources:
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
-- provider: resource
-  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
-- provider: vault-secret
-  path: insights/secrets/insights-stage/export-service/receptor-psks # TODO: Where are these for exports
-  version: 4
-  annotations:
-    qontract.recycle: "true"
 
 managedExternalResources: true
 
@@ -54,14 +44,13 @@ externalResources:
     $ref: /aws/insights-stage/account.yml
   resources: # TODO: Do we need any other resources for exports?
   - provider: cloudwatch
-    identifier: exports-stage
+    identifier: export-service-stage
     defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
     output_resource_name: cloudwatch
     es_identifier: kibana-elasticsearch
   - provider: rds
-    identifier: exports-stage
-    defaults: /terraform/resources/insights/stage/rds/postgres14-rds-rbac-stage.yml # TODO: Where is this for exports
-    old_parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-rbac-stage.yml
-    parameter_group: /terraform/resources/insights/stage/rds/postgres14-parameter-group-rbac-stage.yml
-    output_resource_name: rbac-db
+    identifier: export-service-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres14-rds-export-service-stage.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres14-parameter-group-export-service-stage.yml
+    output_resource_name: export-service-db
     enhanced_monitoring: true
