@@ -113,9 +113,9 @@ Kafka Service Fleet Manager (all of the replicas or pods) are down.
   - CPU, Network, Memory, IO
       - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=managed-services-stage
       - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=managed-services-production
-- Check Sentry to investigate possible causes of the crash.  
-  - Stage: https://sentry.stage.devshift.net/sentry/managed-services-stage/
-  - Production: https://sentry.devshift.net/sentry/managed-services-prod/
+- Check GlitchTip to investigate possible causes of the crash.
+  - Stage: https://glitchtip.devshift.net/managed-services/issues?project=23
+  - Production: https://glitchtip.devshift.net/managed-services/issues?project=27
 - If necessary, escalate the incident to the corresponding teams.  
   - Check [Escalations](#escalations) section below.
 
@@ -148,9 +148,9 @@ Kafka Service Fleet Manager is not performing normally and is returning an abnor
       - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=managed-services-stage
       - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=managed-services-production
 - If there are container performance issue are identified (e.g.: CPU spike, high Latency etc), increase the number of replicas.
-- Check Sentry to investigate possible causes of the crash.  
-  - Stage: https://sentry.stage.devshift.net/sentry/managed-services-stage/
-  - Production: https://sentry.devshift.net/sentry/managed-services-prod/
+- Check GlitchTip to investigate possible causes of the crash.
+  - Stage: https://glitchtip.devshift.net/managed-services/issues?project=23
+  - Production: https://glitchtip.devshift.net/managed-services/issues?project=27
 - Check Deployments/kas-fleet-manager, check details page to make sure pods are configured and started. Start the pod if none is running (default:6).
 - Check if the Kafka Service Fleet Manager pods are running and verify the logs.
     ```
@@ -238,9 +238,9 @@ kas-fleet-manager-rds
 
 ### Steps
 - Check the Dependencies: OCM Cluster Service panel in the Kas Fleet Manager Metrics dasboard - https://grafana.app-sre.devshift.net/d/z1CmsruDn/kas-fleet-manager-metrics?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-consoleurl=https:%2F%2Fconsole-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
-- Check Sentry to investigate possible causes.
-  - Stage: https://sentry.stage.devshift.net/sentry/managed-services-stage/
-  - Production: https://sentry.devshift.net/sentry/managed-services-prod/
+- Check GlitchTip to investigate possible causes of the crash.
+  - Stage: https://glitchtip.devshift.net/managed-services/issues?project=23
+  - Production: https://glitchtip.devshift.net/managed-services/issues?project=27
 - Check if the Kafka Service Fleet Manager pods are running and verify the logs.
     ```
     #example
@@ -329,9 +329,9 @@ kas-fleet-manager-rds
 
 ### Steps
 
-- Check Sentry to investigate possible causes.
-  - Stage: https://sentry.stage.devshift.net/sentry/managed-services-stage/
-  - Production: https://sentry.devshift.net/sentry/managed-services-prod/
+- Check GlitchTip to investigate possible causes of the crash.
+  - Stage: https://glitchtip.devshift.net/managed-services/issues?project=23
+  - Production: https://glitchtip.devshift.net/managed-services/issues?project=27
 - Check if the Kafka Service Fleet Manager pods are running and verify the logs.
     ```
     #example

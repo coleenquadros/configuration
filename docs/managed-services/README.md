@@ -124,4 +124,4 @@ Every control plane team member will take support responsibility for two weeks. 
 
 The main responsibility of Primary are: 
 1. To shield other team members from unplanned work
-2. To perform daily health-check (action alerts, sentry, CI failures) and to action them whenever possible.
+2. To perform daily health-check (action alerts, GlitchTip, CI failures) and to action them whenever possible.
