@@ -1,4 +1,4 @@
-.PHONY: schemas bundle validate run dev server qr-promote user-validator-promote promote-all
+.PHONY: schemas bundle validate run dev server qr-promote go-qr-promote promote-all
 
 include .env
 
