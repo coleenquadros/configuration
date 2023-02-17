@@ -5,16 +5,22 @@ This SOP documents steps to migrate an S3 bucket from source AWS account to a de
 ## Considerations
 The data transfer from bucket to bucket is a repeatable process. Considering the amount of data to be transfered, it will be meaningful to do an initial sync while the service using the bucket is still running. A differential resync after the service shutdown will be a lot faster.
 
-Also consider data transfer costs. Keeping data transfer within a region reduces cost. Using a Pod on a cluster or an EC2 instance (e.g. ssh bastion.ci.int.devshift.net) is a valid way to achieve that.
+Also consider data transfer costs. Keeping data transfer within a region reduces cost.
+Using a Pod on a cluster, an EC2 instance (e.g. ssh bastion.ci.int.devshift.net) or AWS CloudShell is a valid way to achieve that.
 
 If you are migrating a bucket from one account to another and decide to keep the same bucket name, there is a AWS deletion queue that happens in the background once you remove a bucket. That name is part of this queue and it can take anywhere from a few minutes to a couple of hours for that name to be out of the queue and ready to be reused again.
 
 ## Prerequisites
 In order to copy data from one bucket to the other, the AWS CLI can be used. Since we enforce MFA for account access, make sure to have an MFA device attached to your user.
+Note Yubikey is not supported directly in cli, so another virtual device (Authenticator app) is needed.
 Also make sure your AWS cli setup allows you to get STS session tokens.
 
 * [How to setup MFA for your AWS user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html#enable-virt-mfa-for-iam-user)
 * [How to get a session token](https://docs.aws.amazon.com/cli/latest/reference/sts/get-session-token.html) and [how to setup the ENV vars or a credentials file profile](https://docs.aws.amazon.com/cli/latest/topic/config-vars.html?highlight=aws_session_token#credentials)
+
+For easy login AWS, can use some handy tools like [AWSume](https://awsu.me/).
+
+Or use [AWS CloudShell](https://aws.amazon.com/cloudshell/), it has AWS cli ready to use without any further config.
 
 ## Create New Bucket
 
