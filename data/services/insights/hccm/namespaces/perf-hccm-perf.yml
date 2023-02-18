@@ -1,0 +1,241 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: hccm
+
+name: hccm-perf
+description: Insights hccm-perf on the Perf cluster under clowder / app interface management
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+app:
+  $ref: /services/insights/hccm/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+- $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+- $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- ServiceAccount
+
+sharedResources:
+- $ref: /services/unleash/shared-resources/insights-stage.yml
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+# configmaps
+- provider: resource
+  path: /insights-perf/hccm/koku-app.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-auth.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-debug.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-logging.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-messaging.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-monitoring.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-processor.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-upload.configmap.yaml
+
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/koku-aws
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/koku-gcp
+  version: 5
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/koku-oci
+  version: 6
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/koku-secret
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/hadoop-config
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/presto-catalog-config
+  version: 5
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/hive-db
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/koku-report-emailer-secret
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/sources-psk
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: sns 
+    identifier: cost-stage-rds-notification
+    defaults: /terraform/resources/insights/stage/sns-stage-1.yml
+    subscriptions:
+    - protocol: email
+      endpoint: cost-mgmt@redhat.com
+  - provider: rds
+    identifier: koku-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-cost-management-stage-1.yml
+    overrides:
+      username: "insights"
+      name: "koku"
+    output_resource_name: koku-db
+    enhanced_monitoring: true
+    event_notifications:
+    - destination: cost-stage-rds-notification
+      source_type: db-instance
+      event_categories: 
+        - availability
+        - deletion
+        - failover
+        - maintenance
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-cost-management-stage.yml
+    annotations:
+      clowder/database: "koku"
+    # Replica instance for Gabi.
+  - provider: rds
+    identifier: cost-management-stage-readonly
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-cost-management-stage-1.yml
+    overrides:
+      username: "insights"
+      name: "koku"
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-cost-management-stage.yml
+    replica_source: koku-stage
+    output_resource_name: cost-stage-db-ro
+  - provider: cloudwatch
+    identifier: hccm-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: s3
+    identifier: hccm-stage-s3
+    defaults: /terraform/resources/s3-all-expires-465-days.yml
+    output_resource_name: hccm-s3
+  - provider: aws-iam-service-account
+    identifier: hccm-hcs-s3-read-stage
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::hccm-stage-s3",
+            "arn:aws:s3:::hccm-stage-s3/*"
+          ]
+        }]
+      }
+    output_resource_name: hccm-hcs-stage-s3-read
+  - provider: aws-iam-service-account
+    identifier: hccm-hcs-stage-s3-readonly
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::hccm-stage-s3",
+            "arn:aws:s3:::hccm-stage-s3/*"
+          ]
+        }]
+      }
+    output_resource_name: hccm-hcs-stage-s3-readonly
+  - provider: elasticache # TODO remove after clowder
+    identifier: cost-management-stage-elasticache
+    defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-1.yml
+    output_resource_name: elasticache-redis
+  - provider: elasticache # TODO remove after clowder
+    identifier: cost-management-stage-elasticache-api
+    defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-2.yml
+    output_resource_name: elasticache-redis-api
+  - provider: elasticache
+    identifier: cost-management-redis-clowder
+    defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-3.yml
+    output_resource_name: in-memory-db
+  - provider: s3
+    identifier: hccm-ros-stage-s3
+    defaults: /terraform/resources/s3-all-expires-90-days.yml
+    output_resource_name: hccm-ros-s3
+  - provider: aws-iam-service-account
+    identifier: hccm-ros-stage-s3-readonly
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::hccm-ros-stage-s3",
+            "arn:aws:s3:::hccm-ros-stage-s3/*"
+          ]
+        }]
+      }
+    output_resource_name: hccm-ros-stage-s3-readonly
