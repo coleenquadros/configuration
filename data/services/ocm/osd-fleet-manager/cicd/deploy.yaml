@@ -150,7 +150,7 @@ resourceTemplates:
         hs-sc:
           name_prefix: "hs-sc-"
           # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-          openshift_version: "openshift-v4.12.1"
+          openshift_version: "openshift-v4.12.2"
           multi_az: true
           ccs: true
           compute_machine_type: m5.4xlarge
@@ -163,7 +163,7 @@ resourceTemplates:
         hs-mc:
           name_prefix: "hs-mc-"
           # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-          openshift_version: "openshift-v4.12.1"
+          openshift_version: "openshift-v4.12.2"
           multi_az: true
           ccs: true
           compute_machine_type: m5.4xlarge
@@ -198,6 +198,7 @@ resourceTemplates:
     SECTOR_ASSIGNMENT_POLICY: |-
       rules:
       # the following service clusters go to the first perf sector
+      # "perf" sector is used for 80 HC tests
       - predicate:
           service_cluster_id: ce3phnmfvk4nujsvlceg
         sector: perf
@@ -205,10 +206,12 @@ resourceTemplates:
           service_cluster_id: cfhcdasju93jsui4rs70
         sector: perf
       # the following service cluster goes to the perf2 sector
+      # "perf2" sector is used for OSD FM scaling tests
       - predicate:
           service_cluster_id: cfl443tbp9s50f9squrg
         sector: perf2
       # all other us-east-2 clusters go to the perf3 sector
+      # "perf3" sector is used for testing different flavours (e.g. AMD)
       - predicate:
           region: us-east-2
         sector: perf3
@@ -261,7 +264,7 @@ resourceTemplates:
       - ocm-osdfm-deployed-stage-perf2
     parameters:
       DEPLOYMENT_NAME: perf2
-      DATAPLANE_CLUSTER_SCALING_TYPE: manual
+      DATAPLANE_CLUSTER_SCALING_TYPE: auto
   - name: osd-fleet-manager-stage-perf3
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
@@ -270,6 +273,35 @@ resourceTemplates:
       publish:
       - ocm-osdfm-deployed-stage-perf3
     parameters:
+      CLUSTER_TEMPLATES: |2-
+          # HyperShift Service Cluster
+          hs-sc:
+            name_prefix: "hs-sc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: "openshift-v4.12.2"
+            multi_az: true
+            ccs: true
+            flavour_id: perf-scale-master-m6i-a
+            compute_machine_type: m6a.4xlarge
+            compute_autoscale: false
+            compute_nodes: 3
+            network_type: OVNKubernetes
+            private: false
+
+          # HyperShift Management Cluster
+          hs-mc:
+            name_prefix: "hs-mc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: "openshift-v4.12.2"
+            multi_az: true
+            ccs: true
+            flavour_id: perf-scale-master-m6i-a
+            compute_machine_type: m6a.4xlarge
+            compute_autoscale: true
+            compute_autoscale_min_replicas: 3
+            compute_autoscale_max_replicas: 36
+            network_type: OVNKubernetes
+            private: false
       DEPLOYMENT_NAME: perf3
       DATAPLANE_CLUSTER_SCALING_TYPE: manual
   - name: osd-fleet-manager-stage-main
