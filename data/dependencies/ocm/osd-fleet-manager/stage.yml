@@ -26,164 +26,41 @@ upgradePolicyAllowedWorkloads:
 - service-cluster
 - management-cluster
 upgradePolicyAllowedMutexes:
-- service-cluster
-- management-cluster
+- canary
+- main
 
 inheritVersionData:
 - $ref: /dependencies/ocm/osd-fleet-manager/integration.yml
+# enable once cluster upgrades are unstuck in integration/stage
+#publishVersionData:
+#- $ref: /dependencies/ocm/osd-fleet-manager/production.yml
 sectors:
-# region support for hypershift GA:
-# https://docs.google.com/document/d/1AvSgSOlnHg34IFwxIGQzakNYqoItcbRFe08Qdq0NKJ4/edit#heading=h.lvnw05606r2j
-# - name: af-south-1
-# - name: ap-east-1
-- name: ap-northeast-1
-- name: ap-southeast-2
-- name: eu-central-1
-- name: eu-west-1
-- name: us-east-1
-- name: us-east-2
+- name: canary
+- name: main
   dependencies:
-  - name: us-east-1
-- name: us-west-2
-  dependencies:
-  - name: us-east-2
+  - name: canary
+# cluster upgrades are disabled in perf, perf2 and perf3 sectors
 upgradePolicyDefaults:
-- name: service-cluster
+- name: stage-canary
   matchLabels:
-    ext-hypershift.openshift.io/cluster-type: service-cluster
+    ext-hypershift.openshift.io/cluster-sector: canary
   upgradePolicyTemplate:
     path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
     type: jinja2
     variables:
       schedule: 0 11 * * 1-5
-- name: management-cluster
+      soakDays: 0
+- name: stage-main
   matchLabels:
-    ext-hypershift.openshift.io/cluster-type: management-cluster
+    ext-hypershift.openshift.io/cluster-sector: main
   upgradePolicyTemplate:
     path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
     variables:
       schedule: 0 13 * * 1-5
-upgradePolicyClusters:
-- name: hs-sc-ccb0thlad
-  upgradePolicy:
-    workloads:
-    - service-cluster
-    schedule: 0,15,30,45 * * * *
-    conditions:
-      sector: us-west-2
       soakDays: 0
-      mutexes:
-      - service-cluster
-- name: hs-sc-mdqo7k4rg
-  upgradePolicy:
-    workloads:
-    - service-cluster
-    schedule: 0,15,30,45 * * * *
-    conditions:
-      sector: us-east-2
-      soakDays: 0
-      mutexes:
-      - service-cluster
-- name: hs-mc-8c6cdr68g
-  upgradePolicy:
-    workloads:
-    - management-cluster
-    schedule: 0 13 * * 1-5
-    conditions:
-      sector: us-west-2
-      soakDays: 0
-      mutexes:
-      - management-cluster
-- name: hs-sc-suav09b40
-  upgradePolicy:
-    workloads:
-    - service-cluster
-    schedule: 0 11 * * 1-5
-    conditions:
-      sector: us-west-2
-      soakDays: 0
-      mutexes:
-      - service-cluster
-- name: hs-sc-suav09an0
-  upgradePolicy:
-    workloads:
-    - service-cluster
-    schedule: 0 11 * * 1-5
-    conditions:
-      sector: us-east-1
-      soakDays: 0
-      mutexes:
-      - service-cluster
-- name: hs-mc-jsui4ri90
-  upgradePolicy:
-    workloads:
-    - management-cluster
-    schedule: 0 13 * * 1-5
-    conditions:
-      sector: us-west-2
-      soakDays: 0
-      mutexes:
-      - management-cluster
-- name: hs-mc-jsui4ri9g
-  upgradePolicy:
-    workloads:
-    - management-cluster
-    schedule: 0 13 * * 1-5
-    conditions:
-      sector: us-east-1
-      soakDays: 0
-      mutexes:
-      - management-cluster
-- name: hs-sc-0vfs0cl5g
-  upgradePolicy:
-    workloads:
-    - service-cluster
-    schedule: 0 11 * * 1-5
-    conditions:
-      sector: us-east-2
-      soakDays: 0
-      mutexes:
-      - service-cluster
-- name: hs-mc-0vfs0e6gg
-  upgradePolicy:
-    workloads:
-    - management-cluster
-    schedule: 0 13 * * 1-5
-    conditions:
-      sector: us-east-2
-      soakDays: 0
-      mutexes:
-      - management-cluster
-- name: hs-sc-tc8i8f11g
-  upgradePolicy:
-    workloads:
-    - service-cluster
-    schedule: 0 11 * * 1-5
-    conditions:
-      sector: us-east-2
-      soakDays: 0
-      mutexes:
-      - service-cluster
-- name: hs-mc-hnns8hoq0
-  upgradePolicy:
-    workloads:
-    - management-cluster
-    schedule: 0 13 * * 1-5
-    conditions:
-      sector: us-east-2
-      soakDays: 0
-      mutexes:
-      - management-cluster
-- name: hs-mc-9f5sjvcd0
-  upgradePolicy:
-    workloads:
-    - management-cluster
-    schedule: 0 13 * * 1-5
-    conditions:
-      sector: us-east-2
-      soakDays: 0
-      mutexes:
-      - management-cluster
+
+upgradePolicyClusters: []
+
 recommendedVersions:
 - workload: service-cluster
   channel: candidate

@@ -23,122 +23,51 @@ upgradePolicyAllowedWorkloads:
 - service-cluster
 - management-cluster
 upgradePolicyAllowedMutexes:
-- service-cluster
-- management-cluster
+- red
+- green
+- blue
+
+# enable once cluster upgrades are unstuck in integration/stage
+#inheritVersionData:
+#- $ref: /dependencies/ocm/osd-fleet-manager/stage.yml
 
 sectors:
-# region support for hypershift GA:
-# https://docs.google.com/document/d/1AvSgSOlnHg34IFwxIGQzakNYqoItcbRFe08Qdq0NKJ4/edit#heading=h.lvnw05606r2j
-# - name: af-south-1
-# - name: ap-east-1
-- name: ap-northeast-1
-- name: ap-southeast-2
-- name: eu-central-1
-- name: eu-west-1
-- name: us-east-1
-- name: us-east-2
+- name: red
+- name: green
   dependencies:
-  - name: us-east-1
-- name: us-west-2
+  - name: red
+- name: blue
   dependencies:
-  - name: us-east-2
+  - name: green
 upgradePolicyDefaults:
-- name: service-cluster
+- name: production-red
   matchLabels:
-    ext-hypershift.openshift.io/cluster-type: service-cluster
+    ext-hypershift.openshift.io/cluster-sector: red
   upgradePolicyTemplate:
     path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
     type: jinja2
     variables:
       schedule: 0 11 * * 1-5
-- name: management-cluster
+      soakDays: 0
+- name: production-green
   matchLabels:
-    ext-hypershift.openshift.io/cluster-type: management-cluster
+    ext-hypershift.openshift.io/cluster-sector: green
   upgradePolicyTemplate:
     path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
     variables:
       schedule: 0 13 * * 1-5
-upgradePolicyClusters:
-- name: hs-mc-1sek0vqe0
-  upgradePolicy:
-    workloads:
-    - management-cluster
-    schedule: 0 13 * * 1-5
-    conditions:
-      sector: us-east-1
       soakDays: 0
-      mutexes:
-      - management-cluster
-- name: hs-sc-1sek0vq5g
-  upgradePolicy:
-    workloads:
-    - service-cluster
-    schedule: 0 11 * * 1-5
-    conditions:
-      sector: us-east-1
+- name: production-blue
+  matchLabels:
+    ext-hypershift.openshift.io/cluster-sector: blue
+  upgradePolicyTemplate:
+    path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
+    variables:
+      schedule: 0 15 * * 1-5
       soakDays: 0
-      mutexes:
-      - service-cluster
-- name: hs-sc-qiag65950
-  upgradePolicy:
-    workloads:
-    - service-cluster
-    schedule: 0 11 * * 1-5
-    conditions:
-      sector: eu-west-1
-      soakDays: 0
-      mutexes:
-      - service-cluster
-- name: hs-sc-7788f9bag
-  upgradePolicy:
-    workloads:
-    - service-cluster
-    schedule: 0 11 * * 1-5
-    conditions:
-      sector: us-east-1
-      soakDays: 0
-      mutexes:
-      - service-cluster
-- name: hs-sc-mns7ke2j0
-  upgradePolicy:
-    workloads:
-    - service-cluster
-    schedule: 0 11 * * 1-5
-    conditions:
-      sector: eu-west-1
-      soakDays: 0
-      mutexes:
-      - service-cluster
-- name: hs-mc-3fgn9a3qg
-  upgradePolicy:
-    workloads:
-    - management-cluster
-    schedule: 0 13 * * 1-5
-    conditions:
-      sector: us-east-1
-      soakDays: 0
-      mutexes:
-      - management-cluster
-- name: hs-mc-diqec1lc0
-  upgradePolicy:
-    workloads:
-    - management-cluster
-    schedule: 0 13 * * 1-5
-    conditions:
-      sector: eu-west-1
-      soakDays: 0
-      mutexes:
-      - management-cluster
-- name: hs-mc-ndt0hm8g0
-  upgradePolicy:
-    workloads:
-    - management-cluster
-    schedule: 0 13 * * 1-5
-    conditions:
-      sector: us-east-1
-      soakDays: 0
-      mutexes:
-      - management-cluster
+
+upgradePolicyClusters: []
+
 recommendedVersions:
 - workload: management-cluster
   channel: candidate
