@@ -1,0 +1,402 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-perf/hccm-perf/hccm.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 5m
+  input_series:
+  - series: refresh_backlog{namespace="hccm-perf", pod="celery-worker-pod"}
+    values: 551 551 551 520 20
+  - series: priority_backlog{namespace="hccm-perf", pod="koku-masu-pod"}
+    values: 1001 1001 1001 20 20
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: App-cost-priority-queue-overload-In-hccm
+    exp_alerts:
+  - eval_time: 5m
+    alertname: App-cost-refresh-queue-overload-In-hccm
+    exp_alerts:
+  - eval_time: 10m
+    alertname: App-cost-priority-queue-overload-In-hccm
+    exp_alerts:
+  - eval_time: 10m
+    alertname: App-cost-refresh-queue-overload-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-perf&var-db_instance=cost-management-perf&var-rds_datasource=app-sre-perf-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. Experiencing high refresh queue backlog in perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
+  - eval_time: 20m
+    alertname: App-cost-priority-queue-overload-In-hccm
+    exp_alerts:
+  - eval_time: 20m
+    alertname: App-cost-refresh-queue-overload-In-hccm
+    exp_alerts:
+
+
+- interval: 1m
+  input_series:
+  - series: up{service="koku", namespace="hccm-perf"}
+    values:  1 1 1 0 0 0 0 0 0 0
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: App-koku-api-In-hccm-Absent
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+        namespace: hccm-perf
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. At least one API pod has been down for 5 minutes in the perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-koku-api-In-hccm-Absent.rst"
+
+  - eval_time: 10m
+    alertname: App-koku-api-In-hccm-Absent
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+        namespace: hccm-perf
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. At least one API pod has been down for 5 minutes in the perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-koku-api-In-hccm-Absent.rst"
+
+  - eval_time: 15m
+    alertname: App-koku-api-In-hccm-Absent
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+        namespace: hccm-perf
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. At least one API pod has been down for 5 minutes in the perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-koku-api-In-hccm-Absent.rst"
+
+
+- interval: 1m
+  input_series:
+  - series: api_3scale_gateway_api_status{status="5xx",exported_service="cost-management"}
+    values:  10 7 8 0 0 0 0 0 0 0 13 12 11 0 0 0 0 0 0 0 9 8 6 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0
+
+  alert_rule_test:
+  - eval_time: 30m
+    alertname: App-koku-5xx-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcs02ue1-prometheus&var-label=cost-management"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. 5xx responses observed; error rate > 10% for 5 minutes in perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-koku-5xx-In-hccm.rst"
+
+
+- interval: 1m
+  input_series:
+  - series: celery_errors_total{namespace="hccm-perf"}
+    values:  0 0 0 0 0 0 1 1 1 1 1 1 1 1
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: Celery-errors-In-hccm
+    exp_alerts:
+
+  - eval_time: 10m
+    alertname: Celery-errors-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+        namespace: hccm-perf
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-perf&var-db_instance=cost-management-perf&var-rds_datasource=app-sre-perf-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. Celery errors observed in the last 5 minutes in perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/Celery-errors-In-hccm.rst"
+
+
+- interval: 1h
+  input_series:
+  - series: hccm_count_stale_providers{namespace="hccm-perf"}
+    values: 0 3 4
+
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: App-cost-stale-sources-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-perf&var-db_instance=cost-management-perf&var-rds_datasource=app-sre-perf-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. Stale sources observed in the last hour in perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-stale-sources-In-hccm.rst"
+
+
+- interval: 1h
+  input_series:
+  - series: hccm_count_invalid_sources{namespace="hccm-perf"}
+    values: 0 3 4
+
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: App-cost-invalid-sources-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-perf&var-db_instance=cost-management-perf&var-rds_datasource=app-sre-perf-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. Invalid sources observed in the last hour in perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-invalid-sources-In-hccm.rst"
+
+
+- interval: 1h
+  input_series:
+  - series: hccm_count_incomplete_manifests{namespace="hccm-perf"}
+    values: 0 3 4
+
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: App-cost-incomplete-manifests-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-perf&var-db_instance=cost-management-perf&var-rds_datasource=app-sre-perf-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. Incomplete manifests observed in the last hour in perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-incomplete-manifests-In-hccm.rst"
+
+
+- interval: 1m
+  input_series:
+  - series: presto_heartbeatdetector_activecount{namespace="hccm-perf"}
+    values:  4 4 4 4 4 1 1 1 1 1 1 1 1 1
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: App-cost-changed-presto-heartbeats-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+        namespace: hccm-perf
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/6WhuBODGk/cost-management-presto?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-perf"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. Change in number of active presto worker heartbeats observed in perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-changed-presto-heartbeats-In-hccm.rst"
+
+  - eval_time: 10m
+    alertname: App-cost-changed-presto-heartbeats-In-hccm
+    exp_alerts:
+
+
+- interval: 1m
+  input_series:
+  - series: presto_execution_querymanager_insufficientresourcesfailures_totalcount_total{namespace="hccm-perf"}
+    values:  4 4 4 4 4 1 1 1 1 1 1 1 1 1
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: App-cost-presto-insufficent-resources-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+        namespace: hccm-perf
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/6WhuBODGk/cost-management-presto?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-perf"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. Presto queries have insufficient resources in perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-presto-insufficent-resources-In-hccm.rst"
+
+  - eval_time: 10m
+    alertname: App-cost-presto-insufficent-resources-In-hccm
+    exp_alerts:
+
+
+- interval: 30m
+  input_series:
+  - series: kube_pod_container_status_restarts_total{namespace="hccm-perf"}
+    values:  0 5 10 15 20 25 30
+
+  alert_rule_test:
+  - eval_time: 3h
+    alertname: App-cost-pod-restarts-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Insights Cost Management Alert. Pod restarts occurring more than 5x/1h for the last 30 minutes in perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-pod-restarts-In-hccm.rst"
+
+  - eval_time: 4h
+    alertname: App-cost-pod-restarts-In-hccm
+    exp_alerts:
+
+
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="platform.upload.announce", group="hccm-group"}
+    values: '10005+0x60 0'
+
+  alert_rule_test:
+  - eval_time: 59m
+    alertname: App-cost-upload-lag-In-hccm
+    exp_alerts:
+  - eval_time: 60m
+    alertname: App-cost-upload-lag-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+        group: hccm-group
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/8wCTC5Tmz/strimzi-kafka?orgId=1&var-namespace=platform-mq-perf&var-strimzi_cluster_name=platform-mq&var-kafka_broker=All&var-kafka_topic=platform.upload.announce&var-kafka_partition=All&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Kafka lag for cost management uploads in hccm topic exceeded 10000 in perf environment for 1 hour."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-upload-lag-In-hccm.rst"
+
+  - eval_time: 61m
+    alertname: App-cost-upload-lag-In-hccm
+    exp_alerts:
+
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{group="hccm-group",topic="platform.upload.announce"}
+    values: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 0
+
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: App-cost-upload-lag-In-hccm
+    exp_alerts:
+  - eval_time: 11m
+    alertname: App-cost-upload-lag-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+        group: hccm-group
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/8wCTC5Tmz/strimzi-kafka?orgId=1&var-namespace=platform-mq-perf&var-strimzi_cluster_name=platform-mq&var-kafka_broker=All&var-kafka_topic=platform.upload.announce&var-kafka_partition=All&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Kafka lag for cost management uploads has not decreased in perf environment for 10 minutes."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-upload-lag-In-hccm.rst"
+  - eval_time: 29m
+    alertname: App-cost-upload-lag-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+        group: hccm-group
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/8wCTC5Tmz/strimzi-kafka?orgId=1&var-namespace=platform-mq-perf&var-strimzi_cluster_name=platform-mq&var-kafka_broker=All&var-kafka_topic=platform.upload.announce&var-kafka_partition=All&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Kafka lag for cost management uploads has not decreased in perf environment for 10 minutes."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-upload-lag-In-hccm.rst"
+  - eval_time: 30m
+    alertname: App-cost-upload-lag-In-hccm
+    exp_alerts:
+
+
+- interval: 5m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="platform.sources.event-stream", group="hccm-sources"}
+    values: 805 805 805 820 805 805 20
+
+  alert_rule_test:
+  - eval_time: 20m
+    alertname: App-cost-sources-lag-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+        group: hccm-sources
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/8wCTC5Tmz/strimzi-kafka?orgId=1&var-namespace=platform-mq-perf&var-strimzi_cluster_name=platform-mq&var-kafka_broker=All&var-kafka_topic=platform.sources.event-stream&var-kafka_partition=All&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/deployments"
+        message: "Kafka lag for cost management sources in hccm-sources group exceeded 800 in perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-sources-lag-In-hccm.rst"
+
+  - eval_time: 30m
+    alertname: App-cost-sources-lag-In-hccm
+    exp_alerts:
+
+
+- interval: 1h
+  input_series:
+  - series: kube_job_status_failed{namespace="hccm-perf"}
+    values: 0 3 4
+
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: App-job-failures-In-hccm
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: insights
+        env: perf
+        app_team: costmanagement-staging
+      exp_annotations:
+        dashboard: "https://grafana.perf.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-perf&var-db_instance=cost-management-perf&var-rds_datasource=app-sre-perf-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-perf/jobs"
+        message: "Cost management job failures occuring in perf environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-job-failures-In-hccm.rst"
+
