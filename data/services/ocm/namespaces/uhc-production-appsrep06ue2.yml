@@ -1,0 +1,61 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: uhc-production
+description: production namespace for uhc in us-east-2
+
+cluster:
+  $ref: /openshift/appsrep06ue2/cluster.yml
+
+app:
+  $ref: /services/ocm/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsrep06ue2.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+    - provider: rds
+      identifier: uhc-acct-mngr-production-readonly-ue2
+      availability_zone: us-east-2a
+      defaults: /terraform/resources/app-sre/production/rds-1-readonly-us-east-2.yml
+      output_resource_name: uhc-acct-mngr-rds-readonly
+      replica_source: uhc-acct-mngr-production
+      overrides:
+        apply_immediately: true
+        engine_version: '12.11'
+        kms_key_id: uhc-acct-mngr-production-readonly-rds
+        timeouts:
+          create: 90m
+    - provider: rds
+      identifier: uhc-clusters-service-production-readonly-ue2
+      availability_zone: us-east-2b
+      defaults: /terraform/resources/app-sre/production/rds-1-readonly-us-east-2.yml
+      output_resource_name: uhc-clusters-service-rds-readonly
+      replica_source: clusters-service-production
+      overrides:
+        apply_immediately: true
+        engine_version: '12.11'
+        kms_key_id: uhc-clusters-service-production-readonly-rds
+        timeouts:
+          create: 90m
+    - provider: kms
+      identifier: uhc-acct-mngr-production-readonly-rds
+      region: us-east-2
+      defaults: /terraform/resources/ocm/kms-1.yml
+      output_resource_name: uhc-acct-mngr-production-readonly-rds
+    - provider: kms
+      identifier: uhc-clusters-service-production-readonly-rds
+      region: us-east-2
+      defaults: /terraform/resources/ocm/kms-1.yml
+      output_resource_name: uhc-clusters-service-production-readonly-rds
