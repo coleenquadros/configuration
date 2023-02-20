@@ -152,3 +152,26 @@ tests:
           service: insights
           env: prod
           app_team: rhsm
+
+  # TalliesWillMissWindow
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic='platform.rhsm-subscriptions.tasks'}
+    values: "0+10000x15 25000+10000x20"
+  alert_rule_test:
+  - eval_time: 15m
+    alertname: RhsmLatency
+    exp_alerts: [ ]
+  - eval_time: 35m
+    alertname: TalliesWillMissWindow
+    exp_alerts:
+    - exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: rhsm
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+        message: "tally predicted to not finish processing in a timely matter"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/TalliesWillMissWindow.md'
