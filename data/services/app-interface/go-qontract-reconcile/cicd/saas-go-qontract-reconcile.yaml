@@ -51,3 +51,25 @@ resourceTemplates:
     parameters:
       INTEGRATION_NAME: account-notifier
       DRY_RUN: false
+- name: git-partition-sync-producer
+  url: https://github.com/app-sre/go-qontract-reconcile
+  path: /openshift/deployment-git-partition-sync-producer.yml
+  targets:
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-stage-int.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-go-qontract-reconcile-gh-build-main
+    parameters:
+      INTEGRATION_NAME: git-partition-sync-producer
+      DRY_RUN: true
+      PRODUCER_GITLAB_SECRET: testing-go-git-partition-sync-producer
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-production-int.yml
+    ref: 823e1382bce5bd3df5c007d7918d8fe2d90b9946
+    parameters:
+      INTEGRATION_NAME: git-partition-sync-producer
+      DRY_RUN: true
+      PRODUCER_GITLAB_SECRET: testing-go-git-partition-sync-producer
