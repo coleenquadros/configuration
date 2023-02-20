@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cloudwatch-exporter-config
+  name: cloudwatch-exporter-config{{ '-' + region if region is defined else '' }}
   annotations:
     qontract.recycle: "true"
 data:
   config.yml: |
     ---
-    region: us-east-1
+    region: {{ region | default('us-east-1') }}
     metrics:
     # AWS RDS Metrics
     - aws_namespace: AWS/RDS
@@ -30,6 +30,11 @@ data:
       aws_metric_name: FreeStorageSpace
       aws_dimensions: [DBInstanceIdentifier]
       aws_statistics: [Average, Sum]
+      delay_seconds: {{ rds_delay_seconds | default('600') }}
+    - aws_namespace: AWS/RDS
+      aws_metric_name: ReplicaLag
+      aws_dimensions: [DBInstanceIdentifier]
+      aws_statistics: [Average, Maximum]
       delay_seconds: {{ rds_delay_seconds | default('600') }}
     # - aws_namespace: AWS/RDS
     #   aws_metric_name: NetworkReceiveThroughput
