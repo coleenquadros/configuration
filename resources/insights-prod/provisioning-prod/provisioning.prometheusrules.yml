@@ -6,19 +6,19 @@ metadata:
   labels:
     prometheus: app-sre
     role: alert-rules
-  name: provisioning-stage
+  name: provisioning-prod
 spec:
   groups:
   - name: provisioning-component-missing
     rules:
       - alert: ProviosioningComponentAbsent
         expr: | 
-          absent(up{service="provisioning",namespace="provisioning-stage"} == 1)
+          absent(up{service="provisioning",namespace="provisioning-prod"} == 1)
         labels:
           service: insights
           severity: medium
         annotations:
-          message: "There is no pod serving provisioning application in the provisioning-stage namespace"
+          message: "There is no pod serving provisioning application in the provisioning-prod namespace"
    
   - name: http-latency
     rules:
@@ -46,7 +46,7 @@ spec:
         annotations:
           message: "source availability requests response time over 5 seconds per hour"
 
-  - name: provisioning-latency-stage
+  - name: provisioning-latency-prod
     rules:
       - alert: ProvisioningLatency5mto1hrOr30mto6hBudgetBurn
         annotations:
@@ -157,7 +157,7 @@ spec:
           latency: "200"
         record: latencytarget:provisioning_http_request_duration_ms:rate3d
   
-  - name: provisioning-availability-stage
+  - name: provisioning-availability-prod
     rules:
       - alert: Provisioning5mto1hErrorBudgetBurn
         annotations:
@@ -260,7 +260,7 @@ spec:
           severity: medium
         record: provisioning_http_request_total:burnrate6h
   
-  - name: source-availability-checks-latency-stage
+  - name: source-availability-checks-latency-prod
     rules:
       - alert: ProvisioningSourceAvailabilityLatency5mto1hrOr30mto6hBudgetBurn
         annotations:
@@ -368,5 +368,5 @@ spec:
           )
         labels:
           service: insights
-          latency: "5"
+          latency: "5000"
         record: latencytarget:provisioning_source_availability_check_request_duration_ms:rate3d
