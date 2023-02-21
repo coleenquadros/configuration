@@ -1,0 +1,62 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-event-router
+description: saas-event-router
+
+app:
+  $ref: /services/observability/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- ServiceAccount
+- ClusterRole
+- ClusterRoleBinding
+- ConfigMap
+- Deployment
+
+imagePatterns:
+- quay.io/app-sre
+- quay.io/openshift
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: event-router
+  path: /openshift/even-router.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  targets:
+  - namespace:
+      $ref: /openshift/app-sre-prod-01/namespaces/app-sre-event-router.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/app-sre-prod-04/namespaces/app-sre-event-router.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/app-sre-stage-01/namespaces/app-sre-event-router.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/appsrep05ue1/namespaces/app-sre-event-router.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/appsrep06ue2/namespaces/app-sre-event-router.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/appsres03ue1/namespaces/app-sre-event-router.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/appsres04ue2/namespaces/app-sre-event-router.yml
+    ref: master    
