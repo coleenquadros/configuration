@@ -1,0 +1,61 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: osd-operators
+
+name: saas-hs-dataplane-metrics-forwarder # saas-hypershift-dataplane-metrics-forwarder
+description: SaaS tracking file for hypershift-dataplane-metrics-forwarder
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+pipelinesProvider:
+  $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns:
+- quay.io/app-sre/hypershift-dataplane-metrics-forwarder-package
+
+resourceTemplates:
+- name: hypershift-dataplane-metrics-forwarder
+  url: https://github.com/openshift/hypershift-dataplane-metrics-forwarder
+  parameters:
+    REGISTRY_IMG: quay.io/app-sre/hypershift-dataplane-metrics-forwarder-package
+  path: /hack/templates/00-hypershift-dataplane-metrics-forwarder.SelectorSyncSet.yaml.tmpl
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hivei01ue1/cluster-scope.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-hypershift-dataplane-metrics-forwarder-gh-build-main
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-hypershift-dataplane-metrics-forwarder-gh-build-main
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-hypershift-dataplane-metrics-forwarder-gh-build-main
+  - namespace:
+      $ref: /services/osd-operators/namespaces/ssotest01ue1/cluster-scope.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-hypershift-dataplane-metrics-forwarder-gh-build-main
