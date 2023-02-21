@@ -1,0 +1,22 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/timeout: 1h
+    haproxy.router.openshift.io/timeout-tunnel: 2h
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-devshiftnet-dns
+  labels:
+    app: backplane-api
+  name: api
+spec:
+  host: api.integration.backplane.devshift.net
+  port:
+    targetPort: 8001
+  to:
+    kind: Service
+    name: api-integration-backplane-devshift-net
+    weight: 100
+  tls:
+    termination: reencrypt
+  wildcardPolicy: None
