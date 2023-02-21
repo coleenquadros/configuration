@@ -148,3 +148,29 @@ the staging namespace.
 If that went well, the successful acceptance test is promoted to the `github-mirror-stage-post-deploy-tests-success-channel`
 channel, which is picked up by the production target ([see](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/github-mirror/cicd/deploy.yaml#L56-58))
 because the autopromotion resulted in an updated `ref` ([see](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/github-mirror/cicd/deploy.yaml#L54)).
+
+## A new SaaS file is created
+
+```yaml
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: app-interface-test-service
+name: saas-deploy-app-interface-test-service
+resourceTemplates:
+- name: deploy-app-interface-test-service
+  url: https://gitlab.cee.redhat.com/app-sre/app-interface-test-service
+  path: /openshift/template.yml
+  targets:
+  - namespace:
+      $ref: /services/app-interface-test-service/namespaces/app-interface-test-service-stage.yml
+    ref: main
+    promotion:
+      publish:
+      - app-interface-test-service-stage-deploy-success-channel
+```
+
+The configuration changed, i.e., the integration `openshift-saas-deploy-trigger-configs` will trigger a tekton pipeline to
+deploy the commit that is currently being referenced by `main`.
+
+The tekton pipeline will use the `openshift-saas-deploy` integration to deploy the openshift templates referenced in the saas file.
