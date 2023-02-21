@@ -29,13 +29,17 @@ filter kubernetes.event.metadata.namespace = "app-interface-production"
 
 ### Aggregation of event reason per namepsace
 
+```
 filter kubernetes.event.metadata.namespace = "app-interface-production"
 | stats count() by kubernetes.event.reason
 | sort @timestamp desc 
+```
 
 ### Failed scheduling in a namespace
 
+```
 filter kubernetes.event.metadata.namespace = "app-interface-production"
 |filter kubernetes.event.reason = "FailedScheduling"
 | sort @timestamp desc
 | fields message
+```
