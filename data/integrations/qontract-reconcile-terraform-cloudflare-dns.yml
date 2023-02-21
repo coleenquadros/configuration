@@ -2,14 +2,16 @@ $schema: /app-sre/integration-1.yml
 
 labels: {}
 
-name: terraform-cloudflare-resources
+name: terraform-cloudflare-dns
 
-description: Manage Cloudflare Resources using Terraform
+description: Manage Cloudflare DNS zones and records using Terraform
 
 upstream: https://github.com/app-sre/qontract-reconcile
 
 pr_check:
-  cmd: terraform-cloudflare-resources
+  cmd: terraform-cloudflare-dns
+  early_exit: true
+  check_only_affected_shards: true
 
 managed:
 - namespace:
@@ -17,40 +19,38 @@ managed:
   spec:
     resources:
       requests:
-        memory: 500Mi
+        memory: 200Mi
         cpu: 200m
       limits:
-        memory: 1000Mi
+        memory: 400Mi
         cpu: 400m
     extraArgs: ''
     internalCertificates: true
     logs:
       slack: true
-    shards: 1
+    shardingStrategy: per-cloudflare-zone
 - namespace:
     $ref: /services/app-interface/namespaces/app-interface-production-int.yml
   spec:
     resources:
       requests:
-        memory: 500Mi
+        memory: 300Mi
         cpu: 200m
       limits:
-        memory: 1000Mi
+        memory: 600Mi
         cpu: 400m
     extraArgs: ''
     internalCertificates: true
     logs:
       slack: true
-    shards: 1
+    shardingStrategy: per-cloudflare-zone
+    
 
 schemas:
 - /aws/account-1.yml
-- /aws/ecr-1.yml
 - /app-interface/app-interface-settings-1.yml
 - /app-sre/integration-1.yml
-- /cloudflare/dns-zone-1.yml
 - /cloudflare/account-1.yml
-- /dependencies/dependency-1.yml
-- /dependencies/github-org-1.yml
 - /dependencies/terraform-state-1.yml
 - /openshift/namespace-1.yml
+- /cloudflare/dns-zone-1.yml
