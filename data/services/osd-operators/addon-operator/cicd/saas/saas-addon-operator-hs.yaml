@@ -1,0 +1,72 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: osd-operators
+
+name: saas-ado-hypershift # saas-addon-operator
+description: SaaS tracking file for addon-operator for Hypershift
+
+app:
+  $ref: /services/osd-operators/addon-operator/app.yml
+
+pipelinesProvider:
+  $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: sd-mt-sre-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns:
+- quay.io/app-sre/addon-operator-package
+
+use_channel_in_image_tag: false
+
+resourceTemplates:
+- name: addon-operator
+  url: https://github.com/openshift/addon-operator
+  path: /hack/hypershift/package-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/app-sre/addon-operator-package
+    EXPERIMENTAL_FEATURES: false
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hivei01ue1/cluster-scope.yml
+    ref: main
+    parameters:
+      EXPERIMENTAL_FEATURES: true
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-addon-operator-gh-build-main
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
+    ref: efd3c2742d74ec6e71d9c8ce114525b1fb05f9f7
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
+    ref: efd3c2742d74ec6e71d9c8ce114525b1fb05f9f7
+#  - namespace:
+#      $ref: /services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml
+#    ref: a45b2b8cb15f6e9729a166c6ee98baab40375b5d
+#  - namespace:
+#      $ref: /services/osd-operators/namespaces/hivep02ue1/cluster-scope.yml
+#    ref: a45b2b8cb15f6e9729a166c6ee98baab40375b5d
+#  - namespace:
+#      $ref: /services/osd-operators/namespaces/hivep03uw1/cluster-scope.yml
+#    ref: a45b2b8cb15f6e9729a166c6ee98baab40375b5d
+#  - namespace:
+#      $ref: /services/osd-operators/namespaces/hivep04ew2/cluster-scope.yml
+#    ref: a45b2b8cb15f6e9729a166c6ee98baab40375b5d
+#  - namespace:
+#      $ref: /services/osd-operators/namespaces/hivep05ue1/cluster-scope.yml
+#    ref: a45b2b8cb15f6e9729a166c6ee98baab40375b5d
+#  - namespace:
+#      $ref: /services/osd-operators/namespaces/hivep06uw2/cluster-scope.yml
+#    ref: a45b2b8cb15f6e9729a166c6ee98baab40375b5d
+#  - namespace:
+#      $ref: /services/osd-operators/namespaces/hivep07ue2/cluster-scope.yml
+#    ref: a45b2b8cb15f6e9729a166c6ee98baab40375b5d
