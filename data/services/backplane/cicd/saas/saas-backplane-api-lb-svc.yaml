@@ -1,0 +1,119 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: backplane
+
+name: saas-backplane-api-lb-svc
+description: Incident Management Service - Backplane
+
+app:
+  $ref: /services/backplane/app.yaml
+
+pipelinesProvider:
+  $ref: /services/backplane/pipelines/tekton.backplane-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- StatefulSet
+# we do not deploy those in order to be able to provide the non-self-signed Certificate 
+# - Service
+# - Route
+- ConfigMap
+- ServiceAccount
+- Role
+- RoleBinding
+- CronJob
+# those are created in the other saas-file.
+# Note that the clusterrolebinding binds the SA in the backplane namespace, not in the one we use here
+# - ClusterRole
+# - ClusterRoleBinding
+
+imagePatterns:
+- quay.io/app-sre/backplane-api
+- quay.io/app-sre/backplane-cli
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: backplane-api
+  url: https://gitlab.cee.redhat.com/service/backplane-api
+  path: /hack/backplane-api-template.yml
+  parameters:
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre
+    IMAGE_NAME: backplane-api
+    # SSO_BASE_URL is defined at the environment parameters level
+    JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
+    AUDIT_MAX_BACKUPS: 10
+    AUDIT_MAX_SIZE: 10
+    LOG_LEVEL: 1
+    USE_RH_API: true
+    MONITORING_NAMESPACE: openshift-customer-monitoring
+    CLOUD_CONFIG: |
+      aws:
+        jump-role: arn:aws:iam::${AWS_JUMP_ROLE_ACCOUNT_ID}:role/RH-Technical-Support-Access
+        credentials-dir: /cloud/aws
+        roles:
+        - name: "SREP"
+          sessionPrefix: "RH-SRE"
+        - name: "CEE"
+          managedPolicies:
+            - "arn:aws:iam::aws:policy/job-function/SupportUser"
+          sessionPrefix: "RH-CEE"
+        - name: "CSSRE"
+          managedPolicies:
+            - "arn:aws:iam::aws:policy/job-function/SupportUser"
+            - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+            - "arn:aws:iam::aws:policy/AmazonElastiCacheFullAccess"
+          sessionPrefix: "RH-CSSRE"
+        - name: "LPSRE"
+          managedPolicies:
+            - "arn:aws:iam::aws:policy/job-function/SupportUser"
+            - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+            - "arn:aws:iam::aws:policy/AmazonElastiCacheFullAccess"
+          sessionPrefix: "RH-LPSRE"
+    ACL_CONFIG: |
+      - claim: email
+        pattern: ^.*@redhat\.com$
+    JWKS_CONFIG: |
+      {
+        "keys": [
+          {
+            "kid": "-4elc_VdN_WsOUYf2G4Qxr8GcwIx_KtXUCitatLKlLw",
+            "kty": "RSA",
+            "alg": "RS256",
+            "use": "sig",
+            "n": "5MvhbE1Mxr2FUYGZiH0z6p-kV-FIUHp4ErxkD6S8Sc5OB7IjRKDSsJzmuwR803cKpeKoIkkUTiznYwCBqAUdP3bIZ8k97X6GX19dOSqL4ej1rjYZYAf9_Jt_Z-0PzIjX50z6TpqeGoh7-6P-634SvbdjatnhTAQ3qsBXfPOHPIPRAZkGfmlM1EdvIlm_d2hQ7nDSETbVC4YHY-iESvUhre-aNmqJU_E6fRnGwFTPS20fPLE5bUNbshvTXn5c-bxtWK9bSCHCRVYUF9QWwDoFX9gGOIpSScHAKQLRR16yOQjOioZ2FeVZnDpWNvZelbQ7LtLN0H5uCJsqDoZDDhDWeFp-25O9ih5M9auT_2IepUlOq3OBMj7i3CJXrvjNQiuGkPHp9xN6kd5H4E5hcqUTmfYdgf1IuXP0cTwYtQor21dWBSpFvxW8l1HGLOaO_rSetNRJ-tZ7FKUK5L6crt1N72AGIay96gNOWNe4POOG_ML1r4h3SKBFdMPwJ-R5KDg7-oRcUT4kLuFtWuQG7bKLJhIxw_SnVFajLGt1d3-OCqX6ozuUbdEW31f9iLZd4w-NUSSHjxP1Uvalk5QfUro9w9fTW73jRIUASnbHunopjt_IkiQswrdIwpfpeBokcf9O757_i0kctQ5M1gyPf4-0yPfuDVkeBAHygoxNJU9H3C0",
+            "e": "AQAB"
+          },
+          {
+            "kid": "v5MpUEnwk1VYIqifv9G9xmIB2ZLzPttk-0PaEURQQ3I",
+            "kty": "RSA",
+            "alg": "RS256",
+            "use": "sig",
+            "n": "uYp35gi5YzQeNN5aQOPwLranSJT9aJB-w6Ih4Wn9R6FzEg1OEKwBNNpb-z18reAyhxQMy_bCz3q-J7viX6p5hbclPBakKOjPB4lDzwhvfE1G4vp84zH1bR7m8dd4OXbriojVZ51IPNuItO00nrDrx6PWNP_5ufBUwjJo8-BD-sWm7BP_CVlb8miVh8itpcLJrszpHzF-u0OPqwI_e3P83cYOsXoQRxD4wpo718yqYh4J3NNJQYnyprJMpC3w3QQ5PR28TbBfSHgvtWD1SBuavHh2jwT_6Pi8FqOS1vfX7QA1pxyYZ-zazVxj_zOrCeP3FHyaxTPmn0d5zsXBZCCyhsfCaStnFePTPk-KEGwZAlv43JJjV2rTJc1Lsj1Th7Jq63TvwIGBcFFAtC72N5-jwRjUoeyu_nwO_1r1awvbfrlBF31PG5wxUdVR56PesLO7EVH1_2KrVN7dtgaQkomVk6rULBbCbwhfR1oT3cOxF7d0ajpbzHd2qcfeBzFTABL8dzBp4FcZx5QyYSIOP8fuwSO8zy4rxmBw7HpHGOGFrC3cXWqB33M23IjOpVZbfK46QvJhcGq9QEtOlRO2WVemMcwDSgpceAa7e3ZJx-LO6XyTEjRtTuHMwdLxII3YUlL1hPozrNE1U_ADPGHgnTxGswgBpGOA6rOkWav5uhcj9Cs",
+            "e": "AQAB"
+          }
+        ]
+      }
+            
+  targets:
+  - namespace:
+      $ref: /services/backplane/namespaces/backplane-lb-svc-int-hivei01ue1.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-backplane-api-gl-build-master
+    parameters:
+      AWS_JUMP_ROLE_ACCOUNT_ID: "896164604406"
+      ENABLE_TEST_SCRIPT_API: "true"
+      TLS_SECRET_NAME: public-cert
