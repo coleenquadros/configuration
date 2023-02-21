@@ -151,4 +151,3 @@ From the findings in APPSRE-1564, we don't have any proof that this issue could 
 * Background information: APPSRE-1564
 * [Configuration info for Ingress Operator](https://docs.openshift.com/container-platform/4.9/networking/ingress-operator.html#nw-ingress-controller-configuration-parameters_configuring-ingress) including `tlsInspectDelay`
 * [HAProxy docs](https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#4-tcp-request%20inspect-delay) for `inspect-delay`
-
