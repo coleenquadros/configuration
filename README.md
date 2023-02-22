@@ -1097,9 +1097,10 @@ The TOTP engine cannot be interacted with via the Vault UI. The Vault CLI or API
   vault read totp/<my-team>/code/<some-provider>
   ```
 
-### Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform
-
-DNS Zones can be managed in app-interface. A DNS zone follows [this
+### Manage DNS Zones via App-Interface (`/*/dns-zone-1.yml`) using Terraform
+We currently support Route53 DNS zones and Cloudflare DNS zones.
+#### Route53 DNS Zones
+ A Route53 DNS zone follows [this
 JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/dependencies/dns-zone-1.yml).
 
 - `name`: A name for the DNS zone
@@ -1221,6 +1222,74 @@ records:
   - ns-1265.awsdns-30.org
   - ns-1880.awsdns-43.co.uk
 ```
+#### Cloudflare DNS Zones
+ A Cloudflare DNS zone follows [this
+JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/cloudflare/dns-zone-1.yml).
+
+- `identifier`: A globally unique name for the zone.
+- `zone`: Actual domain name.
+- `plan`: The name of the commercial plan to apply to the zone. Available values: free or enterprise.
+- `account`: Cloudflare account this zone belong to.
+- `type`: Available values: full, partial. This field should always be full. Full zone implies that DNS is hosted with Cloudflare. A partial zone is typically a partner-hosted zone or a CNAME setup.
+- `records`: A list of `record`. All parameters of the `record` match those of Terraform's [cloudflare_record](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/record) with an additional required parameter `identifier` that servers as a unique (within zone) identification for each record. The number of total records within a zone is limited to 1000, see Performance section below. 
+
+Example DNS zone resource:
+```yaml
+---
+$schema: /cloudflare/dns-zone-1.yml
+
+labels: {}
+
+identifier: devshift
+
+zone: devshift.net
+
+type: full
+
+account:
+ $ref: /cloudflare/app-sre/account.yml
+
+records:
+# Simple CNAME record visualai.devshift.net
+  - name: visualai
+    identifier: visualai
+    type: CNAME
+    ttl: 300
+    value: visual-app-interface.devshift.net
+    proxied: true # All requests intended for proxied hostnames will go to Cloudflare first and then be forwarded to your origin server. This only applies to A, AAAA or CNAME records
+
+# Simple TXT record
+  - name: devshift_txt
+    identifier: devshift_txt
+    type: TXT
+    ttl: 300
+    value: printer=lpr5
+
+# Simple MX record
+  - name: devshift_mx
+    identifier: devshift_mx1
+    type: MX 
+    ttl: 300
+    value: mailhost1.example.com
+    priority: 1
+
+# NS records with multiple values
+  - name: devshift_ns
+    identifier: devshift_ns1
+    type: NS 
+    ttl: 300
+    value: ns.example.com
+    priority: 1
+  - name: devshift_ns
+    identifier: devshift_ns3
+    type: NS 
+    ttl: 300
+    value: ns3.example.com
+    priority: 3
+```
+
+##### Performance
+MR checks and reconciliation times will grow roughly linearly with zone size. We tested creating a zone with 1000 records took around 5 minutes.
 
 ### Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)
 
