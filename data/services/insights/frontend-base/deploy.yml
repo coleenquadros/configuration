@@ -59,6 +59,8 @@ deployResources:
     memory: 1500Mi
 
 resourceTemplates:
+
+# Deploys Chrome
 - name: insights-chrome
   path: /frontend.yml
   url: https://github.com/RedHatInsights/insights-chrome
@@ -70,13 +72,56 @@ resourceTemplates:
       ENV_NAME: "env-perf"
       IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
       SSO_URL: 'https://sso.stage.redhat.com/auth/'
+  # Stage Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
+    ref: master
+    parameters:
+      ENV_NAME: "env-stage"
+      IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
+      SSO_URL: 'https://sso.stage.redhat.com/auth/'
 
+# Landing page
+- name: landing-page-frontend
+  path: /frontend.yml
+  url: https://github.com/RedHatInsights/landing-page-frontend
+  targets:
+  # Stage Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
+    ref: master
+    parameters:
+      ENV_NAME: "env-stage"
+      IMAGE: "quay.io/cloudservices/landing-page-frontend"
+
+# Dashboard
+- name: insights-dashboard
+  path: /frontend.yml
+  url: https://github.com/RedHatInsights/insights-dashboard
+  targets:
+  # Stage Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
+    ref: master
+    parameters:
+      ENV_NAME: "env-stage"
+      IMAGE: "quay.io/cloudservices/insights-dashboard-frontend"
+
+# Deploys the FrontendEnvironment resources from gitlab
 - name: frontend-env
   path: /env.yml
   url: https://gitlab.cee.redhat.com/insights-platform/frontend-environments
   targets:
+  # This is the "fetest" stage testing environment that will be removed after rollout
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+    ref: main
+    parameters:
+      ENV_NAME: env-stage
+      SSO_SOURCE: 'https://sso.stage.redhat.com/auth/'
+  # This is the primary frontend stage environment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
     ref: main
     parameters:
       ENV_NAME: env-stage
@@ -86,11 +131,13 @@ resourceTemplates:
   path: /deploy/deploy.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/frontend-configs
   targets:
+  # "fetest" this can be removed in future
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
     ref: main
     parameters:
       ENV_NAME: env-stage
+  # ephemeral for bonfire
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -104,8 +151,17 @@ resourceTemplates:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
+  # "fetest" stage deployment. Will be removed in future.
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
     ref: 9454d7d34627d46b1783eda5ad0752a654303774
     parameters:
       ENV_NAME: "env-stage"
+  # Stage Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
+    ref: master
+    parameters:
+      ENV_NAME: "env-stage"
+      IMAGE: "quay.io/cloudservices/api-frontend"
+
