@@ -72,16 +72,16 @@ config:
         # This is a temporary workaround to prevent changes to the hack directory from running MR checks
         pr_check_script_path: |
             if ! git diff --quiet origin/master HEAD -- ./hack/; then
-              echo "Checking permission for user: ${gitlabMergedByUser} ..."
+              echo "Checking permission for user: ${{gitlabMergedByUser}} ..."
               GITLAB_API_URL=https://gitlab.cee.redhat.com/api/v4
-              USER_ID=$(curl -s --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" ${GITLAB_API_URL}/users?username="${gitlabMergedByUser}" | jq '.[0].id')
+              USER_ID=$(curl -s --header "PRIVATE-TOKEN: ${{GITLAB_API_TOKEN}}" ${{GITLAB_API_URL}}/users?username="${{gitlabMergedByUser}}" | jq '.[0].id')
               if [ "$USER_ID" == "null" ]; then
-                echo "User ${gitlabMergedByUser} not found!"
+                echo "User ${{gitlabMergedByUser}} not found!"
                 exit 2
               fi
 
-              echo "Checking if user ${gitlabMergedByUser} (${USER_ID}) is a member of app-sre ..."
-              STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" ${GITLAB_API_URL}/groups/app-sre/members/"${USER_ID}")
+              echo "Checking if user ${{gitlabMergedByUser}} (${{USER_ID}}) is a member of app-sre ..."
+              STATUS_CODE=$(curl -s -o /dev/null -w "%{{http_code}}" --header "PRIVATE-TOKEN: ${{GITLAB_API_TOKEN}}" ${{GITLAB_API_URL}}/groups/app-sre/members/"${{USER_ID}}")
               if [ "$STATUS_CODE" == "200" ]; then
                 echo "Found authorized hack/ folder change, MR will run."
               else
