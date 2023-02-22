@@ -1289,7 +1289,7 @@ records:
 ```
 
 ##### Performance
-
+MR checks and reconciliation times will grow roughly linearly with zone size. We tested creating a zone with 1000 records took around 5 minutes.
 
 ### Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)
 
