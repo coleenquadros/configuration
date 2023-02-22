@@ -1226,12 +1226,12 @@ records:
  A Cloudflare DNS zone follows [this
 JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/cloudflare/dns-zone-1.yml).
 
-- `identifier`: A unique name for the zone
+- `identifier`: A globally unique name for the zone.
 - `zone`: Actual domain name.
 - `plan`: The name of the commercial plan to apply to the zone. Available values: free or enterprise.
 - `account`: Cloudflare account this zone belong to.
 - `type`: Available values: full, partial. This field should always be full. Full zone implies that DNS is hosted with Cloudflare. A partial zone is typically a partner-hosted zone or a CNAME setup.
-- `records`: A list of `record`. All parameters of the `record` match those of Terraform's [cloudflare_record](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/record) with an additional required parameter `identifier` that servers as a unique identification for each record.
+- `records`: A list of `record`. All parameters of the `record` match those of Terraform's [cloudflare_record](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/record) with an additional required parameter `identifier` that servers as a unique (within zone) identification for each record. The number of total records within a zone is limited to 1000, see Performance section below. 
 
 Example DNS zone resource:
 ```yaml
@@ -1251,42 +1251,45 @@ account:
 
 records:
 # Simple CNAME record visualai.devshift.net
- - name: visualai
-   identifier: visualai
-   type: CNAME
-   ttl: 300
-   value: visual-app-interface.devshift.net
-   proxied: true # All requests intended for proxied hostnames will go to Cloudflare first and then be forwarded to your origin server. This only applies to A, AAAA or CNAME records
+  - name: visualai
+    identifier: visualai
+    type: CNAME
+    ttl: 300
+    value: visual-app-interface.devshift.net
+    proxied: true # All requests intended for proxied hostnames will go to Cloudflare first and then be forwarded to your origin server. This only applies to A, AAAA or CNAME records
 
 # Simple TXT record
- - name: devshift_txt
-   identifier: devshift_txt
-   type: TXT
-   ttl: 300
-   value: printer=lpr5
+  - name: devshift_txt
+    identifier: devshift_txt
+    type: TXT
+    ttl: 300
+    value: printer=lpr5
 
 # Simple MX record
- - name: devshift_mx
-   identifier: devshift_mx1
-   type: MX 
-   ttl: 300
-   value: mailhost1.example.com
-   priority: 1
+  - name: devshift_mx
+    identifier: devshift_mx1
+    type: MX 
+    ttl: 300
+    value: mailhost1.example.com
+    priority: 1
 
 # NS records with multiple values
- - name: devshift_ns
-   identifier: devshift_ns1
-   type: NS 
-   ttl: 300
-   value: ns.example.com
-   priority: 1
- - name: devshift_ns
-   identifier: devshift_ns3
-   type: NS 
-   ttl: 300
-   value: ns3.example.com
-   priority: 3
+  - name: devshift_ns
+    identifier: devshift_ns1
+    type: NS 
+    ttl: 300
+    value: ns.example.com
+    priority: 1
+  - name: devshift_ns
+    identifier: devshift_ns3
+    type: NS 
+    ttl: 300
+    value: ns3.example.com
+    priority: 3
 ```
+
+##### Performance
+
 
 ### Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)
 
