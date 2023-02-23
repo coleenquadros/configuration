@@ -464,12 +464,9 @@ def add_event_router_entry_to_saas(
     """
 
     saas_path = EVENT_ROUTER_SAAS_FILE.format(data_dir=data_dir)
-    ns_ref = (
-        f"{data_dir}/openshift/{cluster}/namespaces/app-sre-event-router.yaml"
-    )
     entry = {
         "namespace": {
-            "$ref": ns_ref,
+            "$ref": f"/openshift/{cluster}/namespaces/app-sre-event-router.yaml",
         },
     }
     _add_target_to_resource_template(saas_path, "event-router", entry, True)

@@ -1,14 +1,15 @@
 <!-- TOC -->
 
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
-  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1-cluster-creation-and-initial-access-for-dedicated-admins)
-  - [Step 2 - Bot access and App SRE project template](#step-2-bot-access-and-app-sre-project-template)
-  - [Step 3 - Observability](#step-3-observability)
-  - [Step 4 - Operator Lifecycle Manager](#step-4-operator-lifecycle-manager)
-  - [Step 5 - Container Security Operator](#step-5-container-security-operator)
-  - [Step 6 - Deployment Validation Operator (DVO)](#step-6-deployment-validation-operator-dvo)
-  - [Step 7 - Obtain cluster-admin](#step-7-obtain-cluster-admin)
-  - [Step 8 - Install Cert-manager operator](#step-8-install-cert-manager-operator)
+  - [Step 1 - Cluster creation and initial access for dedicated-admins and automatic cluster file updates](#step-1---cluster-creation-and-initial-access-for-dedicated-admins-and-automatic-cluster-file-updates)
+  - [Step 2 - Bot access and App SRE project template](#step-2---bot-access-and-app-sre-project-template)
+  - [Step 3 - Observability](#step-3---observability)
+  - [Step 4 - Operator Lifecycle Manager](#step-4---operator-lifecycle-manager)
+  - [Step 5 - Container Security Operator](#step-5---container-security-operator)
+  - [Step 6 - Deployment Validation Operator (DVO)](#step-6---deployment-validation-operator-dvo)
+  - [Step 7 - Obtain cluster-admin](#step-7---obtain-cluster-admin)
+  - [Step 8 - Install Cert-manager operator](#step-8---install-cert-manager-operator)
+  - [Step 9 - Setup cluster logging](#step-9---setup-cluster-logging)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -474,6 +475,21 @@ hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <
 ## Step 8 - Install Cert-manager operator
 
 1. Follow the installation instructions in this [Runbook](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/runbook/cert-manager.md)
+
+## Step 9 - Setup cluster logging
+
+We run our custom logging stack. This requires creation of resources in the correct namespaces.
+
+To enable the logging stack just run this command:
+```bash
+hack/cluster_provision.py --datadir data create-obs-logging <cluster> <environment>
+```
+This command does the following steps:
+* Create the logging namespace configuration file `openshift-logging` under `/openshift/<cluster>/namespaces`
+* Create the `event-router` namespace configuration file under `/openshift/<cluster>/namespaces`
+* Add new target to resourceTemplate section to `/services/observability/cicd/saas/saas-event-router.yaml`
+
+**Double check the changes introduced, the destination file could have been modified with manual changes**
 
 # Additional configurations
 
