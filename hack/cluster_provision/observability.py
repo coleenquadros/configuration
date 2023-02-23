@@ -33,9 +33,7 @@ EVENT_ROUTER_NS_PATH = (
     "{data_dir}/openshift/{cluster}/namespaces/app-sre-event-router.yaml"
 )
 
-EVENT_ROUTER_SAAS_FILE = {
-    "{data_dir}/services/observability/cicd/saas/saas-observability-per-cluster.yaml"
-}
+EVENT_ROUTER_SAAS_FILE = "{data_dir}/services/observability/cicd/saas/saas-event-router.yaml"
 
 # CUSTOMER_MONITORING
 CUSTOMER_MON_NS_TEMPLATE = "openshift-customer-monitoring.CLUSTERNAME.tpl"
@@ -458,6 +456,24 @@ def create_event_router_ns(
     )
 
 
+def add_event_router_entry_to_saas(
+    data_dir: str, cluster: str
+) -> None:
+    """Function to add customer monitoring namespace target in the
+    observability saas manifest
+    """
+
+    saas_path = EVENT_ROUTER_SAAS_FILE.format(data_dir=data_dir)
+    ns_ref = (
+        f"{data_dir}/openshift/{cluster}/namespaces/app-sre-event-router.yaml"
+    )
+    entry = {
+        "namespace": {
+            "$ref": ns_ref,
+        },
+    }
+    _add_target_to_resource_template(saas_path, "event-router", entry, True)
+
 
 def configure_cluster_logging(
     data_dir: str, cluster: str, environment: str
@@ -477,3 +493,4 @@ def configure_cluster_logging(
 
     create_logging_stack_ns(data_dir, cluster, environment)
     create_event_router_ns(data_dir, cluster, environment)
+    add_event_router_entry_to_saas(data_dir, cluster)
