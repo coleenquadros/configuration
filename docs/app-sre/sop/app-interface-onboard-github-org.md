@@ -8,10 +8,10 @@ To on-board a new GitHub org to app-interface, perform the following operations:
         * Create a new Personal Access Token as the new user. [link](https://github.com/settings/tokens)
         * Have that token stored in Vault.
 
-2. Accept the invitation as `app-sre-bot`, by either:
-    * Contact Jaime Melis to accept the invitation.
-    * Sign in to GitHub using the `app-sre-bot` [credentials](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/github-app-sre-bot) and a Recovery code.
-    * Add the GitHub org to app-interface (pending automation - https://issues.redhat.com/browse/APPSRE-936).
+2. Accept the invitation as `app-sre-bot`:
+    * Contact `@app-sre-ic` in `#sd-app-sre` in Slack to accept the invitation.
+    * `@app-sre-ic` will log in to GitHub using the `app-sre-bot` [credentials](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/github-app-sre-bot). Username and password are in the `registration_info` secret key. In order to get the TOTP for 2FA, run this command: `vault read totp/app-sre/code/github-app-sre-bot`.
+    * Add the GitHub org to app-interface by visiting `https://github.com/<github-org>` and accepting the invite which will appear on a banner (pending automation - https://issues.redhat.com/browse/APPSRE-936).
 
 3. To add the GitHub org to app-interface, submit a merge request:
     * Add the GitHub org to app-interface:
