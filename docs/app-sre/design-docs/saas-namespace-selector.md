@@ -50,6 +50,11 @@ For example, select namespaces based on the following:
 
 ### Implementation
 
+Whereas the behavior of all `resourceTemplages[].targets` features (e.g., `parameters`, `upstream`, `image`) are straightforward for the dynamic namespace selector, the behavior of the `promotion` attribute needs to be defined:
+
+* `promotion.subscribe`: Trigger the deployment on all selected targets as soon as the message arrives.
+* `promotion.publish`: Publish the message(s) after successful deployments of the selected namespaces.
+
 #### Schema
 
 Enhance the saas file target schema (`/app-sre/saas-file-target-1.yml`) to support a dynamic namespace selector, and in addition,
@@ -316,7 +321,7 @@ resourceTemplates:
 
 ### Test Namespace Selector
 
-Use the CLI command `saas-namespace-selector` to verify the namespace selector and review the selected namespace. It shows the complete target list with all selected namespaces and resolved Jinja variables. E.g. for the `prometheus` example above:
+Use the CLI command `saas-namespace-selector` to verify the namespace selector and review the selected namespace. It shows the complete target list with all selected namespaces and resolved Jinja variables. E.g., for the `prometheus` example above:
 
 ```bash
 $ qontract-cli --config config.toml saas-namespace-selector --app-name app-sre-observability --saas-name saas-app-sre-observability-per-cluster
