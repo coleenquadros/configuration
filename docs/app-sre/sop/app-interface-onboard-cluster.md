@@ -484,12 +484,20 @@ To enable the logging stack just run this command:
 ```bash
 hack/cluster_provision.py --datadir data create-obs-logging <cluster> <environment>
 ```
+**Double check the changes introduced, the destination file could have been modified with manual changes**
+
 This command does the following steps:
 * Create the logging namespace configuration file `openshift-logging` under `/openshift/<cluster>/namespaces`
 * Create the `event-router` namespace configuration file under `/openshift/<cluster>/namespaces`
 * Add new target to resourceTemplate section to `/services/observability/cicd/saas/saas-event-router.yaml`
 
-**Double check the changes introduced, the destination file could have been modified with manual changes**
+Check the created namespace template, it might fail the PR check since the CRD is not deployed at the begining. In that case, you'll need 2 PRs: one to install the operator and a second one to install the ClusterLogging and ClusterLogForwarder configurations.
+
+In order to remove the configuration comment out the following line:
+```
+- $ref: /services/app-sre/shared-resources/cluster-logging-config.yaml
+```
+
 
 # Additional configurations
 
