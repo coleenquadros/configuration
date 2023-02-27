@@ -73,14 +73,16 @@ resourceTemplates:
     PARAMETER_1: "foobar"
   targets:
   # static namespace target
-  - namespace:
+  - provider: static  # optional, default: static
+    namespace:
       $ref: <namespace-ref>
     ref: main
     parameters:
       PARAMETER_2: "something-else"
 
   # dynamic namespaces via a namespace selector
-  - namespaceSelector:
+  - provider: dynamic
+    namespaceSelector:
       jsonPathSelectors:
         include:
         - <json path query>
@@ -99,6 +101,7 @@ resourceTemplates:
         field: field-name
 ```
 
+* `provider`: Optional attribute to select the target type. The default is `static` for static targets and `dynamic` for the new dynamic targets.
 * `namespace` and `namespaceSelector` are mutually exclusive. Only one of them can be defined.
 * `namespaceSelector.jsonPathSelectors`: The `jsonPathSelectors.include` and `jsonPathSelectors.exclude` are evaluated
   against all App-Interface namespaces. The `include` queries are evaluated first, and the namespaces from `exclude`
@@ -152,7 +155,8 @@ resourceTemplates:
     ...
   targets:
   # staging clusters
-  - namespaceSelector:
+  - provider: dynamic
+    namespaceSelector:
       include:
       - namespace[?(@.name=="openshift-customer-monitoring" & @.environment.labels.type=="stage")]
     ref: master
@@ -162,7 +166,8 @@ resourceTemplates:
       EXTERNAL_URL: https://prometheus.{{{ resource.namespace.cluster.name }}}.devshift.net
 
   # dev clusters
-  - namespaceSelector:
+  - provider: dynamic
+    namespaceSelector:
       include:
       - namespace[?(@.name=="openshift-customer-monitoring" & @.environment.labels.type=="dev")]
     ref: master
@@ -172,7 +177,8 @@ resourceTemplates:
       EXTERNAL_URL: https://prometheus.{{{ resource.namespace.cluster.name }}}.devshift.net
 
   # all non-staging and non-dev clusters
-  - namespaceSelector:
+  - provider: dynamic
+    namespaceSelector:
       include:
       - namespace[?(@.name=="openshift-customer-monitoring")]
       exclude:
@@ -228,7 +234,8 @@ resourceTemplates:
       - github-gabi-stage-deploy-success-channel
 
   # Tenant namespaces
-  - namespaceSelector:
+  - provider: dynamic
+    namespaceSelector:
       include:
       - namespace[?(@.label.gabi)]
     ref: 460847c07c64d4fd17db5b10370646c201a66254
@@ -262,11 +269,13 @@ resourceTemplates:
 - name: x509-certificate-exporter
   ...
   targets:
-  - namespaceSelector:
+  - provider: dynamic
+    namespaceSelector:
       include:
       - namespace[?(@.name.skupperSite & @.environment.labels.type=="stage")]
     ref: master
-  - namespaceSelector:
+  - provider: dynamic
+    namespaceSelector:
       include:
       - namespace[?(@.name.skupperSite)]
       exclude:
@@ -275,11 +284,13 @@ resourceTemplates:
 - name: skupper-exporter
   ...
   targets:
-  - namespaceSelector:
+  - provider: dynamic
+    namespaceSelector:
       include:
       - namespace[?(@.name.skupperSite & @.environment.labels.type=="stage")]
     ref: master
-  - namespaceSelector:
+  - provider: dynamic
+    namespaceSelector:
       include:
       - namespace[?(@.name.skupperSite)]
       exclude:
@@ -303,7 +314,8 @@ resourceTemplates:
   provider: directory
   targets:
   # all hive shards in stage
-  - namespaceSelector:
+  - provider: dynamic
+    namespaceSelector:
       include:
       - namespace[?(@.cluster.externalConfiguration.labels."ext-managed.openshift.io/hive-shard"=="true" & @.environment.labels.type=="stage")]
     ref: main
@@ -313,7 +325,8 @@ resourceTemplates:
   path: /production
   provider: directory
   targets:
-  - namespaceSelector:
+  - provider: dynamic
+    namespaceSelector:
       include:
       - namespace[?(@.cluster.externalConfiguration.labels."ext-managed.openshift.io/hive-shard"=="true" & @.environment.labels.type=="production")]
     ref: main
