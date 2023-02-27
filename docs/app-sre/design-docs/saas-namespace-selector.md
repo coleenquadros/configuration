@@ -22,6 +22,7 @@ dynamic namespaces list would be handy and obsoletes manual work. E.g.,
 * [Prometheus per cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/db13ce34e4b425cac5e7436e2d7ee983db6bf7b7/data/services/observability/cicd/saas/saas-observability-per-cluster.yaml#L42)
   The `openshift-customer-monitoring` namespace of each new cluster must be added manually
 * Gabi, CSO, and DVO are following the same pattern
+* [Hive shards](https://gitlab.cee.redhat.com/service/app-interface/-/blob/edd1695663551bddae70defe31aa62fbb96ef78b/data/services/addons/cicd/ci-int/saas-mt-PagerDutyIntegration.yaml#L49): Tenants want to deploy the same on all hive shards in a given environment.
 * Deploy skupper monitoring in each skupper-enabled namespace (`skupperSite` attribute)
 
 
@@ -274,6 +275,38 @@ resourceTemplates:
       exclude:
       - namespace[?(@.environment.labels.type=="stage")]
     ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+```
+
+**Hive Shards**
+
+Deploy to all hive shard namespaces of a given environment.
+
+```yaml
+$schema: /app-sre/saas-file-2.yml
+
+...
+
+resourceTemplates:
+- name: managed-tenants-stage
+  url: https://gitlab.cee.redhat.com/service/managed-tenants-manifests
+  path: /stage
+  provider: directory
+  targets:
+  # all hive shards in stage
+  - namespaceSelector:
+      include:
+      - namespace[?(@.cluster.externalConfiguration.labels."ext-managed.openshift.io/hive-shard"=="true" & @.environment.labels.type=="stage")]
+    ref: main
+  # all hive shards in production
+- name: managed-tenants-production
+  url: https://gitlab.cee.redhat.com/service/managed-tenants-manifests
+  path: /production
+  provider: directory
+  targets:
+  - namespaceSelector:
+      include:
+      - namespace[?(@.cluster.externalConfiguration.labels."ext-managed.openshift.io/hive-shard"=="true" & @.environment.labels.type=="production")]
+    ref: main
 ```
 
 ### Test Namespace Selector
