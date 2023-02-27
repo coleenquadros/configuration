@@ -2946,8 +2946,6 @@ codeComponents:
   gitlabHousekeeping:
     enabled: true
     rebase: false
-  jira:
-    $ref: /dependencies/jira/issues-redhat-com.yaml
 ...
 ```
 
