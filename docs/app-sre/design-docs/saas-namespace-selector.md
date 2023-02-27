@@ -50,6 +50,8 @@ For example, select namespaces based on the following:
 
 ### Implementation
 
+#### Schema
+
 Enhance the saas file target schema (`/app-sre/saas-file-target-1.yml`) to support a dynamic namespace selector, and in addition,
 `parameters` and `secretParameters` must accept Jinja templates to evolve more flexibility.
 
@@ -120,6 +122,9 @@ resourceTemplates:
       version: 2
   ```
 
+#### Saasherder
+
+The dynamic namespace selector must be implemented and considered in the [reconcile.utils.saasherder](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/saasherder.py). The idea is to resolve all dynamic namespace selectors in the [`__init__` method](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/saasherder.py#L182) and replace them with static namespace targets in memory. The rest of the code can remain unchanged.
 
 ### Examples
 
