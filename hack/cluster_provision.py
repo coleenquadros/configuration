@@ -79,6 +79,16 @@ def create_obs_customer_monitoring(ctx, cluster: str, environment: str) -> None:
         ctx.obj["datadir"], cluster, environment
     )
 
+@cli.command()
+@click.argument("cluster")
+@click.argument("environment")
+@click.pass_context
+def create_obs_logging(ctx, cluster: str, environment: str) -> None:
+    """Generates APP-SRE logging config for a cluster"""
+    observability.configure_cluster_logging(
+        ctx.obj["datadir"], cluster, environment
+    )
+
 
 @cli.command()
 @click.argument("cluster")
