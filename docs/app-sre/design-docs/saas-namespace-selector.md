@@ -82,12 +82,12 @@ resourceTemplates:
 
     parameters:
       PARAMETER_2: "something-else"
-      PARAMETER_3: "{{ jinja_variable }}"
+      PARAMETER_3: "{{{ jinja_variable }}}"
 
     secretParameters:
     - name: ENV_KEY_NAME
       secret:
-        path: path/{{ namespace.labels.environment }}/secret
+        path: path/{{{ namespace.labels.environment }}}/secret
         field: field-name
 ```
 
@@ -99,22 +99,22 @@ resourceTemplates:
   :warning: **Attention**: Due to the nature of this feature, the `jsonPathSelectors` must be used with care.
   **No security measurements** are in place to prevent a user from selecting all namespaces in App-Interface or deploying
   to a namespace where the user has no permissions.
-* `targets.parameters` and `targets.secretParameters` values can include Jinja template variables. The Jinja template
-  context contains a `namespace` object representing the selected namespace. E.g.,
+* `targets.parameters` and `targets.secretParameters` values can include Jinja template variables using the
+  extra curly syntax (`{{{ jinja_var }}}`). The Jinja template context contains a `namespace` object representing the selected namespace. E.g.,
   ```yaml
   ...
   parameters:
-    ENVIRONMENT: '{{ namespace.labels.environment }}'
-    CLUSTER_LABEL: '{{ namespace.cluster.name }}'
+    ENVIRONMENT: '{{{ namespace.labels.environment }}}'
+    CLUSTER_LABEL: '{{{ namespace.cluster.name }}}'
   secretParameters:
   - name: CLIENT_ID
     secret:
-      path: foobar/my-app/{{ namespace.labels.environment }}/another-app-api-access
+      path: foobar/my-app/{{{ namespace.labels.environment }}}/another-app-api-access
       field: client-id
       version: 2
   - name: CLIENT_KEY
     secret:
-      path: foobar/my-app/{{ namespace.labels.environment }}/another-app-api-access
+      path: foobar/my-app/{{{ namespace.labels.environment }}}/another-app-api-access
       field: client-key
       version: 2
   ```
@@ -146,9 +146,9 @@ resourceTemplates:
       - namespace[?(@.name=="openshift-customer-monitoring" & @.environment.labels.type=="stage")]
     ref: master
     parameters:
-      CLUSTER_LABEL: "{{ namespace.cluster.name }}"
+      CLUSTER_LABEL: "{{{ namespace.cluster.name }}}"
       ENVIRONMENT: staging
-      EXTERNAL_URL: https://prometheus.{{ namespace.cluster.name }}.devshift.net
+      EXTERNAL_URL: https://prometheus.{{{ namespace.cluster.name }}}.devshift.net
 
   # dev clusters
   - namespaceSelector:
@@ -156,9 +156,9 @@ resourceTemplates:
       - namespace[?(@.name=="openshift-customer-monitoring" & @.environment.labels.type=="dev")]
     ref: master
     parameters:
-      CLUSTER_LABEL: "{{ namespace.cluster.name }}"
+      CLUSTER_LABEL: "{{{ namespace.cluster.name }}}"
       ENVIRONMENT: dev
-      EXTERNAL_URL: https://prometheus.{{ namespace.cluster.name }}.devshift.net
+      EXTERNAL_URL: https://prometheus.{{{ namespace.cluster.name }}}.devshift.net
 
   # all non-staging and non-dev clusters
   - namespaceSelector:
@@ -169,9 +169,9 @@ resourceTemplates:
       - namespace[?(@.environment.labels.type=="stage")]
     ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
     parameters:
-      CLUSTER_LABEL: "{{ namespace.cluster.name }}"
+      CLUSTER_LABEL: "{{{ namespace.cluster.name }}}"
       ENVIRONMENT: production
-      EXTERNAL_URL: https://prometheus.{{ namespace.cluster.name }}.devshift.net
+      EXTERNAL_URL: https://prometheus.{{{ namespace.cluster.name }}}.devshift.net
 
 ```
 
@@ -232,10 +232,10 @@ resourceTemplates:
           target_config_hash: 4bd3b810e44c224f
           type: parent_saas_config
     parameters:
-      HOST: gabi-{{ namespace.labels.gabi }}.{{ namespace.cluster.elbFQDN|replace('elb.', '', 1) }}
-      NAMESPACE: {{ namespace.name }}
-      AWS_RDS_SECRET_NAME: {{ namespace.labels.gabi }}-readonly
-      GABI_INSTANCE: gabi-{{ namespace.labels.gabi }}
+      HOST: gabi-{{{ namespace.labels.gabi }}}.{{{ namespace.cluster.elbFQDN|replace('elb.', '', 1) }}}
+      NAMESPACE: {{{ namespace.name }}}
+      AWS_RDS_SECRET_NAME: {{{ namespace.labels.gabi }}}-readonly
+      GABI_INSTANCE: gabi-{{{ namespace.labels.gabi }}}
 ```
 
 **Skupper Monitoring**
