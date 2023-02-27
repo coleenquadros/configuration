@@ -88,7 +88,7 @@ resourceTemplates:
     secretParameters:
     - name: ENV_KEY_NAME
       secret:
-        path: path/{{{ namespace.labels.environment }}}/secret
+        path: path/{{{ resource.namespace.labels.environment }}}/secret
         field: field-name
 ```
 
@@ -101,21 +101,21 @@ resourceTemplates:
   **No security measurements** are in place to prevent a user from selecting all namespaces in App-Interface or deploying
   to a namespace where the user has no permissions.
 * `targets.parameters` and `targets.secretParameters` values can include Jinja template variables using the
-  extra curly syntax (`{{{ jinja_var }}}`). The Jinja template context contains a `namespace` object representing the selected namespace. E.g.,
+  extra curly syntax (`{{{ jinja_var }}}`). The Jinja template context contains a `resource.namespace` object representing the selected namespace. E.g.,
   ```yaml
   ...
   parameters:
-    ENVIRONMENT: '{{{ namespace.labels.environment }}}'
-    CLUSTER_LABEL: '{{{ namespace.cluster.name }}}'
+    ENVIRONMENT: '{{{ resource.namespace.labels.environment }}}'
+    CLUSTER_LABEL: '{{{ resource.namespace.cluster.name }}}'
   secretParameters:
   - name: CLIENT_ID
     secret:
-      path: foobar/my-app/{{{ namespace.labels.environment }}}/another-app-api-access
+      path: foobar/my-app/{{{ resource.namespace.labels.environment }}}/another-app-api-access
       field: client-id
       version: 2
   - name: CLIENT_KEY
     secret:
-      path: foobar/my-app/{{{ namespace.labels.environment }}}/another-app-api-access
+      path: foobar/my-app/{{{ resource.namespace.labels.environment }}}/another-app-api-access
       field: client-key
       version: 2
   ```
@@ -147,9 +147,9 @@ resourceTemplates:
       - namespace[?(@.name=="openshift-customer-monitoring" & @.environment.labels.type=="stage")]
     ref: master
     parameters:
-      CLUSTER_LABEL: "{{{ namespace.cluster.name }}}"
+      CLUSTER_LABEL: "{{{ resource.namespace.cluster.name }}}"
       ENVIRONMENT: staging
-      EXTERNAL_URL: https://prometheus.{{{ namespace.cluster.name }}}.devshift.net
+      EXTERNAL_URL: https://prometheus.{{{ resource.namespace.cluster.name }}}.devshift.net
 
   # dev clusters
   - namespaceSelector:
@@ -157,9 +157,9 @@ resourceTemplates:
       - namespace[?(@.name=="openshift-customer-monitoring" & @.environment.labels.type=="dev")]
     ref: master
     parameters:
-      CLUSTER_LABEL: "{{{ namespace.cluster.name }}}"
+      CLUSTER_LABEL: "{{{ resource.namespace.cluster.name }}}"
       ENVIRONMENT: dev
-      EXTERNAL_URL: https://prometheus.{{{ namespace.cluster.name }}}.devshift.net
+      EXTERNAL_URL: https://prometheus.{{{ resource.namespace.cluster.name }}}.devshift.net
 
   # all non-staging and non-dev clusters
   - namespaceSelector:
@@ -170,9 +170,9 @@ resourceTemplates:
       - namespace[?(@.environment.labels.type=="stage")]
     ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
     parameters:
-      CLUSTER_LABEL: "{{{ namespace.cluster.name }}}"
+      CLUSTER_LABEL: "{{{ resource.namespace.cluster.name }}}"
       ENVIRONMENT: production
-      EXTERNAL_URL: https://prometheus.{{{ namespace.cluster.name }}}.devshift.net
+      EXTERNAL_URL: https://prometheus.{{{ resource.namespace.cluster.name }}}.devshift.net
 
 ```
 
@@ -233,10 +233,10 @@ resourceTemplates:
           target_config_hash: 4bd3b810e44c224f
           type: parent_saas_config
     parameters:
-      HOST: gabi-{{{ namespace.labels.gabi }}}.{{{ namespace.cluster.elbFQDN|replace('elb.', '', 1) }}}
-      NAMESPACE: {{{ namespace.name }}}
-      AWS_RDS_SECRET_NAME: {{{ namespace.labels.gabi }}}-readonly
-      GABI_INSTANCE: gabi-{{{ namespace.labels.gabi }}}
+      HOST: gabi-{{{ resource.namespace.labels.gabi }}}.{{{ resource.namespace.cluster.elbFQDN|replace('elb.', '', 1) }}}
+      NAMESPACE: {{{ resource.namespace.name }}}
+      AWS_RDS_SECRET_NAME: {{{ resource.namespace.labels.gabi }}}-readonly
+      GABI_INSTANCE: gabi-{{{ resource.namespace.labels.gabi }}}
 ```
 
 **Skupper Monitoring**
