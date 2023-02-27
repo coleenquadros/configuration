@@ -53,7 +53,7 @@ For example, select namespaces based on the following:
 Whereas the behavior of all `resourceTemplages[].targets` features (e.g., `parameters`, `upstream`, `image`) are straightforward for the dynamic namespace selector, the behavior of the `promotion` attribute needs to be defined:
 
 * `promotion.subscribe`: Trigger the deployment on all selected targets as soon as the message arrives.
-* `promotion.publish`: Publish the message(s) after successful deployments of the selected namespaces.
+* `promotion.publish`: Publish the message(s) only after successful deployments of all the selected namespaces. If some deployments fail: do not publish the message.
 
 #### Schema
 
