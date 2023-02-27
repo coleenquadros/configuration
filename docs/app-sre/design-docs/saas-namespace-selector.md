@@ -130,9 +130,15 @@ resourceTemplates:
       version: 2
   ```
 
-#### Saasherder
+#### Sass file trigger
 
-The dynamic namespace selector must be implemented and considered in the [reconcile.utils.saasherder](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/saasherder.py). The idea is to resolve all dynamic namespace selectors in the [`__init__` method](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/saasherder.py#L182) and replace them with static namespace targets in memory. The rest of the code can remain unchanged.
+A saas file must be triggered when a namespace is added or removed from the dynamic namespace selector or changed.
+To achieve this, we have to introduce a new `openshift-saas-deploy-trigger` qontract-reconcile integration that listens
+to changes in App-Interface and triggers the saas file deployment.
+
+#### Saas file deployment
+
+For the deployment part of a saas file, the dynamic namespace selector must be implemented and considered in the [reconcile.utils.saasherder](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/saasherder.py). The idea is to resolve all dynamic namespace selectors (`provider: dynamic`) in the [`__init__` method](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/saasherder.py#L182) and replace them with static namespace targets in memory. The rest of the code can remain unchanged.
 
 ### Examples
 
