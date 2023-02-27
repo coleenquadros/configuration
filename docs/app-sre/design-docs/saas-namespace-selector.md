@@ -36,7 +36,7 @@ N/A
 
 ## Proposal
 
-Introduce a dynamic namespace selector attribute for a saas file.
+Introduce a dynamic namespace selector attribute for a saas file target.
 The selector should be able to select namespaces based on various criteria.
 
 For example, select namespaces based on the following:
