@@ -1,11 +1,11 @@
 ---
 $schema: /app-sre/saas-file-2.yml
 labels:
-  service: uhc
-name: saas-ams-qe-fvt-gating-tests
-description: SaaS deployment for AMS testing
+  service: ocm
+name: osdfm-qe-fvt-gating-tests
+description: SaaS deployment for OSD fleet manager testing
 app:
-  $ref: /services/ocm/ams/app.yml
+  $ref: /services/ocm/osd-fleet-manager/app.yml
 pipelinesProvider:
   $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
 deployResources:
@@ -21,8 +21,9 @@ slack:
   channel: ocm-ship-it
 managedResourceTypes:
 - Job
+- ServiceAccount
 imagePatterns:
-- quay.io/app-sre/uhc-account-manager
+- quay.io/app-sre/osd-fleet-manager
 - quay.io/app-sre/ocm-backend-tests
 - quay.io/centos/centos
 authentication:
@@ -30,28 +31,23 @@ authentication:
     path: app-sre/quay/app-sre-pull
     field: all
 resourceTemplates:
-- name: uhc-account-manager
-  url: https://gitlab.cee.redhat.com/service/uhc-account-manager
+- name: osd-fleet-manager
+  url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
   path: /templates/gating-tests-qe-fvt-template.yml
   parameters:
     IMAGE_REGISTRY: quay.io
-    IMAGE_REPOSITORY: app-sre/uhc-account-manager
+    IMAGE_REPOSITORY: app-sre/osd-fleet-manager
   targets:
   - namespace:
-      $ref: /services/ocm/namespaces/uhc-integration.yml
-    ref: 690c76d2f3f2b8fb8fced46874c78f090ee1edbb
+      $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
+    ref: 5ed2ca8d8ec6c405652a7b76cbb5690f0c97b9cb
     promotion:
       auto: true
       subscribe:
-      - ocm-ams-deployed-int-green
+      - ocm-osdfm-deployed-int-canary
       publish:
-      - ocm-ams-qe-fvt-test-int-green-ok
-      promotion_data:
-      - channel: ocm-ams-deployed-int-green
-        data:
-        - parent_saas: saas-uhc-account-manager
-          target_config_hash: a7905c2078ee13ef
-          type: parent_saas_config
+      - ocm-osdfm-qe-fvt-int-canary-ok
     parameters:
-      DEPLOYMENT_NAME: ams-gate-int
+      DEPLOYMENT_NAME: ocm-osdfm-int-canary
       ENVIRONMENT: integration
+      GATE_NAME: ocm-osdfm-qe-gating-test-int
