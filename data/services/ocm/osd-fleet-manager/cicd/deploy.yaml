@@ -324,6 +324,43 @@ resourceTemplates:
             private: false
       DEPLOYMENT_NAME: perf3
       DATAPLANE_CLUSTER_SCALING_TYPE: manual
+  - name: osd-fleet-manager-stage-chaos
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
+    ref: 3b8d1295858a91679a916081c7f990b907552cc5
+    promotion:
+      publish:
+      - ocm-osdfm-deployed-stage-chaos
+    parameters:
+      CLUSTER_TEMPLATES: |2-
+          # HyperShift Service Cluster
+          hs-sc:
+            name_prefix: "hs-sc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: "openshift-v4.12.2"
+            multi_az: true
+            ccs: true 
+            compute_machine_type: m5.4xlarge
+            compute_autoscale: false
+            compute_nodes: 3
+            network_type: OVNKubernetes
+            private: false
+          # HyperShift Management Cluster
+          hs-mc:
+            name_prefix: "hs-mc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: "openshift-v4.12.2"
+            multi_az: true
+            ccs: true
+            compute_machine_type: m5.4xlarge
+            compute_autoscale: true
+            compute_autoscale_min_replicas: 3
+            compute_autoscale_max_replicas: 36
+            network_type: OVNKubernetes
+            private: false
+      DEPLOYMENT_NAME: chaos
+      # manual scaling will disable automatic creation of addition management clusters
+      DATAPLANE_CLUSTER_SCALING_TYPE: manual
   - name: osd-fleet-manager-stage-main
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
