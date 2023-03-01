@@ -140,26 +140,26 @@ run_vault_reconcile_integration() {
 run_git_partition_sync_integration() {
   local status
 
-  [ -n "$DRY_RUN" ] && DRY_RUN_FLAG="-dry-run"
   echo "INTEGRATION git-partition-sync" >&2
 
   STARTTIME=$(date +%s)
   docker run --rm -t \
     -v /etc/pki:/etc/pki:z \
+    -e DRY_RUN=true \
+    -e RUN_ONCE=true \
+    -e GRAPHQL_SERVER=${GRAPHQL_SERVER} \
+    -e GRAPHQL_USERNAME=${GRAPHQL_USERNAME} \
+    -e GRAPHQL_PASSWORD=${GRAPHQL_PASSWORD} \
     -e AWS_ACCESS_KEY_ID=${GIT_SYNC_AWS_ACCESS_KEY_ID} \
     -e AWS_SECRET_ACCESS_KEY=${GIT_SYNC_AWS_SECRET_ACCESS_KEY} \
     -e AWS_REGION=${GIT_SYNC_AWS_REGION} \
-    -e AWS_S3_BUCKET=${GIT_SYNC_AWS_S3_BUCKET} \
+    -e AWS_GIT_SYNC_BUCKET=${GIT_SYNC_AWS_S3_BUCKET} \
     -e GITLAB_BASE_URL=${GIT_SYNC_GITLAB_BASE_URL}\
     -e GITLAB_USERNAME=${GIT_SYNC_GITLAB_USERNAME} \
     -e GITLAB_TOKEN=${GIT_SYNC_GITLAB_TOKEN} \
     -e PUBLIC_KEY=${GIT_SYNC_PUBLIC_KEY} \
     -e WORKDIR=git-partition-sync \
-    -e GRAPHQL_SERVER=${GRAPHQL_SERVER} \
-    -e GRAPHQL_USERNAME=${GRAPHQL_USERNAME} \
-    -e GRAPHQL_PASSWORD=${GRAPHQL_PASSWORD} \
-    -e PREVIOUS_BUNDLE_SHA=${MASTER_BUNDLE_SHA256} \
-    ${GIT_PARTITION_SYNC_PRODUCER_IMAGE}:${GIT_PARTITION_SYNC_PRODUCER_IMAGE_TAG} $DRY_RUN_FLAG \
+    ${GO_RECONCILE_IMAGE}:${GO_RECONCILE_IMAGE_TAG} git-partition-sync-producer \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-git-partition-sync.txt
 
   status="$?"
