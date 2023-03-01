@@ -31,6 +31,7 @@ managedResourceTypes:
 - Service
 - ConfigMap
 - Frontend
+- PodDisruptionBudget
 
 imagePatterns:
 - quay.io/rhoas/kas-fleet-manager
@@ -40,6 +41,7 @@ imagePatterns:
 - quay.io/rhoas/mk-token-refresher
 - quay.io/rhoas/application-services-ui-frontend-container
 - quay.io/rhoas/rhosak-ui
+- quay.io/rhoas/observability-remote-write-proxy
 
 authentication:
   image:
@@ -75,6 +77,25 @@ resourceTemplates:
       OBSERVATORIUM_TOKEN_REFRESHER_IMAGE: quay.io/rhoas/mk-token-refresher
       OBSERVATORIUM_TOKEN_REFRESHER_IMAGE_TAG: e96a181
       OBSERVATORIUM_TOKEN_REFRESHER_REPLICAS: 3
+- name: observability-remote-write-proxy
+  url: https://gitlab.cee.redhat.com/service/kas-fleet-manager
+  path: /templates/observability-remote-write-proxy.yml
+  targets:
+  - namespace:
+      $ref: /services/managed-services/namespaces/managed-services-stage.yml
+    ref: 7d8817ce0936b41d1a8f64646e7c28c0412f022f
+    parameters:
+      OBSERVABILITY_REMOTE_WRITE_PROXY_FORWARD_URL: https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/managedkafka/api/v1/receive
+      OBSERVABILITY_REMOTE_WRITE_PROXY_TOKEN_VERIFICATION_ENABLED: true
+      # Use kas-fleet-manager-envoy K8s Service to communicate to KFM. By
+      # doing this we avoid using public routing and the requests
+      # go through KFM's Envoy sidecar first
+      OBSERVABILITY_REMOTE_WRITE_PROXY_TOKEN_VERIFICATION_URL: https://kas-fleet-manager-envoy.managed-services-stage.svc:9001/api/kafkas_mgmt/v1/obs-proxy-verification
+      OBSERVABILITY_REMOTE_WRITE_PROXY_OIDC_ENABLED: true
+      OBSERVABILITY_REMOTE_WRITE_PROXY_REPLICAS: 3
+      OBSERVABILITY_REMOTE_WRITE_PROXY_IMAGE_NAME: quay.io/rhoas/observability-remote-write-proxy
+      OBSERVATORIUM_TOKEN_REFRESHER_IMAGE_TAG: 8ed2bb9
+      OBSERVABILITY_REMOTE_WRITE_PROXY_IMAGE_PULL_POLICY: IfNotPresent
 - name: kas-fleet-manager
   url: https://gitlab.cee.redhat.com/service/kas-fleet-manager
   path: /templates/service-template.yml
