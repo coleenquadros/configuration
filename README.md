@@ -2204,6 +2204,45 @@ Such an entry will enable this specific resource to be deleted even if the accou
 
 When submitting a MR to delete a resource which results in a build failure, look at the logs and find lines such as `['delete', '<account_name>', '<resource_type>', '<resource_name>']`. For each line (will also include an error such as `'delete' action is not enabled.`) - add an entry to the `deletionApprovals` list.
 
+### Manage Cloudflare user access via App-Interface using Terraform
+
+The `terraform-cloudflare-users` integration is used to provide access to [Cloudflare](https://www.cloudflare.com/) accounts.
+
+In order to provide access to Cloudflare accounts registered in App-Interface, you need to [sign up for a Cloudflare account](https://www.cloudflare.com/) with
+your `@redhat.com` email address. Note, access is only granted to users who register with `@redhat.com` email address.
+
+Once you have registered the user, you can follow these steps.
+1. Add `cloudflare_user` field in your user file (`/access/user-1.yml`) and set it to your registered `@redhat.com` email.
+1. Create a cloudflare role (`/cloudflare/account-role-1.yml`), link it to your account and list the relevant roles. Cloudflare account administrators should have visibility into all roles available through Cloudflare UI. If the cloudflare role already exists you can skip this step.
+
+    Example
+    ```
+    ---
+    $schema: /cloudflare/account-role-1.yml
+
+    account: 
+      $ref: /path/to/your/cloudflare/account.yml
+
+    name: dummy-cloudflare-admin-read-only
+    description: Read-only access to the dummy Cloudflare account
+
+    roles:
+      - 'Administrator Read Only'
+
+    ```
+1. Associate newly created Cloudflare role (`/cloudflare/account-role-1.yml`) to access role (`/access/role-1.yml`) with `cloudflare_access` field.
+
+    Example
+    ```
+    ---
+    $schema: /access/role-1.yml
+    ...
+    cloudflare_access:
+    - $ref: /path/to/your/cloudflare/role.yml
+    ...
+
+    ```
+
 ### Manage Cloudflare resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform
 
 The `terraform-cloudflare-resources` integration is used to provision [Cloudflare](https://www.cloudflare.com/) services.
