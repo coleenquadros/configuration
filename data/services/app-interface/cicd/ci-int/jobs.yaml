@@ -72,18 +72,18 @@ config:
         # This is a temporary workaround to prevent changes to the hack directory from running MR checks
         pr_check_script_path: |
             #!/bin/bash
-            set -evo pipefail
+            set -evuo pipefail
             if ! git diff --quiet origin/master HEAD -- ./hack/; then
-              echo "Checking permission for user: ${{gitlabMergedByUser}} ..."
-              GITLAB_API_URL=https://gitlab.cee.redhat.com/api/v4
-              USER_ID=$(curl -s --header "PRIVATE-TOKEN: ${{GITLAB_API_TOKEN}}" ${{GITLAB_API_URL}}/users?username="${{gitlabMergedByUser}}" | jq '.[0].id')
-              if [ "$USER_ID" == "null" ]; then
-                echo "User ${{gitlabMergedByUser}} not found!"
+              MERGE_REQUEST_QUERY=api/v4/projects/"$gitlabMergeRequestTargetProjectId"/merge_requests/"$gitlabMergeRequestIid"
+              echo "Checking permission for merge request: $MERGE_REQUEST_QUERY ..."
+              AUTHOR_ID=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "$GITLAB_SERVER/$MERGE_REQUEST_QUERY" | jq '.author.id')
+              if [ "$AUTHOR_ID" == "null" ]; then
+                echo "Author not found!"
                 exit 2
               fi
-
-              echo "Checking if user ${{gitlabMergedByUser}} (${{USER_ID}}) is a member of app-sre ..."
-              STATUS_CODE=$(curl -s -o /dev/null -w "%{{http_code}}" --header "PRIVATE-TOKEN: ${{GITLAB_API_TOKEN}}" ${{GITLAB_API_URL}}/groups/app-sre/members/"${{USER_ID}}")
+              MEMBER_QUERY=api/v4/groups/app-sre/members/"$AUTHOR_ID"
+              echo "Checking if author is a member of app-sre $MEMBER_QUERY ..."
+              STATUS_CODE=$(curl -s -o /dev/null -w "%{{http_code}}" --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "$GITLAB_SERVER/$MEMBER_QUERY")
               if [ "$STATUS_CODE" == "200" ]; then
                 echo "Found authorized hack/ folder change, MR will run."
               else
@@ -93,11 +93,6 @@ config:
             fi
             ./hack/pr_check.sh
         job_type: '-manual-testing'
-        wrappers:
-        - credentials-binding:
-          - text:
-              credential-id: devtools-bot-token
-              variable: GITLAB_API_TOKEN
 
 - project:
     name: qontract-api
