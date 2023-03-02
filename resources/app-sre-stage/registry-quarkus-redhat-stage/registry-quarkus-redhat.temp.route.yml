@@ -1,0 +1,21 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-prod-http
+    haproxy.router.openshift.io/balance: source
+  labels:
+    service: registry-quarkus
+  name: registry-quarkus-redhat-devshift
+spec:
+  host: registry.quarkus.preprod.devshift.net
+  port:
+    targetPort: "8080"
+  to:
+    kind: Service
+    name: registry-quarkus
+    weight: 100
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

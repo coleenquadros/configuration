@@ -20,6 +20,21 @@ log = logging.getLogger(__name__)
 DNS_FILE_CONFIG_PATH = "{data_dir}/aws/app-sre/dns/devshift.net.yaml"
 DNS_OBSERVABILTY_RECORDS = ["prometheus.{cluster}", "alertmanager.{cluster}"]
 
+
+# LOGGING
+LOGGING_NS_TEMPLATE = "openshift-logging.tpl"
+EVENT_ROUTER_NS_TEMPLATE = "app-sre-event-router.tpl"
+
+LOGGING_NS_PATH = (
+    "{data_dir}/openshift/{cluster}/namespaces/openshift-logging.yaml"
+)
+
+EVENT_ROUTER_NS_PATH = (
+    "{data_dir}/openshift/{cluster}/namespaces/app-sre-event-router.yaml"
+)
+
+EVENT_ROUTER_SAAS_FILE = "{data_dir}/services/observability/cicd/saas/saas-event-router.yaml"
+
 # CUSTOMER_MONITORING
 CUSTOMER_MON_NS_TEMPLATE = "openshift-customer-monitoring.CLUSTERNAME.tpl"
 
@@ -419,3 +434,60 @@ def configure_customer_monitoring(
     create_appsre_observability_ns(data_dir, cluster)
     configure_appsre_observability_ns(data_dir, cluster)
     add_cluster_to_observability_role(data_dir, cluster)
+
+
+
+def create_logging_stack_ns(
+    data_dir: str, cluster: str, environment: str
+) -> None:
+    """Function to create the customer monitoring namespace"""
+    ns_path = LOGGING_NS_PATH.format(data_dir=data_dir, cluster=cluster)
+    create_file_from_template(
+        ns_path, LOGGING_NS_TEMPLATE, cluster=cluster, environment=environment
+    )
+
+def create_event_router_ns(
+    data_dir: str, cluster: str, environment: str
+) -> None:
+    """Function to create the customer monitoring namespace"""
+    ns_path = EVENT_ROUTER_NS_PATH.format(data_dir=data_dir, cluster=cluster)
+    create_file_from_template(
+        ns_path, EVENT_ROUTER_NS_TEMPLATE, cluster=cluster, environment=environment
+    )
+
+
+def add_event_router_entry_to_saas(
+    data_dir: str, cluster: str
+) -> None:
+    """Function to add customer monitoring namespace target in the
+    observability saas manifest
+    """
+
+    saas_path = EVENT_ROUTER_SAAS_FILE.format(data_dir=data_dir)
+    entry = {
+        "namespace": {
+            "$ref": f"/openshift/{cluster}/namespaces/app-sre-event-router.yaml",
+        },
+    }
+    _add_target_to_resource_template(saas_path, "event-router", entry, True)
+
+
+def configure_cluster_logging(
+    data_dir: str, cluster: str, environment: str
+) -> None:
+    """Configure customer monitoring namespace"""
+    _check_data_and_cluster_exists(data_dir, cluster)
+
+    if not os.path.exists(data_dir):
+        raise FileNotFoundError(f"{data_dir} does not exist")
+
+    if not cluster_config_exists(data_dir, cluster):
+        raise FileNotFoundError(
+            f"Cluster configuration doesn't exist for "
+            f"{cluster}, check if the cluster name was "
+            f"mistyped"
+        )
+
+    create_logging_stack_ns(data_dir, cluster, environment)
+    create_event_router_ns(data_dir, cluster, environment)
+    add_event_router_entry_to_saas(data_dir, cluster)

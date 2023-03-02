@@ -551,6 +551,18 @@ glitchtipProjects:
 - $ref: <glitchtip project datafile (`/dependencies/glitchtip-project-1.yml`), for example `/dependencies/glitchtip/projects/glitchtip-production/app-interface-prod.yml`
 ```
 
+By referencing the project in a namespace, the Glitchtip project DSN can be consumed via a Kubernetes secret. The secret has the following structure:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: <project name>-dsn
+data:
+  dsn: <base64 encoded DSN>
+  security_endpoint: <base64 encoded security endpoint>
+```
+E.g., the [app-interface-prod](data/dependencies/glitchtip/projects/glitchtip-production/app-interface-prod.yml) is referenced in [the app-interface-production-int namespace](data/services/app-interface/namespaces/app-interface-production-int.yml), so the DSN can be retrieved via the `app-interface-production-dsn` secret in the namespace.
 
 ### Create a Glitchtip Team (`/dependencies/glitchtip-team-1.yml`)
 
@@ -1097,9 +1109,10 @@ The TOTP engine cannot be interacted with via the Vault UI. The Vault CLI or API
   vault read totp/<my-team>/code/<some-provider>
   ```
 
-### Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform
-
-DNS Zones can be managed in app-interface. A DNS zone follows [this
+### Manage DNS Zones via App-Interface (`/*/dns-zone-1.yml`) using Terraform
+We currently support Route53 DNS zones and Cloudflare DNS zones.
+#### Route53 DNS Zones
+ A Route53 DNS zone follows [this
 JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/dependencies/dns-zone-1.yml).
 
 - `name`: A name for the DNS zone
@@ -1221,39 +1234,76 @@ records:
   - ns-1265.awsdns-30.org
   - ns-1880.awsdns-43.co.uk
 ```
+#### Cloudflare DNS Zones
+ A Cloudflare DNS zone follows [this
+JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/cloudflare/dns-zone-1.yml).
 
-### Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)
+- `identifier`: A globally unique name for the zone.
+- `zone`: Actual domain name.
+- `plan`: The name of the commercial plan to apply to the zone. Available values: free or enterprise.
+- `account`: Cloudflare account this zone belong to.
+- `type`: Available values: full, partial. This field should always be full. Full zone implies that DNS is hosted with Cloudflare. A partial zone is typically a partner-hosted zone or a CNAME setup.
+- `records`: A list of `record`. All parameters of the `record` match those of Terraform's [cloudflare_record](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/record) with an additional required parameter `identifier` that servers as a unique (within zone) identification for each record. The number of total records within a zone is limited to 1000, see Performance section below. 
 
-Dyn DNS Traffic Director is a service offered by Oracle Dyn DNS that allows for returning different DNS responses based on weights and rules. It is used by AppSRE to do DNS-based traffic balancing to multiple clusters.
+\* Note that the `identifier` field doesn't allow underscore, but it is a internal variable that we only recommend to be consistent with the record name. Feel free to replace it with dash if underscore is part of the name.
 
-We currently support configuring Traffic Director services under the following two hostnames:
-- gslb.stage.openshift.com
-- gslb.openshift.com
-
-- `name`: A name for the Traffic Director service. We require that this is the same name as the DNS entry to be used. (eg: foo.gslb.stage.openshift.com)
-- `ttl`: The default TTL for the Traffic Director records
-- `records`: A list of `record` (currently only CNAMEs are supported)
-  - One of the following:
-    - `hostname`: The hostname for the CNAME record
-    - `cluster`:  A reference to a cluster file. The cluster's ELB hostname will then be used as the hostname for the record
-  - `weight`: The weight for the record. Responses will be proportional to the weight of all other records
-
-Example:
+Example DNS zone resource:
 ```yaml
 ---
-$schema: /dependencies/dyn-traffic-director-1.yml
+$schema: /cloudflare/dns-zone-1.yml
 
-name: api.gslb.stage.openshift.com
-ttl: 30
+labels: {}
+
+identifier: devshift
+
+zone: devshift.net
+
+type: full
+
+account:
+ $ref: /cloudflare/app-sre/account.yml
 
 records:
-- cluster:
-    $ref: /openshift/app-sre-stage-01/cluster.yml
-  weight: 100
-- cluster:
-    $ref: /openshift/appsres04ue2/cluster.yml
-  weight: 100
+# Simple CNAME record visualai.devshift.net
+  - name: visualai
+    identifier: visualai
+    type: CNAME
+    ttl: 300
+    value: visual-app-interface.devshift.net
+    proxied: true # All requests intended for proxied hostnames will go to Cloudflare first and then be forwarded to your origin server. This only applies to A, AAAA or CNAME records
+
+# Simple TXT record
+  - name: devshift-txt
+    identifier: devshift-txt
+    type: TXT
+    ttl: 300
+    value: printer=lpr5
+
+# Simple MX record
+  - name: devshift-mx
+    identifier: devshift-mx1
+    type: MX 
+    ttl: 300
+    value: mailhost1.example.com
+    priority: 1
+
+# NS records with multiple values
+  - name: devshift-ns
+    identifier: devshift-ns1
+    type: NS 
+    ttl: 300
+    value: ns.example.com
+    priority: 1
+  - name: devshift-ns
+    identifier: devshift-ns3
+    type: NS 
+    ttl: 300
+    value: ns3.example.com
+    priority: 3
 ```
+
+##### Performance
+MR checks and reconciliation times will grow roughly linearly with zone size. We tested creating a zone with 1000 records took around 5 minutes.
 
 ### Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform
 
@@ -2135,6 +2185,45 @@ Such an entry will enable this specific resource to be deleted even if the accou
 
 When submitting a MR to delete a resource which results in a build failure, look at the logs and find lines such as `['delete', '<account_name>', '<resource_type>', '<resource_name>']`. For each line (will also include an error such as `'delete' action is not enabled.`) - add an entry to the `deletionApprovals` list.
 
+### Manage Cloudflare user access via App-Interface using Terraform
+
+The `terraform-cloudflare-users` integration is used to provide access to [Cloudflare](https://www.cloudflare.com/) accounts.
+
+In order to provide access to Cloudflare accounts registered in App-Interface, you need to [sign up for a Cloudflare account](https://www.cloudflare.com/) with
+your `@redhat.com` email address. Note, access is only granted to users who register with `@redhat.com` email address.
+
+Once you have registered the user, you can follow these steps.
+1. Add `cloudflare_user` field in your user file (`/access/user-1.yml`) and set it to your registered `@redhat.com` email.
+1. Create a cloudflare role (`/cloudflare/account-role-1.yml`), link it to your account and list the relevant roles. Cloudflare account administrators should have visibility into all roles available through Cloudflare UI. If the cloudflare role already exists you can skip this step.
+
+    Example
+    ```
+    ---
+    $schema: /cloudflare/account-role-1.yml
+
+    account: 
+      $ref: /path/to/your/cloudflare/account.yml
+
+    name: dummy-cloudflare-admin-read-only
+    description: Read-only access to the dummy Cloudflare account
+
+    roles:
+      - 'Administrator Read Only'
+
+    ```
+1. Associate newly created Cloudflare role (`/cloudflare/account-role-1.yml`) to access role (`/access/role-1.yml`) with `cloudflare_access` field.
+
+    Example
+    ```
+    ---
+    $schema: /access/role-1.yml
+    ...
+    cloudflare_access:
+    - $ref: /path/to/your/cloudflare/role.yml
+    ...
+
+    ```
+
 ### Manage Cloudflare resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform
 
 The `terraform-cloudflare-resources` integration is used to provision [Cloudflare](https://www.cloudflare.com/) services.
@@ -2877,8 +2966,6 @@ codeComponents:
   gitlabHousekeeping:
     enabled: true
     rebase: false
-  jira:
-    $ref: /dependencies/jira/issues-redhat-com.yaml
 ...
 ```
 

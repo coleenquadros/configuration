@@ -115,7 +115,7 @@ resourceTemplates:
       MANDRILL_TIMEOUT: 60s
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
-    ref: 67a38b3409ca8f3576dfbc684ad90b3bd552cf3e
+    ref: 8c3c15da346a95c52fabed183dc6fc995a6a5766
     promotion:
       auto: true
       subscribe:
@@ -149,9 +149,11 @@ resourceTemplates:
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
       MANDRILL_TIMEOUT: 60s
       AUTOMATIC_BAN: 'false'
+      RBAC_BASE_URL: https://mtls.internal.console.redhat.com
+      RBAC_PROXY: ''
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
-    ref: 67a38b3409ca8f3576dfbc684ad90b3bd552cf3e
+    ref: 9c26744404ca7fca1d91932b63935db40ccf6543
     parameters:
       MEMORY_LIMIT: 4Gi
       REPLICAS: 1
@@ -172,6 +174,8 @@ resourceTemplates:
       DB_QUERY_READ_TIMEOUT_SERVER: '300000'
       DB_QUERY_WRITE_TIMEOUT_SERVER: '60000'
       MANDRILL_TIMEOUT: 60s
+      RBAC_BASE_URL: https://mtls.internal.console.redhat.com
+      RBAC_PROXY: ''
 - name: uhc-account-manager
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
   path: /templates/service-template.yml
@@ -330,7 +334,7 @@ resourceTemplates:
       UMB_TIMEOUT: 5m
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
-    ref: 67a38b3409ca8f3576dfbc684ad90b3bd552cf3e
+    ref: 8c3c15da346a95c52fabed183dc6fc995a6a5766
     promotion:
       auto: true
       subscribe:
@@ -359,7 +363,8 @@ resourceTemplates:
       SUSPEND_RBAC_RECONCILER_CRON: 'false'
       RBAC_RECONCILER_DRY_RUN: 'false'
       RBAC_RECONCILER_CRON_SCHEDULE: 15,45 * * * *
-      RBAC_RECONCILER_LIMIT: 3000
+      RBAC_RECONCILER_LIMIT: -1
+      RBAC_RECONCILER_WORKER_COUNT: 8
       WAREHOUSE_DELETED_CLUSTERS_DRY_RUN: 'false'
       WAREHOUSE_DELETED_CLUSTERS_MAX_AMOUNT: 1000
       CLUSTER_TRANSFERS_RECONCILER_DRY_RUN: 'false'
@@ -510,16 +515,19 @@ resourceTemplates:
       AUTOMATIC_BAN: 'false'
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
-    ref: 67a38b3409ca8f3576dfbc684ad90b3bd552cf3e
+    ref: 9c26744404ca7fca1d91932b63935db40ccf6543
     parameters:
       MEMORY_LIMIT: 4Gi
       REPLICAS: 6
       API_REPLICA_COUNT_MIN: '6'
       API_REPLICA_COUNT_MAX: '6'
       RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.redhat.com/candlepin
-      SUSPEND_RBAC_RECONCILER_CRON: 'true'
-      RBAC_RECONCILER_DRY_RUN: 'true'
-      RBAC_RECONCILER_LIMIT: 1
+      SUSPEND_RBAC_RECONCILER_CRON: 'false'
+      RBAC_RECONCILER_DRY_RUN: 'false'
+      RBAC_RECONCILER_LIMIT: 1000
+      RBAC_BASE_URL: https://mtls.internal.console.redhat.com
+      RBAC_PROXY: ''
+      RBAC_RECONCILER_CRON_SCHEDULE: 15,45 * * * *
       WAREHOUSE_DELETED_CLUSTERS_DRY_RUN: 'false'
       WAREHOUSE_DELETED_CLUSTERS_MAX_AMOUNT: 1000
       CLUSTER_REG_RATE_LIMIT: 250
@@ -577,7 +585,7 @@ resourceTemplates:
       SUBSCRIPTION_STATUS_RECONCILER_DRY_RUN: 'false'
       SUBSCRIPTION_STATUS_RECONCILER_MAX_DELETE_CLUSTERS: '1'
       MANDRILL_TIMEOUT: 60s
-      UMB_CONSUMER_REPLICAS: '1'
+      UMB_CONSUMER_REPLICAS: '3'
       UMB_URL: umb.api.redhat.com:61612
       UMB_USER_QUEUE: Consumer.uhcaccountmanager.ocm-user-consumer
       UMB_USER_TOPIC: VirtualTopic.canonical.user
@@ -585,9 +593,9 @@ resourceTemplates:
       ENABLE_UMB_USER_CONSUMER_MOCK: 'false'
       UMB_SUBSCRIPTION_QUEUE: Consumer.uhcaccountmanager.ocm-subscription-consumer
       UMB_SUBSCRIPTION_TOPIC: VirtualTopic.canonical.subscription
-      UMB_SUBSCRIPTION_CONSUMER_DRY_RUN: 'true'
+      UMB_SUBSCRIPTION_CONSUMER_DRY_RUN: 'false'
       ENABLE_UMB_SUBSCRIPTION_CONSUMER_MOCK: 'false'
-      UMB_TIMEOUT: 1h
+      UMB_TIMEOUT: 5m
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage-sso-test.yml
     ref: master
@@ -670,4 +678,4 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
-    ref: 463cc18c8ef0c58112723c2a465b10adf7d74168
+    ref: 9c26744404ca7fca1d91932b63935db40ccf6543

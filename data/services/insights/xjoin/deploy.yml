@@ -143,7 +143,7 @@ resourceTemplates:
       name: RedHatInsights-xjoin-kafka-connect-gh-build-master
     parameters:
       VERSION: '3.0.0'
-      CPU_REQUESTS: 249m
+      CPU_REQUESTS: 250m
       NUM_REPLICAS: '7'
       MEMORY_REQUESTS: 8Gi
       MEMORY_LIMITS: 10Gi
@@ -179,3 +179,20 @@ resourceTemplates:
       NUM_REPLICAS: '1'
       XMS: 3G
       XMX: 3G
+
+
+- name: xjoin-apicurio
+  path: /clowdapp.yaml
+  url: https://github.com/RedHatInsights/xjoin-apicurio
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-apicurio-gh-build-master
