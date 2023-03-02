@@ -42,12 +42,27 @@ config:
         concurrent_build: true
         # This is a temporary workaround to prevent changes to the hack directory from running MR checks
         pr_check_script_path: |
-            if git diff --quiet --exit-code origin/master..HEAD -- ./hack/; then
-                ./hack/pr_check.sh
-            else
+            #!/bin/bash
+            set -evuo pipefail
+            if ! git diff --quiet origin/master HEAD -- ./hack/; then
+              MERGE_REQUEST_QUERY=api/v4/projects/"$gitlabMergeRequestTargetProjectId"/merge_requests/"$gitlabMergeRequestIid"
+              echo "Checking permission for merge request: $MERGE_REQUEST_QUERY ..."
+              AUTHOR_ID=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "$GITLAB_SERVER/$MERGE_REQUEST_QUERY" | jq '.author.id')
+              if [ "$AUTHOR_ID" == "null" ]; then
+                echo "Author not found!"
+                exit 2
+              fi
+              MEMBER_QUERY=api/v4/groups/app-sre/members/"$AUTHOR_ID"
+              echo "Checking if author is a member of app-sre $MEMBER_QUERY ..."
+              STATUS_CODE=$(curl -s -o /dev/null -w "%{{http_code}}" --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "$GITLAB_SERVER/$MEMBER_QUERY")
+              if [ "$STATUS_CODE" == "200" ]; then
+                echo "Found authorized hack/ folder change, MR will run."
+              else
                 echo "Found unauthorized hack/ folder change, MR will not run."
                 exit 2
+              fi
             fi
+            ./hack/pr_check.sh
         job_type: ''
     - 'gl-periodic-job-app-interface':
         node: app-interface-long-running
