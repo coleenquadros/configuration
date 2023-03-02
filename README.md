@@ -1303,39 +1303,6 @@ records:
 ##### Performance
 MR checks and reconciliation times will grow roughly linearly with zone size. We tested creating a zone with 1000 records took around 5 minutes.
 
-### Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)
-
-Dyn DNS Traffic Director is a service offered by Oracle Dyn DNS that allows for returning different DNS responses based on weights and rules. It is used by AppSRE to do DNS-based traffic balancing to multiple clusters.
-
-We currently support configuring Traffic Director services under the following two hostnames:
-- gslb.stage.openshift.com
-- gslb.openshift.com
-
-- `name`: A name for the Traffic Director service. We require that this is the same name as the DNS entry to be used. (eg: foo.gslb.stage.openshift.com)
-- `ttl`: The default TTL for the Traffic Director records
-- `records`: A list of `record` (currently only CNAMEs are supported)
-  - One of the following:
-    - `hostname`: The hostname for the CNAME record
-    - `cluster`:  A reference to a cluster file. The cluster's ELB hostname will then be used as the hostname for the record
-  - `weight`: The weight for the record. Responses will be proportional to the weight of all other records
-
-Example:
-```yaml
----
-$schema: /dependencies/dyn-traffic-director-1.yml
-
-name: api.gslb.stage.openshift.com
-ttl: 30
-
-records:
-- cluster:
-    $ref: /openshift/app-sre-stage-01/cluster.yml
-  weight: 100
-- cluster:
-    $ref: /openshift/appsres04ue2/cluster.yml
-  weight: 100
-```
-
 ### Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform
 
 [teams](/data/teams) contains all the teams that are being services by the App-SRE team. Inside of those directories, there is a `users` folder that lists all the `users` that are linked to that team. Each `user` has a list of assiciated `roles`. A `role` can be used to grant AWS access to a user, by adding the `user` to an AWS `group`.
