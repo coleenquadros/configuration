@@ -96,6 +96,21 @@ spec:
         message: "RHSM: more than 3 restarts in prod happened in that last 3 hours"
         runbook: 'https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubePodCrashLooping.md'
 
+    - alert: RhsmJobFailedToComplete
+      expr: |
+        sum by (job_name) (kube_job_status_failed{namespace="rhsm-prod"}) - sum by (job_name) (kube_job_status_failed{namespace="rhsm-prod"} offset 1h) > 0
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: rhsm
+        exported_service: rhsm-subscriptions
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+        message: "RHSM: {{ $labels.job_name }} job failed in production"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/RhsmJobFailedToComplete.md"
+
     - alert: RhsmConduitValidationErrors
       expr: sum(increase(inventory_ingress_add_host_failures_total{cause="ValidationException", reporter="rhsm-conduit", namespace=~"host-inventory-.*"}[5m])) > 0
       labels:
