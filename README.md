@@ -551,6 +551,18 @@ glitchtipProjects:
 - $ref: <glitchtip project datafile (`/dependencies/glitchtip-project-1.yml`), for example `/dependencies/glitchtip/projects/glitchtip-production/app-interface-prod.yml`
 ```
 
+By referencing the project in a namespace, the Glitchtip project DSN can be consumed via a Kubernetes secret. The secret has the following structure:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: <project name>-dsn
+data:
+  dsn: <base64 encoded DSN>
+  security_endpoint: <base64 encoded security endpoint>
+```
+E.g., the [app-interface-prod](data/dependencies/glitchtip/projects/glitchtip-production/app-interface-prod.yml) is referenced in [the app-interface-production-int namespace](data/services/app-interface/namespaces/app-interface-production-int.yml), so the DSN can be retrieved via the `app-interface-production-dsn` secret in the namespace.
 
 ### Create a Glitchtip Team (`/dependencies/glitchtip-team-1.yml`)
 
