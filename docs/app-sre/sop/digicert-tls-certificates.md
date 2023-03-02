@@ -8,7 +8,7 @@ The IT Operations team is responsible for TLS certificates.
 
 Their IRC channel at irc.devel.redhat.com is #iso (on-call can be pinged for urgent requests)
 
-Their Google Chat room is `IT Utility & Infra Services (UIS)`
+Their Google Chat room is `IT-IAM`
 
 # 2. Process
 
