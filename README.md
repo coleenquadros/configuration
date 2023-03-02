@@ -1245,6 +1245,8 @@ JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/cloud
 - `type`: Available values: full, partial. This field should always be full. Full zone implies that DNS is hosted with Cloudflare. A partial zone is typically a partner-hosted zone or a CNAME setup.
 - `records`: A list of `record`. All parameters of the `record` match those of Terraform's [cloudflare_record](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/record) with an additional required parameter `identifier` that servers as a unique (within zone) identification for each record. The number of total records within a zone is limited to 1000, see Performance section below. 
 
+\* Note that the `identifier` field doesn't allow underscore, but it is a internal variable that we only recommend to be consistent with the record name. Feel free to replace it with dash if underscore is part of the name.
+
 Example DNS zone resource:
 ```yaml
 ---
@@ -1271,29 +1273,29 @@ records:
     proxied: true # All requests intended for proxied hostnames will go to Cloudflare first and then be forwarded to your origin server. This only applies to A, AAAA or CNAME records
 
 # Simple TXT record
-  - name: devshift_txt
-    identifier: devshift_txt
+  - name: devshift-txt
+    identifier: devshift-txt
     type: TXT
     ttl: 300
     value: printer=lpr5
 
 # Simple MX record
-  - name: devshift_mx
-    identifier: devshift_mx1
+  - name: devshift-mx
+    identifier: devshift-mx1
     type: MX 
     ttl: 300
     value: mailhost1.example.com
     priority: 1
 
 # NS records with multiple values
-  - name: devshift_ns
-    identifier: devshift_ns1
+  - name: devshift-ns
+    identifier: devshift-ns1
     type: NS 
     ttl: 300
     value: ns.example.com
     priority: 1
-  - name: devshift_ns
-    identifier: devshift_ns3
+  - name: devshift-ns
+    identifier: devshift-ns3
     type: NS 
     ttl: 300
     value: ns3.example.com
