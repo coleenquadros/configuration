@@ -1,0 +1,86 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: vault-dev
+description: Internal dev namespace for vault
+
+cluster:
+  $ref: /openshift/appsres03ue1/cluster.yml
+
+app:
+  $ref: /services/vault.devshift.net/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/dev.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsres03ue1.yml
+
+managedRoles: true
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: vault-locking-dev
+    defaults: /terraform/resources/app-sre/production/rds-4-vault.yml
+    output_resource_name: vault-rds
+    enhanced_monitoring: true
+    overrides:
+      maintenance_window: Thu:10:00-Thu:11:00
+      apply_immediately: true
+  - provider: s3
+    identifier: app-sre-vault-dev
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: app-sre-vault-s3
+  - provider: s3
+    identifier: app-sre-vault-dev-backup
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: app-sre-vault-s3-backup
+  - provider: s3
+    identifier: app-sre-vault-dev-audit
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: app-sre-vault-s3-audit
+  - provider: kms
+    identifier: app-sre-vault-dev
+    output_resource_name: app-sre-vault-kms
+    defaults: resources/terraform/resources/app-sre/development/kms-vault-dev.yml
+  - provider: aws-iam-service-account
+    identifier: vault-dev
+    variables:
+      bucket: app-sre-vault-dev
+      region: us-east-1
+      endpoint: s3.us-east-1.amazonaws.com
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:ListBucket"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${bucket}",
+              "arn:aws:s3:::${bucket}-backup",
+              "arn:aws:s3:::${bucket}-audit",
+              "arn:aws:s3:::${bucket}/*",
+              "arn:aws:s3:::${bucket}-backup/*",
+              "arn:aws:s3:::${bucket}-audit/*"
+            ]
+          }
+        ]
+      }
+    output_resource_name: vault-dev-creds
