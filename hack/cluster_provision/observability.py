@@ -1,18 +1,19 @@
 """Generate Observability configs for a cluster."""
-from io import StringIO
+import json
+import logging
 import os
 import sys
-import logging
-import json
-from typing import Any, Mapping, MutableMapping
+from io import StringIO
+from typing import Any, Dict, Mapping, MutableMapping
+from urllib.parse import urlparse
 
 from .common import cluster_config_exists
-from .common import get_base_yaml
-from .common import render_template_as_str
-from .common import read_yaml_from_file
-from .common import write_yaml_to_file
-from .common import get_yaml_attribute
 from .common import create_file_from_template
+from .common import get_base_yaml
+from .common import get_yaml_attribute
+from .common import read_yaml_from_file
+from .common import render_template_as_str
+from .common import write_yaml_to_file
 
 log = logging.getLogger(__name__)
 
@@ -71,6 +72,8 @@ NGINX_SAAS_FILE = "{data_dir}/services/observability/cicd/saas/" "saas-nginx-pro
 GRAFANA_DATASOURCES_PATH = (
     "{data_dir}/../resources/observability/grafana/" "grafana-datasources.secret.yaml"
 )
+GRAFANA_SHARED_RESOURCES_PATH = "{data_dir}/services/observability/shared-resources/grafana.yml"
+GRAFANA_CLUSTERS_SOURCE_PATH = "{data_dir}/openshift"
 
 
 def _check_data_and_cluster_exists(data_dir: str, cluster: str) -> None:
@@ -338,6 +341,43 @@ def _get_grafana_json_datasources(file_path: str):
     yaml_obj.dump(datasources_yaml, stream)
     json_data = json.loads(stream.getvalue())
     return json_data
+
+
+def _get_cluster_name_slugs(clusters_source_path: str) -> Dict[str, str]:
+    filepaths = []
+    for path, _, filenames in os.walk(clusters_source_path):
+        for filename in filenames:
+            filepaths.append(os.path.join(path, filename))
+
+    name_slugs = {}
+    for file in filepaths:
+        content = read_yaml_from_file(file)
+        if content["$schema"] == "/openshift/cluster-1.yml":
+            name = content["name"]
+            console_url: str = content["consoleUrl"]
+            hostname = urlparse(console_url).hostname
+            slug = ".".join(hostname.split(".")[2:5])
+            name_slugs[name] = slug
+    return name_slugs
+
+
+def _patch_grafana_shared_resources_clusters(grafana_shared_resources_path: str, name_slugs: Dict[str, str]) -> None:
+    grafana_shared_resources = read_yaml_from_file(grafana_shared_resources_path)
+
+    for resource in grafana_shared_resources["openshiftResources"]:
+        if resource["path"] == "/observability/grafana/grafana-datasources.secret.yaml":
+            for cluster in resource["variables"]["clusters"]:
+                cluster["slug"] = name_slugs[cluster["name"]]
+
+    write_yaml_to_file(grafana_shared_resources_path, grafana_shared_resources)
+
+
+def refresh_grafana_datasources(data_dir: str) -> None:
+    """Refresh grafana datasources"""
+    clusters_source_path = GRAFANA_CLUSTERS_SOURCE_PATH.format(data_dir=data_dir)
+    name_slugs = _get_cluster_name_slugs(clusters_source_path)
+    grafana_shared_resources_path = GRAFANA_SHARED_RESOURCES_PATH.format(data_dir=data_dir)
+    _patch_grafana_shared_resources_clusters(grafana_shared_resources_path, name_slugs)
 
 
 def configure_grafana_datasources(data_dir: str, cluster: str) -> None:
