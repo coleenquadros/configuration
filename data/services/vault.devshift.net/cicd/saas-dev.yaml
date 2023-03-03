@@ -1,0 +1,78 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: vault
+
+name: saas-vault-dev
+description: SaaS tracking file for Vault DEV
+
+app:
+  $ref: /services/vault.devshift.net/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+deployResources:
+  requests:
+    cpu: 600m
+    memory: 1800Mi
+  limits:
+    cpu: 600m
+    memory: 1800Mi
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+# vault
+- Deployment
+- Service
+- CronJob
+- ServiceAccount
+
+imagePatterns:
+# vault
+- quay.io/app-sre/vault
+- quay.io/app-sre/fluentd
+- quay.io/app-sre/vault-exporter
+- quay.io/app-sre/mesosphere-aws-cli:1.14.5
+- quay.io/app-sre/busybox
+- quay.io/app-sre/ubi8-ubi-minimal
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+# vault
+- name: vault-devshift-net
+  url: https://gitlab.cee.redhat.com/service/vault-devshift-net
+  path: /openshift-vault.yaml
+  targets:
+  - namespace:
+      $ref: /services/vault.devshift.net/namespaces/vault-dev-internal.yml
+    ref: master
+    parameters:
+      VAULT_URL: https://vault.dev.devshift.net
+      REPLICAS: 3
+      IMAGE_VAULT_TAG: 1.9.10
+      IMAGE_FLUENTD_TAG: 5b4b7d3
+      IMAGE_VAULT_EXPORTER_TAG: f851984
+      VAULT_RESOURCES:
+        requests:
+          cpu: '500m'
+          memory: '1.0Gi'
+        limits:
+          cpu: '1'
+          memory: '1.5Gi'
+      VAULT_BACKUP_RESOURCES:
+        requests:
+          cpu: '400m'
+          memory: '256Mi'
+        limits:
+          cpu: '600m'
+          memory: '512Mi'
