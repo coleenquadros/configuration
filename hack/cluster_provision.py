@@ -98,6 +98,13 @@ def create_obs_grafana_datasources(ctx, cluster: str) -> None:
     observability.configure_grafana_datasources(ctx.obj["datadir"], cluster)
 
 
+@cli.command()
+@click.pass_context
+def refresh_obs_grafana_datasources(ctx) -> None:
+    """Refresh APP-SRE observability shared grafana data sources"""
+    observability.refresh_grafana_datasources(ctx.obj["datadir"])
+
+
 if __name__ == "__main__":
     # pylint: disable=no-value-for-parameter
     cli()

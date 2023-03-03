@@ -134,6 +134,60 @@ tests:
           app_team: rhsm
           exported_service: rhsm-subscriptions
 
+- interval: 30m
+  input_series:
+    - series: 'kube_job_status_failed{job_name="swatch-metrics-sync-123", namespace="rhsm-prod"}'
+      values: "0x10"
+    - series: 'kube_job_status_failed{job_name="swatch-tally-hourly-456", namespace="rhsm-prod"}'
+      # A job that fails at 30 minutes but runs successfully thereafter.  This series is 0 1 1 1 1 ...
+      values: "0 1x9"
+    - series: 'kube_job_status_failed{job_name="swatch-tally-purge-789", namespace="rhsm-prod"}'
+      # A job that is failing every half hour.  This series is 0 1 2 3 4 ...
+      values: "0 1+1x8"
+  alert_rule_test:
+    - eval_time: 1h
+      alertname: RhsmJobFailedToComplete
+      exp_alerts:
+      - exp_labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: rhsm
+          exported_service: rhsm-subscriptions
+          job_name: swatch-tally-hourly-456
+        exp_annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+          message: "RHSM: swatch-tally-hourly-456 job failed in production"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/RhsmJobFailedToComplete.md"
+      - exp_labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: rhsm
+          exported_service: rhsm-subscriptions
+          job_name: swatch-tally-purge-789
+        exp_annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+          message: "RHSM: swatch-tally-purge-789 job failed in production"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/RhsmJobFailedToComplete.md"
+    - eval_time: 3h
+      alertname: RhsmJobFailedToComplete
+      exp_alerts:
+      - exp_labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: rhsm
+          exported_service: rhsm-subscriptions
+          job_name: swatch-tally-purge-789
+        exp_annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/lkPhH-1Zk/subscription-watch?orgId=1"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rhsm-prod/deployments"
+          message: "RHSM: swatch-tally-purge-789 job failed in production"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/RhsmJobFailedToComplete.md"
+
 - interval: 5m
   input_series:
     - series: inventory_ingress_add_host_failures_total{cause="ValidationException", reporter="rhsm-conduit", namespace="host-inventory-prod"}
