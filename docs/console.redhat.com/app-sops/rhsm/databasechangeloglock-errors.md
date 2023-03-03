@@ -1,4 +1,3 @@
-
 # Summary
 -  Pods failing to start up due to liquibase holding the change log lock
 
@@ -44,4 +43,7 @@ delete from databasechangeloglock;
 
 ## Using CronJob
 
-TBD
+The swatch-tally ClowdApp deployment has a means to run a cronjob that has the ability to delete the databasechangeloglock record as described in the manual method above.  To enable this, increment the DB_CHANGELOG_CLEANUP_RUN_NUMBER in data/services/insights/rhsm/cicd/deploy-clowder.yml.
+
+
+Here's a previous example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/60372 
