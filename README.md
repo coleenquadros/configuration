@@ -1185,6 +1185,36 @@ records:
   records:
   - subB.example.com
 
+# Multiple geolocation records
+# See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record#geolocation-routing-policy
+# and https://docs.aws.amazon.com/Route53/latest/APIReference/API_GetGeoLocation.html
+- name: my-geolocation-record
+  type: CNAME
+  ttl: 5
+  geolocation_routing_policy:
+    continent: NA
+  set_identifier: my-geolocation-record_app-sre-stage-01
+  # records:
+  # - subA.example.com
+  _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}
+- name: my-geolocation-record
+  type: CNAME
+  ttl: 5
+  geolocation_routing_policy:
+    continent: EU
+  set_identifier: my-geolocation-record_appsres04ue2
+  _target_cluster: {$ref: /openshift/appsres04ue2/cluster.yml}
+# This (country: "*") defines the default geolocation record
+# See https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-values-geo.html#rrsets-values-geo-location
+- name: my-geolocation-record
+  type: CNAME
+  ttl: 5
+  geolocation_routing_policy:
+    country: "*"
+  set_identifier: my-geolocation-record_default
+  _target_cluster: {$ref: /openshift/appsres04ue2/cluster.yml}
+
+
 # Records with aliases (let you route traffic to selected AWS resources or from one record in a hosted zone to another record)
 - name: my-aliased-record
   type: A
