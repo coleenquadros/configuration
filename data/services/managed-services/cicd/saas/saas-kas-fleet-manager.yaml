@@ -97,6 +97,22 @@ resourceTemplates:
       OBSERVABILITY_REMOTE_WRITE_PROXY_IMAGE_NAME: quay.io/rhoas/observability-remote-write-proxy
       OBSERVABILITY_REMOTE_WRITE_PROXY_IMAGE_TAG: a5dab1f
       OBSERVABILITY_REMOTE_WRITE_PROXY_IMAGE_PULL_POLICY: IfNotPresent
+  - namespace:
+      $ref: /services/managed-services/namespaces/managed-services-production.yml
+    ref: 93f55093f17fa881f3b3f0016e21c26a02e055b3
+    parameters:
+      OBSERVABILITY_REMOTE_WRITE_PROXY_FORWARD_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka/api/v1/receive
+      OBSERVABILITY_REMOTE_WRITE_PROXY_TOKEN_VERIFICATION_ENABLED: true
+      # Use kas-fleet-manager-envoy K8s Service to communicate to KFM. By
+      # doing this we avoid using public routing and the requests
+      # go through KFM's Envoy sidecar first
+      OBSERVABILITY_REMOTE_WRITE_PROXY_TOKEN_VERIFICATION_URL: https://kas-fleet-manager-envoy.managed-services-production.svc:9001/api/kafkas_mgmt/v1/obs-proxy-verification
+      OBSERVABILITY_REMOTE_WRITE_PROXY_TOKEN_VERIFICATION_SERVICE_SERVING_CA_ENABLED: true
+      OBSERVABILITY_REMOTE_WRITE_PROXY_OIDC_ENABLED: true
+      OBSERVABILITY_REMOTE_WRITE_PROXY_REPLICAS: 3
+      OBSERVABILITY_REMOTE_WRITE_PROXY_IMAGE_NAME: quay.io/rhoas/observability-remote-write-proxy
+      OBSERVABILITY_REMOTE_WRITE_PROXY_IMAGE_TAG: a5dab1f
+      OBSERVABILITY_REMOTE_WRITE_PROXY_IMAGE_PULL_POLICY: IfNotPresent
 - name: kas-fleet-manager
   url: https://gitlab.cee.redhat.com/service/kas-fleet-manager
   path: /templates/service-template.yml
