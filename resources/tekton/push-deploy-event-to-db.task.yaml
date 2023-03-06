@@ -10,6 +10,10 @@ spec:
       type: string
     - name: task_status
       type: string
+    - name: trigger_integration
+      type: string
+    - name: trigger_reason
+      type: string
   steps:
     - env:
         - name: PGHOST
@@ -37,6 +41,10 @@ spec:
             secretKeyRef:
               name: deploy-events-db
               key: db.name
+        - name: trigger_reason
+          value: $(params.trigger_reason)
+        - name: trigger_integration
+          value: $(params.trigger_integration)
       image: 'registry.redhat.io/rhel8/postgresql-13:1-72'
       name: push-deploy-event-to-db
       resources:
@@ -55,6 +63,6 @@ spec:
         elif [ "$(params.task_status)" = "Failed" ]; then
           task_status="false"
         fi
-        echo "Storing deploy event for app: $(params.app_name), env: $(params.env_name), status: $task_status, time: $(date -u)"
-        psql -c "insert into deployments(deployment_time, succeeded, app_name, env_name) values(now(), $task_status, '$(params.app_name)', '$(params.env_name)')"
+        echo "Storing deploy event for app: $(params.app_name), env: $(params.env_name), status: $task_status, time: $(date -u), trigger_reason: $(params.trigger_reason), trigger_integration: $(params.trigger_integration)"
+        psql -c "insert into deployments(deployment_time, succeeded, app_name, env_name, trigger_reason, trigger_integration) values(now(), $task_status, '$(params.app_name)', '$(params.env_name)', '$(params.trigger_reason)', '$(params.trigger_integration)')"
 

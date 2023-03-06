@@ -15,9 +15,21 @@ app:
 environment:
   $ref: /products/app-sre/environments/production.yml
 
+clusterAdmin: true
+
 managedResourceTypes:
+- Secret
 - ConfigMap
 
 openshiftResources:
+### Alertmanager configuration
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/alertmanager/alertmanager-instance.secret.yaml
+  validate_alertmanager_config: true
+  enable_query_support: true
+  variables:
+    name: alertmanager-user-workload
+    jiralert_host: jiralert.app-sre-stage.devshift.net
 - provider: resource
   path: /observability/uwm/user-workload-monitoring-config.configmap.yaml
