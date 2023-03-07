@@ -1,6 +1,8 @@
 # Upgrading the OS in Jenkins
 
-DEPRECATION NOTICE: We're moving to EC2 Fleet Manager to manage worker nodes dynamically. We have already completed ci-int whereas ci-ext still has static nodes. See [this doc](/docs/app-sre/jenkins-worker-cicd.md) to have more information on how to handle dynamic nodes.
+**IMPORTANT**: Only controller nodes must be upgraded using the `node-upgrade`
+playbook. The worker nodes are based on static AMIs. See [this doc](/docs/app-sre/jenkins-worker-cicd.md)
+to have more information on how to handle dynamic nodes.
 
 To upgrade RPMs in ci-int, ci-ext and their nodes, use the
 [`node-upgrade`](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-upgrade.yml)
@@ -10,10 +12,9 @@ playbook, like
 $ ansible-playbook playbooks/node-upgrade-restart.yml -e upgradehost=<name_of_host>
 ```
 
-It is mostly safe to do this for controllers and nodes at the same
-time. Once the controller and the nodes for an instance have finished
+Once the controller for an instance has finished
 their upgrade, use the
-[`node-rebot`](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-reboot.yml)
+[`node-reboot`](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-reboot.yml)
 playbook **on the controller only** to safely reboot the entire fleet
 while respecting the most user jobs.
 

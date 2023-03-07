@@ -1,7 +1,5 @@
 # Keeping the OS up to date in Jenkins
 
-DEPRECATION NOTICE: We're moving to EC2 Fleet Manager to manage worker nodes dynamically. We have already completed ci-int whereas ci-ext still has static nodes. See [this doc](/docs/app-sre/jenkins-worker-cicd.md) to have more information on how to handle dynamic nodes.
-
 [TOC]
 
 ## Introduction
@@ -32,6 +30,10 @@ particular, the
 [`node-upgrade`](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-upgrade.yml)
 playbook upgrades all packages in a given node, but won't trigger any
 reboots.
+
+**IMPORTANT**: Only controller nodes must be upgraded using the `node-upgrade`
+playbook. The worker nodes are based on static AMIs. See [this doc](/docs/app-sre/jenkins-worker-cicd.md)
+to have more information on how to handle dynamic nodes.
 
 ## Orchestration
 
