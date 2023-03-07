@@ -304,6 +304,31 @@
     <<: *gh_build_master
 
 - job-template:
+    id: 'insights-gh-build-master-stable'
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    slack_channel_notification: 'consoledot-development-fails'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+    publishers:
+    - slack: 
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
+    - naginator:
+        max-failed-builds: 3
+    <<: *gh_build_master
+
+- job-template:
     id: 'insights-gh-pr-check'
     name: '{gh_org}-{gh_repo}-pr-check'
     branch: "master"
