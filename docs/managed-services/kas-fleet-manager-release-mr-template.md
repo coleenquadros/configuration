@@ -16,7 +16,11 @@ chore: update kas-fleet-manager <prod/stage> version to <new-version>
 
 
 ## Passing E2E Tests in Stage:
-<link-to-report-portal-e2e-tests>
+### AWS end to end tests release gating
+<link-to-report-portal-e2e-test-suite/api-e2e-tests-gating-aws>
+
+### GCP end to end tests release gating
+<link-to-report-portal-e2e-test-suite/api-e2e-tests-gating-gcp>
 
 ## Passing Nightly CI in Stage: 
 <link-to-nightly-ci-tests>
