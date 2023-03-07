@@ -2,8 +2,11 @@
   this template produces an upgrade policy YAML output for
   OSD Fleet Manager hypershift service and management clusters.
   It uses some cluster 'external' labels for the policy values.
-  The label 'ext-hypershift.openshift.io/cluster-type' is mandatory.
-  An optional variable 'schedule' can be used to not use the default
+  The labels 'ext-hypershift.openshift.io/cluster-type' and
+  'ext-hypershift.openshift.io/cluster-sector' are mandatory.
+  Optional variables 'schedule' and 'mutexes' can be used to not use the default.
+
+  tip: test this out with https://ansible.sivel.net/test/
 #}
 workloads:
 - {{ labels['ext-hypershift.openshift.io/cluster-type'] }}
@@ -11,6 +14,10 @@ schedule: "{{ schedule | default('0 11 * * 1-5') }}"
 conditions:
   sector: {{ labels['ext-hypershift.openshift.io/cluster-sector'] }}
   soakDays: {{ labels['ext-hypershift.openshift.io/soak-days'] | default(0) }}
+{%- if mutexes is defined %}
+  mutexes: {{ mutexes | tojson }}
+{%- else %}
   mutexes:
   # Allow one cluster upgrade at a time in a given sector (regardless of whether it is service/management cluster)
   - {{ labels['ext-hypershift.openshift.io/cluster-sector'] | default("null") }}
+{%- endif %}
