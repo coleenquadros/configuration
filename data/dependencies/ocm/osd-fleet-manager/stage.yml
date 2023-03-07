@@ -38,6 +38,18 @@ sectors:
 - name: main
   dependencies:
   - name: canary
+- name: perf
+  dependencies:
+  - name: canary
+- name: perf2
+  dependencies:
+  - name: canary
+- name: perf3
+  dependencies:
+  - name: canary
+- name: chaos
+  dependencies:
+  - name: canary
 upgradePolicyDefaults:
 - name: stage-canary
   matchLabels:
@@ -55,6 +67,16 @@ upgradePolicyDefaults:
     path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
     variables:
       schedule: 0,15,30,45 * * * *
+      soakDays: 0
+# catch all for all other stage sectors (perf, perf2, perf3, chaos)
+# scheduled to happen after 4pm EDT in order to avoid interference with running tests
+- name: stage
+  matchLabels:
+    ext-hypershift.openshift.io/osdfm-managed-cluster: "true"
+  upgradePolicyTemplate:
+    path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
+    variables:
+      schedule: 0,15,30,45 20,21,22,23 * * *
       soakDays: 0
 upgradePolicyClusters:
 - name: hs-sc-ccb0thlad
