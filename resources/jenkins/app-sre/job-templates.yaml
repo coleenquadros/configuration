@@ -156,8 +156,8 @@
     <<: *gl_build_master
 
 - job-template:
-    id: 'jenkins-worker-housekeeping'
-    name: 'jenkins-worker-housekeeping-{tagname}'
+    id: 'node-user-housekeeping'
+    name: 'node-user-housekeeping'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -176,7 +176,7 @@
         eval `ssh-agent -s`
         ssh-add app-sre-bot.key
         export REQUESTS_CA_BUNDLE="/etc/pki/tls/cert.pem"
-        ansible-playbook -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -i hosts/aws_ec2.yaml playbooks/jenkins-worker-housekeeping.yml --tags '{tagname}' -v -D
+        ansible-playbook -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key playbooks/node-user-housekeeping.yml -v -D
     <<: *gl_build_master
 
 - job-template:
@@ -200,7 +200,7 @@
         eval `ssh-agent -s`
         ssh-add app-sre-bot.key
         export REQUESTS_CA_BUNDLE="/etc/pki/tls/cert.pem"
-        ansible-playbook -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -i hosts/aws_ec2.yaml playbooks/jenkins-worker-housekeeping.yml --tags '{tagname}' -v -D
+        ansible-playbook -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key playbooks/jenkins-worker-housekeeping.yml --tags '{tagname}' -v -D
     cron_expression: H */2 * * *
     <<: *gl_timed
 
