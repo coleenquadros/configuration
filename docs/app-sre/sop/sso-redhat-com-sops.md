@@ -81,6 +81,7 @@ It may be necessary to rotate credentials for many reasons: credentials leaks, e
         ```
         @Platypus !oncall it-user
         ```
+- Send email to infosec@redhat.com and provide following details in the body of the email - what leaked, to which service/app, what is potential impact of the leak, what steps have been taken so far and what is the current state of the remediation process
 
 ## Personal token rotation
 
