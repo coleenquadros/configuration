@@ -13,7 +13,9 @@ slack:
   channel: content-services-dev
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-poc-pipelines.appsres03ue1.yaml
-publishJobLogs: true
+# disable publishing job logs until it can work with multiple containers in the same pod:
+# https://issues.redhat.com/browse/APPSRE-7037
+publishJobLogs: false
 imagePatterns:
 - quay.io/cloudservices
 - quay.io/redhatqe
@@ -34,17 +36,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/content-sources/namespaces/content-sources-stage-testing.yml
     ref: 287582e30a03c0d1ef4e7ced8f983199d9c0c096
-    # block auto promotion until qontract-reconcile supports multiple containers
+    # turn off auto promotion until publishJobLogs can be enabled 
     # https://issues.redhat.com/browse/APPSRE-7037
-    #promotion:
-      # auto: false
-      # subscribe:
-      # - content-sources-stage-deploy-success-channel
-      # publish:
-      # - content-sources-stage-post-deploy-tests-internal-success-channel
-      # promotion_data:
-      # - channel: content-sources-stage-deploy-success-channel
-      #   data:
-      #   - parent_saas: content-sources
-      #     target_config_hash: 8270c89b856d0a13
-      #     type: parent_saas_config
+    promotion:
+      auto: false
+      subscribe:
+      - content-sources-stage-deploy-success-channel
+      publish:
+      - content-sources-stage-post-deploy-tests-internal-success-channel
+      promotion_data:
+      - channel: content-sources-stage-deploy-success-channel
+        data:
+        - parent_saas: content-sources
+          target_config_hash: 8270c89b856d0a13
+          type: parent_saas_config
