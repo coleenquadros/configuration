@@ -71,3 +71,38 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
+
+peering:
+  connections:
+  - provider: account-vpc
+    name: backplanes02uw2_app-sre-ci-int
+    vpc:
+      $ref: /aws/app-sre/vpcs/ci-int.yml
+    manageAccountRoutes: true
+    manageRoutes: true
+  - provider: account-tgw
+    name: backplanes02uw2
+    account:
+      $ref: /aws/osd-privatelink-stage/account.yml
+    tags:
+      osd: privatelink
+    manageRoutes: true
+    manageSecurityGroups: true
+    cidrBlock: 172.16.0.0/12
+  - provider: account-vpc-mesh
+    name: backplanes02uw2_osd-bastion-stage
+    account:
+      $ref: /aws/osd-bastion-stage/account.yml
+    tags:
+      osd: backplane
+    manageRoutes: true
+  - provider: cluster-vpc-requester
+    name: backplanes02uw2_appsres03ue1
+    cluster:
+      $ref: /openshift/appsres03ue1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-requester
+    name: backplanes02uw2_appsrep05ue1
+    cluster:
+      $ref: /openshift/appsrep05ue1/cluster.yml
+    manageRoutes: true
