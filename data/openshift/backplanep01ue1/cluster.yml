@@ -1,0 +1,55 @@
+---
+$schema: /openshift/cluster-1.yml
+labels:
+  service: backplane
+
+name: backplanep01ue1
+description: backplanep01ue1 cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+auth: []
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  product: osd
+  provider: aws
+  region: us-east-1
+  channel: candidate
+  version: ''
+  initial_version: 4.12.6-candidate
+  multi_az: true
+  nodes: 9
+  instance_type: m5.xlarge
+  storage: 100
+  load_balancers: 4
+  private: true
+  id: ''
+  external_id: ''
+  provision_shard_id: ''
+  disable_user_workload_monitoring: true
+
+internal: false
+
+upgradePolicy:
+  workloads:
+  - backplane
+  schedule: 0 14 * * 1-4
+  conditions:
+    soakDays: 10
+    mutexes:
+    - backplane-production
+
+network:
+  type: OpenShiftSDN
+  vpc: 10.170.12.0/22
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
