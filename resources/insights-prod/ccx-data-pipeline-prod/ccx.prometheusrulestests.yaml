@@ -77,3 +77,49 @@ tests:
               message: "ccx-upgrades-inference service has been down for two minutes <!subteam^S043UGRST2L>"
               dashboard: "https://grafana.app-sre.devshift.net/d/hFu11qbVz/ccx-upgrade-risks-predictions"
               link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+
+  - interval: 1m
+    input_series:
+      - series: http_requests_total{service="ccx-upgrades-data-eng-svc", status="5xx", handler="/test"}
+        values: '0+10x10'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: CCXUpgradesDataEng500
+        exp_alerts:
+      - eval_time: 5m
+        alertname: CCXUpgradesDataEng500
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              service: insights
+              env: prod
+              app_team: ccx-data-pipeline
+              status: 5xx
+              handler: /test
+            exp_annotations:
+              message: "ccx-upgrades-data-eng service returns too many 500 responses for endpoint /test <!subteam^S043UGRST2L>"
+              dashboard: "https://grafana.app-sre.devshift.net/d/hFu11qbVz/ccx-upgrade-risks-predictions"
+              link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+
+  - interval: 1m
+    input_series:
+      - series: http_requests_total{service="ccx-upgrades-inference-svc", status="5xx", handler="/test"}
+        values: '0+10x10'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: CCXUpgradesInference500
+        exp_alerts:
+      - eval_time: 5m
+        alertname: CCXUpgradesInference500
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              service: insights
+              env: prod
+              app_team: ccx-data-pipeline
+              status: 5xx
+              handler: /test
+            exp_annotations:
+              message: "ccx-upgrades-inference service returns too many 500 responses for endpoint /test <!subteam^S043UGRST2L>"
+              dashboard: "https://grafana.app-sre.devshift.net/d/hFu11qbVz/ccx-upgrade-risks-predictions"
+              link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
