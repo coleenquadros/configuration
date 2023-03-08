@@ -158,6 +158,30 @@ spec:
           message: "ccx-upgrades-inference service returns too many 500 responses for endpoint {{ $labels.handler }} <!subteam^S043UGRST2L>"
           dashboard: "https://grafana.app-sre.devshift.net/d/hFu11qbVz/ccx-upgrade-risks-predictions"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+      - alert: CCXUpgradesDataEngTooSlow
+        expr: avg by(handler)(rate(http_request_duration_seconds_sum{service="ccx-upgrades-data-eng-svc"}[5m]) / rate(http_request_duration_seconds_count{service="ccx-upgrades-data-eng-svc"}[5m])) > 2
+        for: 2m
+        labels:
+          severity: critical
+          service: insights
+          env: prod
+          app_team: ccx-data-pipeline
+        annotations:
+          message: "ccx-upgrades-data-eng service is taking too long to respond for endpoint {{ $labels.handler }} <!subteam^S043UGRST2L>"
+          dashboard: "https://grafana.app-sre.devshift.net/d/hFu11qbVz/ccx-upgrade-risks-predictions"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+      - alert: CCXUpgradesInferenceTooSlow
+        expr: avg by(handler)(rate(http_request_duration_seconds_sum{service="ccx-upgrades-inference-svc"}[5m]) / rate(http_request_duration_seconds_count{service="ccx-upgrades-inference-svc"}[5m])) > 2
+        for: 2m
+        labels:
+          severity: critical
+          service: insights
+          env: prod
+          app_team: ccx-data-pipeline
+        annotations:
+          message: "ccx-upgrades-inference service is taking too long to respond for endpoint {{ $labels.handler }} <!subteam^S043UGRST2L>"
+          dashboard: "https://grafana.app-sre.devshift.net/d/hFu11qbVz/ccx-upgrade-risks-predictions"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
       - alert: CCXNotificationDBLowStorageSpace
         expr: aws_rds_free_storage_space_average{container="cloudwatch-exporter", dbinstance_identifier="ccx-notification-prod", namespace="app-sre-observability-production"} offset 10m < (40 * 1024^3)
         for: 30m
