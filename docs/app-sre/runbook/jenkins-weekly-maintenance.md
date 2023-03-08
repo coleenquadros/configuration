@@ -9,7 +9,7 @@ This SOP captures MANUAL steps for weekly maintenance of AppSRE CI infrastructur
 
 This is done by utilising ansible for running command on many hosts, but you can ssh to each individual hosts and run commands if you prefer.
 
-Examples for ci-int, but same steps ca be used for ci-ext by changing hosts.
+Examples for ci-int, but same steps can be used for ci-ext by changing hosts.
 
 
 ## Architecture
@@ -29,7 +29,7 @@ Examples for ci-int, but same steps ca be used for ci-ext by changing hosts.
     ```
     date -u > packer/FORCE_AMI_BUILD
     ```
-1. Make CI instance offline 
+1. Make CI instance offline
   - go https://ci.int.devshift.net/prepareShutdown/ 
   - Type reason like "Weekly maintenance" and hit the button
   - announce in #sd-app-sre Slack channel
@@ -38,7 +38,8 @@ Examples for ci-int, but same steps ca be used for ci-ext by changing hosts.
   - ssh to host `ssh ci.int.devshift.net`
   - `# systemctl stop jenkins`
   - NOTE: you need to stop service before rebooting controller VM. This is critical step. In case of rebooting without *prior* stopping of jenkins service reboot command may kill _ssh_ daemon and wait jenkins controller for graceful stop upto 35 minutes. That may lock instance for that period of time.
-1. Clean /tmp folder on workers nodes: `ansible -u app-sre-bot --key-file app-sre-bot.key --forks=1 -m shell -a 'rm -rf /tmp/*' -b ci-int-aws-jenkins-worker`
+1. Update kernel on controller: `# yum -y update kernel`
+1. Clean /tmp folder on workers nodes: `# rm -rf /tmp/*`
 1. Schedule reboot of controller: `# shutdown -r 1`
 1. Update the reference of the AMIs in the [ASGs configuration](/data/services/app-sre/namespaces/app-sre-ci.yaml).
 1. Announce end of maintenance in #sd-app-sre Slack channel
@@ -49,3 +50,13 @@ Go to controller console and check all workers node for status and free disk spa
 ## Further reading
 
 See [this doc](/docs/app-sre/jenkins-worker-cicd.md) to have more information on how to handle Jenkins dynamic nodes.
+
+## Aditional steps for monthly maintenance
+
+# It's better to run this cript before stopping jenkins service
+
+We need to cleanup Old Builds data by runing groove script, as described in [Git plugin doc|https://plugins.jenkins.io/git/#plugin-content-remove-git-plugin-buildsbybranch-builddata-script]
+
+1. Open [script console|https://ci.int.devshift.net/manage/script]
+1. Paste content of script
+1. Hit Run button
