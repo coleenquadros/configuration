@@ -1,23 +1,17 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: uhc
-
 name: saas-uhc-clusters-service
 description: SaaS tracking file for UHC Clusters service
-
 app:
   $ref: /services/ocm/cs/app.yml
-
 pipelinesProvider:
   $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
-
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
   channel: team-uhc-info
-
 managedResourceTypes:
 - Deployment
 - Service
@@ -32,7 +26,6 @@ authentication:
   image:
     path: app-sre/quay/app-sre-pull
     field: all
-
 resourceTemplates:
 - name: uhc-clusters-service
   url: https://gitlab.cee.redhat.com/service/uhc-clusters-service
@@ -44,18 +37,14 @@ resourceTemplates:
     REPLICAS: 3
     GATEWAY_URL: unix://localhost/sockets/egress.socket
     TELEMETER_URL: ${TELEMETER_BASE_URL}
-    # SSO_BASE_URL is defined at the environment parameters level
     TOKEN_URL: ${SSO_BASE_URL}/protocol/openid-connect/token
     JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
     VERSION: latest
     DEBUG_PORT: 8081
-    # Observed up to 160M BUT saw OOMKilled at limit of 200Mi.
-    # Increasing liberally, at least until we measure better.
-    MEMORY_REQUEST: "500Mi"
-    MEMORY_LIMIT: "2Gi"
-    # Observed CPU up to 0.100 leader with metrics worker (< 0.050 non-leader).
-    CPU_REQUEST: "200m"
-    CPU_LIMIT: "1"
+    MEMORY_REQUEST: 500Mi
+    MEMORY_LIMIT: 2Gi
+    CPU_REQUEST: 200m
+    CPU_LIMIT: '1'
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
@@ -70,43 +59,43 @@ resourceTemplates:
     parameters:
       ENVIRONMENT: integration
       LOG_LEVEL: info
-      # DO NOT ADD THESE TO PRODUCTION
       DEFAULT_EXPIRATION: 36h
       MAXIMUM_EXPIRATION: 168h
-      # Investigate https://issues.redhat.com/browse/SDB-1327.
-      GODEBUG: ""
-      FORCE_MIGRATION: ""
-      JIRA_PROJECT: "SDAINT"
-      CLUSTER_ERROR_REPORT: "false"
-      JIRA_ISSUE_TYPE: "Bug"
-      # comma separated string of Jira issue components
-      JIRA_COMPONENTS: "Provision & Uninstallation"
+      GODEBUG: ''
+      FORCE_MIGRATION: ''
+      JIRA_PROJECT: SDAINT
+      CLUSTER_ERROR_REPORT: 'false'
+      JIRA_ISSUE_TYPE: Bug
+      JIRA_COMPONENTS: Provision & Uninstallation
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
-    ref: 63c34f1ba844e33b97356e25671ec5cfdbc8e882
+    ref: 55f4f2e5882773e4fc88b0c3888f1a67795b2059
     promotion:
       auto: true
       subscribe:
       - ocm-cs-deployed-int
       publish:
       - ocm-cs-deployed-stage
+      promotion_data:
+      - channel: ocm-cs-deployed-int
+        data:
+        - parent_saas: saas-uhc-clusters-service
+          target_config_hash: e48b3a30d322188f
+          type: parent_saas_config
     parameters:
       ENVIRONMENT: staging
       LOG_LEVEL: info
       GATEWAY_URL: unix://localhost/sockets/egress.socket
-      # DO NOT ADD THESE TO PRODUCTION
       DEFAULT_EXPIRATION: 36h
       MAXIMUM_EXPIRATION: 168h
-      # Investigate https://issues.redhat.com/browse/SDB-1327.
-      GODEBUG: ""
-      PROVISION_SHARD_CLUSTER_LIMIT: "800"
-      FORCE_MIGRATION: ""
-      JIRA_PROJECT: "SDAINT"
-      CLUSTER_ERROR_REPORT: "true"
-      JIRA_ISSUE_TYPE: "Bug"
-      # comma separated string of Jira issue components
-      JIRA_COMPONENTS: ""
-      JIRA_PRODUCT: ""
+      GODEBUG: ''
+      PROVISION_SHARD_CLUSTER_LIMIT: '800'
+      FORCE_MIGRATION: ''
+      JIRA_PROJECT: SDAINT
+      CLUSTER_ERROR_REPORT: 'true'
+      JIRA_ISSUE_TYPE: Bug
+      JIRA_COMPONENTS: ''
+      JIRA_PRODUCT: ''
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage-appsres04ue2.yml
     ref: master
@@ -117,36 +106,30 @@ resourceTemplates:
     parameters:
       ENVIRONMENT: staging
       LOG_LEVEL: info
-      # DO NOT ADD THESE TO PRODUCTION
       DEFAULT_EXPIRATION: 36h
       MAXIMUM_EXPIRATION: 168h
-      # Investigate https://issues.redhat.com/browse/SDB-1327.
-      GODEBUG: ""
-      PROVISION_SHARD_CLUSTER_LIMIT: "1200"
-      FORCE_MIGRATION: ""
-      LEADERSHIP_ENABLED: "false"
-      JIRA_PROJECT: "SDAINT"
-      CLUSTER_ERROR_REPORT: "true"
-      JIRA_ISSUE_TYPE: "Bug"
-      # comma separated string of Jira issue components
-      JIRA_COMPONENTS: ""
-      JIRA_PRODUCT: ""
+      GODEBUG: ''
+      PROVISION_SHARD_CLUSTER_LIMIT: '1200'
+      FORCE_MIGRATION: ''
+      LEADERSHIP_ENABLED: 'false'
+      JIRA_PROJECT: SDAINT
+      CLUSTER_ERROR_REPORT: 'true'
+      JIRA_ISSUE_TYPE: Bug
+      JIRA_COMPONENTS: ''
+      JIRA_PRODUCT: ''
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
     ref: 9ca79a87c6563df6362fce737506fe7ecf1c9874
     parameters:
       ENVIRONMENT: production
       LOG_LEVEL: info
-      # Avoid https://issues.redhat.com/browse/SDB-1327.
       GODEBUG: http2server=0
-      # In case of rollback also change this to 1611852316.
-      FORCE_MIGRATION: ""
-      JIRA_PROJECT: "OHSS"
-      CLUSTER_ERROR_REPORT: "true"
-      JIRA_ISSUE_TYPE: "Incident"
-      # comma separated string of Jira issue components
-      JIRA_COMPONENTS: ""
-      JIRA_PRODUCT: ""
+      FORCE_MIGRATION: ''
+      JIRA_PROJECT: OHSS
+      CLUSTER_ERROR_REPORT: 'true'
+      JIRA_ISSUE_TYPE: Incident
+      JIRA_COMPONENTS: ''
+      JIRA_PRODUCT: ''
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage-sso-test.yml
     ref: master
@@ -157,9 +140,7 @@ resourceTemplates:
     parameters:
       ENVIRONMENT: sso-test
       LOG_LEVEL: info
-      # DO NOT ADD THESE TO PRODUCTION
       DEFAULT_EXPIRATION: 36h
       MAXIMUM_EXPIRATION: 168h
-      # Investigate https://issues.redhat.com/browse/SDB-1327.
-      GODEBUG: ""
-      FORCE_MIGRATION: ""
+      GODEBUG: ''
+      FORCE_MIGRATION: ''
