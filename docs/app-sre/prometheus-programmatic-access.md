@@ -28,7 +28,7 @@ The tenant can self-service by creating MR in app-interface.
 * You can query the target cluster Prometheus API via using sa token as the bearer token.
 
 
-## For service running out of AppSRE clusters but still within our infra (jenkins for example).
+## For service not running on AppSRE clusters
 
 Tenant will need to create a ticket for [App-SRE](https://issues.redhat.com/projects/ASIC/issues)
 
