@@ -20,7 +20,9 @@ slack:
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-poc-pipelines.appsres03ue1.yaml
 
-publishJobLogs: true
+# disable publishing job logs until it can work with multiple containers in the same pod:
+# https://issues.redhat.com/browse/APPSRE-7037
+publishJobLogs: false
 
 imagePatterns:
 - quay.io/cloudservices
@@ -42,11 +44,12 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-stage-testing.yml
-    ref: 7db209d8a6b47def100d7661300c028c8e95b29a
-# Comment promotion until https://issues.redhat.com/browse/APPSRE-7037
-#    promotion:
-#      auto: true
-#      subscribe:
-#      - swatch-producer-aws-stage-deploy-success-channel
-#      publish:
-#      - rhsm-stage-post-deploy-tests-internal-success-channel
+    ref: d4b46f2c1b22f26cc5742c5765cbc89498de46b5
+    # turn off auto promotion until publishJobLogs can be enabled
+    # https://issues.redhat.com/browse/APPSRE-7037
+    promotion:
+      auto: false
+      subscribe:
+      - swatch-producer-aws-stage-deploy-success-channel
+      publish:
+      - rhsm-stage-post-deploy-tests-internal-success-channel
