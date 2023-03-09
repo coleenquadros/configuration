@@ -109,3 +109,27 @@ spec:
             service: cos-fleet-manager
             exported_namespace: managed-connectors-stage
           record: api_inbound_request_count:burnrate5m
+        - expr: |
+            sum(rate(api_inbound_request_duration_count{namespace="managed-connectors-stage",code!~"5.."}[28d]))
+            /
+            sum(rate(api_inbound_request_duration_count{namespace="managed-connectors-stage"}[28d]))
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+          record: api_inbound_request_duration_count:burnrate28d
+        - expr: |
+            sum(rate(api_inbound_request_duration_bucket{job="cos-fleet-manager-metrics",namespace="managed-connectors-stage",le="1",code!~"5.."}[28d]))
+            /
+            sum(rate(api_inbound_request_duration_count{job="cos-fleet-manager-metrics",namespace="managed-connectors-stage"}[28d]))
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+          record: cos_fleetmanager_api_latency_1s_rate:burnrate28d
+        - expr: |
+            sum(rate(api_inbound_request_duration_bucket{job="cos-fleet-manager-metrics",namespace="managed-connectors-stage",le="0.1",code!~"5.."}[28d]))
+            /
+            sum(rate(api_inbound_request_duration_count{job="cos-fleet-manager-metrics",namespace="managed-connectors-stage"}[28d]))
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+          record: cos_fleetmanager_api_latency_1ms_rate:burnrate28d
