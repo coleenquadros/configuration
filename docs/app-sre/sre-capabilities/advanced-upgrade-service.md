@@ -182,3 +182,7 @@ blockedVersions:
 ```
 
 ## Support model
+
+### Validating configuration
+
+<https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-fleet-upgrade-policies.md>
