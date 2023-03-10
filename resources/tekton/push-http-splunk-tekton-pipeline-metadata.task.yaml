@@ -74,15 +74,12 @@ spec:
 
       TIMESTAMP=$(date +%s)
       
-      HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -H "Authorization: Splunk ${SPLUNK_TOKEN}" --header "Content-Type: application/json" "$SPLUNK_URL/services/collector/event" --connect-timeout 10 --data-binary @- <<DATA
+      HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -H "Authorization: Splunk ${SPLUNK_TOKEN}" -H "Content-Type: application/json" "${SPLUNK_URL}/services/collector/event" --connect-timeout 10 --retry 2 --data-binary @- <<DATA
       {"event":{"saas_file_name":"${saas_file_name}","env_name":"${env_name}","aggregate_task_status":"${aggregate_task_status}","tkn_cluster_console_url":"${tkn_cluster_console_url}","tkn_namespace_name":"${tkn_namespace_name}","pipelinerun_name":"${pipelinerun_name}"},"time":"$TIMESTAMP","host":"${tkn_cluster_console_url}","source":"app-sre-tekton-pipelines-$SOURCE_POSTFIX","sourcetype":"json","index":"rh_tekton_pipeline"}
       DATA
       )
 
-      # Suppress errors when sending audit data to Splunk.  Remove this
-      # once https://issues.redhat.com/browse/ASIC-375 is resolved.
-      #EXIT_RC=$?
-      EXIT_RC=0
+      EXIT_RC=$?
 
       log "HTTP RESPONSE CODE: $HTTP_RESPONSE_CODE"
       log "exiting with return code $EXIT_RC"
