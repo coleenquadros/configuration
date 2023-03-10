@@ -10,13 +10,15 @@ The Advanced Upgrade Service (AUS) SRE capability provides the same powerful pol
 
 AUS revolves around the concepts of `workloads` and `conditions` for upgrades.
 
+`Workloads` are freely chooseable identifiers to define what workloads are hosted on a cluster. Several conditions act on workloads.
+
 The most central condition is `soak days`, which defines the number of days an Openshift version should run on other clusters with similar `workloads` before it is considered to be applied to a cluster.
 
 > There needs to be at least one cluster with 0 `soak days` to start the process
 
-Another widely used condition is `mutexes`. A `mutex` acts as an exclusive lock a cluster must aquire before an upgrade is applied. This way, one-cluster-at-a-time semantics can be achieved for upgrades.
+Another widely used condition is `mutexes`. A mutex acts as an exclusive lock a cluster must aquire before an upgrade is applied. This way, one-cluster-at-a-time semantics can be achieved for upgrades. Mutexes only consider clusters and not workloads.
 
-Clusters can also be partitioned into `sectors`, e.g. stage and production. Updates are applied to all clusters of a sector before it is considered for a dependant sector, e.g. first stage then production.
+Clusters can also be partitioned into workload aware `sectors`, e.g. stage and production. Updates are applied to all clusters of a sector before it is considered for a dependant sector, e.g. first stage then production.
 
 ## Requirements engineering
 
@@ -181,8 +183,16 @@ blockedVersions:
 - ^.*-rc\..*$
 ```
 
-## Support model
-
 ### Validating configuration
 
 <https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-fleet-upgrade-policies.md>
+
+## Support model
+
+Anyone intersted in AUS can open a ticket on the [AppSRE Jira Board](https://issues.redhat.com/projects/APPSRE) asking for help setting up an OCM organization and respective upgrade policies
+
+todo:
+
+* discuss sharding of the OCM integrations, define different alerting for non-AppSRE managed OCM orgs
+* define SLO for configuration changes
+* define SLO for issue fixing
