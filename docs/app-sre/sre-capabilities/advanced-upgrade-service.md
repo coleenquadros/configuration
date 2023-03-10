@@ -16,7 +16,7 @@ AUS revolves around the concepts of `workloads` and `conditions` for upgrades.
 
 `Workloads` are freely chooseable identifiers to define what workloads are hosted on a cluster. Several conditions act on workloads.
 
-The most central condition is `soak days`, which defines the number of days an Openshift version should run on other clusters with similar `workloads` before it is considered to be applied to a cluster.
+The most central condition is `soak days`, which defines the number of days an Openshift version should run on other clusters with the same `workloads` before it is considered to be applied to a cluster. Those days are accumlated, e.g. a version running on 2 clusters for 3 days satisfies a condition for 6 soak days.
 
 > There needs to be at least one cluster with 0 `soak days` to start the process
 
