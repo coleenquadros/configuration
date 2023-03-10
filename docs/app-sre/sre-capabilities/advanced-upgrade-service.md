@@ -1,5 +1,9 @@
 # Declare Advanced Upgrade Service for SRE capabilities users
 
+## Table of contents
+
+[TOC]
+
 ## Motivation
 
 AppSRE manages a fleet of clusters with various workloads and various constraints on how these clusters continously receive Openshift updates. Years of experience, high automation and strong tooling allowed AppSRE to turn cluster upgrades into a no-toil process.
@@ -185,14 +189,29 @@ blockedVersions:
 
 ### Validating configuration
 
+The state of any upgrade policy can be observed here:
+
 <https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-fleet-upgrade-policies.md>
 
 ## Support model
 
-Anyone intersted in AUS can open a ticket on the [AppSRE Jira Board](https://issues.redhat.com/projects/APPSRE) asking for help setting up an OCM organization and respective upgrade policies
+### Reaching support
 
-todo:
+A request for policy setup or change needs to be files on the [AppSRE Jira Board](https://issues.redhat.com/projects/APPSRE). Also any other technical assistance for AUS needs to be requested by filing a ticket.
 
-* discuss sharding of the OCM integrations, define different alerting for non-AppSRE managed OCM orgs
-* define SLO for configuration changes
-* define SLO for issue fixing
+### AUS responsibilities
+
+AUS *is responsible* to schedule cluster upgrades via OCM based on the defined policies.
+
+AUS *is not responsible* for the success or failure of an upgrade.
+
+AUS *is not responsible* for pre- or post upgrade cluster inspection. AUS uses the OCM semantics for upgradability and upgrade success/failure but does not connect to any clusters (nor is it having access credentials or a network path to do so).
+
+### AUS Service Level Objectives
+
+| Service Level Indicator (SLI)                            | SLO Time    |
+|----------------------------------------------------------|-------------|
+| AppSRE Jira ticket response                              | 24 BH       |
+| Service degradation                                      | 24 BH       |
+
+SLO times above are measured as the mean time to first response/action.
