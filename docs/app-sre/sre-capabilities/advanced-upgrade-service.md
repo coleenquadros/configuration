@@ -30,6 +30,13 @@ AUS *is not responsible* for the success or failure of an upgrade.
 
 AUS *is not responsible* for pre- or post upgrade cluster inspection. AUS uses the OCM semantics for upgradability and upgrade success/failure but does not connect to any clusters (nor is it having access credentials or a network path to do so).
 
+### Escalations
+
+For all support cases where AUS and AppSRE are not responsible, support is delegated as follows:
+
+* Upgrade has been scheduled for a cluster but is not starting - reach out to [OCM Support](https://red.ht/ocm-support)
+* Cluster upgrade is failing - reach out to [OHSS support](https://red.ht/ohss-incident)
+
 ### AUS Service Level Objectives
 
 | Service Level Indicator (SLI)                            | SLO Time    |
