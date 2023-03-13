@@ -69,6 +69,25 @@ managed:
         subSharding:
           strategy: static
           shards: 5
+
+---
+# Another case with just a static sharding. But setting the sharding attributes
+# under the sharding section
+managed:
+- namespace:
+    $ref: /services/app-interface/namespaces/app-interface-production-int.yml
+  spec:
+    resources:
+      requests:
+        memory: 500Mi
+        cpu: 500m
+      limits:
+        memory: 1000Mi
+        cpu: 1200m
+    sharding:
+      strategy: static
+      shards: 20
+
 ```
 
 
