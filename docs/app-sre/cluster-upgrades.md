@@ -6,7 +6,7 @@
 
 AppSRE manages a fleet of clusters with various workloads and various constraints on how these clusters continously receive Openshift version updates.
 
-Following the SRE principles, AppSRE build strong tooling around its upgrade policies and turned a complex continous effort into a no-toil process. The result is a powerful policy framework driven a set of integration (`ocm-upgrade-*`) that together form the Advanced Upgrade Service (AUS).
+Following the SRE principles, AppSRE built strong tooling around its upgrade policies and turned a complex continous effort into a no-toil process. The result is a powerful policy framework driven by a set of integrations (`ocm-upgrade-*`), forming the Advanced Upgrade Service (AUS).
 
 This document explains the concepts behind the policies, shows how policies can be defined and how they drive the decision about which cluster is upgrade when to what version.
 
@@ -27,13 +27,13 @@ AUS revolves around the concepts of `workloads` and `conditions` to declare upgr
 
 `Workloads` are freely chooseable identifiers to define what workloads are hosted on a cluster.
 
-The most central condition is `soak days`, which defines the number of days an Openshift version must run on other clusters with the same `workloads` before it is considered to be applied to a cluster. Those days are accumlated, e.g. a version running on 2 clusters for 3 days satisfies a condition for 6 soak days.
+The most central condition is `soak days`, which defines the number of days an Openshift version must run on other clusters with the same `workloads` before it is considered for a cluster. Soak days are an accumulating metric, e.g. a version running on 2 clusters for 3 days satisfies a condition for 6 soak days.
 
-> There needs to be at least one cluster with 0 `soak days` to start the process.
+> At least one cluster with 0 `soak days` is required to start the AUS process.
 
-Another useful condition is `mutexes`. A mutex acts as an exclusive lock a cluster must aquire before an upgrade is applied. This way, one-cluster-at-a-time semantics can be achieved for upgrades. Mutexes only consider clusters and not workloads.
+Another condition is `mutexes`, which acts as an exclusive lock a cluster must aquire before an upgrade is applied. This way, one-cluster-at-a-time semantics can be achieved for upgrades. Mutexes only consider clusters and not workloads.
 
-Clusters can also be partitioned into workload aware `sectors`, e.g. stage and production. Updates are applied to all clusters of a sector before it is considered for a dependant sector, e.g. first stage then production.
+Clusters can also be partitioned into workload aware `sectors`, e.g. stage and production. A version is applied to all clusters of a sector before it is considered for a dependant sector, e.g. first stage then production.
 
 ## Placing a policy
 
@@ -70,13 +70,13 @@ upgradePolicyClusters:
 
 The name of the clusters (1) must match the names in OCM.
 
-This is the result of a PoC ([SDE-2341](https://issues.redhat.com/browse/SDE-2341)) to expose advanced cluster upgrade capabilities to internal RH teams.
+OCM organization based cluster upgrades are the result of a PoC ([SDE-2341](https://issues.redhat.com/browse/SDE-2341)) to expose advanced cluster upgrade capabilities to internal RH teams.
 
 Example: [/data/dependencies/ocm/osd-fleet-manager/integration.yml](/data/dependencies/ocm/osd-fleet-manager/integration.yml)
 
 ## The anatomy of a policy
 
-The general structure of an upgrade policy looks as follows and can be placed into context as defined in the section `[Placing a policy](#placing-a-policy)`.
+The general structure of an upgrade policy looks as follows and can be placed into context as defined in the section [Placing a policy](#placing-a-policy).
 
 ```yaml
 upgradePolicy:
@@ -113,7 +113,7 @@ The versions to upgrade to are iterated over in reverse order, so it is assumed 
 
 ### Defining soak days
 
-Soak days are a way to gain trust in version running on other clusters with the same workloads. They are accumulated from all clusters running that workload on a version and also account for clusters that were running that workload/version combination in the past.
+Soak days are a way to gain trust in a version running on other clusters with the same workloads. They are accumulated from all clusters running that workload on a version and also account for clusters that were running that workload/version combination in the past.
 
 The more clusters are running a specific workload/version combination, the faster the number of soak days is increasing, unlocking upgrades to that version for other clusters.
 
@@ -287,7 +287,7 @@ blockedVersions:
 
 ## Support model
 
-Depending on the ownership of the clusters or OCM organizations, differen SLOs apply for the AUS service.
+Depending on the ownership of the clusters or OCM organizations, different SLOs apply for the AUS service.
 
 * for AppSRE owned clusters and organizations, the [AppSRE SLOs](https://gitlab.cee.redhat.com/app-sre/contract/-/tree/master/#appsre-service-level-objectives) apply
 * for cluster or OCM organizations not managed by AppSRE, the [AUS SRE capability SLOs](/docs/app-sre/sre-capabilities/advanced-upgrade-service.md#aus-service-level-objectives) apply
