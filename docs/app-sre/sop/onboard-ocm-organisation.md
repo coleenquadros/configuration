@@ -1,6 +1,6 @@
 # Onboard an OCM organization into app-interface
 
-Several app-interfaces feature and SRE capabilities revolving around OCM depend on an OCM organization file to identify an organization and define authentication.
+Several app-interface features and SRE capabilities revolving around OCM depend on an OCM organization file to identify an organization and define authentication.
 
 This SOP describes the process of adding an `/openshift/openshift-cluster-manager-1.yml` file for a new OCM organization.
 
@@ -42,4 +42,4 @@ accessTokenClientSecret:
 * stage <https://api.stage.openshift.com>
 * integration <https://api.integration.openshift.com>
 
-(2) The [sre-capabilities OCM service account](https://gitlab.cee.redhat.com/service/ocm-resources/-/blob/master/data/uhc-production/users/service-account-sre-capabilities.yaml) is not bound to any organization and has for all relevant cluster and cluster-upgrade permissions in all (⚠️) organizations. Using this accounts simplifies the onboarding of an OCM organization because no additional SSO account, OCM SA and permissions need to be requested.
+(2) The [sre-capabilities OCM service account](https://gitlab.cee.redhat.com/service/ocm-resources/-/blob/master/data/uhc-production/users/service-account-sre-capabilities.yaml) is not bound to any organization and has for all relevant cluster and cluster-upgrade permissions in all (⚠️) organizations. Using this account simplifies the onboarding of an OCM organization because no additional SSO account, OCM SA and permissions need to be requested.

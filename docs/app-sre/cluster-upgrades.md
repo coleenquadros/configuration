@@ -4,9 +4,9 @@
 
 ## Motivation
 
-AppSRE manages a fleet of clusters with various workloads and various constraints on how these clusters continously receive Openshift version updates.
+AppSRE manages a fleet of clusters with various workloads and various constraints on how these clusters continuously receive Openshift version updates.
 
-Following the SRE principles, AppSRE built strong tooling around its upgrade policies and turned a complex continous effort into a no-toil process. The result is a powerful policy framework driven by a set of integrations (`ocm-upgrade-*`), forming the Advanced Upgrade Service (AUS).
+Following the SRE principles, AppSRE built strong tooling around its upgrade policies and turned a complex continuous effort into a no-toil process. The result is a powerful policy framework driven by a set of integrations (`ocm-upgrade-*`), forming the Advanced Upgrade Service (AUS).
 
 This document explains the concepts behind the policies, shows how policies can be defined and how they drive the decision about which cluster is upgrade when to what version.
 
