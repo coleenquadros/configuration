@@ -30,6 +30,7 @@ managedResourceNames:
   resourceNames:
   - vault-manager-auth-delegator
   - qontract-reconcile-auth-delegator
+  - go-qontract-reconcile-auth-delegator
 
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
@@ -93,10 +94,18 @@ openshiftResources:
   name: vault-creds
   annotations:
     qontract.recycle: "true"
-- provider: resource
-  path: /app-sre/app-interface-stage/vault-manager-auth-delegate.clusterrolebinding.yml
-- provider: resource
-  path: /app-sre/app-interface-stage/qontract-reconcile-auth-delegate.clusterrolebinding.yml
+- provider: resource-template
+  path: /app-sre/app-interface-stage/auth-delegate.clusterrolebinding.yml
+  variables:
+    name: go-qontract-reconcile
+- provider: resource-template
+  path: /app-sre/app-interface-stage/auth-delegate.clusterrolebinding.yml
+  variables:
+    name: qontract-reconcile
+- provider: resource-template
+  path: /app-sre/app-interface-stage/auth-delegate.clusterrolebinding.yml
+  variables:
+    name: vault-manager
 - provider: vault-secret
   path: app-sre/creds/push-gateway/stage/basic-auth
   version: 1
