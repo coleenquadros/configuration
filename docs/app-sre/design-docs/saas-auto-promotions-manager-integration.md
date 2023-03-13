@@ -43,6 +43,8 @@ The following timeline highlights how multiple parallel promotions can result in
 
 ## Proposal
 
+We have a [PoC available](https://github.com/app-sre/qontract-reconcile/pull/3306) for this proposal.
+
 Create a new fully context aware integration: `saas-auto-promotions-manager` (SAPM). Remove auto-promotion feature from openshift-saas-deploy. SAPM is able to gather all context around auto-promotions:
 
 - whats the commit sha of a saas file target ref?
