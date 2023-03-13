@@ -2,7 +2,7 @@
 $schema: /app-sre/saas-file-2.yml
 labels:
   service: uhc
-name: saas-ams-qe-fvt-gating-tests
+name: saas-ams-qe-fvt-quotacost-aws
 description: SaaS deployment for AMS testing
 app:
   $ref: /services/ocm/ams/app.yml
@@ -32,26 +32,21 @@ authentication:
 resourceTemplates:
 - name: uhc-account-manager
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
-  path: /templates/gating-tests-qe-fvt-template.yml
+  path: /templates/gating-tests-qe-fvt-quotacost-template.yml
   parameters:
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: app-sre/uhc-account-manager
+    CLOUD_PROVIDER: aws
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
-    ref: 3e75309d6d0b8896efedc6a715485cb5baa92076
+    ref: b89e599b136f03b15bfa56f85da2cbfe2d56545b
     promotion:
       auto: true
       subscribe:
       - ocm-ams-deployed-int-green
       publish:
-      - ocm-ams-qe-fvt-test-int-green-ok
-      promotion_data:
-      - channel: ocm-ams-deployed-int-green
-        data:
-        - parent_saas: saas-uhc-account-manager
-          target_config_hash: 2bb52776d6d15ba2
-          type: parent_saas_config
+      - ocm-ams-qe-fvt-test-quotacost-aws-int-green-ok
     parameters:
       DEPLOYMENT_NAME: ams-gate-int
       ENVIRONMENT: integration
