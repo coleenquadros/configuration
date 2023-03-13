@@ -256,7 +256,7 @@ sectors:
 
 Note that each cluster follows an upgrade channel. Clusters following different channels don't get the same version available at the same time (e.g. the `stable` channel enables upgrade paths much later than the `candidate` and `fast` channels). Timely version progression from cluster to cluster works best if all clusters share the same upgrade `channel`.
 
-> AppSRE does not use different channels for clusters. This avoids clusters lagging behind, not getting any upgrade (not even patch/CVE) while other clusters are running fine on later releases. See [APPSRE-5393](https://issues.redhat.com/browse/APPSRE-5393) for more context and discussion.
+> AppSRE the `candidate` and `fast` channels for cluster upgrades. This avoids clusters lagging behind during `X.Y` upgrades, not getting any upgrade (not even patch/CVE) while other clusters are running fine on later releases. See [APPSRE-5393](https://issues.redhat.com/browse/APPSRE-5393) for more context and discussion.
 
 ## Version history
 
