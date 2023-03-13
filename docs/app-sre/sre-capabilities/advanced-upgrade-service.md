@@ -4,7 +4,7 @@
 
 ## Motivation
 
-AppSRE manages a fleet of clusters with various workloads and various constraints on how these clusters continously receive Openshift updates. Years of experience, high automation and strong tooling allowed AppSRE to turn cluster upgrades into a no-toil process.
+AppSRE manages a fleet of clusters with various workloads and various constraints on how these clusters continuously receive Openshift updates. Years of experience, high automation and strong tooling allowed AppSRE to turn cluster upgrades into a no-toil process.
 
 The Advanced Upgrade Service (AUS) SRE capability provides the same powerful policy based  upgrade experience for any cluster in <https://console.redhat.com/openshift>
 
