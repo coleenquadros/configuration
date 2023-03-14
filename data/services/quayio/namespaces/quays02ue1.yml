@@ -64,7 +64,6 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
-    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -81,7 +80,6 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
-    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -98,7 +96,6 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
-    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -115,7 +112,6 @@ openshiftResources:
     enable_clair: true
     region: us-east-1
     log_producer: kinesis_stream
-    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -132,7 +128,6 @@ openshiftResources:
     enable_clair: true
     region: us-east-1
     log_producer: kinesis_stream
-    enable_cloudflare: true
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -149,7 +144,6 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
-    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -166,7 +160,6 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
-    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -183,7 +176,6 @@ openshiftResources:
     enable_clair: false
     region: us-east-1
     log_producer: kinesis_stream
-    enable_cloudflare: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -302,33 +294,24 @@ externalResources:
     ingress_cidr_blocks: ["0.0.0.0/0"]
     targets:
     - name: quayio-stage-py3
-      default: false
+      default: true
       openshift_service: quay-py3-load-balancer-service
     - name: quayio-stage-cf
-      default: true
+      default: false
       openshift_service: quay-py3-cloudflare-load-balancer-service
-    # - name: quayio-stage-debug
-    #   default: false
-    #   openshift_service: quay-py3-cloudflare-debug-load-balancer-service
+    - name: quayio-stage-debug
+      default: false
+      openshift_service: quay-py3-cloudflare-debug-load-balancer-service
     rules:
     - condition:
-        path: /v2/cloudflare-test/*
+        path: /v2/bcaton/push-pull-monitor-debug/*
       action:
         - target: quayio-stage-cf
-          weight: 100
+          weight: 0
         - target: quayio-stage-py3
           weight: 0
-        # - target: quayio-stage-debug
-        #   weight: 0
-    # - condition:
-    #     path: /v2/bcaton/push-pull-monitor-debug/*
-    #   action:
-    #     - target: quayio-stage-cf
-    #       weight: 0
-    #     - target: quayio-stage-py3
-    #       weight: 0
-    #     - target: quayio-stage-debug
-    #       weight: 100
+        - target: quayio-stage-debug
+          weight: 100
   - provider: s3
     identifier: quayio-stage-cloudfront-logs
     defaults: /terraform/resources/s3-all-expires-90-days-external-acl.yml

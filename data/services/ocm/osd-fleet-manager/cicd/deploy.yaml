@@ -26,6 +26,13 @@ authentication:
   image:
     path: app-sre/quay/app-sre-pull
     field: all
+deployResources:
+  requests:
+    cpu: 500m
+    memory: 800Mi
+  limits:
+    cpu: 500m
+    memory: 800Mi
 resourceTemplates:
 #
 # - integration, stage and production environments defined below
@@ -45,9 +52,13 @@ resourceTemplates:
         hs-sc:
           name_prefix: "hs-sc-"
           # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-          openshift_version: "openshift-v4.12.1"
+          openshift_version: ""
           multi_az: true
           ccs: true
+          default_machine_pool:
+            machine_type: m5.xlarge
+            autoscale: false
+            nodes: 3
           compute_machine_type: m5.xlarge
           compute_autoscale: false
           compute_nodes: 3
@@ -58,9 +69,14 @@ resourceTemplates:
         hs-mc:
           name_prefix: "hs-mc-"
           # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-          openshift_version: "openshift-v4.12.1"
+          openshift_version: ""
           multi_az: true
           ccs: true
+          default_machine_pool:
+            machine_type: m5.4xlarge
+            autoscale: true
+            autoscale_min_replicas: 3
+            autoscale_max_replicas: 36
           compute_machine_type: m5.4xlarge
           compute_autoscale: true
           compute_autoscale_min_replicas: 3
@@ -75,8 +91,8 @@ resourceTemplates:
     EXTERNAL_DNS_DOMAIN_FILTER: i3.devshift.org
     HCP_TELEMETER_URL: https://infogw.api.integration.openshift.com/metrics/v1/receive
     HYPERSHIFT_OPERATOR_OVERRIDING_DATA: |2-
-          # openshift/hypershift.git branch release-4.13 commit 139955c0d99e13dc882fa01663457d896aa9f836
-          hypershift-operator: quay.io:443/acm-d/hypershift-rhel8-operator@sha256:b7ffc7943f14ef464ea0644bce1e3850928d24ce8c482b70994887a7b04804fd
+          # openshift/hypershift.git branch release-4.13 commit 42e85b6ed107c4b99a5ef00b886e1943ea896095 / v0.1.1 tag
+          hypershift-operator: quay.io:443/acm-d/hypershift-rhel8-operator@sha256:f94229ca05e739f82fe3e35067304a4db81d99419f2b455bbd05de13292fcf6f
           apiserver-network-proxy: quay.io:443/acm-d/apiserver-network-proxy-rhel8@sha256:281c31c439d4116a7180519370955254d1845e57fb0c2b9b55a84e4798bec9ce
           aws-encryption-provider: quay.io:443/acm-d/aws-encryption-provider-rhel8@sha256:5c1afc24ccc9ef5c41f78a6561fc43c6f653bc772c752a656f01d8596ffccaa8
           cluster-api: quay.io:443/acm-d/cluster-api-rhel8@sha256:c6edc4a5f6cc09f6ac733350615d8c134993af83e8d07025e3aa4dec596a2488
@@ -105,6 +121,9 @@ resourceTemplates:
         regions:
           - name: us-west-2
     TELEMETER_SERVER_URL: https://infogw.api.integration.openshift.com
+    TRANSIT_ACCOUNT_ARN: arn:aws:iam::232799112676:user/svc-cluster-aws-vpce-operator
+    TRANSIT_ACCOUNT_PRIVATE_HOSTED_ZONE_ID: Z06901582AR2YJNH4ESHM
+    TRANSIT_ACCOUNT_SECRET_NAME: svc-transit-int-aws-vpce-operator
   targets:
   - name: osd-fleet-manager-integration-canary
     namespace:
@@ -118,11 +137,48 @@ resourceTemplates:
       publish:
       - ocm-osdfm-deployed-int-canary
     parameters:
+      CLUSTER_TEMPLATES: |2-
+          # HyperShift Service Cluster
+          hs-sc:
+            name_prefix: "hs-sc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: ""
+            multi_az: true
+            ccs: true
+            default_machine_pool:
+              machine_type: m5.xlarge
+              autoscale: false
+              nodes: 3
+            compute_machine_type: m5.xlarge
+            compute_autoscale: false
+            compute_nodes: 3
+            network_type: OVNKubernetes
+            private: true
+
+          # HyperShift Management Cluster
+          hs-mc:
+            name_prefix: "hs-mc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: ""
+            multi_az: true
+            ccs: true
+            default_machine_pool:
+              machine_type: m5.4xlarge
+              autoscale: true
+              autoscale_min_replicas: 3
+              autoscale_max_replicas: 36
+            compute_machine_type: m5.4xlarge
+            compute_autoscale: true
+            compute_autoscale_min_replicas: 3
+            compute_autoscale_max_replicas: 36
+            network_type: OVNKubernetes
+            private: false
       DEPLOYMENT_NAME: canary
+      PROVISIONING_TIME_WINDOW: '259200'
   - name: osd-fleet-manager-integration-main
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
-    ref: 4345ff3e167efbc07a7d9ca5ffef243d77fed0e2
+    ref: fafd773897cc96e9e0fc501232cd294d02665769
     promotion:
       auto: true
       subscribe:
@@ -133,7 +189,7 @@ resourceTemplates:
       - channel: ocm-osdfm-deployed-int-canary
         data:
         - parent_saas: osd-fleet-manager
-          target_config_hash: 7912c4b65e5cfc69
+          target_config_hash: ea37179005bede2f
           type: parent_saas_config
     parameters:
       DEPLOYMENT_NAME: main
@@ -150,9 +206,13 @@ resourceTemplates:
         hs-sc:
           name_prefix: "hs-sc-"
           # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-          openshift_version: "openshift-v4.12.2"
+          openshift_version: ""
           multi_az: true
           ccs: true
+          default_machine_pool:
+            machine_type: m5.4xlarge
+            autoscale: false
+            nodes: 3
           compute_machine_type: m5.4xlarge
           compute_autoscale: false
           compute_nodes: 3
@@ -163,9 +223,14 @@ resourceTemplates:
         hs-mc:
           name_prefix: "hs-mc-"
           # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-          openshift_version: "openshift-v4.12.2"
+          openshift_version: ""
           multi_az: true
           ccs: true
+          default_machine_pool:
+            machine_type: m5.4xlarge
+            autoscale: true
+            autoscale_min_replicas: 3
+            autoscale_max_replicas: 36
           compute_machine_type: m5.4xlarge
           compute_autoscale: true
           compute_autoscale_min_replicas: 3
@@ -178,8 +243,8 @@ resourceTemplates:
     EXTERNAL_DNS_DOMAIN_FILTER: s3.devshift.org
     HCP_TELEMETER_URL: https://infogw.api.stage.openshift.com/metrics/v1/receive
     HYPERSHIFT_OPERATOR_OVERRIDING_DATA: |2-
-          # openshift/hypershift.git branch release-4.13 commit 139955c0d99e13dc882fa01663457d896aa9f836
-          hypershift-operator: quay.io:443/acm-d/hypershift-rhel8-operator@sha256:b7ffc7943f14ef464ea0644bce1e3850928d24ce8c482b70994887a7b04804fd
+          # openshift/hypershift.git branch release-4.13 commit 42e85b6ed107c4b99a5ef00b886e1943ea896095 / v0.1.1 tag
+          hypershift-operator: quay.io:443/acm-d/hypershift-rhel8-operator@sha256:f94229ca05e739f82fe3e35067304a4db81d99419f2b455bbd05de13292fcf6f
           apiserver-network-proxy: quay.io:443/acm-d/apiserver-network-proxy-rhel8@sha256:281c31c439d4116a7180519370955254d1845e57fb0c2b9b55a84e4798bec9ce
           aws-encryption-provider: quay.io:443/acm-d/aws-encryption-provider-rhel8@sha256:5c1afc24ccc9ef5c41f78a6561fc43c6f653bc772c752a656f01d8596ffccaa8
           cluster-api: quay.io:443/acm-d/cluster-api-rhel8@sha256:c6edc4a5f6cc09f6ac733350615d8c134993af83e8d07025e3aa4dec596a2488
@@ -205,16 +270,24 @@ resourceTemplates:
       - predicate:
           service_cluster_id: cfhcdasju93jsui4rs70
         sector: perf
-      # the following service cluster goes to the perf2 sector
-      # "perf2" sector is used for OSD FM scaling tests
       - predicate:
           service_cluster_id: cfl443tbp9s50f9squrg
         sector: perf2
-      # all other us-east-2 clusters go to the perf3 sector
-      # "perf3" sector is used for testing different flavours (e.g. AMD)
+      - predicate:
+          service_cluster_id: cg3cbp6ijt9tsjs2f4i0
+        sector: perf2
+      - predicate:
+          service_cluster_id: cfr399q93bobfjjq35n0
+        sector: perf3
+      - predicate:
+          service_cluster_id: cg7j4d602khm1qggri70
+        sector: perf3
       - predicate:
           region: us-east-2
-        sector: perf3
+        sector: perf2
+      - predicate:
+          region: us-east-1
+        sector: chaos
       # put everything else into the main sector
       - sector: main
     SENTRY_PROJECT: 39
@@ -224,13 +297,15 @@ resourceTemplates:
         regions:
           - name: us-west-2
           - name: us-east-2 # reserved for perf testing
-          - name: us-east-1 # reserved for aws outpost integration work
+          - name: us-east-1 # reserved for chaos testing
     TELEMETER_SERVER_URL: https://infogw.api.stage.openshift.com
+    TRANSIT_ACCOUNT_ARN: arn:aws:iam::254070712068:user/svc-cluster-aws-vpce-operator
+    TRANSIT_ACCOUNT_SECRET_NAME: svc-transit-stage-aws-vpce-operator
   targets:
   - name: osd-fleet-manager-stage-canary
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
-    ref: 4345ff3e167efbc07a7d9ca5ffef243d77fed0e2
+    ref: fafd773897cc96e9e0fc501232cd294d02665769
     promotion:
       auto: true
       subscribe:
@@ -241,24 +316,60 @@ resourceTemplates:
       - channel: ocm-osdfm-deployed-int-main
         data:
         - parent_saas: osd-fleet-manager
-          target_config_hash: 3af9e90773b03ab0
+          target_config_hash: 0f515ddf93474a54
           type: parent_saas_config
     parameters:
       DEPLOYMENT_NAME: canary
   - name: osd-fleet-manager-stage-perf
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
-    ref: 14b101e9a453b46fb5c322abce6b94e340c266db
+    ref: 4e93804e5b173dfbf0a388ffd5bda8c261a1c1cc
     promotion:
       publish:
       - ocm-osdfm-deployed-stage-perf
     parameters:
+      CLUSTER_TEMPLATES: |2-
+          # HyperShift Service Cluster
+          hs-sc:
+            name_prefix: "hs-sc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: ""
+            multi_az: true
+            ccs: true
+            default_machine_pool:
+              machine_type: m5.4xlarge
+              autoscale: false
+              nodes: 3
+            compute_machine_type: m5.4xlarge
+            compute_autoscale: false
+            compute_nodes: 3
+            network_type: OVNKubernetes
+            private: false
+
+          # HyperShift Management Cluster
+          hs-mc:
+            name_prefix: "hs-mc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: ""
+            multi_az: true
+            ccs: true
+            default_machine_pool:
+              machine_type: m5.8xlarge
+              autoscale: true
+              autoscale_min_replicas: 3
+              autoscale_max_replicas: 36
+            compute_machine_type: m5.8xlarge
+            compute_autoscale: true
+            compute_autoscale_min_replicas: 3
+            compute_autoscale_max_replicas: 36
+            network_type: OVNKubernetes
+            private: false
       DEPLOYMENT_NAME: perf
       DATAPLANE_CLUSTER_SCALING_TYPE: manual
   - name: osd-fleet-manager-stage-perf2
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
-    ref: 14b101e9a453b46fb5c322abce6b94e340c266db
+    ref: 4e93804e5b173dfbf0a388ffd5bda8c261a1c1cc
     promotion:
       publish:
       - ocm-osdfm-deployed-stage-perf2
@@ -268,7 +379,7 @@ resourceTemplates:
   - name: osd-fleet-manager-stage-perf3
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
-    ref: 14b101e9a453b46fb5c322abce6b94e340c266db
+    ref: 4e93804e5b173dfbf0a388ffd5bda8c261a1c1cc
     promotion:
       publish:
       - ocm-osdfm-deployed-stage-perf3
@@ -278,10 +389,15 @@ resourceTemplates:
           hs-sc:
             name_prefix: "hs-sc-"
             # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-            openshift_version: "openshift-v4.12.2"
+            openshift_version: ""
             multi_az: true
             ccs: true
-            flavour_id: perf-scale-master-m6i-a
+            master_machine_type: m6a.2xlarge
+            infra_machine_type: r6a.xlarge
+            default_machine_pool:
+              machine_type: m6a.4xlarge
+              autoscale: false
+              nodes: 3
             compute_machine_type: m6a.4xlarge
             compute_autoscale: false
             compute_nodes: 3
@@ -292,10 +408,16 @@ resourceTemplates:
           hs-mc:
             name_prefix: "hs-mc-"
             # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-            openshift_version: "openshift-v4.12.2"
+            openshift_version: ""
             multi_az: true
             ccs: true
-            flavour_id: perf-scale-master-m6i-a
+            master_machine_type: m6a.4xlarge
+            infra_machine_type: r6a.2xlarge
+            default_machine_pool:
+              machine_type: m6a.4xlarge
+              autoscale: true
+              autoscale_min_replicas: 3
+              autoscale_max_replicas: 36
             compute_machine_type: m6a.4xlarge
             compute_autoscale: true
             compute_autoscale_min_replicas: 3
@@ -304,10 +426,55 @@ resourceTemplates:
             private: false
       DEPLOYMENT_NAME: perf3
       DATAPLANE_CLUSTER_SCALING_TYPE: manual
+  - name: osd-fleet-manager-stage-chaos
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
+    ref: 4e93804e5b173dfbf0a388ffd5bda8c261a1c1cc
+    promotion:
+      publish:
+      - ocm-osdfm-deployed-stage-chaos
+    parameters:
+      CLUSTER_TEMPLATES: |2-
+          # HyperShift Service Cluster
+          hs-sc:
+            name_prefix: "hs-sc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: ""
+            multi_az: true
+            ccs: true
+            default_machine_pool:
+              machine_type: m5.4xlarge
+              autoscale: false
+              nodes: 3
+            compute_machine_type: m5.4xlarge
+            compute_autoscale: false
+            compute_nodes: 3
+            network_type: OVNKubernetes
+            private: false
+          # HyperShift Management Cluster
+          hs-mc:
+            name_prefix: "hs-mc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: ""
+            multi_az: true
+            ccs: true
+            default_machine_pool:
+              machine_type: m5.4xlarge
+              autoscale: true
+              autoscale_min_replicas: 3
+              autoscale_max_replicas: 36
+            compute_machine_type: m5.4xlarge
+            compute_autoscale: true
+            compute_autoscale_min_replicas: 3
+            compute_autoscale_max_replicas: 36
+            network_type: OVNKubernetes
+            private: false
+      DEPLOYMENT_NAME: chaos
+      DATAPLANE_CLUSTER_SCALING_TYPE: manual
   - name: osd-fleet-manager-stage-main
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
-    ref: 4345ff3e167efbc07a7d9ca5ffef243d77fed0e2
+    ref: fafd773897cc96e9e0fc501232cd294d02665769
     promotion:
       auto: true
       subscribe:
@@ -318,7 +485,7 @@ resourceTemplates:
       - channel: ocm-osdfm-deployed-stage-canary
         data:
         - parent_saas: osd-fleet-manager
-          target_config_hash: 7a6743b5de1c640c
+          target_config_hash: 6bebdce597db3bc5
           type: parent_saas_config
     parameters:
       DEPLOYMENT_NAME: main
@@ -334,9 +501,15 @@ resourceTemplates:
         hs-sc:
           name_prefix: "hs-sc-"
           # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-          openshift_version: "openshift-v4.12.1"
+          openshift_version: ""
           multi_az: true
           ccs: true
+          default_machine_pool:
+            machine_type: m5.4xlarge
+            autoscale: true
+            autoscale_min_replicas: 3
+            autoscale_max_replicas: 9
+            nodes: 3
           compute_machine_type: m5.4xlarge
           compute_autoscale: true
           compute_autoscale_min_replicas: 3
@@ -349,9 +522,14 @@ resourceTemplates:
         hs-mc:
           name_prefix: "hs-mc-"
           # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-          openshift_version: "openshift-v4.12.1"
+          openshift_version: ""
           multi_az: true
           ccs: true
+          default_machine_pool:
+            machine_type: m5.4xlarge
+            autoscale: true
+            autoscale_min_replicas: 3
+            autoscale_max_replicas: 60
           compute_machine_type: m5.4xlarge
           compute_autoscale: true
           compute_autoscale_min_replicas: 3
@@ -378,7 +556,7 @@ resourceTemplates:
     OCM_URL: ${OCM_BASE_URL}
     READ_ONLY_USERS:
     - fleet-manager-debug
-    REPLICAS: 1
+    REPLICAS: 3
     RHOBS_URL: https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform/api/v1/receive
     RHOBS_ENV: prod
     SECTOR_ASSIGNMENT_POLICY: |-
@@ -401,16 +579,73 @@ resourceTemplates:
   - name: osd-fleet-manager-production-red
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
-    ref: 33d68d68d884ac1ba1ca99922c86bef4319bfafb
+    ref: fa60cb8260817f47776aba0b4f9ab0c465497ff0
     promotion:
       publish:
       - ocm-osdfm-deployed-production-red
     parameters:
       DEPLOYMENT_NAME: red
+  - name: osd-fleet-manager-production-nightly
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
+    ref: fa60cb8260817f47776aba0b4f9ab0c465497ff0
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-osdfm-deployed-production-red
+      promotion_data:
+      - channel: ocm-osdfm-deployed-production-red
+        data:
+        - parent_saas: osd-fleet-manager
+          target_config_hash: 1b4259cbc705a513
+          type: parent_saas_config
+    parameters:
+      DEPLOYMENT_NAME: nightly
+      CLUSTER_CHANNEL: nightly
+      CLUSTER_TEMPLATES: |2-
+          # HyperShift Service Cluster
+          hs-sc:
+            name_prefix: "hs-sc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: "4.12.0-0.nightly-2023-03-12-020831"
+            multi_az: true
+            ccs: true
+            default_machine_pool:
+              machine_type: m5.4xlarge
+              autoscale: true
+              autoscale_min_replicas: 3
+              autoscale_max_replicas: 9
+              nodes: 3
+            compute_machine_type: m5.4xlarge
+            compute_autoscale: true
+            compute_autoscale_min_replicas: 3
+            compute_autoscale_max_replicas: 9
+            compute_nodes: 3
+            network_type: OVNKubernetes
+            private: false
+
+          # HyperShift Management Cluster
+          hs-mc:
+            name_prefix: "hs-mc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: "4.12.0-0.nightly-2023-03-12-020831"
+            multi_az: true
+            ccs: true
+            default_machine_pool:
+              machine_type: m5.4xlarge
+              autoscale: true
+              autoscale_min_replicas: 3
+              autoscale_max_replicas: 60
+            compute_machine_type: m5.4xlarge
+            compute_autoscale: true
+            compute_autoscale_min_replicas: 3
+            compute_autoscale_max_replicas: 60
+            network_type: OVNKubernetes
+            private: false
   - name: osd-fleet-manager-production-green
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
-    ref: 33d68d68d884ac1ba1ca99922c86bef4319bfafb
+    ref: fa60cb8260817f47776aba0b4f9ab0c465497ff0
     promotion:
       auto: true
       subscribe:
@@ -421,14 +656,14 @@ resourceTemplates:
       - channel: ocm-osdfm-deployed-production-red
         data:
         - parent_saas: osd-fleet-manager
-          target_config_hash: dc0346f1bc880a0e
+          target_config_hash: 1b4259cbc705a513
           type: parent_saas_config
     parameters:
       DEPLOYMENT_NAME: green
   - name: osd-fleet-manager-production-blue
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
-    ref: 33d68d68d884ac1ba1ca99922c86bef4319bfafb
+    ref: 80aa5afd815e5da9482be1cb5c5a9aaa1ede8c5f
     promotion:
       auto: true
       subscribe:
@@ -439,7 +674,7 @@ resourceTemplates:
       - channel: ocm-osdfm-deployed-production-green
         data:
         - parent_saas: osd-fleet-manager
-          target_config_hash: e0006667823f58e1
+          target_config_hash: 3f62935cb7c751c9
           type: parent_saas_config
     parameters:
       DEPLOYMENT_NAME: blue
@@ -454,4 +689,4 @@ resourceTemplates:
     ref: main
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
-    ref: 11cf225548d95fa904de19b5127ec0ebdb9cfc7c
+    ref: bab062b145787b93b0cf0bdbb788bdbb011ecf4d

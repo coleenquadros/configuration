@@ -86,7 +86,9 @@ externalResources:
         "Version": "2012-10-17",
         "Statement": [{
           "Action": [
-            "ec2:DescribeInstances"
+            "autoscaling:DescribeAutoScalingGroups",
+            "ec2:DescribeInstances",
+            "ec2:DescribeImages"
           ],
           "Effect": "Allow",
           "Resource": "*"
@@ -97,8 +99,9 @@ externalResources:
     identifier: ci-int-jenkins-worker-app-interface
     defaults: /terraform/resources/app-sre/production/ci-int-asg-1.yml
     overrides:
-      min_size: 3
-      max_size: 12
+      min_size: 0
+      max_size: 10
+      instance_types: ["c6i.4xlarge"]
     image:
       - provider: git
         tag_name: infra_commit
@@ -114,13 +117,12 @@ externalResources:
     identifier: ci-int-jenkins-worker-app-sre
     defaults: /terraform/resources/app-sre/production/ci-int-asg-1.yml
     overrides:
-      min_size: 1
       max_size: 3
     image:
       - provider: git
         tag_name: infra_commit
         url: https://gitlab.cee.redhat.com/app-sre/infra
-        ref: abeb6820b37aafef285531bcc3a83f94bc4d8f9d
+        ref: 69230b14ec0e59671a1d0652b9535c8e72daa2a4
       - provider: static
         tag_name: type
         value: ci-int-jenkins-worker-app-sre
@@ -131,7 +133,6 @@ externalResources:
     identifier: ci-int-jenkins-worker-hive
     defaults: /terraform/resources/app-sre/production/ci-int-asg-1.yml
     overrides:
-      min_size: 1
       max_size: 2
     image:
     - provider: git
@@ -148,7 +149,6 @@ externalResources:
     identifier: ci-int-jenkins-worker-service-development
     defaults: /terraform/resources/app-sre/production/ci-int-asg-1.yml
     overrides:
-      min_size: 1
       max_size: 2
     image:
     - provider: git
@@ -165,7 +165,6 @@ externalResources:
     identifier: ci-int-jenkins-worker-insights
     defaults: /terraform/resources/app-sre/production/ci-int-asg-1.yml
     overrides:
-      min_size: 1
       max_size: 3
     image:
     - provider: git
@@ -182,7 +181,6 @@ externalResources:
     identifier: ci-int-jenkins-worker-rhel7
     defaults: /terraform/resources/app-sre/production/ci-int-asg-1.yml
     overrides:
-      min_size: 1
       max_size: 2
     image:
     - provider: git
@@ -199,13 +197,12 @@ externalResources:
     identifier: ci-int-jenkins-worker-rhel8
     defaults: /terraform/resources/app-sre/production/ci-int-asg-1.yml
     overrides:
-      min_size: 1
       max_size: 3
     image:
     - provider: git
       tag_name: infra_commit
       url: https://gitlab.cee.redhat.com/app-sre/infra
-      ref: abeb6820b37aafef285531bcc3a83f94bc4d8f9d
+      ref: 0d47e84a1d11e2b19d84bce95446716c038f6e03
     - provider: static
       tag_name: type
       value: ci-int-jenkins-worker-rhel8
@@ -216,16 +213,113 @@ externalResources:
     identifier: ci-ext-jenkins-worker-app-sre
     defaults: /terraform/resources/app-sre/production/ci-ext-asg-1.yml
     overrides:
-      min_size: 1
       max_size: 2
+      instance_types: ["c5.2xlarge"]
     image:
       - provider: git
         tag_name: infra_commit
         url: https://gitlab.cee.redhat.com/app-sre/infra
-        ref: abeb6820b37aafef285531bcc3a83f94bc4d8f9d
+        ref: 0d47e84a1d11e2b19d84bce95446716c038f6e03
       - provider: static
         tag_name: type
         value: ci-ext-jenkins-worker-app-sre
     extra_tags:
       os: centos
+      jenkins_controller: ci-ext
+  - provider: asg
+    identifier: ci-ext-jenkins-worker-service-development
+    defaults: /terraform/resources/app-sre/production/ci-ext-asg-1.yml
+    overrides:
+      min_size: 0
+      max_size: 2
+    image:
+      - provider: git
+        tag_name: infra_commit
+        url: https://gitlab.cee.redhat.com/app-sre/infra
+        ref: 0d47e84a1d11e2b19d84bce95446716c038f6e03
+      - provider: static
+        tag_name: type
+        value: ci-ext-jenkins-worker-service-development
+    extra_tags:
+      os: centos
+      jenkins_controller: ci-ext
+  - provider: asg
+    identifier: ci-ext-jenkins-worker-hive
+    defaults: /terraform/resources/app-sre/production/ci-ext-asg-1.yml
+    overrides:
+      max_size: 2
+    image:
+      - provider: git
+        tag_name: infra_commit
+        url: https://gitlab.cee.redhat.com/app-sre/infra
+        ref: 0d47e84a1d11e2b19d84bce95446716c038f6e03
+      - provider: static
+        tag_name: type
+        value: ci-ext-jenkins-worker-hive
+    extra_tags:
+      os: centos
+      jenkins_controller: ci-ext
+  - provider: asg
+    identifier: ci-ext-jenkins-worker-quarkus
+    defaults: /terraform/resources/app-sre/production/ci-ext-asg-1.yml
+    overrides:
+      max_size: 2
+    image:
+      - provider: git
+        tag_name: infra_commit
+        url: https://gitlab.cee.redhat.com/app-sre/infra
+        ref: 0d47e84a1d11e2b19d84bce95446716c038f6e03
+      - provider: static
+        tag_name: type
+        value: ci-ext-jenkins-worker-quarkus
+    extra_tags:
+      os: centos
+      jenkins_controller: ci-ext
+  - provider: asg
+    identifier: ci-ext-jenkins-worker-toolchain
+    defaults: /terraform/resources/app-sre/production/ci-ext-asg-1.yml
+    overrides:
+      max_size: 2
+    image:
+      - provider: git
+        tag_name: infra_commit
+        url: https://gitlab.cee.redhat.com/app-sre/infra
+        ref: 0d47e84a1d11e2b19d84bce95446716c038f6e03
+      - provider: static
+        tag_name: type
+        value: ci-ext-jenkins-worker-toolchain
+    extra_tags:
+      os: centos
+      jenkins_controller: ci-ext
+  - provider: asg
+    identifier: ci-ext-jenkins-worker-codeready-analytics
+    defaults: /terraform/resources/app-sre/production/ci-ext-asg-1.yml
+    overrides:
+      max_size: 2
+    image:
+      - provider: git
+        tag_name: infra_commit
+        url: https://gitlab.cee.redhat.com/app-sre/infra
+        ref: 0d47e84a1d11e2b19d84bce95446716c038f6e03
+      - provider: static
+        tag_name: type
+        value: ci-ext-jenkins-worker-codeready-analytics
+    extra_tags:
+      os: rhel7
+      jenkins_controller: ci-ext
+  - provider: asg
+    identifier: ci-ext-jenkins-worker-rhel8
+    defaults: /terraform/resources/app-sre/production/ci-ext-asg-1.yml
+    overrides:
+      max_size: 2
+    image:
+      - provider: git
+        tag_name: infra_commit
+        url: https://gitlab.cee.redhat.com/app-sre/infra
+        ref: 9009c96d0b8273c7d860d13038ca2c3c25cae252
+      - provider: static
+        tag_name: type
+        value: ci-ext-jenkins-worker-rhel8
+    extra_tags:
+      os: rhel8
       jenkins_controller: ci-ext

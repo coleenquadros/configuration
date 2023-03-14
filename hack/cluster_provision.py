@@ -79,6 +79,16 @@ def create_obs_customer_monitoring(ctx, cluster: str, environment: str) -> None:
         ctx.obj["datadir"], cluster, environment
     )
 
+@cli.command()
+@click.argument("cluster")
+@click.argument("environment")
+@click.pass_context
+def create_obs_logging(ctx, cluster: str, environment: str) -> None:
+    """Generates APP-SRE logging config for a cluster"""
+    observability.configure_cluster_logging(
+        ctx.obj["datadir"], cluster, environment
+    )
+
 
 @cli.command()
 @click.argument("cluster")
@@ -86,6 +96,13 @@ def create_obs_customer_monitoring(ctx, cluster: str, environment: str) -> None:
 def create_obs_grafana_datasources(ctx, cluster: str) -> None:
     """Generates APP-SRE observability config for a cluster"""
     observability.configure_grafana_datasources(ctx.obj["datadir"], cluster)
+
+
+@cli.command()
+@click.pass_context
+def refresh_obs_grafana_datasources(ctx) -> None:
+    """Refresh APP-SRE observability shared grafana data sources"""
+    observability.refresh_grafana_datasources(ctx.obj["datadir"])
 
 
 if __name__ == "__main__":

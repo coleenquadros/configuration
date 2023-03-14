@@ -40,6 +40,7 @@ networkPoliciesAllow:
 - $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
 - $ref: /services/insights/ros/namespaces/stage-ros-stage.yml
 - $ref: /services/insights/malware-detection/namespaces/stage-malware-detection-stage.yml
+- $ref: /services/insights/content-sources/namespaces/content-sources-stage.yml
 
 managedRoles: true
 
@@ -96,12 +97,22 @@ externalResources:
     parameter_group: /terraform/resources/insights/stage/rds/postgres14-parameter-group-rbac-stage.yml
     output_resource_name: rbac-db
     enhanced_monitoring: true
-  # Replica instance for GABI
+  - provider: rds
+    identifier: rbac-stage-postgres14
+    defaults: /terraform/resources/insights/stage/rds/postgres14-rds-rbac-stage.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres14-parameter-group-rbac-stage.yml
+    output_resource_name: rbac-db-postgres14
+    enhanced_monitoring: true
+    annotations:
+      clowder/database: "rbac"
+    # Replica instance for GABI
   - provider: rds
     identifier: rbac-stage-readonly
     defaults: /terraform/resources/insights/stage/rds/postgres14-rds-rbac-stage.yml
-    replica_source: rbac-stage
+    replica_source: rbac-stage-postgres14
     output_resource_name: rbac-stage-db-ro
+    overrides:
+      deletion_protection: false
   - provider: cloudwatch
     identifier: rbac-stage
     defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml

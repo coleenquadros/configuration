@@ -1,0 +1,108 @@
+---
+$schema: /openshift/cluster-1.yml
+labels:
+  service: backplane
+name: backplanes02uw2
+description: backplanes02uw2 cluster
+consoleUrl: https://console-openshift-console.apps.backplanes02uw2.mxci.p1.openshiftapps.com
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: https://api.backplanes02uw2.mxci.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.backplanes02uw2.mxci.p1.openshiftapps.com
+auth:
+- service: github-org-team
+  org: app-sre
+  team: backplanes02uw2-cluster
+ocm:
+  $ref: /dependencies/ocm/production.yml
+managedGroups:
+- dedicated-admins
+
+spec:
+  product: osd
+  provider: aws
+  region: us-west-2
+  channel: candidate
+  version: 4.12.6
+  initial_version: 4.12.6-candidate
+  multi_az: true
+  nodes: 9
+  instance_type: m5.xlarge
+  storage: 100
+  load_balancers: 4
+  private: true
+  id: 22ava21s42euuqhbmgpl2buv00gkp2i9
+  external_id: b6706044-9291-4ba8-8f90-42bf44aa952e
+  provision_shard_id: 7c2626e2-da06-11ea-8f62-8c1645a911be
+  disable_user_workload_monitoring: true
+jumpHost:
+  $ref: /openshift/bastion.ci.int.devshift.net.jumphost.yml
+internal: false
+upgradePolicy:
+  workloads:
+  - backplane
+  schedule: 0 16 * * 1-5
+  conditions:
+    soakDays: 10
+network:
+  type: OpenShiftSDN
+  vpc: 10.170.8.0/22
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+awsInfrastructureManagementAccounts:
+- account:
+    $ref: /aws/app-sre/account.yml
+  accessLevel: network-mgmt
+  default: true
+- account:
+    $ref: /aws/osd-privatelink-stage/account.yml
+  accessLevel: network-mgmt
+- account:
+    $ref: /aws/osd-bastion-stage/account.yml
+  accessLevel: network-mgmt
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+peering:
+  connections:
+  - provider: account-vpc
+    name: backplanes02uw2_app-sre-ci-int
+    vpc:
+      $ref: /aws/app-sre/vpcs/ci-int.yml
+    manageAccountRoutes: true
+    manageRoutes: true
+  - provider: account-tgw
+    name: backplanes02uw2
+    account:
+      $ref: /aws/osd-privatelink-stage/account.yml
+    tags:
+      osd: privatelink
+    manageRoutes: true
+    manageSecurityGroups: true
+    cidrBlock: 172.16.0.0/12
+  - provider: account-vpc-mesh
+    name: backplanes02uw2_osd-bastion-stage
+    account:
+      $ref: /aws/osd-bastion-stage/account.yml
+    tags:
+      osd: backplane
+    manageRoutes: true
+  - provider: cluster-vpc-requester
+    name: backplanes02uw2_appsres03ue1
+    cluster:
+      $ref: /openshift/appsres03ue1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-requester
+    name: backplanes02uw2_appsrep05ue1
+    cluster:
+      $ref: /openshift/appsrep05ue1/cluster.yml
+    manageRoutes: true
+automationToken:
+  path: app-sre/creds/kube-configs/backplanes02uw2
+  field: token
+clusterAdmin: true

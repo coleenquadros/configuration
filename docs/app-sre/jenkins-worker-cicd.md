@@ -10,7 +10,23 @@ Continuous Delivery means deploying instances via AWS Auto Scaling groups (ASGs)
 
 We use the Ansible Packer provisioner to build different AMIs based on different base AMIs (we are using CentOS 7, RHEL 7, and RHEL 8) and run different roles. Packer configuration can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/packer). Each new commit [that makes changes](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/build_images.sh#L51-56) under that folder will trigger a building process for all types of worker nodes. The roles configuration for each kind of node can be found [here](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/packer/ansible/jenkins-worker.yaml). To add a new type would also require adding a new source in packer [config](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/packer/worker.pkr.hcl#L40-80).
 
-For security, all AMIs are built in [app-sre-ci](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-ci/account.yml) account. Once the AMIs get built successfully, they will be shared into `app-sre` account via [aws-ami-share](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/aws_ami_share.py). Sharing configuration can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-ci/account.yml#L47-50)
+For security, all AMIs are built in [app-sre-ci](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-ci/account.yml) account in a dedicated VPC. Once the AMIs get built successfully, they will be shared into `app-sre` account via [aws-ami-share](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/aws_ami_share.py). Sharing configuration can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-ci/account.yml#L47-50)
+
+AMIs are built every time a file inside the `packer` directory of [`infra`](https://gitlab.cee.redhat.com/app-sre/infra) repository is modified. See [`build_images.sh`](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/build_images.sh) for details:
+
+### Tests
+
+In a MR, AMIs are also tested using [`ami-tests`](https://gitlab.cee.redhat.com/app-sre/ami-tests), a test runner for [testinfra](https://testinfra.readthedocs.io/en/latest/) tests.
+
+### OS Upgrades
+
+Every time an AMI is built, all the packages are upgraded in the [`baseline`](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/packer/ansible/roles/baseline/tasks/main.yml#L1) role. If we want to upgrade AMIs, we just have to introduce a trivial change under the `packer` directory. The file `packer/FORCE_AMI_BUILD` exists for that purpose. In order to force a new ami build just:
+
+```
+date -u > packer/FORCE_AMI_BUILD
+```
+
+and create a MR in the `infra` repo.
 
 ## Continuous Delivery
 

@@ -73,8 +73,10 @@ records:
 - {name: vault, type: CNAME, _target_cluster: {$ref: /openshift/appsrep05ue1/cluster.yml}, ttl: 30}
 - {name: vault.ci.ext, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 - {name: vault.stage, type: CNAME, _target_cluster: {$ref: /openshift/appsres03ue1/cluster.yml}}
+- {name: vault.dev, type: CNAME, _target_cluster: {$ref: /openshift/appsres03ue1/cluster.yml}}
 - {name: app-interface, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 - {name: app-interface.stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
+- {name: app-interface.dev, type: CNAME, _target_cluster: {$ref: /openshift/appsres03ue1/cluster.yml}}
 
 - {name: insights.unleash, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 - {name: insights-stage.unleash, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
@@ -123,6 +125,7 @@ records:
 - {name: web-rca.stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
 - {name: web-rca, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 
+- {name: registry.quarkus.preprod, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
 - {name: registry.quarkus, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 
 ### OCM
@@ -186,15 +189,17 @@ records:
 - {name: alertmanager.hivep05ue1, type: CNAME, _target_cluster: {$ref: /openshift/hivep05ue1/cluster.yml}}
 - {name: prometheus.hivep06uw2, type: CNAME, _target_cluster: {$ref: /openshift/hivep06uw2/cluster.yml}}
 - {name: alertmanager.hivep06uw2, type: CNAME, _target_cluster: {$ref: /openshift/hivep06uw2/cluster.yml}}
+
+# Backplane
 - name: api.integration.backplane
   type: CNAME
   records:
-  - backplane-api-int-906040274.us-east-1.elb.amazonaws.com
-- name: _dbf6fa8aefe32b583b5eabdcd9249e71.api.integration.backplane
-  type: CNAME
-  records:
-  - _18a86763fd4cbc6e2d4d1bc00782bfd7.kdbplsmznr.acm-validations.aws
-
+  # apps2 router on integration cluster backplanei01ue1
+  - elb.apps2.backplanei01ue1.z3pt.p1.openshiftapps.com
+  ttl: 10
+  geolocation_routing_policy:
+    country: "*"
+  set_identifier: api-integration-backplane-default
 
 ### Sentry
 - {name: sentry, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
@@ -205,7 +210,7 @@ records:
 - {name: github-mirror.stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
 
 ### Dashdotdb
-- {name: dashdotdb.stage, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-stage-01/cluster.yml}}
+- {name: dashdotdb.stage, type: CNAME, _target_cluster: {$ref: /openshift/hst01ue1/cluster.yml}}
 - {name: dashdotdb, type: CNAME, _target_cluster: {$ref: /openshift/app-sre-prod-01/cluster.yml}}
 
 - {name: grafana.stage, type: CNAME, _target_cluster: {$ref: /openshift/appsres03ue1/cluster.yml}}
@@ -254,7 +259,6 @@ records:
 # ;;;
 - {name: ci.ext, type: CNAME, records: [ci-ext-alb-1356770065.us-east-1.elb.amazonaws.com], ttl: 60}
 - {name: ci.ext.ssh, type: A, records: [18.214.51.196]}
-- {name: bastion.ci.ext, type: CNAME, records: [ec2-54-224-238-24.compute-1.amazonaws.com]}
 - {name: bastion.ci.int, type: A, records: [10.29.88.149]}
 
 # ;;;
@@ -292,41 +296,6 @@ records:
 - {name: n27.int, type: A, records: [192.168.173.27]}
 - {name: n28.int, type: A, records: [192.168.173.28]}
 
-- {name: ci-int-jenkins-slave-01-app-sre.int, type: CNAME, records: [ci-int-aws-jenkins-worker-001-app-sre.int.devshift.net]}
-- {name: ci-int-jenkins-slave-03-hive.int, type: CNAME, records: [ci-int-aws-jenkins-worker-003-hive.int.devshift.net]}
-- {name: ci-int-jenkins-slave-04-uhc-provisioning.int, type: CNAME, records: [ci-int-aws-jenkins-worker-004-uhc-provisioning.int.devshift.net]}
-- {name: ci-int-jenkins-slave-05-app-sre.int, type: CNAME, records: [ci-int-aws-jenkins-worker-005-app-sre.int.devshift.net]}
-- {name: ci-int-jenkins-slave-06-insights.int, type: CNAME, records: [ci-int-aws-jenkins-worker-006-insights.int.devshift.net]}
-- {name: ci-int-jenkins-slave-07-rhel7.int, type: CNAME, records: [ci-int-aws-jenkins-worker-007-rhel7.int.devshift.net]}
-- {name: ci-int-jenkins-slave-08-app-interface.int, type: CNAME, records: [ci-int-aws-jenkins-worker-008-app-interface.int.devshift.net]}
-- {name: ci-int-jenkins-slave-09-app-interface.int, type: CNAME, records: [ci-int-aws-jenkins-worker-009-app-interface.int.devshift.net]}
-- {name: ci-int-jenkins-slave-10-app-interface.int, type: CNAME, records: [ci-int-aws-jenkins-worker-010-app-interface.int.devshift.net]}
-- {name: ci-int-jenkins-slave-11-app-interface.int, type: CNAME, records: [ci-int-aws-jenkins-worker-011-app-interface.int.devshift.net]}
-- {name: ci-int-jenkins-slave-12-app-interface.int, type: CNAME, records: [ci-int-aws-jenkins-worker-012-app-interface.int.devshift.net]}
-- {name: ci-int-jenkins-slave-13-app-interface.int, type: CNAME, records: [ci-int-aws-jenkins-worker-013-app-interface.int.devshift.net]}
-- {name: ci-int-jenkins-slave-14-rhel8.int, type: CNAME, records: [ci-int-aws-jenkins-worker-014-rhel8.int.devshift.net]}
-- {name: ci-int-jenkins-slave-15-app-interface.int, type: CNAME, records: [ci-int-aws-jenkins-worker-015-app-interface.int.devshift.net]}
-- {name: ci-int-jenkins-slave-16-app-interface.int, type: CNAME, records: [ci-int-aws-jenkins-worker-016-app-interface.int.devshift.net]}
-- {name: ci-int-jenkins-slave-17-app-interface.int, type: CNAME, records: [ci-int-aws-jenkins-worker-017-app-interface.int.devshift.net]}
-- {name: ci-int-jenkins-slave-18-rhel8.int, type: CNAME, records: [ci-int-aws-jenkins-worker-018-rhel8.int.devshift.net]}
-- {name: ci-int-aws-jenkins-worker-001-app-sre.int, type: A, records: [10.29.89.11]}
-- {name: ci-int-aws-jenkins-worker-003-hive.int, type: A, records: [10.29.89.13]}
-- {name: ci-int-aws-jenkins-worker-004-uhc-provisioning.int, type: A, records: [10.29.89.14]}
-- {name: ci-int-aws-jenkins-worker-005-app-sre.int, type: A, records: [10.29.89.15]}
-- {name: ci-int-aws-jenkins-worker-006-insights.int, type: A, records: [10.29.89.16]}
-- {name: ci-int-aws-jenkins-worker-007-rhel7.int, type: A, records: [10.29.89.17]}
-- {name: ci-int-aws-jenkins-worker-008-app-interface.int, type: A, records: [10.29.89.18]}
-- {name: ci-int-aws-jenkins-worker-009-app-interface.int, type: A, records: [10.29.89.19]}
-- {name: ci-int-aws-jenkins-worker-010-app-interface.int, type: A, records: [10.29.89.110]}
-- {name: ci-int-aws-jenkins-worker-011-app-interface.int, type: A, records: [10.29.89.111]}
-- {name: ci-int-aws-jenkins-worker-012-app-interface.int, type: A, records: [10.29.89.112]}
-- {name: ci-int-aws-jenkins-worker-013-app-interface.int, type: A, records: [10.29.89.113]}
-- {name: ci-int-aws-jenkins-worker-014-rhel8.int, type: A, records: [10.29.89.114]}
-- {name: ci-int-aws-jenkins-worker-015-app-interface.int, type: A, records: [10.29.89.115]}
-- {name: ci-int-aws-jenkins-worker-016-app-interface.int, type: A, records: [10.29.89.116]}
-- {name: ci-int-aws-jenkins-worker-017-app-interface.int, type: A, records: [10.29.89.117]}
-- {name: ci-int-aws-jenkins-worker-018-rhel8.int, type: A, records: [10.29.89.118]}
-- {name: ci-int-aws-jenkins-worker-019-insights.int, type: A, records: [10.29.89.119]}
 - name: prometheus.appsrep06ue2
   type: CNAME
   _target_cluster:
@@ -359,11 +328,19 @@ records:
   type: CNAME
   _target_cluster:
     $ref: /openshift/rhobsp02ue1/cluster.yml
-- name: prometheus.stone-stg-host1
+- name: prometheus.hst01ue1
   type: CNAME
   _target_cluster:
-    $ref: /openshift/stone-stg-host1/cluster.yml
-- name: alertmanager.stone-stg-host1
+    $ref: /openshift/hst01ue1/cluster.yml
+- name: alertmanager.hst01ue1
   type: CNAME
   _target_cluster:
-    $ref: /openshift/stone-stg-host1/cluster.yml
+    $ref: /openshift/hst01ue1/cluster.yml
+- name: prometheus.backplanei01ue1
+  type: CNAME
+  _target_cluster:
+    $ref: /openshift/backplanei01ue1/cluster.yml
+- name: alertmanager.backplanei01ue1
+  type: CNAME
+  _target_cluster:
+    $ref: /openshift/backplanei01ue1/cluster.yml

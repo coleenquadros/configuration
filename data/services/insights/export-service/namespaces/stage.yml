@@ -1,0 +1,60 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: export-service
+
+name: export-service
+description: |
+  The Export-Service provides a shared approach to allow customers to
+  request and download data archives from the apps running on the c.r.c
+  platform.
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+app:
+  $ref: /services/insights/export-service/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: export-service-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: export-service-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres14-rds-export-service-stage.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres14-parameter-group-export-service-stage.yml
+    output_resource_name: export-service-db
+    enhanced_monitoring: true
+  - provider: s3
+    identifier: export-service-stage
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: export-service-s3

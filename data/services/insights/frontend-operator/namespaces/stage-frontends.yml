@@ -1,0 +1,46 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights
+
+name: frontends
+description: Namespace where frontends are deployed
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+app:
+  $ref: /services/insights/frontend-operator/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+# - NetworkPolicy
+- Secret
+
+sharedResources:
+- $ref: /services/unleash/shared-resources/insights-stage.yml
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-common/iqe-vault.secret.yaml

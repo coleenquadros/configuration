@@ -1,22 +1,18 @@
 # SOP : Jenkins
 
-DEPRECATION NOTICE: We're moving to EC2 Fleet Manager to manage worker nodes dynamically. We have already completed ci-int whereas ci-ext still has static nodes. See [this doc](/docs/app-sre/jenkins-worker-cicd.md) to have more information on how to handle dynamic nodes.
-
 [TOC]
 
 ---
 
 # Instances
 
-The Jenkins servers (nodes and controllers) are VMs running in
+The Jenkins servers (workers and controllers) are VMs running in
 [AWS](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Instances:search=ci.ext;sort=desc:instanceId),
 in the app-sre account. You can check your default credentials in the
 [app-interface output repo](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md).
 
-The configuration is documented in the
-[infa](https://gitlab.cee.redhat.com/app-sre/infra) repo
-[here](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/host_vars/ci.ext.ssh.devshift.net).
-
+* The controller nodes are installed via ansible in [ansible](https://gitlab.cee.redhat.com/app-sre/infra/master/ansible) directory of the `infra` repo.
+* The worker nodes are managed through the EC2 Fleet Manager plugin. See [this doc](/docs/app-sre/jenkins-worker-cicd.md) for details.
 
 # Alerts
 
@@ -111,12 +107,9 @@ See [the general openstack SOP](openstack-ci-int.md).
 
 ### Steps:
 
-Reboot or restart all the affected nodes. Identify their names from
-the alert, and then use `openstack server reboot --hard $server_name`.
-
-If they don't come back, escalate to PSI. Cut a [Service Now
-ticket](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=4c66fd3a1bfbc4d0ebbe43f8bc4bcb6a)
--- yes, really. Mark impact as 3, and urgency as 3 or 2.
+A non-responding worker can be safely deleted since it belongs to an ASG. The node will be identified
+by the AWS instance id. Mark it as offline, wait for the builds to finish and delete it from the `app-sre`
+account console or from the CLI.
 
 ---
 

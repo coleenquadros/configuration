@@ -453,3 +453,7 @@ Easy way to identify such tickets in Jira is to check for `JIRALERT{<HASH>}` in 
  ***Only tickets created with this label will be resolved automatically once underlying cause has been addressed.***
 
 More information on how to enroll in this feature https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/register-your-service/#creating-an-escalation-policy, look for `issueResolveState` in jira board example.
+
+### Why did my Job not run yesterday?
+
+So, you already checked your namespace events, but it shows they are no longer visible? Take a look at [this documentation](./docs/app-sre/historic-kubernetes-events.md), as it explains how to access historic kubernetes events in Cloudwatch.

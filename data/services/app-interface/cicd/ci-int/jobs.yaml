@@ -31,7 +31,6 @@ config:
         job_type: ''
         slack_channel_notification: sd-app-sre-reconcile
     - 'gl-build-master-app-interface':
-        node: app-interface-long-running
         display_name: build master - deploy to stage only
         build_deploy_script_path: ./hack/build_deploy.sh
         environment: stage
@@ -42,12 +41,27 @@ config:
         concurrent_build: true
         # This is a temporary workaround to prevent changes to the hack directory from running MR checks
         pr_check_script_path: |
-            if git diff --quiet --exit-code origin/master..HEAD -- ./hack/; then
-                ./hack/pr_check.sh
-            else
+            #!/bin/bash
+            set -evuo pipefail
+            if ! git diff --quiet origin/master HEAD -- ./hack/; then
+              MERGE_REQUEST_QUERY=api/v4/projects/"$gitlabMergeRequestTargetProjectId"/merge_requests/"$gitlabMergeRequestIid"
+              echo "Checking permission for merge request: $MERGE_REQUEST_QUERY ..."
+              AUTHOR_ID=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "$GITLAB_SERVER/$MERGE_REQUEST_QUERY" | jq '.author.id')
+              if [ "$AUTHOR_ID" == "null" ]; then
+                echo "Author not found!"
+                exit 2
+              fi
+              MEMBER_QUERY=api/v4/groups/app-sre/members/"$AUTHOR_ID"
+              echo "Checking if author is a member of app-sre $MEMBER_QUERY ..."
+              STATUS_CODE=$(curl -s -o /dev/null -w "%{{http_code}}" --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "$GITLAB_SERVER/$MEMBER_QUERY")
+              if [ "$STATUS_CODE" == "200" ]; then
+                echo "Found authorized hack/ folder change, MR will run."
+              else
                 echo "Found unauthorized hack/ folder change, MR will not run."
                 exit 2
+              fi
             fi
+            ./hack/pr_check.sh
         job_type: ''
     - 'gl-periodic-job-app-interface':
         node: app-interface-long-running
@@ -73,13 +87,13 @@ config:
 - project:
     name: app-interface-output
     label: app-interface
-    node: app-interface
+    node: app-interface-long-running
     gl_group: service
     gl_project: app-interface-output
     jobs:
     - 'app-interface-output-run':
         display_name: app-interface-output run
-        commands: 'clusters-network quay-mirrors ocm-aws-infrastructure-access-switch-role-links terraform-users-credentials clusters namespaces clusters-egress-ips version-history cluster-upgrade-policies clusters-aws-account-ids cluster-openshift-resources aws-terraform-resources app-interface-review-queue app-interface-merge-queue app-interface-merge-history app-interface-open-selfserviceable-mr-queue ocm-fleet-upgrade-policies ocm-addon-upgrade-policies change-types'
+        commands: 'clusters-network quay-mirrors ocm-aws-infrastructure-access-switch-role-links terraform-users-credentials clusters namespaces version-history cluster-upgrade-policies clusters-aws-account-ids cluster-openshift-resources aws-terraform-resources app-interface-review-queue app-interface-merge-queue app-interface-merge-history app-interface-open-selfserviceable-mr-queue ocm-fleet-upgrade-policies ocm-addon-upgrade-policies change-types selectorsyncset-managed-resources selectorsyncset-managed-hypershift-resources'
 
 - project:
     name: container-images-internal

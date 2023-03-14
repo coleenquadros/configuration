@@ -35,8 +35,9 @@ resourceTemplates:
   url: https://github.com/app-sre/qontract-server
   path: /openshift/app-interface.yaml
   parameters:
-    IMAGE_GATE_TAG: 5f4ad23
+    IMAGE_GATE_TAG: 49a928c
     REPLICAS: 3
+    MAX_OLD_SPACE_SIZE: "800"
     APP_INTERFACE_RESOURCES:
       requests:
         cpu: 900m
@@ -54,8 +55,22 @@ resourceTemplates:
         cpu: 30m
         memory: 20Mi
       limits:
-        memory: 20Mi
+        memory: 40Mi
+    IMAGE_GATE_AUTH_DISABLE: "true"
   targets:
   - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-dev-int.yml
+    ref: master
+    parameters:
+      REPLICAS: 2
+      APP_INTERFACE_RESOURCES:
+        requests:
+          cpu: 50m
+          memory: 512Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      IMAGE_GATE_AUTH_DISABLE: "true"
+  - namespace:
       $ref: /services/app-interface/namespaces/app-interface-production-int.yml
-    ref: 4f7d3a04a77a3c9c27bdd67fb4443127685960a5
+    ref: f09ee6eee727f4b027787009fc3256a4600bacba

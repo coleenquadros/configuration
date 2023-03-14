@@ -113,9 +113,11 @@ resourceTemplates:
       UNLEASH_URL: https://ocm-integration.unleash.devshift.net/api
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-integration.svc.cluster.local
       MANDRILL_TIMEOUT: 60s
+      ENABLE_ORG_SERVICE_ACCT_EMAIL_VALIDATION: 'true'
+      PPROF_SERVER_BINDADDRESS: ''
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
-    ref: 035c6628499805b4b3a6726b62b7709e30beaf87
+    ref: 6da42c4bb2cd9fc6e71c0791cb224ebf7e30420b
     promotion:
       auto: true
       subscribe:
@@ -126,7 +128,7 @@ resourceTemplates:
       - channel: ocm-ams-deployed-int-green
         data:
         - parent_saas: saas-uhc-account-manager
-          target_config_hash: a7905c2078ee13ef
+          target_config_hash: ab738fab7672fbe6
           type: parent_saas_config
     parameters:
       UHC_BASE_URL: http://127.0.0.1:9090
@@ -149,9 +151,13 @@ resourceTemplates:
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
       MANDRILL_TIMEOUT: 60s
       AUTOMATIC_BAN: 'false'
+      RBAC_BASE_URL: https://mtls.internal.console.redhat.com
+      RBAC_PROXY: ''
+      ENABLE_ORG_SERVICE_ACCT_EMAIL_VALIDATION: 'true'
+      PPROF_SERVER_BINDADDRESS: ''
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
-    ref: 3feeb96a71e9e2fa94565cb4b046453eba26deaa
+    ref: d21affba8d7534fe68746b73fae86755cf54a05d
     parameters:
       MEMORY_LIMIT: 4Gi
       REPLICAS: 1
@@ -172,6 +178,9 @@ resourceTemplates:
       DB_QUERY_READ_TIMEOUT_SERVER: '300000'
       DB_QUERY_WRITE_TIMEOUT_SERVER: '60000'
       MANDRILL_TIMEOUT: 60s
+      RBAC_BASE_URL: https://mtls.internal.console.redhat.com
+      RBAC_PROXY: ''
+      PPROF_SERVER_BINDADDRESS: ''
 - name: uhc-account-manager
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
   path: /templates/service-template.yml
@@ -251,6 +260,7 @@ resourceTemplates:
     AUTO_ENTITLEMENT_RECONCILER_CRON_SCHEDULE: 31 11 * * *
     RH_MARKETPLACE_QUOTA_RECONCILER_CRON_SCHEDULE: '*/5 * * * *'
     PULL_SECRET_ROTATIONS_RECONCILER_CRON_SCHEDULE: 0 */6 * * *
+    PPROF_SERVER_BINDADDRESS: ''
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
@@ -275,7 +285,8 @@ resourceTemplates:
       SUSPEND_RBAC_RECONCILER_CRON: 'false'
       RBAC_RECONCILER_DRY_RUN: 'false'
       RBAC_RECONCILER_CRON_SCHEDULE: 15,45 * * * *
-      RBAC_RECONCILER_LIMIT: 8
+      RBAC_RECONCILER_LIMIT: -1
+      RBAC_RECONCILER_WORKER_COUNT: 8
       USE_CANDLEPIN_BASIC_AUTH: 'true'
       WAREHOUSE_DELETED_CLUSTERS_DRY_RUN: 'false'
       WAREHOUSE_DELETED_CLUSTERS_MAX_AMOUNT: 1000
@@ -328,9 +339,11 @@ resourceTemplates:
       UMB_SUBSCRIPTION_CONSUMER_DRY_RUN: 'false'
       ENABLE_UMB_SUBSCRIPTION_CONSUMER_MOCK: 'false'
       UMB_TIMEOUT: 5m
+      ENABLE_ORG_SERVICE_ACCT_EMAIL_VALIDATION: 'true'
+      PPROF_SERVER_BINDADDRESS: ''
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
-    ref: 035c6628499805b4b3a6726b62b7709e30beaf87
+    ref: 6da42c4bb2cd9fc6e71c0791cb224ebf7e30420b
     promotion:
       auto: true
       subscribe:
@@ -341,9 +354,10 @@ resourceTemplates:
       - channel: ocm-ams-deployed-int
         data:
         - parent_saas: saas-uhc-account-manager
-          target_config_hash: 9aaf9534c5e8517d
+          target_config_hash: ee368f4e605402d4
           type: parent_saas_config
     parameters:
+      SEGMENT_EMAIL_NAME: 'true'
       UHC_BASE_URL: http://127.0.0.1:9090
       REPLICAS: 6
       API_REPLICA_COUNT_MIN: '6'
@@ -359,7 +373,8 @@ resourceTemplates:
       SUSPEND_RBAC_RECONCILER_CRON: 'false'
       RBAC_RECONCILER_DRY_RUN: 'false'
       RBAC_RECONCILER_CRON_SCHEDULE: 15,45 * * * *
-      RBAC_RECONCILER_LIMIT: 8
+      RBAC_RECONCILER_LIMIT: -1
+      RBAC_RECONCILER_WORKER_COUNT: 8
       WAREHOUSE_DELETED_CLUSTERS_DRY_RUN: 'false'
       WAREHOUSE_DELETED_CLUSTERS_MAX_AMOUNT: 1000
       CLUSTER_TRANSFERS_RECONCILER_DRY_RUN: 'false'
@@ -423,6 +438,8 @@ resourceTemplates:
       UMB_TIMEOUT: 5m
       AUTOMATIC_BAN: 'false'
       ACCOUNT_RECONCILER_DRY_RUN: 'false'
+      ENABLE_ORG_SERVICE_ACCT_EMAIL_VALIDATION: 'true'
+      PPROF_SERVER_BINDADDRESS: ''
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage-appsres04ue2.yml
     ref: master
@@ -508,18 +525,24 @@ resourceTemplates:
       ENABLE_UMB_SUBSCRIPTION_CONSUMER_MOCK: 'false'
       UMB_TIMEOUT: 5m
       AUTOMATIC_BAN: 'false'
+      ENABLE_ORG_SERVICE_ACCT_EMAIL_VALIDATION: 'true'
+      PPROF_SERVER_BINDADDRESS: ''
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
-    ref: 3feeb96a71e9e2fa94565cb4b046453eba26deaa
+    ref: d21affba8d7534fe68746b73fae86755cf54a05d
     parameters:
       MEMORY_LIMIT: 4Gi
       REPLICAS: 6
       API_REPLICA_COUNT_MIN: '6'
       API_REPLICA_COUNT_MAX: '6'
       RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.redhat.com/candlepin
-      SUSPEND_RBAC_RECONCILER_CRON: 'true'
-      RBAC_RECONCILER_DRY_RUN: 'true'
-      RBAC_RECONCILER_LIMIT: 1
+      SUSPEND_RBAC_RECONCILER_CRON: 'false'
+      RBAC_RECONCILER_DRY_RUN: 'false'
+      RBAC_RECONCILER_LIMIT: -1
+      RBAC_RECONCILER_WORKER_COUNT: 4
+      RBAC_BASE_URL: https://mtls.internal.console.redhat.com
+      RBAC_PROXY: ''
+      RBAC_RECONCILER_CRON_SCHEDULE: 15,45 * * * *
       WAREHOUSE_DELETED_CLUSTERS_DRY_RUN: 'false'
       WAREHOUSE_DELETED_CLUSTERS_MAX_AMOUNT: 1000
       CLUSTER_REG_RATE_LIMIT: 250
@@ -577,7 +600,7 @@ resourceTemplates:
       SUBSCRIPTION_STATUS_RECONCILER_DRY_RUN: 'false'
       SUBSCRIPTION_STATUS_RECONCILER_MAX_DELETE_CLUSTERS: '1'
       MANDRILL_TIMEOUT: 60s
-      UMB_CONSUMER_REPLICAS: '1'
+      UMB_CONSUMER_REPLICAS: '3'
       UMB_URL: umb.api.redhat.com:61612
       UMB_USER_QUEUE: Consumer.uhcaccountmanager.ocm-user-consumer
       UMB_USER_TOPIC: VirtualTopic.canonical.user
@@ -585,9 +608,10 @@ resourceTemplates:
       ENABLE_UMB_USER_CONSUMER_MOCK: 'false'
       UMB_SUBSCRIPTION_QUEUE: Consumer.uhcaccountmanager.ocm-subscription-consumer
       UMB_SUBSCRIPTION_TOPIC: VirtualTopic.canonical.subscription
-      UMB_SUBSCRIPTION_CONSUMER_DRY_RUN: 'true'
+      UMB_SUBSCRIPTION_CONSUMER_DRY_RUN: 'false'
       ENABLE_UMB_SUBSCRIPTION_CONSUMER_MOCK: 'false'
-      UMB_TIMEOUT: 1h
+      UMB_TIMEOUT: 5m
+      PPROF_SERVER_BINDADDRESS: ''
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage-sso-test.yml
     ref: master
@@ -660,6 +684,8 @@ resourceTemplates:
       UMB_SUBSCRIPTION_CONSUMER_DRY_RUN: 'true'
       ENABLE_UMB_SUBSCRIPTION_CONSUMER_MOCK: 'false'
       UMB_TIMEOUT: 1h
+      ENABLE_ORG_SERVICE_ACCT_EMAIL_VALIDATION: 'true'
+      PPROF_SERVER_BINDADDRESS: ''
 - name: uhc-account-manager-dashboards
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
   path: /dashboards
@@ -670,4 +696,4 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
-    ref: 463cc18c8ef0c58112723c2a465b10adf7d74168
+    ref: d21affba8d7534fe68746b73fae86755cf54a05d

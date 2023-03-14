@@ -9,7 +9,7 @@ name: argocd-staging
 description: Namespace for ArgoCD resources deployed by the Gitops Operator
 
 cluster:
-  $ref: /openshift/stone-stg-host1/cluster.yml
+  $ref: /openshift/stone-stg-host/cluster.yml
 
 app:
   $ref: /services/stonesoup/argocd/app.yml
@@ -39,9 +39,15 @@ openshiftResources:
   path: /stonesoup/argocd/argocd.yml
 - provider: resource
   path: /stonesoup/argocd/argocd-server-clusterrole.yml
-- provider: resource
-  path: /stonesoup/argocd/argocd-server-clusterrolebinding.yml
+- provider: resource-template
+  type: jinja2
+  path: /stonesoup/argocd/argocd-server-clusterrolebinding.yml.j2
+  variables:
+    argocd_namespace: argocd-staging
 - provider: resource
   path: /stonesoup/argocd/argocd-application-controller-clusterrole.yaml
-- provider: resource
-  path: /stonesoup/argocd/argocd-application-controller-clusterrolebinding.yaml
+- provider: resource-template
+  type: jinja2
+  path: /stonesoup/argocd/argocd-application-controller-clusterrolebinding.yaml.j2
+  variables:
+    argocd_namespace: argocd-staging

@@ -1,0 +1,66 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: provisioning
+
+name: provisioning
+
+app:
+  $ref: /services/insights/provisioning/app.yml
+
+namespaces:
+- $ref: /services/insights/provisioning/namespaces/provisioning-prod.yml
+
+slos:
+- name: API Success Rate
+  SLIType: availability
+  SLISpecification: The proportion of 2xx HTTP requests
+  SLODetails: https://gitlab.cee.redhat.com/satellite-services/satellite-services.pages.redhat.com/-/blob/main/observability/slos/provisioning/success_rate.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(provisioning_http_request_total{code=~"2.*"}[{{window}}]))/sum(rate(provisioning_http_request_total[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /insights-prod/provisioning-prod/provisioning.prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/211/provisioning?orgId=1&viewPanel=32
+
+- name: API request latency
+  SLIType: latency
+  SLISpecification: The proportion of HTTP requests that return within 200ms
+  SLODetails: https://gitlab.cee.redhat.com/satellite-services/satellite-services.pages.redhat.com/-/blob/main/observability/slos/provisioning/request_latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(provisioning_http_request_duration_ms_bucket{le="200"}[{{window}}])) / sum(rate(provisioning_http_request_duration_ms_count[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /insights-prod/provisioning-prod/provisioning.prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/211/provisioning?orgId=1&viewPanel=33
+
+- name: Source Availability Success Rate
+  SLIType: availability
+  SLISpecification: The proportion of successful and processed requests received from sources
+  SLODetails: https://gitlab.cee.redhat.com/satellite-services/satellite-services.pages.redhat.com/-/blob/main/observability/slos/provisioning/source_check_success_rate.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    (sum(rate(provisioning_source_availability_check_request_total[{{window}}]))+ sum(rate(provisioning_invalid_source_availability_check_request_total[{{window}}])))/sum(rate(provisioning_http_request_total{path="/api/provisioning/v1/availability_status/sources/"}[{{window}}]))
+  SLOTarget: 0.75
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /insights-prod/provisioning-prod/provisioning.prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/211/provisioning
+
+- name: Source Availability request latency
+  SLIType: latency
+  SLISpecification: The proportion of source availability checks requests that succeeds within 5 seconds
+  SLODetails: https://gitlab.cee.redhat.com/satellite-services/satellite-services.pages.redhat.com/-/blob/main/observability/slos/provisioning/source_check_latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000"}[{{window}}])) / sum(rate(provisioning_source_availability_check_request_duration_ms_count[{{window}}]))
+  SLOTarget: 0.5
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /insights-prod/provisioning-prod/provisioning.prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/211/provisioning

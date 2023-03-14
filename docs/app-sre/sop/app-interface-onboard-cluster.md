@@ -1,14 +1,15 @@
 <!-- TOC -->
 
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
-  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1-cluster-creation-and-initial-access-for-dedicated-admins)
-  - [Step 2 - Bot access and App SRE project template](#step-2-bot-access-and-app-sre-project-template)
-  - [Step 3 - Observability](#step-3-observability)
-  - [Step 4 - Operator Lifecycle Manager](#step-4-operator-lifecycle-manager)
-  - [Step 5 - Container Security Operator](#step-5-container-security-operator)
-  - [Step 6 - Deployment Validation Operator (DVO)](#step-6-deployment-validation-operator-dvo)
-  - [Step 7 - Obtain cluster-admin](#step-7-obtain-cluster-admin)
-  - [Step 8 - Install Cert-manager operator](#step-8-install-cert-manager-operator)
+  - [Step 1 - Cluster creation and initial access for dedicated-admins and automatic cluster file updates](#step-1---cluster-creation-and-initial-access-for-dedicated-admins-and-automatic-cluster-file-updates)
+  - [Step 2 - Bot access and App SRE project template](#step-2---bot-access-and-app-sre-project-template)
+  - [Step 3 - Observability](#step-3---observability)
+  - [Step 4 - Operator Lifecycle Manager](#step-4---operator-lifecycle-manager)
+  - [Step 5 - Container Security Operator](#step-5---container-security-operator)
+  - [Step 6 - Deployment Validation Operator (DVO)](#step-6---deployment-validation-operator-dvo)
+  - [Step 7 - Obtain cluster-admin](#step-7---obtain-cluster-admin)
+  - [Step 8 - Install Cert-manager operator](#step-8---install-cert-manager-operator)
+  - [Step 9 - Setup cluster logging](#step-9---setup-cluster-logging)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -392,6 +393,21 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 1. **IMPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notified by the browser.
 
+1. Add new grafana datasources for the new cluster:
+
+    You can do that with this command:
+      ```bash
+      hack/cluster_provision.py create-obs-grafana-datasources <cluster>
+      ```
+    **Double check the changes introduced, the destination file could have been modified with manual changes.**
+
+    Tip: There is one command to refresh all cluster info in shared grafana config,
+    just in case console url changed but forgot to update `slug`.
+
+      ```bash
+      hack/cluster_provision.py refresh-obs-grafana-datasources
+      ```
+
 ## Step 4 - Operator Lifecycle Manager
 
 1. Install the Operator Lifecycle Manager
@@ -474,6 +490,29 @@ hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <
 ## Step 8 - Install Cert-manager operator
 
 1. Follow the installation instructions in this [Runbook](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/runbook/cert-manager.md)
+
+## Step 9 - Setup cluster logging
+
+We run our custom logging stack. This requires creation of resources in the correct namespaces.
+
+To enable the logging stack just run this command:
+```bash
+hack/cluster_provision.py --datadir data create-obs-logging <cluster> <environment>
+```
+**Double check the changes introduced, the destination file could have been modified with manual changes**
+
+This command does the following steps:
+* Create the logging namespace configuration file `openshift-logging` under `/openshift/<cluster>/namespaces`
+* Create the `event-router` namespace configuration file under `/openshift/<cluster>/namespaces`
+* Add new target to resourceTemplate section to `/services/observability/cicd/saas/saas-event-router.yaml`
+
+Check the created namespace template, it might fail the PR check since the CRD is not deployed at the begining. In that case, you'll need 2 PRs: one to install the operator and a second one to install the ClusterLogging and ClusterLogForwarder configurations.
+
+In order to remove the configuration comment out the following line:
+```
+- $ref: /services/app-sre/shared-resources/cluster-logging-config.yaml
+```
+
 
 # Additional configurations
 

@@ -40,6 +40,7 @@ networkPoliciesAllow:
 - $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
 - $ref: /services/insights/ros/namespaces/ros-prod.yml
 - $ref: /services/insights/malware-detection/namespaces/malware-detection-prod.yml
+- $ref: /services/insights/content-sources/namespaces/content-sources-prod.yml
 
 managedRoles: true
 
@@ -104,6 +105,18 @@ externalResources:
     parameter_group: /terraform/resources/insights/production/rds/postgres14-parameter-group-rbac-prod.yml
     old_parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-rbac-prod.yml
   - provider: rds
+    identifier: rbac-prod-postgres14
+    defaults: /terraform/resources/insights/production/rds/rds-rbac-prod.yml
+    parameter_group: /terraform/resources/insights/production/rds/postgres14-parameter-group-rbac-prod.yml
+    output_resource_name: rbac-db-postgres14
+    output_resource_db_name: rbac
+    enhanced_monitoring: true
+    overrides:
+      db_subnet_group_name: 'insights-subnet-group'
+      vpc_security_group_ids: ['sg-03c8ee3586a6aa74a']
+    annotations:
+      clowder/database: rbac
+  - provider: rds
     identifier: rbac-prod-202302121326
     defaults: /terraform/resources/insights/production/rds/rds-rbac-prod.yml
     overrides:
@@ -114,8 +127,17 @@ externalResources:
     output_resource_name: rbac-db
     output_resource_db_name: rbac
     parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-rbac-prod.yml
-    annotations:
-      clowder/database: rbac
+    # Replica instance for GABI
+  - provider: rds
+    identifier: rbac-prod-readonly
+    defaults: /terraform/resources/insights/production/rds/rds-rbac-prod.yml
+    parameter_group: /terraform/resources/insights/production/rds/postgres14-parameter-group-rbac-prod.yml
+    replica_source: rbac-prod-postgres14
+    output_resource_name: rbac-prod-db-ro
+    overrides:
+      db_subnet_group_name: 'insights-subnet-group'
+      vpc_security_group_ids: ['sg-03c8ee3586a6aa74a']
+    output_resource_db_name: rbac
   - provider: elasticache
     identifier: rbac-prod-elasticache
     defaults: /terraform/resources/insights/production/elasticache/elasticache-rbac-1.yml

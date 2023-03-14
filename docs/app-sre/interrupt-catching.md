@@ -38,6 +38,12 @@ We have a [checklist](/docs/app-sre/re-onboarding-checklist.md) to help drive th
 
 The IC engineer should review any open [ASIC](https://issues.redhat.com/projects/ASIC/issues/) tickets and attempt to resolve them, or at least start the investigation and post and findings to the ticket.
 
+A few basic rules about ASIC tickets:
+
+* ASIC tickets are a collaborative effort. They exist because keeping context in a ticket is much easier in JIRA. Please always add enough context and information so that it can be picked up by the following IC.
+* ASIC tickets must not be owned by any engineer. If by any chance you feel that you should own a ticket so that it is properly addressed, then it doesn't belong to ASIC project any longer: move it to `APPSRE` board and assign it to yourself. If not, just add all the information that you have gathered and unassign it once your shift is done.
+* Do not let ASIC tickets rot: if a solution has been provided to the tenant that created it, just close it giving the tenant the possibility to reopen if needed.
+
 #### 4b. Answer users questions in [#sd-app-sre](https://redhat-internal.slack.com/messages/CCRND57FW/) that aren't impacting production
 
 Users will often ask questions in [#sd-app-sre](https://redhat-internal.slack.com/messages/CCRND57FW/) such as how to perform some task in app-interface, or other general questions. Keep the following in mind when answering questions in this channel:
@@ -53,6 +59,8 @@ Users will often ask questions in [#sd-app-sre](https://redhat-internal.slack.co
 2. Read through the SOP and attempt to resolve the issue
 3. Escalate to the tenant team if you cannot resolve the issue with the SOP
 4. When the issue is mitigated/resolved, search through the alerts Slack channel to see if this alert has been trending, or if there were concerns because the SOP was incomplete, create an [ASIC](https://issues.redhat.com/projects/ASIC/issues/) ticket to track working with the team to fix the alert or underlying issue
+
+**IMPORTANT**: The maintenance of the `#sd-app-sre-alert` channel is to be done by the IC. If the channel is overloaded with flappy alerts, then it is of no use to anyone, and important things can be missed. It is the duty of the IC to make sure alerts in that channel are actionable and not flappy. If you detect a flappy alert, downgrade its severity to `medium` and let the tenant know so that they can work on restoring the trust of the alert so that it can reach us again.
 
 ### Additional notes
 

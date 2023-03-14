@@ -37,6 +37,7 @@ newly created RDS instances.
 * [Connecting to database](/docs/dba/connect-to-postgres-mysql-database.md)
 * [PostgreSQL handy queries](/docs/dba/Postgres-handy-queries.md)
 * [MySQL handy queries](/docs/dba/MySQL-handy-queries.md)
+* [High ReplicaLag](/docs/aws/sop/rds-high-replica-lag.md)
 
 ### RDS Documentation
 

@@ -4,6 +4,8 @@
 
 steahan / June 28, 2022
 
+* Updated January 2023 to cover Cloudflare ACM certificate renewal
+
 ## Tracking JIRA
 
 https://issues.redhat.com/browse/SDE-1958
@@ -28,7 +30,8 @@ as it would provide significant cost savings.
     * `cloudflare_worker_route` - links Cloudflare Workers to a specific route
     * `cloudflare_worker_script` - deploys the Cloudflare Workers code
     * `cloudflare_argo` - Argo controls tiered caching and smart routing
-    * `cloudflare_custom_ssl` - setup custom TLS certificates
+    * `cloudflare_certificate_pack` - provision Advanced Certificate Manager (ACM)
+      certificates for edge TLS
 * Establish a pattern for supporting >1 Cloud provider with Terraform
 * Implement the solution in the next 2-3 months
 
@@ -161,6 +164,97 @@ The Goals section of this document outlines the Cloudflare resources that will n
 be supported in our schemas. As the implementation progresses, it can be decided which
 of those resources are exposed directly versus which will be implicitly created.
 
+### Edge certificate support
+
+Edge certificates are used to terminate TLS connections on Cloudflare servers. This edge
+certificate is what is presented to the user. As per InfoSec mandates, we can currently
+use either Digicert or Let's Encrypt certificates.
+
+Using a Digicert certificate would require a manual process that starts with opening a
+SNOW ticket, a certificate must be provisioned by another team, and then uploaded to
+Vault for consumption by an integration. This is not ideal because it requires a manual
+step and provides human access to the private key.
+
+Cloudflare supports Advanced Certificate Manager (ACM) as an alternative that can
+automatically provision Let's Encrypt certificates. This removes a manual step while
+also avoiding the need for a human to generate the private key. Cloudflare having access
+to the private key is no less secure because even if we generate the certificate, they'd
+still need the private key that we generated to decrypt the traffic.
+
+Utilizing the Cloudflare ACM service was the option that was chosen.
+
+#### Certificate Domain Control Validation (DCV)
+
+One extra bit of complexity that wasn't initially anticipated is that the DNS records
+that need to be created for DCV will change each time that a certificate needs to be
+renewed. Cloudflare provides the name and value of the TXT records that must be created,
+but the `terraform-cloudflare-resources` integration doesn't have a good way to directly
+create these DNS records. Extending the integration to support DNS record creation seems
+like it would add unnecessary complexity.
+
+The solution to overcome this will be to write the DCV values as Terraform outputs and
+ultimately into Vault. These values could then be consumed by the appropriate DNS
+integrations to manage the record. For now, this would only be `terraform-aws-route53`
+because DCV validation records are handled automatically when a Cloudflare zone is
+configured in `Full`
+mode ([docs](https://developers.cloudflare.com/ssl/edge-certificates/changing-dcv-method/methods/txt/#zone-setups))
+.
+
+For example, the output would be:
+
+```json
+{
+  "_acme-challenge.somedomain.local": "<dns-record-value>",
+  "_acme-challenge.subdomain.somedomain.local": "<dns-record-value>"
+}
+```
+
+The schema of `/dependencies/dns-zone-1.yml` could then be extended to accept values
+from Vault by allowing the definition of `_records_from_vault` instead of the normal
+`records` field.
+
+```yaml
+records:
+  - name: _acme-challenge.test-from-vault
+    type: TXT
+    _records_from_vault:
+      - path: some/vault/path
+        field: validation_records
+        key: _acme-challenge.test-from-vault.dev-data.domain.local
+```
+
+The intent is that this would only be used sparingly for dynamic values, particularly
+related to DCV. This would be documented as such.
+
+Putting this all together, the workflow would roughly look like:
+
+1. User defines the certificate to be
+   created ([docs](https://gitlab.cee.redhat.com/service/app-interface#manage-cloudflare-zone-via-app-interface-openshiftnamespace-1yml-using-terraform))
+2. User determines the Vault path that the outputs with the DCV records will be stored
+   in (`integrations-output/<integration_name>/<cluster>/<namespace>/<resource>`). This
+   will be documented.
+3. User creates the entry in their `/dependencies/dns-zone-1.yml` file corresponding to
+   the DCV domain and provides the required `_records_from_vault` data
+
+The other alternative that was considered was to use
+the [mr](https://github.com/app-sre/qontract-reconcile/tree/master/reconcile/utils/mr)
+package within qontract-reconcile to automatically create merge requests when a DCV
+value has changed. The primary disadvantage is that this is adding a new responsibility
+to the `terraform-cloudflare-resources` integration without any real benefit. It's
+already a standard practice to have Terraform outputs that are used to pass values to
+other resources that need them.
+
+Overall, this is currently perceived to be a pattern that will have limited use, and
+will be documented such that it should only be used for DCV. The primary benefit is that
+we will no longer need to manually update DCV DNS entries every 60 days. The cost of
+changing the approach in the future would be limited as long as this is only used for
+DCV records.
+
+#### Open questions
+
+1. Do we support both `records` and `_records_from_vault` for the same DNS record?
+    * Leaning towards this not being required because the use case here is primarily Let's Encrypt DCV entries which are very specific `_acme-challenge` and are unlikely to have static values
+
 ## Alternatives considered
 
 ### Upgrade to Terraform >= 1.0
@@ -177,7 +271,9 @@ this work is outside of the scope of adding Cloudflare support.
 The Terraform CDK and Terraform >= 1.0 is a supported configuration. The issues with
 this approach are:
 
-1. The [Terraform CDK is still not a stable API](https://www.terraform.io/cdktf#project-maturity)
+1.
+
+The [Terraform CDK is still not a stable API](https://www.terraform.io/cdktf#project-maturity)
 , so there is an expectation of breaking changes that will introduce more work for
 upgrades
 

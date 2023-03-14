@@ -53,7 +53,7 @@ openshiftResources:
     qontract.recycle: "true"
 - provider: vault-secret
   path: insights/secrets/insights-prod/sources-prod/sources-api-secrets
-  version: 3
+  version: 4
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
@@ -92,18 +92,20 @@ externalResources:
     es_identifier: kibana-elasticsearch
   - provider: rds
     identifier: sources-prod
-    defaults: /terraform/resources/insights/production/rds/postgres11-rds-sources-prod.yml
+    defaults: /terraform/resources/insights/production/rds/postgres14-rds-sources-prod.yml
     overrides:
+      apply_immediately: true
       snapshot_identifier: sources-prod-migration
     enhanced_monitoring: true
     output_resource_name: sources-db
     output_resource_db_name: sources_production
-    parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-sources-prod.yml
-    # Replica instance for Gabi.
+    parameter_group: /terraform/resources/insights/production/rds/postgres14-parameter-group-sources-prod.yml
+    old_parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-sources-prod.yml
+  # Replica instance for Gabi.
   - provider: rds
     identifier: sources-prod-readonly
-    defaults: /terraform/resources/insights/production/rds/postgres11-rds-sources-prod.yml
-    parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-sources-prod.yml
+    defaults: /terraform/resources/insights/production/rds/postgres14-rds-sources-prod.yml
+    parameter_group: /terraform/resources/insights/production/rds/postgres14-parameter-group-sources-prod.yml
     replica_source: sources-prod
     output_resource_name: sources-prod-db-ro
     output_resource_db_name: sources_production

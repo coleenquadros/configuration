@@ -68,12 +68,13 @@ resourceTemplates:
       DB_SECRET_PASSWORD_KEY: password
       DB_SECRET_USERNAME_KEY: username
       RBAC_AUTHENTICATION_READ_TIMEOUT: 30000
+      NOTIFICATIONS_EMAILS_ONLY_MODE_ENABLED: false
 
   # stage
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: cf05f6eaa71b1b77aa89863c9dc51f18d3418b13
+    ref: 11be21d7391e6125d9cca258dd41142bc1382f00
     parameters:
       FLOORIST_SUSPEND: 'true'
       FLOORIST_IMAGE_TAG: fe12542 # 2022-06-03
@@ -91,7 +92,8 @@ resourceTemplates:
       QUARKUS_REST_CLIENT_OB_URL: https://gjklh2bmbuaio30.api.openshift.com
       QUARKUS_REST_CLIENT_KC_URL: https://sso.redhat.com
       SENTRY_DSN: https://3ff0dbd8017a4750a1d92055a1685263@o490301.ingest.sentry.io/5440905?environment=
-      SOURCES_ENABLED: false
+      SOURCES_ENABLED: true
+      NOTIFICATIONS_EMAILS_ONLY_MODE_ENABLED: false
     # upstream:
     #   instance:
     #     $ref: /dependencies/ci-ext/ci-ext.yml
@@ -104,7 +106,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: 2c7fccbe9e64c44cc19ba71784abc58dffad7ae4
+    ref: 11be21d7391e6125d9cca258dd41142bc1382f00
     parameters:
       FLOORIST_SUSPEND: 'true'
       FLOORIST_IMAGE_TAG: b57a5a8
@@ -121,6 +123,8 @@ resourceTemplates:
       OB_READY_CHECK_PERIOD: 10s
       QUARKUS_REST_CLIENT_OB_URL: https://gjklh2bmbuaio30.api.openshift.com
       QUARKUS_REST_CLIENT_KC_URL: https://sso.redhat.com
+      SOURCES_ENABLED: true
+      NOTIFICATIONS_EMAILS_ONLY_MODE_ENABLED: false
     promotion:
       publish:
       - notifications-backend-prod-deploy-success-channel
@@ -138,12 +142,18 @@ resourceTemplates:
     disable: true
     # populated by bonfire
     ref: internal
+    parameters:
+      IT_SERVICE_TO_SERVICE_KEY_STORE: file:/mnt/secrets/clientkeystore.jks
+      NOTIFICATIONS_USE_SECURED_EMAIL_TEMPLATES_ENABLED: false
+      NOTIFICATIONS_EMAILS_ONLY_MODE_ENABLED: false
+      NOTIFICATIONS_USE_RBAC_FOR_FETCHING_USERS: false
+      NOTIFICATIONS_USE_TEMPLATES_FROM_DB: false
 
   # stage
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-engine.yaml version
-    ref: cf05f6eaa71b1b77aa89863c9dc51f18d3418b13
+    ref: 11be21d7391e6125d9cca258dd41142bc1382f00
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_LIMIT: 300m
@@ -160,6 +170,7 @@ resourceTemplates:
       MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 180000
       NOTIFICATIONS_DISABLE_WEBHOOK_ENDPOINTS_ON_FAILURE: true
       NOTIFICATIONS_LOG_LEVEL: DEBUG
+      NOTIFICATIONS_SLACK_CAMEL_ENABLED: true
       OB_BRIDGE_NAME: notifications-stage
       OB_ERROR_CHECK_PERIOD: 10s
       PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
@@ -168,10 +179,32 @@ resourceTemplates:
       RBAC_S2S_READ_TIMEOUT: 120000
       SENTRY_DSN: https://fbb2970a5a3c454fa6543707138145c1@o490301.ingest.sentry.io/6193703?environment=
       SENTRY_ENABLED: true
-      SOURCES_ENABLED: false
+      SOURCES_ENABLED: true
       RECIPIENT_PROVIDER_USE_IT_IMPL: true
       RHEL_ADVISOR_DAILY_DIGEST_ENABLED: true
       NOTIFICATIONS_USE_DEFAULT_TEMPLATE: true
+      NOTIFICATIONS_USE_POLICIES_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_COMPLIANCE_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_ANSIBLE_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_COST_MANAGEMENT_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_PATCH_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_INTEGRATIONS_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_DRIFT_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_SOURCES_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_INVENTORY_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_MALWARE_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_EDGE_MANAGEMENT_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_RESOURCE_OPTIMIZATION_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_VULNERABILITY_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_RHOSAK_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_RBAC_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_ADVISOR_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_ADVISOR_OPENSHIFT_EMAIL_TEMPLATES_V2_ENABLED: true
+      NOTIFICATIONS_USE_SECURED_EMAIL_TEMPLATES_ENABLED: false
+      IT_SERVICE_TO_SERVICE_KEY_STORE: file:/mnt/secrets/clientkeystore.jks
+      NOTIFICATIONS_EMAILS_ONLY_MODE_ENABLED: false
+      NOTIFICATIONS_USE_RBAC_FOR_FETCHING_USERS: false
+      NOTIFICATIONS_USE_TEMPLATES_FROM_DB: false
     # upstream:
     #   instance:
     #     $ref: /dependencies/ci-ext/ci-ext.yml
@@ -184,7 +217,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-engine.yaml version
-    ref: 2c7fccbe9e64c44cc19ba71784abc58dffad7ae4
+    ref: 11be21d7391e6125d9cca258dd41142bc1382f00
     parameters:
       CLOUDWATCH_ENABLED: true
       MEMORY_LIMIT: 2Gi
@@ -197,6 +230,7 @@ resourceTemplates:
       MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 180000
       NOTIFICATIONS_DISABLE_WEBHOOK_ENDPOINTS_ON_FAILURE: true
       NOTIFICATIONS_LOG_LEVEL: DEBUG
+      NOTIFICATIONS_SLACK_CAMEL_ENABLED: true
       OB_ENABLED: true
       OB_BACKCHANNEL_FILLER_ENABLED: true
       OB_BRIDGE_NAME: notifications-prod
@@ -208,6 +242,12 @@ resourceTemplates:
       SENTRY_DSN: https://fbb2970a5a3c454fa6543707138145c1@o490301.ingest.sentry.io/6193703?environment=
       SENTRY_ENABLED: true
       RECIPIENT_PROVIDER_USE_IT_IMPL: true
+      NOTIFICATIONS_USE_SECURED_EMAIL_TEMPLATES_ENABLED: false
+      IT_SERVICE_TO_SERVICE_KEY_STORE: file:/mnt/secrets/clientkeystore.jks
+      NOTIFICATIONS_EMAILS_ONLY_MODE_ENABLED: false
+      NOTIFICATIONS_USE_RBAC_FOR_FETCHING_USERS: false
+      NOTIFICATIONS_USE_TEMPLATES_FROM_DB: false
+      SOURCES_ENABLED: true
     promotion:
       publish:
       - notifications-engine-prod-deploy-success-channel
@@ -230,7 +270,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: cf05f6eaa71b1b77aa89863c9dc51f18d3418b13
+    ref: 11be21d7391e6125d9cca258dd41142bc1382f00
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
@@ -251,7 +291,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: 2c7fccbe9e64c44cc19ba71784abc58dffad7ae4
+    ref: 11be21d7391e6125d9cca258dd41142bc1382f00
     parameters:
       CLOUDWATCH_ENABLED: true
       NOTIFICATIONS_LOG_LEVEL: DEBUG
@@ -279,7 +319,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: af43ecd76e1f10d0cf78d1e41b76a52c4829230c
+    ref: d3ba125f9bea6024b9b109093ff944a03c7f8b49
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
@@ -299,7 +339,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: af43ecd76e1f10d0cf78d1e41b76a52c4829230c
+    ref: d3ba125f9bea6024b9b109093ff944a03c7f8b49
     parameters:
       CLOUDWATCH_ENABLED: true
       MIN_REPLICAS: 3

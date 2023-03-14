@@ -1,0 +1,47 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: app-interface
+  type: dev
+
+name: app-interface-dev
+description: dev namespace for app-interface
+
+cluster:
+  $ref: /openshift/appsres03ue1/cluster.yml
+
+app:
+  $ref: /services/app-interface/app.yml
+
+environment:
+  $ref: /products/app-interface/environments/dev-int.yml
+
+managedResourceTypes:
+- ConfigMap
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+openshiftResources:
+- provider: resource
+  path: /app-sre/app-interface-dev/app-interface.configmap.yaml
+- provider: vault-secret
+  path: app-interface/app-sre-dev/app-interface-dev/app-interface
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: route
+  path: /app-sre/app-interface-dev/app-interface-internal.route.yaml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  # the bucket for app-interface-state and for bundles
+  - provider: s3
+    identifier: app-interface-dev
+    defaults: /terraform/resources/app-sre/app-interface-s3.yml

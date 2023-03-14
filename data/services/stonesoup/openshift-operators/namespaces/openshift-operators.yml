@@ -8,19 +8,20 @@ name: openshift-operators
 description: Operator subscriptions required by Stonesoup
 
 cluster:
-  $ref: /openshift/stone-stg-host1/cluster.yml
+  $ref: /openshift/stone-prd-host1/cluster.yml
 
 app:
   $ref: /services/stonesoup/app.yml
 
 environment:
-  $ref: /products/stonesoup/environments/stage.yml
+  $ref: /products/stonesoup/environments/production.yml
 
 managedResourceTypes:
 - Subscription
 
 openshiftResources:
-- provider: resource
-  path: /stonesoup/argocd/subscription.yml
-- provider: resource
-  path: /cert-manager/openshift-cert-manager-operator-subscription.yaml
+- provider: resource-template
+  type: jinja2
+  path: /stonesoup/argocd/subscription.yml.j2
+  variables:
+    argocd_namespace: argocd

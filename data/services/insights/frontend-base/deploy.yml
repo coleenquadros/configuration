@@ -53,12 +53,14 @@ authentication:
 deployResources:
   requests:
     cpu: 400m
-    memory: 1500Mi
+    memory: 2000Mi
   limits:
     cpu: 400m
-    memory: 1500Mi
+    memory: 2000Mi
 
 resourceTemplates:
+
+# Deploys Chrome
 - name: insights-chrome
   path: /frontend.yml
   url: https://github.com/RedHatInsights/insights-chrome
@@ -70,27 +72,101 @@ resourceTemplates:
       ENV_NAME: "env-perf"
       IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
       SSO_URL: 'https://sso.stage.redhat.com/auth/'
+  # Stage Stable Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
+    ref: 956f6fd6bce9ee88fe07fbbf89134eff67a6ab57
+    parameters:
+      ENV_NAME: "frontends"
+      IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
+      SSO_URL: 'https://sso.stage.redhat.com/auth/'
+  # Stage Beta Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
+    ref: master
+    parameters:
+      ENV_NAME: "frontends-beta"
+      IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
+      SSO_URL: 'https://sso.stage.redhat.com/auth/'
 
+# Landing page
+- name: landing-page-frontend
+  path: /frontend.yml
+  url: https://github.com/RedHatInsights/landing-page-frontend
+  targets:
+  # Stage Stable
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
+    ref: fcf17a7509eee75ded9b00fa19af4077ac547d6a
+    parameters:
+      ENV_NAME: "frontends"
+      IMAGE: "quay.io/cloudservices/landing-page-frontend"
+  # Stage Beta
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
+    ref: master
+    parameters:
+      ENV_NAME: "frontends-beta"
+      IMAGE: "quay.io/cloudservices/landing-page-frontend"
+
+# Dashboard
+- name: insights-dashboard
+  path: /frontend.yml
+  url: https://github.com/RedHatInsights/insights-dashboard
+  targets:
+  # Stage Stable
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
+    ref: b996d0ae6182de3c43175e4f900ea079a9040155
+    parameters:
+      ENV_NAME: "frontends"
+      IMAGE: "quay.io/cloudservices/insights-dashboard-frontend"
+  # Stage Beta
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
+    ref: master
+    parameters:
+      ENV_NAME: "frontends-beta"
+      IMAGE: "quay.io/cloudservices/insights-dashboard-frontend"
+
+# Deploys the FrontendEnvironment resources from gitlab
 - name: frontend-env
   path: /env.yml
   url: https://gitlab.cee.redhat.com/insights-platform/frontend-environments
   targets:
+  # This is the "fetest" stage testing environment that will be removed after rollout
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
     ref: main
     parameters:
       ENV_NAME: env-stage
       SSO_SOURCE: 'https://sso.stage.redhat.com/auth/'
+  # This is the stable frontend stage environment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
+    ref: main
+    parameters:
+      ENV_NAME: frontends
+      SSO_SOURCE: 'https://sso.stage.redhat.com/auth/'
+  # This is the beta frontend stage environment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
+    ref: main
+    parameters:
+      ENV_NAME: frontends-beta
+      SSO_SOURCE: 'https://sso.stage.redhat.com/auth/'
 
 - name: frontend-configs
   path: /deploy/deploy.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/frontend-configs
   targets:
+  # "fetest" this can be removed in future
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
     ref: main
     parameters:
       ENV_NAME: env-stage
+  # ephemeral for bonfire
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -104,8 +180,24 @@ resourceTemplates:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
+  # "fetest" stage deployment. Will be removed in future.
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
     ref: 9454d7d34627d46b1783eda5ad0752a654303774
     parameters:
       ENV_NAME: "env-stage"
+  # Stage Stable Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
+    ref: 49f93dba5238c61b3d6467038c19a5a372abd65f
+    parameters:
+      ENV_NAME: "frontends"
+      IMAGE: "quay.io/cloudservices/api-frontend"
+  # Stage Beta Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
+    ref: master
+    parameters:
+      ENV_NAME: "frontends-beta"
+      IMAGE: "quay.io/cloudservices/api-frontend"
+

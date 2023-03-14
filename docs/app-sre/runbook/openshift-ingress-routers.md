@@ -132,11 +132,19 @@ fields kubernetes.host, message
 | sort by ct desc
 ```
 
+This can happen when CPU is throttling, can verify it by checking metrics in prometheus
+
+```
+sum by (pod)(rate(container_cpu_cfs_throttled_seconds_total{node="$NODE"}[3m])) > 1
+```
+
 #### Options for fixing this issue
 
 * `tlsInspectDelay` could be increased on the Ingress Operator, but this could leave us more suspectible to denial of service attacks (the client can send packets very slowly). So, in most cases this should probably be avoided.
 * If we control the clients, we can implement retries on TLS failures
 * Explore other options with #forum-network-edge or investigate other load balancer options that don't suffer from this same issue?
+* If the issue is caused by CPU throttle, then adjust CPU limit of affected pods and check if any pods without limits set.
+* Terminate affected pods may fix the temporary issue
 
 #### Other causes
 
@@ -151,4 +159,3 @@ From the findings in APPSRE-1564, we don't have any proof that this issue could 
 * Background information: APPSRE-1564
 * [Configuration info for Ingress Operator](https://docs.openshift.com/container-platform/4.9/networking/ingress-operator.html#nw-ingress-controller-configuration-parameters_configuring-ingress) including `tlsInspectDelay`
 * [HAProxy docs](https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#4-tcp-request%20inspect-delay) for `inspect-delay`
-

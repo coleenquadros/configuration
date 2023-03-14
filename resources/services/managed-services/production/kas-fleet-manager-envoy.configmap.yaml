@@ -113,6 +113,8 @@ data:
                       prefix_rewrite: /stats/prometheus
               http_filters:
               - name: envoy.filters.http.router
+                typed_config:
+                  "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
 
       # This listener is used to accept inbound API requests.
       - name: ingress
@@ -155,6 +157,15 @@ data:
                   - name: kas-fleet-shard-operator-agent-cluster-routes
                     match:
                       prefix: /api/kafkas_mgmt/v1/agent-clusters
+                    route:
+                      cluster: backend
+
+                  # Route kas-fleet-manager's observability proxy verification
+                  # related endpoints directly to the service
+                  # without rate limiting
+                  - name: kas-fleet-manager-v1-obsproxy-verification-routes
+                    match:
+                      prefix: /api/kafkas_mgmt/v1/obs-proxy-verification/
                     route:
                       cluster: backend
                   
@@ -208,7 +219,9 @@ data:
 
               # This is mandatory in order to have the HTTP routes above.
               - name: envoy.filters.http.router
-
+                typed_config:
+                  "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+              
               # We need this in order to generate JSON responses according to
               # our API guidelines, otherwise Envoy will generate plain text
               # responses.

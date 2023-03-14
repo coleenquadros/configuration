@@ -1,0 +1,121 @@
+---
+$schema: /access/role-1.yml
+
+labels: {}
+name: lp-sre
+
+permissions:
+# github
+- $ref: /teams/app-sre/permissions/github-app-sre.yml
+- $ref: /teams/lp-sre/permissions/github-mt-sre-owner.yml
+- $ref: /teams/lp-sre/permissions/github-mt-sre-team.yml
+- $ref: /teams/lp-sre/permissions/github-mt-sre-addon-operator-devel-team.yml
+- $ref: /teams/lp-sre/permissions/github-mt-sre-reference-addon-devel-team.yml
+- $ref: /teams/lp-sre/permissions/github-cs-sre.yml
+# gitlab
+- $ref: /dependencies/gitlab/permissions/mt-sre-member.yml
+- $ref: /dependencies/gitlab/permissions/cssre-member.yml
+# observability
+- $ref: /services/observability/permissions/observability-access.yml
+# quay
+- $ref: /dependencies/quay/permissions/quay-membership-app-sre-owners.yml
+- $ref: /dependencies/quay/permissions/quay-membership-rhoas-mt-sre.yml
+- $ref: /dependencies/quay/permissions/quay-membership-mtsre-owners.yml
+- $ref: /dependencies/quay/permissions/quay-membership-osd-addons-owners.yml
+- $ref: /dependencies/quay/permissions/quay-membership-osd-addons-test-owners.yml
+- $ref: /dependencies/quay/permissions/quay-membership-rhoas-cs-sre.yml
+- $ref: /dependencies/quay/permissions/quay-membership-cs-sre.yml
+- $ref: /dependencies/quay/permissions/quay-membership-bf2-managed-services.yml
+# jenkins
+- $ref: /dependencies/ci-int/permissions/ci-int-job-control.yml
+- $ref: /dependencies/ci-ext/permissions/ci-ext-job-control.yml
+# slack
+- $ref: /teams/mt-sre/permissions/mt-sre-team-coreos-slack.yml
+
+oidc_permissions:
+- $ref: /dependencies/vault/permissions/oidc/prod/cs-sre.yml
+- $ref: /dependencies/vault/permissions/oidc/prod/cs-sre-aws.yml
+- $ref: /dependencies/vault/permissions/oidc/prod/mt-sre.yml
+
+access:
+# hive
+- cluster:
+    $ref: /openshift/hivep01ue1/cluster.yml
+  group: hive-admins
+- cluster:
+    $ref: /openshift/hivep02ue1/cluster.yml
+  group: hive-admins
+- cluster:
+    $ref: /openshift/hivep03uw1/cluster.yml
+  group: hive-admins
+- cluster:
+    $ref: /openshift/hivep04ew2/cluster.yml
+  group: hive-admins
+- cluster:
+    $ref: /openshift/hive-stage-01/cluster.yml
+  group: hive-admins
+- cluster:
+    $ref: /openshift/hives02ue1/cluster.yml
+  group: hive-admins
+- cluster:
+    $ref: /openshift/hivei01ue1/cluster.yml
+  group: hive-admins
+- cluster:
+    $ref: /openshift/ssotest01ue1/cluster.yml
+  group: hive-admins
+# observability
+- namespace:
+    $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+  role: view
+- namespace:
+    $ref: /services/observability/namespaces/app-sre-observability-production.yml
+  role: view
+- namespace:
+    $ref: /openshift/app-sre-prod-01/namespaces/app-sre-observability-per-cluster.yml
+  role: view
+# glitchtip
+- namespace:
+    $ref: /services/glitchtip/namespaces/glitchtip-stage.yml
+  role: view
+- namespace:
+    $ref: /services/glitchtip/namespaces/glitchtip-production.yaml
+  role: view
+- namespace:
+    $ref: /services/glitchtip/namespaces/glitchtip-pipelines.appsrep05ue1.yml
+  role: view
+- namespace:
+    $ref: /services/glitchtip/namespaces/glitchtip-pipelines.appsrep05ue1.yml
+  role: tekton-trigger-access
+# telemeter
+- namespace:
+    $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
+  role: view
+- namespace:
+    $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
+  role: view
+# pipelines
+- namespace:
+    $ref: /services/app-interface/namespaces/app-sre-pipelines.appsrep05ue1.yaml
+  role: view
+- namespace:
+    $ref: /services/app-interface/namespaces/app-sre-pipelines.appsrep05ue1.yaml
+  role: tekton-trigger-access
+
+- namespace:
+    $ref: /services/addons/namespaces/mtsre-workloads-stage.yaml
+  role: admin
+
+self_service:
+- change_type:
+    $ref: /app-interface/changetype/saas-file-self-service.yml
+  datafiles:
+  - $ref: /services/managed-services/cicd/saas/saas-kas-fleet-manager.yaml
+  - $ref: /services/managed-connectors/cicd/saas/saas-cos-fleet-manager.yaml
+  - $ref: /services/osd-operators/cicd/saas/saas-deployment-validation-operator.yaml
+- change_type:
+    $ref: /app-interface/changetype/add-role-member.yml
+  datafiles:
+  - $ref: /teams/lp-sre/roles/lp-sre.yml
+  - $ref: /teams/lp-sre/roles/app-sre-osd-addons.yml
+  - $ref: /teams/lp-sre/roles/saas-managed-tenants-approver.yml
+  - $ref: /teams/lp-sre/roles/lp-sre-emea-slack.yml
