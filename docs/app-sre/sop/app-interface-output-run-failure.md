@@ -2,18 +2,7 @@
 
 The app-interface output job is running the [run.sh](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/run.sh) script.
 
-This script runs [qontract-cli commands](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/e9d5a55899cf90b8fc47e8f9a51349346ec5af58/run.sh#L12):
-- clusters-network
-- quay-mirrors
-- ocm-aws-infrastructure-access-switch-role-links
-- terraform-users-credentials
-- namespaces
-- clusters-egress-ips
-- version-history
-- cluster-upgrade-policies
-
-(correct for the time of writing this SOP)
-
+This script runs [qontract-cli commands](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/e9d5a55899cf90b8fc47e8f9a51349346ec5af58/run.sh#L12) listed in data/services/app-interface/cicd/ci-int/jobs.yaml
 
 If the job is failing, look at the logs to understand which qontract-cli command failed, and debug accordingly.
 
