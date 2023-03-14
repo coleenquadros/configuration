@@ -8,7 +8,7 @@ Jira [APPSRE-7281](https://issues.redhat.com/browse/APPSRE-7281)
 
 ## Problem statement
 
-The `/openshift/openshift-cluster-manager-1.yml` schema hybridly declares OCM environments and OCM organizations. This blures the line what parts belong to an environment and which ones to an organization. Integrations that deal mostly with an OCM environment have no clear schema that identifies such an environment in a unique way.
+The `/openshift/openshift-cluster-manager-1.yml` schema hybridly declares OCM environments and OCM organizations. This blurs the line what parts belong to an environment and which ones to an organization. Integrations that deal mostly with an OCM environment have no clear schema that identifies such an environment in a unique way.
 
 ## Goals
 
