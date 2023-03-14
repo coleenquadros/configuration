@@ -65,9 +65,9 @@ resourceTemplates:
     ref: 3fbbe50d41cfc1b82dbc580b3baaf1145b51dd93
     parameters:
       SOURCES_ENV: prod
-      MIN_REPLICAS: 0
-      AVAILABILITY_MIN_REPLICAS: 0
-      BACKGROUND_WORKER_MIN_REPLICAS: 0
+      MIN_REPLICAS: 3
+      AVAILABILITY_MIN_REPLICAS: 3
+      BACKGROUND_WORKER_MIN_REPLICAS: 3
       KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-prod.svc.cluster.local
       KOKU_SOURCES_API_PORT: "10000"
       CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-prod.svc.cluster.local
@@ -96,13 +96,6 @@ resourceTemplates:
       SOURCES_HOST: sources-api-svc
   - namespace:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
-    parameters:
-      # Since this Pod is scheduled via Cron, we set it to run on the last day
-      # of this year, to avoid firing any pods. It doesn't have direct database
-      # access, it just calls other pods, but just in case...
-      SCHEDULE_AVAILABLE: "0 0 31 12 5"
-      SCHEDULE_UNAVAILABLE: "0 0 31 12 5"
-
     ref: ae351e952a0abfeccb3948a865964ce17244bf66
 - name: sources-superkey-worker
   path: /deploy/clowdapp.yaml
@@ -130,7 +123,7 @@ resourceTemplates:
     ref: 1d4d5b6841d1b24c9acf3b8379082fef7dac8abb
     parameters:
       LOG_LEVEL: INFO
-      MIN_REPLICAS: 0
+      MIN_REPLICAS: 3
       MEMORY_LIMIT: 150Mi
 # Svc depends on receptor which is not migrated to the Clowder
 - name: sources-satellite
@@ -158,7 +151,7 @@ resourceTemplates:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
     ref: 1845313ddfa6b4092957794542fa4f2480fd066c
     parameters:
-      MIN_REPLICAS: 0
+      MIN_REPLICAS: 3
       UPDATE_SOURCES_VIA_API: '1'
       RECEPTOR_CONTROLLER_SECRET_NAME: sources-psk
       RECEPTOR_CONTROLLER_SECRET_KEY_PSK: client-psk
