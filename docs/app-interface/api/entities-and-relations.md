@@ -15,3 +15,5 @@ Relations:
 - An App may reference a parentApp to allow an App to be comprised of Components (We treat apps/services/components just as Apps).
 
 ![](docs/app-interface/api/images/products-environments-namespaces-apps.png)
+
+App-SRE require a couple of mandatory environments, but also make it possible to have additional ones as [explained in the contract](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/environments.md#additional-environments).
