@@ -47,7 +47,7 @@ sequenceDiagram
     U ->> C: Access cluster console with *openshift token*
 ```
 
-## How to order a SSO client (profile)?
+## How to order an SSO client (profile)?
 
 You can find the official **Identity & Access management** documentation in [the source](https://source.redhat.com/groups/public/identity-access-management/identity__access_management_wiki/how_to_get_sso_for_your_application_or_vendor).
 
@@ -69,6 +69,20 @@ Order a new SSO auth.redhat.com client via a [ServiceNow ticket](https://redhat.
 * **Redirect URLs?**: https://oauth-openshift.apps.XXX.p1.openshiftapps.com/oauth2callback/redhat-app-sre-auth
 
 This manual task will be replaced by the [dynamic client registration feature](https://issues.redhat.com/browse/ITIAM-4261) in the future.
+
+## How to configure the OIDC IDP for a cluster?
+
+After the SSO client is created, store the client ID and client secret in [vault (app-sre/integrations-input/ocm-oidc-idp/redhat-app-sre-auth)](https://vault.devshift.net/ui/vault/secrets/app-sre/list/integrations-input/ocm-oidc-idp/redhat-app-sre-auth/). Create a secret with the name of the cluster, e.g., `appsres03ue1`, and store `client_id` and `client_secret`. Next adapt the cluster config in app-interface to use the new IDP:
+
+```yaml
+$schema: /openshift/cluster-1.yml
+...
+
+auth:
+- service: oidc
+  name: redhat-app-sre-auth
+  issuer: https://auth.redhat.com/auth/realms/EmployeeIDP
+```
 
 ## Common issues
 
