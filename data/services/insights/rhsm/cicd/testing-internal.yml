@@ -1,27 +1,19 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   platform: insights
   service: rhsm
-
 name: rhsm-testing-internal
-
 description: rhsm internal cluster testing
-
 app:
   $ref: /services/insights/content-sources/app.yml
-
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
   channel: team-clouddot-info
-
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-poc-pipelines.appsres03ue1.yaml
-
 publishJobLogs: true
-
 imagePatterns:
 - quay.io/cloudservices
 - quay.io/redhatqe
@@ -31,7 +23,6 @@ authentication:
     path: insights/quay/cloudservices-push
     field: all
     version: 3
-
 managedResourceTypes:
 - Job
 
@@ -42,10 +33,16 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-stage-testing.yml
-    ref: d1570a8fc4edfe4ba787027a859390e398ab46d7
+    ref: b67863dceb9fc88f37412cd6e124486aea22cda8
     promotion:
       auto: true
       subscribe:
       - swatch-producer-aws-stage-deploy-success-channel
       publish:
       - rhsm-stage-post-deploy-tests-internal-success-channel
+      promotion_data:
+      - channel: swatch-producer-aws-stage-deploy-success-channel
+        data:
+        - parent_saas: rhsm-clowder
+          target_config_hash: 74d5b5d89433f9c2
+          type: parent_saas_config
