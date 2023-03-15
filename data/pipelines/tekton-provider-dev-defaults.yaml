@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/tekton-provider-defaults-1.yml
+
+labels: {}
+
+name: tekton-provider-stage-defaults
+description: Tekton provider stage defaults
+
+retention:
+  days: 7
+  minimum: 100
+
+taskTemplates:
+- name: openshift-saas-deploy
+  type: onePerSaasFile
+  path: /tekton/openshift-saas-deploy.task.yaml
+  variables:
+    qontract_reconcile_image: quay.io/app-sre/qontract-reconcile
+    # replace the above line if quay.io is down
+    # qontract_reconcile_image: gcr.io/app-sre/qontract-reconcile
+    qontract_reconcile_image_tag: 4ecfd4c-rc
+- name: push-gateway-openshift-saas-deploy-task-status-metric
+  type: onePerNamespace
+  path: /tekton/push-gateway-task-status-metric.task.yaml
+  variables:
+    ubi8_ubi_minimal_image: quay.io/app-sre/ubi8-ubi-minimal
+    # replace the above line if quay.io is down
+    # ubi8_ubi_minimal_image: pull.q1w2.quay.rhcloud.com/app-sre/ubi8-ubi-minimal
+    ubi8_ubi_minimal_image_tag: 8.4-7
+- name: push-http-splunk-tekton-pipeline-metadata
+  type: onePerNamespace
+  path: /tekton/push-http-splunk-tekton-pipeline-metadata.task.yaml
+  variables:
+    ubi8_ubi_minimal_image: quay.io/app-sre/ubi8-ubi-minimal
+    # replace the above line if quay.io is down
+    # ubi8_ubi_minimal_image: pull.q1w2.quay.rhcloud.com/app-sre/ubi8-ubi-minimal
+    ubi8_ubi_minimal_image_tag: 8.4-7
+- name: push-deploy-event-to-db
+  type: onePerNamespace
+  path: /tekton/push-deploy-event-to-db.task.yaml
+
+pipelineTemplates:
+  openshiftSaasDeploy:
+    name: openshift-saas-deploy
+    type: onePerSaasFile
+    path: /tekton/openshift-saas-deploy.pipeline.yaml
+
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 600Mi
+  limits:
+    cpu: 300m
+    memory: 600Mi
