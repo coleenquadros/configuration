@@ -15,13 +15,9 @@ March 2023
 
 We often see merge conflicts in auto-promotion MRs created by our devtools bot.
 
-Auto promotion MRs are currently created after a tekton deployment pipeline successfully
-finished a deployment job. Tekton pipelines are not fully context aware, i.e., they
-do not know the current state of open MRs. Further, pipelines can potentially run in parallel, which makes it even harder to gain full context.
+Auto promotion MRs are currently created after a tekton deployment pipeline successfully finished a deployment job. Tekton pipelines are not fully context aware, i.e., they do not know the current state of open MRs. Further, pipelines can potentially run in parallel, which makes it even harder to gain full context.
 
-An auto promotion process can take some time and involve multiple MRs.
-If during that time another deployment happened in the publisher target, then a potentially
-parallel auto promotion process is started, resulting in MRs that have merge conflicts.
+An auto promotion process can take some time and involve multiple MRs. If during that time another deployment happened in the publisher target, then a potentially parallel auto promotion process is started, resulting in MRs that have merge conflicts.
 
 ### Current Implementation
 
@@ -51,6 +47,7 @@ Create a new fully context aware integration: `saas-auto-promotions-manager` (SA
 SAPM is able to gather all context around auto-promotions:
 
 - whats the commit sha of a saas file target ref?
+- whats the new config hash of the parent saas?
 - is there a successful deployment for a new commit sha?
 - are there already open MRs for the subscribed target?
 
@@ -65,6 +62,23 @@ The [current PoC](https://github.com/app-sre/qontract-reconcile/pull/3306) imple
 
 Further, SAPM is not required to hold state. It must anyways fetch real-world state directly from VCSs. 
 
+Another positive aspect of SAPM is its extensibility. We will likely need more features/logic around SaaS auto promotions. SAPMs broader context and reconciled approach will be helpful there.
+
+## Migration Path
+
+The first milestone will not handle merge conflicts. We must avoid creating merge conflicts when putting this integration into production. I.e., we must avoid having MRs opened by `openshift-saas-deploy` events and SAPM in parallel.
+
+1. Announce to tenants that auto-promotions are disabled for a short window (roughly ~1h to be safe)
+1. [disable sending promotion events](https://github.com/app-sre/qontract-reconcile/blob/c2f9f926a3bea60bf270e4fdee1b068ede5cccc1/reconcile/openshift_saas_deploy.py#L240) in `openshift-saas-deploy`
+1. [remove AutoPromoter](https://github.com/app-sre/qontract-reconcile/blob/c2f9f926a3bea60bf270e4fdee1b068ede5cccc1/reconcile/utils/mr/__init__.py#L33) as MR type.
+1. wait 10 minutes
+1. wait until there are no more open auto-promotion MRs.
+1. put SAPM into production
+
+Step 2 ensures we do not send any new events. Step 3 ensures that any event from long-running tekton pipelines will not be handled, so we can neglect checking the SQS queue for any later events. We will instead implement the type `AutoPromoterV2` for SAPM MRs.
+
+SAPM is able to conclude missing auto-promotions from real-world state, so no promotion will get lost with this approach - they are only delayed.
+
 ## Alternatives Considered
 
 - leverage timestamps and shas from deployment state instead of querying VCSs directly. We decided against that because a timestamp does not guarantee a proper order of commits. (a pipeline might be very slow)
@@ -72,4 +86,4 @@ Further, SAPM is not required to hold state. It must anyways fetch real-world st
 ## Milestones
 
 1. SAPM re-creates current behavior and replaces openshift-saas-deploy auto-promotion events.
-2. SAPM manages MRs to avoid merge conflicts.
+2. Extend SAPM to manage all open MRs and avoid merge conflicts.
