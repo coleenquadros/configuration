@@ -2188,6 +2188,7 @@ In order to add a DNS zone, you need to add them to the `externalResources` sect
 - `identifier`: id of the resource to create (example: `dns-example-com`)
 - `name`: name of the resource to create (example: `dns.example.com`)
 - `output_resource_name`: name of Kubernetes Secret to be created.
+- `records`: (optional) same as `records` in [Route53 DNS Zones](#route53-dns-zones), but without support for additional special fields.
 
 Once the changes are merged, the DNS zone will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
