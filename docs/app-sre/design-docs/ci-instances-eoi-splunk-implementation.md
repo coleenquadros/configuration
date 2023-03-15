@@ -1,0 +1,136 @@
+# Design document - Event of interest implementation for ci instances
+
+## Author / Date
+
+Andreu Gallofré / March 2023
+
+Jira [APPSRE-7297](https://issues.redhat.com/browse/APPSRE-7297)
+Epic Jira [SDE-2536](https://issues.redhat.com/browse/SDE-2536)
+
+## Problem statement
+
+From an infosec requirement, we need to ensure that our pipeline services, infrastructure and tools are logging events of interest per ESS standarts.
+
+Events of interest are defined [here](https://source.redhat.com/departments/it/it-information-security/wiki/security_logging_and_monitoring_what_and_how) and documentation on what should be covered is available on the following docs: [Information about the epic](https://docs.engineering.redhat.com/pages/viewpage.action?spaceKey=PSSCINIT&title=PPSP-ESS-01-P02%3A+All+Existing+PPC+Services%2C+Infrastructures+and+tools+that+run+on+servers+Log+Events+of+Interest+%28EOI%29+Per+ESS+Standards) and [Enablement steps to implement the logging correctly](https://docs.engineering.redhat.com/display/PSSCINIT/PPSP-ESS-01-P02%3A+Enablement+Steps)
+
+## Goals
+
+Implement the required logging systems on ci.ext and ci.int to cover the affected events of interest following the guidelines of Infosec and the Monitoring team.
+
+## Non-goal
+
+N/A
+
+## Proposal
+
+The plan to implement EOI logging requirements into our Jenkins systems will be the following:
+
+### Install Splunk forwarder on the Jenkins VMs
+
+Splunk forwarder will be installed on the AMI's directly so we don't need to add extra steps on the Ansible used when a new instance is started.
+
+### Configure Splunk forwarder with an Ansible task to handle the credentials.
+
+The configuration, will be done after the instance is created and ready using Ansible because we don't want to have any credentials on the AMI's. This will follow the same strategy that we are using right now to distribute the ssh keys of the AppSRE team members.
+
+### Configure auditd to log events according to the requirements of the EOI
+
+The rules that will be used to configure auditd and cover all the Events of interests, will be the following.
+
+**1. Creation, Updating, Accessing or Deletion of Red Hat Internal or Red Hat Restricted (+PII) data classifications**
+
+Not needed in case of ci.ext and ci.int
+
+**2. Creation or deletion of system level objects - PCI DSS 10.2.7**
+
+Cover with auditd rules the following directories
+
+* /bin
+* /sbin
+* /usr/bin
+* /usr/sbin
+* /var/lib
+* /usr/lib
+* /usr/libexec
+* /lib64
+* /usr/lib64
+
+```
+-a always,exit -S all -F dir=/bin -F perm=aw -k system-objects
+-a always,exit -S all -F dir=/sbin -F perm=aw -k system-objects
+-a always,exit -S all -F dir=/usr/bin -F perm=aw -k system-objects
+-a always,exit -S all -F dir=/usr/sbin -F perm=aw -k system-objects
+-a always,exit -S all -F dir=/var/lib -F perm=aw -k system-objects
+-a always,exit -S all -F dir=/usr/lib -F perm=aw -k system-objects
+-a always,exit -S all -F dir=/usr/libexec -F perm=aw -k system-objects
+-a always,exit -S all -F dir=/usr/lib64 -F perm=aw -k system-objects
+-a always,exit -S all -F dir=/lib64 -F perm=aw -k system-objects
+```
+
+
+**3. Administrative actions taken by any individual with higher level privileges (e.g., admin, super user, root, etc)**
+
+Already part of what we are currently logging in auditd, we will need to forward auditd log to splunk.
+
+Example
+
+```
+type=USER_ACCT msg=audit(timestamp): pid=pid uid=uid auid=auid ses=ses subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_unix,pam_localuser acct="user" exe="/usr/bin/sudo" hostname=? addr=? terminal=/dev/pts/1 res=success'
+```
+
+**4. Grant, Modify or Revoke access for a user or a group of users**
+
+Covered by our processes, but not possible to add logging into splunk as it is managed on the AMI build time.
+
+**5. Application or process startup, shutdown or restart**
+
+Part of what we are logging to splunk, query
+
+`index="jenkins_statistics" host=ci.int.devshift.net source=jenkins`
+
+**6. User Login, Logout events**
+
+logins into the jenkins application are already logged on Splunk by the jenkins plugin.
+
+For logins to the host VM, we can add the following rules to the auditd configuration
+
+```
+-w /var/run/utmp -p wa -k session
+-w /var/log/wtmp -p wa -k session
+-w /var/log/btmp -p wa -k session
+```
+
+**7. Any attempts of Invalid Logins into an application or host**
+
+Covered using the same strategy as 6
+
+**8. All authorization failures (e.g., trying to run 'sudo' command on a host when the user is not in sudoers list)**
+
+Already covered by the default configuration of auditd. Same as 3.
+
+**9. Any attempts of stopping or deletion or tampering with Audit Trails/Logs themselves.**
+
+```
+-w /var/log/audit/audit.log -p wa -k audit_tampering
+-w /etc/audit/audit.rules -p wa -k audit_tampering
+```
+
+**10. Initiation of accepting a network connection (e.g., VPC/SSH connections) along with IP Address captured**
+
+SSH connections are part of the audit log default config
+
+**11. Any warnings or errors generated by the above EOIs**
+
+Not required.
+
+### Push the auditd logs to Splunk.
+
+Using the Splunk forwarder installed on the AMI's we will push the logs to Splunk to be consumed by Monitorin/Infosec teams in case is needed.
+
+### Update the catalog with the information on the queries used to track each EOI on Splunk.
+
+Once we have the logs available in splunk, we will open a MR to the [catalog repository](https://gitlab.cee.redhat.com/exd/catalog) adding the queries used to validate each EOI in case is relevant for the application or `na_comment` with a description on why is not relevant.
+
+Similar to [Jenkins CBS EOI Merge Request](https://gitlab.cee.redhat.com/exd/catalog/-/merge_requests/4862/diffs)
+
+## Milestones
