@@ -20,7 +20,8 @@ Extensive documentation about how policies work and how they can be defined, can
 
 ### Reaching support
 
-A request for policy setup or change needs to be filed on the [AppSRE Jira Board](https://issues.redhat.com/projects/APPSRE). Also any other technical assistance for AUS needs to be requested by filing a ticket.
+A request for policy setup or change needs to be filed on the [AppSRE Jira Board](https://issues.redhat.com/projects/APPSRE) and make `@app-sre-stream-xtream` in the `#sd-app-sre` Slack channel aware.
+Also any other technical assistance for AUS needs to be requested by filing a ticket.
 
 ### AUS responsibilities
 
@@ -29,6 +30,12 @@ AUS *is responsible* to schedule cluster upgrades via OCM based on the defined p
 AUS *is not responsible* for the success or failure of an upgrade.
 
 AUS *is not responsible* for pre- or post upgrade cluster inspection. AUS uses the OCM semantics for upgradability and upgrade success/failure but does not connect to any clusters (nor is it having access credentials or a network path to do so).
+
+### Service logs
+
+AUS is using service logs to notify cluster owners about potential issues upgrade policies. Such service logs will show up on <https://console.redhat.com/openshift> in the `Cluster history` section of the respective cluster.
+
+Service logs can be received as emails as well. Follow the [documentation](https://docs.openshift.com/dedicated/logging/sd-accessing-the-service-logs.html#adding-cluster-notification-contacts_sd-accessing-the-service-logs) to configure notifications.
 
 ### Escalations
 
