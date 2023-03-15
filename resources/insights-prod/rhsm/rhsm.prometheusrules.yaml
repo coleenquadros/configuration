@@ -125,12 +125,10 @@ spec:
         runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/rhsm/RhsmConduitValidationErrors.md'
 
     - alert: TalliesWillMissWindow
-      # Predicts when tally is expected to leave more than too many tasks unprocessed in a two-hour window
-      # On average tally consumes between 4000 to upwards of 66k events, so if the volume is predicted to be more than 200k
-      # Than it means that tallies aren't being processed fast enough in the time window
-      expr: |
-        predict_linear(sum(kafka_consumergroup_group_lag{topic='platform.rhsm-subscriptions.tasks'})[30m:2m], 3600 * 2) > 200000
-      for: 10m
+      # Predicts when tally is expected to leave too many tasks unprocessed in an hour window
+      # based on the last 10 minutes, do a linear regression and if the group lag will be greater than 0 for an hour
+      expr: sum(predict_linear(kafka_consumergroup_group_lag{topic='platform.rhsm-subscriptions.tasks'}[10m], 3600)) > 0
+      for: 1h
       labels:
         severity: medium
         service: insights
