@@ -58,7 +58,7 @@ Provisioning a new hive shard is a rather complex process has been greatly simpl
 
 If we are completely out of capacity or we are time constrained and can't wait for a new shard to be provisioned (about a day) we may want to increase the shard capacity limit in OCM
 
-A shard should be able to manage up to `1000` ClusterDeployments even though we currently have the (soft) limit set to `500`.
+A shard should be able to manage up to `1000` ClusterDeployments even though we currently have the (soft) limit set to `700`.
 
 Changing the limit in OCM is done in app-interface via the [saas file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/ocm/cicd/saas/saas-uhc-clusters-service.yaml) by updating the `PROVISION_SHARD_CLUSTER_LIMIT` variable
 
