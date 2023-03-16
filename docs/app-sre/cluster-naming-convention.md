@@ -28,14 +28,14 @@ Taken from [here](https://docs.aws.amazon.com/general/latest/gr/rande.html).
 | Africa (Cape Town) | af-south-1 | fs1 |
 | Asia Pacific (Hong Kong) | ap-east-1 | ae1 |
 | Asia Pacific (Mumbai) | ap-south-1 | as1 |
-| Asia Pacific (Osaka-Local) | ap-northeast-3 | an3 |
-| Asia Pacific (Seoul) | ap-northeast-2 | an2 |
-| Asia Pacific (Singapore) | ap-southeast-1 | as1 |
-| Asia Pacific (Sydney) | ap-southeast-2 | as2 |
-| Asia Pacific (Tokyo) | ap-northeast-1 | an1 |
+| Asia Pacific (Osaka-Local) | ap-northeast-3 | ane3 |
+| Asia Pacific (Seoul) | ap-northeast-2 | ane2 |
+| Asia Pacific (Singapore) | ap-southeast-1 | ase1 |
+| Asia Pacific (Sydney) | ap-southeast-2 | ase2 |
+| Asia Pacific (Tokyo) | ap-northeast-1 | ane1 |
 | Canada (Central) | ca-central-1 | cc1 |
 | China (Beijing) | cn-north-1 | cn1 |
-| China (Ningxia) | cn-northwest-1 | cw1 |
+| China (Ningxia) | cn-northwest-1 | cnw1 |
 | Europe (Frankfurt) | eu-central-1 | ec1 |
 | Europe (Ireland) | eu-west-1 | ew1 |
 | Europe (London) | eu-west-2 | ew2 |
