@@ -4,8 +4,7 @@
 
 ## Author / Date
 
-Karl Fischer
-March 2023
+Karl Fischer / March 2023
 
 ## Tracking JIRA
 
@@ -40,9 +39,9 @@ The following timeline highlights how multiple parallel promotions can result in
 
 ## Proposal
 
-We have a [PoC available](https://github.com/app-sre/qontract-reconcile/pull/3306) for this proposal.
+Create a new fully context aware integration: `saas-auto-promotions-manager` (SAPM).
 
-Create a new fully context aware integration: `saas-auto-promotions-manager` (SAPM). Remove the auto-promotion event from `openshift-saas-deploy`. Without these events, `gitlab-me-sqs-consumer` will not receive any data to open auto promotion MRs anylonger.
+We have a [PoC available](https://github.com/app-sre/qontract-reconcile/pull/3306) for this proposal.
 
 SAPM is able to gather all context around auto-promotions:
 
@@ -56,17 +55,21 @@ Based on that context, SAPM can decide:
 1. Do we have to open a new auto-promotion MR?
 2. Do we have to close old (now obsolete) auto-promotion MRs?
 
+Further, we remove the auto-promotion event from `openshift-saas-deploy`. Without these events, `gitlab-me-sqs-consumer` will not receive any data to open auto promotion MRs anylonger.
+
+### Proposed Implementation
+
 ![](images/saas-auto-promotions-manager/proposal.png)
 
-The [current PoC](https://github.com/app-sre/qontract-reconcile/pull/3306) implements Milestone 1, i.e., it does not do any merge conflict management yet. It is a very simple single-threaded integration. The runtime is bound by the number of subscribed SaaS targets. Even though it only uses a single thread one run currently happens in < 2 mins for latest app-interface prod state. Threading will enhance runtime considerably, as we could easily query VCSs in parallel.
+The [current PoC](https://github.com/app-sre/qontract-reconcile/pull/3306) does not do any merge conflict management yet (see Milestone 1). It is a very simple single-threaded integration. The runtime is bound by the number of subscribed SaaS targets. Even though it only uses a single thread one run currently happens in < 1 minute for latest app-interface prod state. Threading will enhance runtime considerably, as we could easily query VCSs and S3 files in parallel, i.e., we have an easy path for scaling.
 
 Further, SAPM is not required to hold state. It must anyways fetch real-world state directly from VCSs. 
 
-Another positive aspect of SAPM is its extensibility. We will likely need more features/logic around SaaS auto promotions. SAPMs broader context and reconciled approach will be helpful there.
+Another positive aspect of SAPM is its extensibility. We will likely need more features/logic around SaaS auto promotions. SAPMs broader context and reconciled approach provide a good basis for upcoming challenges.
 
-## Migration Path
+### Migration Path
 
-The first milestone will not handle merge conflicts. We must avoid creating merge conflicts when putting this integration into production. I.e., we must avoid having MRs opened by `openshift-saas-deploy` events and SAPM in parallel.
+In the first milestone, SAPM will simply replace the current auto-promotion mechanism. It will not handle merge conflicts yet. We must avoid creating merge conflicts when putting this integration into production. I.e., we must avoid having MRs opened by `openshift-saas-deploy` events and SAPM in parallel.
 
 1. Announce to tenants that auto-promotions are disabled for a short window (roughly ~1h to be safe)
 1. [disable sending promotion events](https://github.com/app-sre/qontract-reconcile/blob/c2f9f926a3bea60bf270e4fdee1b068ede5cccc1/reconcile/openshift_saas_deploy.py#L240) in `openshift-saas-deploy`
@@ -86,4 +89,4 @@ SAPM is able to conclude missing auto-promotions from real-world state, so no pr
 ## Milestones
 
 1. SAPM re-creates current behavior and replaces openshift-saas-deploy auto-promotion events.
-2. Extend SAPM to manage all open MRs and avoid merge conflicts.
+2. After we consider SAPM stable enough, we extend it to manage all open MRs and avoid merge conflicts.
