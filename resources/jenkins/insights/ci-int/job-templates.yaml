@@ -602,6 +602,25 @@
     pipeline-scm:
       # make parameter to override template name
       script-path: 'Jenkinsfile'
+      scm:
+      - git:
+          url: 'git@github.com:{gl_group}/{gl_project}.git'
+          credentials-id: '{github_ssh_credentials}'
+          skip-tag: true
+          refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
+          branches:
+          - '${{ghprbActualCommit}}'
+          merge:
+              remote: origin
+              branch: '{branch}'
+          git-config-name: "AppSRE"
+          git-config-email: "sd-app-sre@redhat.com"
+          included-regions:
+          - '{include_path}'
+          prune: true
+          clean:
+              before: true
+          wipe-workspace: true
     disabled: '{disable}'
     node: '{node}'
     concurrent: '{concurrent_build}'
@@ -620,7 +639,6 @@
         failure-only: true
         name: '{name}'
         mark-unstable-as-success: false
-    <<: *gl_pr_check
 
 # Wrappers Ignored for Pipeline type:
 # https://opendev.org/jjb/jenkins-job-builder/src/commit/a191e0b174322a55eac082ad4815fb7c35de56fa/jenkins_jobs/modules/wrappers.py#L3003-L3006
