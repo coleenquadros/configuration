@@ -20,8 +20,7 @@ Extensive documentation about how policies work and how they can be defined, can
 
 ### Reaching support
 
-A request for policy setup or change needs to be filed on the [AppSRE Jira Board](https://issues.redhat.com/projects/APPSRE) and make `@app-sre-stream-xtream` in the `#sd-app-sre` Slack channel aware.
-Also any other technical assistance for AUS needs to be requested by filing a ticket.
+A request for policy setup, change or support needs to be filed on the [AppSRE Jira Board](https://issues.redhat.com/projects/APPSRE) and ping `@advanced-upgrade-service-enablement` in the [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) Slack channel.
 
 ### AUS responsibilities
 
