@@ -391,7 +391,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     - key: `deadmanssnitch-<cluster_name>-url`
     - value: the `Unique Snitch URL` from deadmanssnitch
 
-1. **IMPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notified by the browser.
+1. **IMPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notified by the browser. If you do not see a valid SSL certificate, maybe you need to add letsencrypt as `CERT_ISSUER_NAME` for the nginx proxy. See this [example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/61907). If you change the issuer name, make sure to also delete the old pending certificate requests: `oc delete certificaterequests.cert-manager.io alertmanager-...`
 
 ## Step 4 - Operator Lifecycle Manager
 
