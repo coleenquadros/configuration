@@ -26,20 +26,23 @@ labels: {}
 
 name: <org-name>
 description: <meaningful description>
-url: "https://api.openshift.com" (1)
-
+environment:
+  $ref: /dependencies/ocm/environments/production.yml (1)
 orgId: <organization ID>
-accessTokenClientId: sre-capabilities (2)
-accessTokenUrl: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
-accessTokenClientSecret:
-  path: app-sre/creds/ocm/sre-capabilities
-  field: client_secret
 ```
 
-(1) Depending on the OCM environment, use one of the following
-
-* production <https://api.openshift.com>
-* stage <https://api.stage.openshift.com>
-* integration <https://api.integration.openshift.com>
+(1) ... or use the staging or integration one depending on the usecase
 
 (2) The [sre-capabilities OCM service account](https://gitlab.cee.redhat.com/service/ocm-resources/-/blob/master/data/uhc-production/users/service-account-sre-capabilities.yaml) is not bound to any organization and has for all relevant cluster and cluster-upgrade permissions in all (⚠️) organizations. Using this account simplifies the onboarding of an OCM organization because no additional SSO account, OCM SA and permissions need to be requested.
+
+If the organization should rely on a dedicated service account, dedicated credentials can be specified that take precedence over the ones from the referenced environment:
+
+```yaml
+$schema: /openshift/openshift-cluster-manager-1.yml
+...
+accessTokenClientId: xxx
+accessTokenUrl: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+accessTokenClientSecret:
+  path: xxx
+  field: client_secret
+```
