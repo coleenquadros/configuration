@@ -42,6 +42,8 @@ accessTokenClientSecret:
 
 (1) the credentials to be used when interacting with the OCM environment in the context of SRE capabilities
 
+> To improve our security posture, different credentials should be used to different environments and organizations. That can be enforced on the schema once we have service accounts in place.
+
 The `/openshift/openshift-cluster-manager-1.yml` schema will reference a `/openshift/openshift-cluster-manager-environment-1.yml` and will not declare `url` anymore. Authentication information will be optional.
 
 * If they are missing, the credentials from the referenced OCM environment will be used. This is the proposed way for OCM organizations that are onboarded to `app-interface` in the context of SRE capabilitites.
