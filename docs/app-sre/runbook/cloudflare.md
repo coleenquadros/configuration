@@ -37,7 +37,7 @@ We use the [lablabs/cloudflare-exporter](https://github.com/lablabs/cloudflare-e
 
 [Cloudflare Dashboard](https://dash.cloudflare.com/)
 
-Credentials to Cloudflare accounts can be found in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/cloudflare). The table below describes which user has access to which account.
+Credentials to Cloudflare accounts can be found in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/cloudflare). The table below describes which user has access to which account.
 
 | User email                               | Accounts                             |
 |------------------------------------------|--------------------------------------|
@@ -193,6 +193,27 @@ The maximum number of records per zone for Free accounts is 1000. The limit is 3
 This is set on a per-zone basis, so a requirement to have this limit increased is to have the zone already created
 
 The process to have the record limit increased is to open a support ticket and copy Tim Flynn and Brian Ceppi on it
+
+
+### terraform-cloudflare-users integration
+
+#### Integration unable to create cloudflare account member
+Sometimes `terraform-cloudflare-users` integration fails with the following error
+
+```
+error creating Cloudflare account member: Error when processing member: cannot add existing user that is participating in an incompatible authorization system (1005)
+```
+Per Cloudflare support team this happens because 
+
+```
+Users with Domain Scoped Roles enabled can ONLY manage other members also enrolled with Domain Scoped Roles.
+Users without Domain Scoped Roles enabled can NOT manage users with Domain Scoped Roles enabled.
+```
+
+If we run into this issue, we need to do the following
+1. Remove user access temporarily by unsetting `cloudflare_user` field within `/access/user-1.yml` and notify the user.
+1. Reach out to Cloudflare support through a ticket mentioning this issue.
+1. Once Cloudflare support fixes the issue in their backend, set `cloudflare_user` field and verify integration succeeds.
 
 ## Helpful links & resources
 
