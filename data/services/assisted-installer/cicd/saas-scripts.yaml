@@ -1,0 +1,50 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: assisted-installer
+name: assisted-installer-scripts
+description: SaaS tracking file for maintenance scripts
+app:
+  $ref: /services/assisted-installer/app.yml
+pipelinesProvider:
+  $ref: /services/assisted-installer/pipelines/tekton.assisted-installer-pipelines.appsrep05ue1.yaml
+deployResources:
+  requests:
+    cpu: 200m
+    memory: 700Mi
+  limits:
+    cpu: 200m
+    memory: 700Mi
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: assisted-app-sre-ci
+managedResourceTypes:
+- CronJob
+- ConfigMap
+
+imagePatterns:
+- quay.io/edge-infrastructure/aws-cli
+
+resourceTemplates:
+- name: assisted-installer-scripts
+  url: https://github.com/openshift-assisted/assisted-scripts
+  path: /operations/cloud-maintenance/openshift/template.yaml
+  provider: openshift-template
+  targets:
+  - ref: main
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
+    promotion:
+      publish:
+      - assisted-scripts-integration-deploy-success-channel
+    parameters:
+      S3_CLEANER_CRON_SUSPEND: true
+  - ref: main
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
+    promotion:
+      publish:
+      - assisted-scripts-stage-deploy-success-channel
+    parameters:
+      S3_CLEANER_CRON_SUSPEND: true
