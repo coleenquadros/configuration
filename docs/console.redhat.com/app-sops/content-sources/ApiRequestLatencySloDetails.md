@@ -12,15 +12,15 @@ This directly relates to a healthy user experience, as a fast return results in 
 
 This SLI is represented by the expression: 
 
-* sum(rate(content_sources_http_status_histogram_bucket{le="0.1",path!="/api/content-sources/v1.0/repository_parameters/validate"}[{{window}}])) / sum(rate(content_sources_http_status_histogram_count[{{window}}]))
+* sum(rate(content_sources_http_status_histogram_bucket{le="0.5",path!="{{ignoredUrls}}"}[{window}}]))/sum(rate(content_sources_http_status_histogram_count{path!="{{ignoredUrls}}"}[{{window}}]))
 
-The `content_sources_http_status_histogram_bucket` histogram metric has buckets populated by the duration of each request to the content sources API. The `content_sources_http_status_histogram_count` metric is the total number of requests. The 0.1 second bucket divided by the total number of requests gives the proportion of requests that return within 100ms.
+The `content_sources_http_status_histogram_bucket` histogram metric has buckets populated by the duration of each request to the content sources API. The `content_sources_http_status_histogram_count` metric is the total number of requests. The 0.5 second bucket divided by the total number of requests gives the proportion of requests that return within 500ms.
 
 The validate endpoint is excluded because it sometimes reaches out to the internet to grab files, which can cause delays outside of our app's control. 
 
 ## SLO Rationale
 
-The target is for 95% of requests to return within 100ms, but the target may be adjusted in the future based on the volume of traffic. 
+The target is for 90% of requests to return within 500ms, but the target may be adjusted in the future based on the volume of traffic. 
 
 ## Alerts
 
