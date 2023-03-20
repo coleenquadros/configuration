@@ -29,3 +29,14 @@ spec:
           severity: medium
         annotations:
           message: "UHC Account Manager in namespace {{{ environment }}}: RDS Memory is too high"
+      # RDS - disaster recovery instance (us-east-2) high replica lag
+      - alert: RDS ReplicaLag is too high for disaster recovery instances - {{{environment}}}
+        # aws_rds_replica_lag_average unit is seconds, -1 indicates issues with reporting ReplicaLag
+        expr: aws_rds_replica_lag_average{dbinstance_identifier="uhc-acct-mngr-{{{environment}}}-readonly-ue2"} > 300 or aws_rds_replica_lag_average{dbinstance_identifier="uhc-acct-mngr-{{{environment}}}-readonly-ue2"} == -1
+        for: 1h
+        labels:
+          service: uhc-acct-mngr
+          severity: {{{ 'high' if environment == 'production' else 'medium' }}}
+        annotations:
+          message: "UHC Account Manager in namespace {{{ environment }}}: ReplicaLag is too high which could impact disaster recovery operations in us-east-2"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/aws/sop/rds-high-replica-lag.md"
