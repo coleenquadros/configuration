@@ -395,11 +395,23 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 1. Remove yourself from the cluster-admin group via OCM.
 
-## Step 4 - Install Cert-manager operator
+## Step 4 - Operator Lifecycle Manager
+
+1. Install the Operator Lifecycle Manager
+
+   The Operator Lifecycle Manager is responsible for managing operator lifecycles.  It will install and update operators using a subscription.
+
+    1. Create an `openshift-operator-lifecycle-manager.yml` namespace file for the cluster with this command:
+
+    ```bash
+    hack/cluster_provision.py [--datadir=data directory] create-olm-ns <cluster-name>
+    ```
+
+## Step 5 - Install Cert-manager operator
 
 1. Follow the installation instructions in this [Runbook](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/runbook/cert-manager.md)
 
-## Step 5 - Observability
+## Step 6 - Observability
 1. Add Prometheus/Alertmanager DNS records to the [devshift.net DNS zone file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/dns/devshift.net.yaml)
     ```bash
     hack/cluster_provision.py create-obs-dns-records <cluster>
@@ -423,6 +435,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     * Creates an `app-sre-observability-per-cluster` namespace file for that specific cluster. [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-prod-01/namespaces/app-sre-observability-per-cluster.yml)
     * Adds the new `app-sre-observability-per-cluster` namespace to list of namespaces in [observability-access-elevated.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/observability-access-elevated.yml) under `access`, to allow users with elevated observability access to access all the prometheus.
     * Adds the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-nginx-proxy.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-nginx-proxy.yaml) to deploy nginx-proxy.
+      **If this is a private cluster, you need to add `CERT_MANAGER_ISSUER_NAME: letsencrypt-devshiftnet-dns` to `parameters`.**
 
   **Double check the changes introduced, the destination file could have been modified with manual changes**
 
@@ -439,18 +452,6 @@ At this point you should be able to access the cluster via the console / `oc` cl
     - value: the `Unique Snitch URL` from deadmanssnitch
 
 1. **IMPORTANT**: Merge the changes and check that the integrations have completed running successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid TLS certificates by accessing the URLs. If no security warning is given and the connection is secure as notified by the browser. If you do not see a valid TLS certificate, maybe you need to change the `CERT_ISSUER_NAME` attribute in the saas-nginx-proxy.yaml deployment. Remember that private clusters need to use DNS challenge solvers. See this [example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/61907). If you change the issuer name, make sure also to delete the old pending certificate requests: `oc delete certificaterequests.cert-manager.io alertmanager-...`
-
-## Step 6 - Operator Lifecycle Manager
-
-1. Install the Operator Lifecycle Manager
-
-    The Operator Lifecycle Manager is responsible for managing operator lifecycles.  It will install and update operators using a subscription.
-
-    1. Create an `openshift-operator-lifecycle-manager.yml` namespace file for the cluster with this command:
-
-    ```bash
-    hack/cluster_provision.py [--datadir=data directory] create-olm-ns <cluster-name>
-    ```
 
 ## Step 7 - Container Security Operator
 
