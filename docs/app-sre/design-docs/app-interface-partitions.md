@@ -29,8 +29,7 @@ As a practical example, [APPSRE-6724](https://issues.redhat.com/browse/APPSRE-67
 
 ~~To deploy changes over a single partition we will leverage our current shard-specific-integration-deployments strategy, changing it to fit the `partitions`. In next iterations it might make sense to define environments over partitions and define staged rollouts.~~
 
-After spiking and writing some code around it, I think introducing the concept as sub-sharding suits better and is less disruptive. The idea remains the same: Integrations that are subject to be horizontally partitioned by a clear attribute (`per-openshift-cluster`, `per-aws-account`, `per-cloudflare-zone`, etc.) will be **sharded** by that attribute. If a specific shard is big enough to be split,
-it will be possible to apply a **sub-sharding** strategy over it.
+After spiking and writing some code around it, I think introducing the concept as sub-sharding suits better and is less disruptive. The idea remains the same: Integrations that are subject to be horizontally partitioned by a clear attribute (`per-openshift-cluster`, `per-aws-account`, `per-cloudflare-zone`, etc.) will be **sharded** by that attribute. If a specific shard is big enough to be split, it will be possible to apply a **sub-sharding** strategy over it.
 
 To start, using the current hash based sharding strategy that we use as a `sub-sharding` strategy is enough for now. `sub-sharding` will be configured using integration configuration overrides as we do right now to override the container images.
 
@@ -39,6 +38,12 @@ The sharding configuration for integrations will be improved to allow more chang
 ### Some practical examples
 
 ```yaml
+
+pr_check:
+  command: # ...
+
+
+
 managed:
 - namespace:
     $ref: /services/app-interface/namespaces/app-interface-production-int.yml
@@ -50,25 +55,27 @@ managed:
       limits:
         memory: 1000Mi
         cpu: 1200m
-    sharding:
-      strategy: per-openshift-cluster
-      shardSpecOverrides:
-      - shard: appsrep05ue1
-        subSharding:
-          strategy: static
-          shards: 20
-      - shard: app-sre-stage-01
-        imageRef: my-dangerous-change
-        resources:
-          requests:
-            memory: 2Gi
-            cpu: 2
-          limits:
-            memory: 2Gazillions
-            cpu: 100
-        subSharding:
-          strategy: static
-          shards: 5
+  # ...
+
+sharding:
+  strategy: per-openshift-cluster
+  shardSpecOverrides:
+  - shard: appsrep05ue1
+    subSharding:
+      strategy: static
+      shards: 20
+  - shard: app-sre-stage-01
+    imageRef: my-dangerous-change
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: 2
+      limits:
+        memory: 2Gazillions
+        cpu: 100
+    subSharding:
+      strategy: static
+      shards: 5
 
 ---
 # Another case with just a static sharding. But setting the sharding attributes
@@ -84,16 +91,17 @@ managed:
       limits:
         memory: 1000Mi
         cpu: 1200m
-    sharding:
-      strategy: static
-      shards: 20
+
+sharding:
+  strategy: static
+  shards: 20
 
 ```
 
 
 ## Alternatives considered
 
-- N/A
+- Introduce the concept of partition when there is a clear data split like per-aws-account or per-openshift-cluster. Discarded in favor of sub-sharding naming.
 
 ## Milestones
 
