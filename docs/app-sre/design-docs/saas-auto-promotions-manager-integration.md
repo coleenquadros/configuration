@@ -70,13 +70,14 @@ Another positive aspect of SAPM is its extensibility. We will likely need more f
 ### Migration Path
 
 In the first milestone, SAPM will simply replace the current auto-promotion mechanism. It will not handle merge conflicts yet. We must avoid creating merge conflicts when putting this integration into production. I.e., we must avoid having MRs opened by `openshift-saas-deploy` events and SAPM in parallel.
+We implement feature flags to easily turn SAPM / `openshift-saas-deploy` on or off.
 
 1. Announce to tenants that auto-promotions are disabled for a short window (roughly ~1h to be safe)
-1. [disable sending promotion events](https://github.com/app-sre/qontract-reconcile/blob/c2f9f926a3bea60bf270e4fdee1b068ede5cccc1/reconcile/openshift_saas_deploy.py#L240) in `openshift-saas-deploy`
-1. [remove AutoPromoter](https://github.com/app-sre/qontract-reconcile/blob/c2f9f926a3bea60bf270e4fdee1b068ede5cccc1/reconcile/utils/mr/__init__.py#L33) as MR type.
+1. [disable sending promotion events](https://github.com/app-sre/qontract-reconcile/blob/c2f9f926a3bea60bf270e4fdee1b068ede5cccc1/reconcile/openshift_saas_deploy.py#L240) in `openshift-saas-deploy` via feature flag
+1. [remove AutoPromoter](https://github.com/app-sre/qontract-reconcile/blob/c2f9f926a3bea60bf270e4fdee1b068ede5cccc1/reconcile/utils/mr/__init__.py#L33) as MR type via feature flag.
 1. wait 10 minutes
 1. wait until there are no more open auto-promotion MRs.
-1. put SAPM into production
+1. put SAPM into production via feature flag
 
 Step 2 ensures we do not send any new events. Step 3 ensures that any event from long-running tekton pipelines will not be handled, so we can neglect checking the SQS queue for any later events. We will instead implement the type `AutoPromoterV2` for SAPM MRs.
 
@@ -89,4 +90,6 @@ SAPM is able to conclude missing auto-promotions from real-world state, so no pr
 ## Milestones
 
 1. SAPM re-creates current behavior and replaces openshift-saas-deploy auto-promotion events.
-2. After we consider SAPM stable enough, we extend it to manage all open MRs and avoid merge conflicts.
+2. Implement features that enhance current behavior after we consider SAPM stable enough:
+2.1 manage all open MRs and avoid merge conflicts.
+2.2 properly handle targets that subscribe to multiple targets. See [APPSRE-7307](https://issues.redhat.com/browse/APPSRE-7307)
