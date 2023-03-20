@@ -14,7 +14,7 @@ The cluster names must have a maximum of 15 characters and the following shape:
 ### Notes
 * When creating a new cluster, please check if a previous one has been created for the same service.
 * `NN` is a counter per service, neither per environment nor per region.
-* To keep the name to 15 chars, limit the service name to 9 chars or fewer. In other words, 9c1c2c3c. For example, “`crcp01ue1`”.
+* To keep the name to 15 chars, limit the service name to 8 chars or fewer. In other words, 8c1c2c4c. For example, `crcp01ue1` or `crcp01ase2`.
 
 ## Region Abbreviations
 Taken from [here](https://docs.aws.amazon.com/general/latest/gr/rande.html).
