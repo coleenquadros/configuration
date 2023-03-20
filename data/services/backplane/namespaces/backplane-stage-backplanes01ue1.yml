@@ -22,9 +22,52 @@ managedRoles: true
 
 managedResourceTypes:
 - Route
+- Issuer.cert-manager.io
 
 sharedResources:
 - $ref: /services/backplane/shared-resources/stage.yml
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
 openshiftResources: []
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: backplane-cert-manager-stage
+    output_resource_name: backplane-cert-manager-stage
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:GetChange",
+            ],
+            "Resource": "arn:aws:route53:::change/*",
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:ChangeResourceRecordSets",
+              "route53:ListResourceRecordSets"
+            ],
+            "Resource": [
+              # backplane.openshift.com
+              "arn:aws:route53:::hostedzone/Z0648348T8EF2IW6069F"
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:ListHostedZonesByName"
+            ],
+            "Resource": "*"
+          }
+        ]
+      }
