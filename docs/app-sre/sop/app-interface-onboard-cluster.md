@@ -533,23 +533,23 @@ Note that the host prefix must be set to /23.
 
 ## Adding Datasource to Grafana
 
-First create a new cloudwatch secret, add it to [app-sre-observability-production.yml](data/services/observability/namespaces/app-sre-observability-production.yml). Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/41114
+1. create a new cloudwatch secret, add it to [app-sre-observability-production.yml](data/services/observability/namespaces/app-sre-observability-production.yml). Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/41114
+1. add grafana to `openshiftServiceAccountTokens` in `app-sre-observability-per-cluster.yml`, [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/458295334b65444dcbee5d9fc5e09e9a7b32a354/data/openshift/appsrep05ue1/namespaces/app-sre-observability-per-cluster.yml#L23-26)
+1. add the cluster to [grafana.yaml](/data/services/observability/shared-resources/grafana.yml). Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/41110
+ 
+    You can do that with this command:
+      ```bash
+      hack/cluster_provision.py create-obs-grafana-datasources <cluster>
+      ```
 
-Afterwards add the cluster to [grafana.yaml](/data/services/observability/shared-resources/grafana.yml). Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/41110
+    **Double check the changes introduced, the destination file could have been modified with manual changes.**
 
-You can do that with this command:
-  ```bash
-  hack/cluster_provision.py create-obs-grafana-datasources <cluster>
-  ```
+    Tip: There is one command to refresh all cluster info in shared grafana config,
+    just in case console url changed but forgot to update `slug`.
 
-**Double check the changes introduced, the destination file could have been modified with manual changes.**
-
-Tip: There is one command to refresh all cluster info in shared grafana config,
-just in case console url changed but forgot to update `slug`.
-
-  ```bash
-  hack/cluster_provision.py refresh-obs-grafana-datasources
-  ```
+      ```bash
+      hack/cluster_provision.py refresh-obs-grafana-datasources
+      ```
 
 Datasource should be available afterwards.
 
