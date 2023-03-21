@@ -31,13 +31,13 @@ More information about the phases can be found in this document [Mission Critica
 
 Stonesoup will onboard into AppSRE the control plane components which are:
 
-- ArgoCD: Deployed as an operator from OperatorHub. This component will be used to deploy the all the other components to the data plane clusters. ArgoCD's endpoint should be accessible by Stonesoup Hybrid SREs.
+- ArgoCD: Deployed as an operator from OperatorHub. This component will be used to deploy all the other components to the data plane clusters. ArgoCD's endpoint should be accessible by Stonesoup Hybrid SREs.
 - ArgoCD CRs required for ArgoCD to deploy workloads into the data plane clusters.
 - Observability CRs: Prometheus Rules with alerts
-- Fleet Manager: Although this component is necessary to support the fleet management capabilities of the data plane, this is not in scope until Service Preview II and it's currently under design / development.
+- Fleet Manager: Although this component is necessary to support the fleet management capabilities of the data plane, this is not in scope until Service Preview II and it's currently (2023-03-21) under design / development.
 
 As of 2023-03-21, the key onboarding issues and questions:
-- Decide whether to use RHOBS or AppSRE hosted Prometheus for the observability and telemetry (metrics and logs) of the data plane.
+- Decide whether to use RHOBS or AppSRE hosted Prometheus for the observability of the data plane.
 - Decide if RHACM is suitable as a fleet manager piece, or if the FFM (Factorized Fleet Manager) should be used instead, or a third solution.
 - Define SLIs/SLOs.
 - Runbooks for alerts / SLOs.
@@ -67,7 +67,7 @@ Initially, the data plane clusters will be statically defined (without cluster m
 * Document was originally prepared on 2022-10-04.
 * Document was revised substantially on 2023-01-05, to reflect a [decision](https://docs.google.com/document/d/1ONrBWVlbdGZIIEanEtiUP3daUCKmrGgehk2VtPhN-Mk/edit) from the [ARB](https://source.redhat.com/departments/products_and_global_engineering/oo_cto/red_hat_office_of_the_cto_wiki/architecture_review_board_arb) to drop KCP from the
 architecture.
-* Document has been reworked on 2023-03-21 as it is now a regular AppSRE onboarding.
+* Document has been reworked on 2023-03-21 as it is now a regular AppSRE onboarding for the control plane.
 
 ## Other Resources
 
