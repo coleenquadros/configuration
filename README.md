@@ -2375,6 +2375,91 @@ Worker scripts are programs that will process requests and possibly change them 
   - `name`: Name of the variable
   - `text`: Value of the variable
 
+### Manage Cloudflare Logpush and Logpull configuration using Terraform
+App-interface supports following Terraform resources for Logpush and Logpull configuration.
+
+#### Logpush ownership challenge resource
+
+Certain Logpush [destinations](https://developers.cloudflare.com/logs/get-started/enable-destinations/) require ownership proof, you can configure ownership challenge through [`logpush_ownership_challenge`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpush_ownership_challenge) terraform resource.
+
+Following is an example, please set attribute values as per your needs.
+```
+- provider: cloudflare
+  provisioner:
+    $ref: /cloudflare/app-sre/account.yml
+  resources:
+  # For zone level resource
+  - provider: logpush_ownership_challenge
+    identifier: test-logpush-challenge
+    zone: test-zone
+    destination_conf: s3://bucket/logs?region=us-east-1&sse=AES256 # Update this according to your destination
+  # For account level resource
+  - provider: logpush_ownership_challenge
+    identifier: test-logpush-challenge
+    destination_conf: s3://bucket/logs?region=us-east-1&sse=AES256 # Update this according to your destination
+```
+
+Note: Currently we only support `S3` for Logpush destination. Please see additional resources for setting up bucket policy required for `S3` destination.
+
+Additional resource:
+- [Cloudflare destination](https://developers.cloudflare.com/logs/get-started/api-configuration/#destination)
+- [S3 Destination Pre-requisite](https://developers.cloudflare.com/logs/get-started/enable-destinations/aws-s3/#manage-via-api)
+
+#### Logpush job resource
+The Cloudflare Logpush job resource definition follows [`logpush_job`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpush_job) Terraform resource.
+
+Following is an example, please set attribute values as per your needs.
+```
+- provider: cloudflare
+  provisioner:
+    $ref: /cloudflare/app-sre/account.yml
+  resources:
+    - provider: logpush_job
+      identifier: test-logpush-job-zone
+      enabled: true
+      zone: test-zone
+      logpull_options: fields=RayID,ClientIP,EdgeStartTimestamp&timestamps=rfc3339
+      destination_conf: s3://bucket/logs?region=us-east-1&sse=AES256
+      ownership_challenge: some-challenge
+      dataset: http_requests
+      frequency: <low|high>
+    - provider: logpush_job
+      identifier: test-logpush-job-account
+      enabled: true
+      zone: test-zone
+      logpull_options: fields=RayID,ClientIP,EdgeStartTimestamp&timestamps=rfc3339
+      destination_conf: s3://bucket/logs?region=us-east-1&sse=AES256
+      ownership_challenge: some-challenge
+      dataset: http_requests
+      frequency: high
+```
+
+Additonal resources
+- [Cloudflare datasets](https://developers.cloudflare.com/logs/reference/log-fields/#datasets)
+
+#### Logpull retention resource
+
+The cloudflare Logpull retention resource definition follows [`logpull_retention`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpull_retention) Terraform resource.
+
+Following is an example, please set attribute values as per your needs.
+
+```
+- provider: cloudflare
+  provisioner:
+    $ref: /cloudflare/app-sre/account.yml
+  resources:
+    - provider: logpull_retention
+      identifier: test-logpull-retention
+      zone: test-zone
+      enabled: true
+```
+#### Monitoring Logpush jobs
+Tenants are encouraged to setup prometheus alerts to monitor Logpush job status in case of any failures. 
+You can utilize following metrics to setup the alerts
+- `cloudflare_logpush_failed_jobs_account_count` with labels `destination`, `job_id` (can be obtained via Cloudflare UI) to monitor Logpush job for account level resources
+- `cloudflare_logpush_failed_jobs_zone_count` with labels `destination`, `job_id` (can be obtained via Cloudflare UI) to monitor Logpush job for zone level resources
+
+
 ### Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)
 
 VPC peerings can be entirely self-services via App-Interface.
