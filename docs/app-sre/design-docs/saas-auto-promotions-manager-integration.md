@@ -99,7 +99,6 @@ SAPM is able to conclude missing auto-promotions from real-world state, so no pr
 
 1. SAPM re-creates current behavior and replaces openshift-saas-deploy auto-promotion events.
 2. Implement features that enhance current behavior after we consider SAPM stable enough:
-  -- manage all open MRs and avoid merge conflicts. See [APPSRE-6685](https://issues.redhat.com/browse/APPSRE-6685)
-  -- properly handle targets that subscribe to multiple targets. See [APPSRE-7307](https://issues.redhat.com/browse/APPSRE-7307)
-
+  - manage all open MRs and avoid merge conflicts. See [APPSRE-6685](https://issues.redhat.com/browse/APPSRE-6685)
+  - properly handle targets that subscribe to multiple targets. See [APPSRE-7307](https://issues.redhat.com/browse/APPSRE-7307)
 3. If we witness performance issues or too many requests to github mirror / gitlab, then we must consider to adjust towards a more event-based approach and / or proper early exit detection. See [APPSRE-7320](https://issues.redhat.com/browse/APPSRE-7320). Note, that such a design will require its own design doc and must be considered a major effort.
