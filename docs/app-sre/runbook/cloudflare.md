@@ -33,6 +33,38 @@ We use the [lablabs/cloudflare-exporter](https://github.com/lablabs/cloudflare-e
 
 ## Troubleshooting
 
+### terraform-cloudflare-dns integration
+
+#### Zone manually deleted
+
+The error message below may indicate that a Cloudflare DNS zone was manually deleted. This can be verified by checking the Cloudflare audit log and searching for the zone in question.
+
+```
+[terraform-cloudflare-dns] error: b'\nError: error finding Zone "0f17ee691c67ac7df9cfc56db9f92372": Invalid zone identifier (1001)\n\n\n'
+```
+
+Reach out to the owners of the zone to figure out if this was in fact deleted manually. If it was, advise the tenants to add `delete: true` to the `/cloudflare/dns-zone-1.yml` file in the future. To stop the errors, the `/cloudflare/dns-zone-1.yml` file can be removed so that the integration will no longer run against that shard.
+
+### terraform-cloudflare-users integration
+
+#### Integration unable to create cloudflare account member
+Sometimes `terraform-cloudflare-users` integration fails with the following error:
+
+```
+error creating Cloudflare account member: Error when processing member: cannot add existing user that is participating in an incompatible authorization system (1005)
+```
+Per Cloudflare support team this happens because:
+
+```
+Users with Domain Scoped Roles enabled can ONLY manage other members also enrolled with Domain Scoped Roles.
+Users without Domain Scoped Roles enabled can NOT manage users with Domain Scoped Roles enabled.
+```
+
+If we run into this issue, we need to do the following
+1. Remove user access temporarily by unsetting `cloudflare_user` field within `/access/user-1.yml` and notify the user.
+1. Reach out to Cloudflare support through a ticket mentioning this issue.
+1. Once Cloudflare support fixes the issue in their backend, set `cloudflare_user` field and verify integration succeeds.
+
 ### Dashboard access
 
 [Cloudflare Dashboard](https://dash.cloudflare.com/)
@@ -193,27 +225,6 @@ The maximum number of records per zone for Free accounts is 1000. The limit is 3
 This is set on a per-zone basis, so a requirement to have this limit increased is to have the zone already created
 
 The process to have the record limit increased is to open a support ticket and copy Tim Flynn and Brian Ceppi on it
-
-
-### terraform-cloudflare-users integration
-
-#### Integration unable to create cloudflare account member
-Sometimes `terraform-cloudflare-users` integration fails with the following error
-
-```
-error creating Cloudflare account member: Error when processing member: cannot add existing user that is participating in an incompatible authorization system (1005)
-```
-Per Cloudflare support team this happens because 
-
-```
-Users with Domain Scoped Roles enabled can ONLY manage other members also enrolled with Domain Scoped Roles.
-Users without Domain Scoped Roles enabled can NOT manage users with Domain Scoped Roles enabled.
-```
-
-If we run into this issue, we need to do the following
-1. Remove user access temporarily by unsetting `cloudflare_user` field within `/access/user-1.yml` and notify the user.
-1. Reach out to Cloudflare support through a ticket mentioning this issue.
-1. Once Cloudflare support fixes the issue in their backend, set `cloudflare_user` field and verify integration succeeds.
 
 ## Helpful links & resources
 
