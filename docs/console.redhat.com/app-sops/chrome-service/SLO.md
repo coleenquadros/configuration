@@ -21,4 +21,4 @@ The given SLIs were determined based on the necessary components of the chrome-s
 
 ## Error Budget
 
-Error budgets are determined based on the SOP for each objective.
+Error budgets are determined based on the SLO for each objective.
