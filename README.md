@@ -2380,10 +2380,10 @@ App-interface supports following Terraform resources for Logpush and Logpull con
 
 #### Logpush ownership challenge resource
 
-Certain Logpush [destinations](https://developers.cloudflare.com/logs/get-started/enable-destinations/) require ownership proof, you can configure ownership challenge through [`logpush_ownership_challenge`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpush_ownership_challenge) terraform resource.
+Certain Logpush [destinations](https://developers.cloudflare.com/logs/get-started/enable-destinations/) require proof of ownership. You can configure ownership challenge through [`logpush_ownership_challenge`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpush_ownership_challenge) Terraform resource.
 
 Following is an example, please set attribute values as per your needs.
-```
+```yaml
 - provider: cloudflare
   provisioner:
     $ref: /cloudflare/app-sre/account.yml
@@ -2399,7 +2399,7 @@ Following is an example, please set attribute values as per your needs.
     destination_conf: s3://bucket/logs?region=us-east-1&sse=AES256 # Update this according to your destination
 ```
 
-Note: Currently we only support `S3` for Logpush destination. Please see additional resources for setting up bucket policy required for `S3` destination.
+Note: Currently we only support `S3` for Logpush destination. Please see additional resources for setting up bucket policy required for `S3` destination before creating ownership challenge.
 
 Additional resource:
 - [Cloudflare destination](https://developers.cloudflare.com/logs/get-started/api-configuration/#destination)
@@ -2409,7 +2409,7 @@ Additional resource:
 The Cloudflare Logpush job resource definition follows [`logpush_job`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpush_job) Terraform resource.
 
 Following is an example, please set attribute values as per your needs.
-```
+```yaml
 - provider: cloudflare
   provisioner:
     $ref: /cloudflare/app-sre/account.yml
@@ -2443,7 +2443,7 @@ The cloudflare Logpull retention resource definition follows [`logpull_retention
 
 Following is an example, please set attribute values as per your needs.
 
-```
+```yaml
 - provider: cloudflare
   provisioner:
     $ref: /cloudflare/app-sre/account.yml
