@@ -60,11 +60,13 @@ managed:
 sharding:
   strategy: per-openshift-cluster
   shardSpecOverrides:
-  - shard: appsrep05ue1
+  - shard:
+      $ref: /openshift/appsrep05ue1/cluster.yml
     subSharding:
       strategy: static
       shards: 20
-  - shard: app-sre-stage-01
+  - shard:
+      $ref: /openshift/app-sre-stage-01/cluster.yml
     imageRef: my-dangerous-change
     resources:
       requests:
