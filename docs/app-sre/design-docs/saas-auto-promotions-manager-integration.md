@@ -31,6 +31,7 @@ The following timeline highlights how multiple parallel promotions can result in
 ## Goals
 
 * Solution to avoid merge conflicts in auto-promotions
+* The solution should be reconcile based to comply with current qontract-reconcile patterns
 
 ## Non-Goals
 
@@ -61,9 +62,16 @@ Further, we remove the auto-promotion event from `openshift-saas-deploy`. Withou
 
 ![](images/saas-auto-promotions-manager/proposal.png)
 
-The [current PoC](https://github.com/app-sre/qontract-reconcile/pull/3306) does not do any merge conflict management yet (see Milestone 1). It is a very simple single-threaded integration. The runtime is bound by the number of subscribed SaaS targets. Even though it only uses a single thread one run currently happens in < 1 minute for latest app-interface prod state. Threading will enhance runtime considerably, as we could easily query VCSs and S3 files in parallel, i.e., we have an easy path for scaling.
+The [current PoC](https://github.com/app-sre/qontract-reconcile/pull/3306) does not do any merge conflict management yet (see Milestone 1). It is a very simple single-threaded integration. The runtime is bound by the number of subscribed SaaS targets. Even though it only uses a single thread one run currently happens in < 1 minute for latest app-interface prod state. Threading will enhance runtime considerably, as we could easily query VCSs and S3 files in parallel, i.e., we have an easy path for scaling. 
 
-Further, SAPM is not required to hold state. It must anyways fetch real-world state directly from VCSs. 
+The additional load SAPM introduces per run is currently manageable (based on data from latest app-interface `master`). 
+
+```
+Github Mirror: fetch 23 refs
+Gitlab: fetch 11 refs
+```
+
+SAPM is not required to hold state. It must anyways fetch real-world state directly from VCSs. 
 
 Another positive aspect of SAPM is its extensibility. We will likely need more features/logic around SaaS auto promotions. SAPMs broader context and reconciled approach provide a good basis for upcoming challenges.
 
@@ -91,5 +99,7 @@ SAPM is able to conclude missing auto-promotions from real-world state, so no pr
 
 1. SAPM re-creates current behavior and replaces openshift-saas-deploy auto-promotion events.
 2. Implement features that enhance current behavior after we consider SAPM stable enough:
-  - manage all open MRs and avoid merge conflicts. See [APPSRE-6685](https://issues.redhat.com/browse/APPSRE-6685)
-  - properly handle targets that subscribe to multiple targets. See [APPSRE-7307](https://issues.redhat.com/browse/APPSRE-7307)
+  -- manage all open MRs and avoid merge conflicts. See [APPSRE-6685](https://issues.redhat.com/browse/APPSRE-6685)
+  -- properly handle targets that subscribe to multiple targets. See [APPSRE-7307](https://issues.redhat.com/browse/APPSRE-7307)
+
+3. If we witness performance issues or too many requests to github mirror / gitlab, then we must consider to adjust towards a more event-based approach and / or proper early exit detection. See [APPSRE-7320](https://issues.redhat.com/browse/APPSRE-7320). Note, that such a design will require its own design doc and must be considered a major effort.
