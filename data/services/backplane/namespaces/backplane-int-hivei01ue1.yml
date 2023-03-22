@@ -21,47 +21,15 @@ networkPoliciesAllow:
 managedRoles: true
 
 managedResourceTypes:
-- Service
-- NetworkPolicy
 - Route
 
 sharedResources:
 - $ref: /services/backplane/shared-resources/int.yml
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
-openshiftResources:
-# This resource should move to a saas-file once the POC is completed (APPSRE-7044)
-- provider: resource
-  path: /services/backplane/api-integration-backplane-devshift-net.service.yaml
-- provider: resource
-  path: /services/backplane/api-integration-backplane-devshift-net.networkpolicy.yaml
-
 managedExternalResources: true
 externalResources:
 - provider: aws
   provisioner:
     $ref: /aws/app-sre-stage/account.yml
-  resources:
-  - provider: acm
-    identifier: api-integration-backplane-devshift-net
-    domain:
-      domain_name: 'api.integration.backplane.devshift.net'
-  - provider: alb
-    identifier: backplane-api-int
-    output_resource_name: backplane-api-int
-    idle_timeout: 3600
-    enable_http2: false
-    vpc:
-      $ref: /aws/app-sre-stage/vpcs/app-sre-stage-vpc-backplane-poc.yml
-    certificate_arn: arn:aws:acm:us-east-1:927966746891:certificate/7b06501c-85dd-4cd3-9a07-b39a7a285e7d
-    ip_address_type: ipv4
-    ingress_cidr_blocks:
-    # bastion-nasa-1.ops.openshift.com
-    - 52.70.201.140/32
-    # bastion-nasa-2.ops.openshift.com
-    - 52.6.0.240/32
-    targets:
-    - name: backplane-api-int
-      default: true
-      openshift_service: api-integration-backplane-devshift-net
-    rules: []
+  resources: []
