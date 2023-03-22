@@ -1,0 +1,74 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: stonesoup
+
+name: stonesoups01ue1
+description: stonesoups01ue1 cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+auth:
+- service: github-org-team
+  org: app-sre
+  team: stonesoups01ue1-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  product: osd
+  provider: aws
+  region: us-east-1
+  channel: candidate
+  version: 4.12.8
+  initial_version: 4.12.8-candidate
+  multi_az: false
+  nodes: 4
+  instance_type: m5.xlarge
+  storage: 600
+  load_balancers: 0
+  private: false
+
+upgradePolicy:
+  workloads:
+  - stonesoup
+  schedule: '0 10 * * 1-5'
+  conditions:
+    soakDays: 0
+
+network:
+  type: OVNKubernetes
+  vpc: 10.170.20.0/22
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+automationToken:
+  path: app-sre/creds/kube-configs/stonesoups01ue1
+  field: token
+
+clusterAdmin: true # should enable cluster admin for this cluster via OCM
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre-stage/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre-stage/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+
+awsInfrastructureManagementAccounts:
+- account:
+    $ref: /aws/app-sre-stage/account.yml
+  accessLevel: network-mgmt
+  default: true
