@@ -31,7 +31,7 @@
         failure-only: true
         name: '{name}'
         mark-unstable-as-success: false
-    - slack: 
+    - slack:
         room: '{slack_channel_notification}'
         notify-start: false
         notify-success: false
@@ -106,7 +106,7 @@
         - *quay_secret_push
         - *quay_api_token
     publishers:
-    - slack: 
+    - slack:
         room: '{slack_channel_notification}'
         notify-start: false
         notify-success: false
@@ -293,7 +293,7 @@
         - *quay_secret_push
         - *quay_api_token
     publishers:
-    - slack: 
+    - slack:
         room: '{slack_channel_notification}'
         notify-start: false
         notify-success: false
@@ -318,7 +318,7 @@
         - *quay_secret_push
         - *quay_api_token
     publishers:
-    - slack: 
+    - slack:
         room: '{slack_channel_notification}'
         notify-start: false
         notify-success: false
@@ -634,6 +634,69 @@
     - archive:
         artifacts: 'artifacts/**/*'
     <<: *gl_triggers
+
+- job-template:
+    id: 'insights-vulnerability-gh-build-master'
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    slack_channel_notification: 'consoledot-development-fails'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+        - *vulnerabilitybot_github
+    publishers:
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
+    - naginator:
+        max-failed-builds: 3
+    <<: *gh_build_master
+
+- job-template:
+    id: 'insights-vulnerability-gh-pr-check'
+    name: '{gh_org}-{gh_repo}-pr-check'
+    branch: "master"
+    slack_channel_notification: 'consoledot-development-fails'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_crcd_oc_login
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *insightsdroid_github
+        - *quay_api_token
+        - *hac_keycloak_secret
+        - *ibutsu
+        - *hac_prcheck_secret
+        - *chrome_cypress
+        - *vulnerabilitybot_github
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
+    <<: *insights_gh_pr_check
 
 # Wrappers Ignored for Pipeline type:
 # https://opendev.org/jjb/jenkins-job-builder/src/commit/a191e0b174322a55eac082ad4815fb7c35de56fa/jenkins_jobs/modules/wrappers.py#L3003-L3006
