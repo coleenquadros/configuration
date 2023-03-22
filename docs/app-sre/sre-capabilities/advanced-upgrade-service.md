@@ -1,0 +1,53 @@
+# Declare Advanced Upgrade Service for SRE capabilities users
+
+[TOC]
+
+## Motivation
+
+AppSRE manages a fleet of clusters with various workloads and various constraints on how these clusters continuously receive Openshift updates. Years of experience, high automation and strong tooling allowed AppSRE to turn cluster upgrades into a no-toil process.
+
+The Advanced Upgrade Service (AUS) SRE capability provides the same powerful policy based  upgrade experience for any cluster in <https://console.redhat.com/openshift>.
+
+## Requirements engineering
+
+Before an upgrade policy can be defined, the requirements and constraints for cluster upgrades need to be elaborated with the tenant. Since AppSRE is going to create the policy in `app-interface` in most cases (see [Support model](#support-model)), proper discussion about the update requirements is crucial.
+
+## Defining a policy
+
+Extensive documentation about how policies work and how they can be defined, can be found in the [Cluster Upgrades](/docs/app-sre/cluster-upgrades.md) docs. See the [Reaching support](#reaching-support) section to get the process started.
+
+## Support model
+
+### Reaching support
+
+To get help with upgrade policy onboarding, change or troubleshooting
+
+* create a ticket on the [AppSRE Jira Board](https://issues.redhat.com/projects/APPSRE)
+* ping `@advanced-upgrade-service-enablement` in the [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) Slack channel.
+
+To learn how these communication channels are triaged, read [here](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/README.md#triage).
+
+### AUS responsibilities
+
+AUS *is responsible* to schedule cluster upgrades via OCM based on the defined policies.
+
+AUS *is not responsible* for the success or failure of an upgrade.
+
+AUS *is not responsible* for pre- or post upgrade cluster inspection. AUS uses the OCM semantics for upgradability and upgrade success/failure but does not connect to any clusters (nor is it having access credentials or a network path to do so).
+
+### Escalations
+
+For all support cases where AUS and AppSRE are not responsible, support is delegated as follows:
+
+* Upgrade has been scheduled for a cluster but is not starting - reach out to [OCM Support](https://red.ht/ocm-support)
+* Cluster upgrade is failing - reach out to [OHSS support](https://red.ht/ohss-incident)
+
+### Service logs
+
+AUS is using service logs to notify cluster owners about potential issues upgrade policies. Such service logs will show up on <https://console.redhat.com/openshift> in the `Cluster history` section of the respective cluster.
+
+Service logs can be received as emails as well. Follow the [documentation](https://docs.openshift.com/dedicated/logging/sd-accessing-the-service-logs.html#adding-cluster-notification-contacts_sd-accessing-the-service-logs) to configure notifications.
+
+### AUS Service Level Objectives
+
+The AUS SLOs are aligned with the [AppSRE SLOs](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/README.md#appsre-service-level-objectives).
