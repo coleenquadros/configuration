@@ -1270,6 +1270,7 @@ JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/cloud
 
 - `identifier`: A globally unique name for the zone.
 - `zone`: Actual domain name.
+- `delete`: Boolean. Use when deleting a zone. See below for example.
 - `plan`: The name of the commercial plan to apply to the zone. Available values: free or enterprise.
 - `account`: Cloudflare account this zone belong to.
 - `type`: Available values: full, partial. This field should always be full. Full zone implies that DNS is hosted with Cloudflare. A partial zone is typically a partner-hosted zone or a CNAME setup.
@@ -1331,7 +1332,9 @@ records:
     value: ns3.example.com
     priority: 3
 ```
-
+##### Delete Cloudflare resource
+* To delete a zone, first set the `delete: true` in the zone file with `deletionApprovals` for cloudflare_zone and cloudflare_zone_settings_override in the account file (See this [MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/62509/diffs) for example). Then remove the zone file in another MR. 
+* To delete a record, simply remove the record related entries.
 ##### Performance
 MR checks and reconciliation times will grow roughly linearly with zone size. We tested creating a zone with 1000 records took around 5 minutes.
 

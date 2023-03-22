@@ -272,3 +272,13 @@ https://cdnXX.quay.io/sha256/9c/... (long url that includes AWS parameters as we
 # < cf-ray: 768027d679740595-IAD
 # < cf-cache-status: HIT
 ```
+
+## Known Issues:
+### Records still present after zone removed
+  When a zone is deleted then added back, the old records are still present. Integration will have following errors:
+```
+[2023-03-22 19:25:33] [ERROR] [terraform_client.py:check_output:571] - [redhat-service-delivery-openshift-com - apply] Error: expected DNS record to not already be present but already exists
+[2023-03-22 19:25:33] [ERROR] [terraform_client.py:check_output:571] - [redhat-service-delivery-openshift-com - apply]   on config.tf.json line 14651, in resource.cloudflare_record.cname-metrics-gchaturv-test-openshift-com:
+[2023-03-22 19:25:33] [ERROR] [terraform_client.py:check_output:571] - [redhat-service-delivery-openshift-com - apply] 14651:       },
+```
+Solution: When deleting zone, use the `delete: true` flag on the zone file. See the Delete Cloudflare resource section in App Interface Readme.
