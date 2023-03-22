@@ -1,0 +1,22 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt-backplane-dns
+spec:
+  acme:
+    email: sd-app-sre@redhat.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: backplane-account-key
+    solvers:
+    - selector:
+        dnsZones:
+          - "backplane.openshift.com"
+      dns01:
+        cnameStrategy: None
+        route53:
+          region: global
+          accessKeyID: {{{ vault(vault_path, 'aws_access_key_id') }}}
+          secretAccessKeySecretRef:
+            key: aws_secret_access_key
+            name: {{{ secret }}}

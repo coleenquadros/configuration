@@ -6,8 +6,8 @@ name: backplanep02uw2
 description: backplanep02uw2 cluster
 consoleUrl: https://console-openshift-console.apps.backplanep02uw2.y7tz.p1.openshiftapps.com
 kibanaUrl: ''
-prometheusUrl: ''
-alertmanagerUrl: ''
+prometheusUrl: https://prometheus.backplanep02uw2.devshift.net
+alertmanagerUrl: https://alertmanager.backplanep02uw2.devshift.net
 serverUrl: https://api.backplanep02uw2.y7tz.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.backplanep02uw2.y7tz.p1.openshiftapps.com
 auth:
@@ -29,13 +29,16 @@ spec:
   multi_az: true
   nodes: 9
   instance_type: m5.xlarge
-  storage: 100
+  storage: 600
   load_balancers: 4
   private: true
   id: 22ava01c3f8fg4j2fiifs6cqkqe1io79
   external_id: 1f4e2c92-274c-4163-ab2b-2c5be0959840
   provision_shard_id: e78ec522-04c3-11ec-b4f0-8c1645a911be
   disable_user_workload_monitoring: true
+externalConfiguration:
+  labels:
+    ext-managed.openshift.io/backplane-shard: 'true'
 jumpHost:
   $ref: /openshift/bastion.ci.int.devshift.net.jumphost.yml
 internal: false
@@ -104,3 +107,14 @@ automationToken:
   path: app-sre/creds/kube-configs/backplanep02uw2
   field: token
 clusterAdmin: true
+clusterAdminAutomationToken:
+  path: app-sre/creds/kube-configs/backplanep02uw2-cluster-admin
+  field: token
+managedClusterRoles: true
+observabilityNamespace:
+  $ref: /services/observability/namespaces/openshift-customer-monitoring.backplanep02uw2.yml
+additionalRouters:
+- private: false
+  route_selectors:
+    router: apps2
+

@@ -623,6 +623,14 @@
         name: REPOSITORIES
         default: "{repositories}"
         description: 'All repositories to promote'
+    - string:
+        name: FROM_BRANCHES
+        default: "{from_branches}"
+        description: 'semi-colon separated list of the soutce branch(es) dist to promote'
+    - string:
+        name: TO_BRANCHES
+        default: "{to_branches}"
+        description: 'semi-colon separated list of the destination branch(es)'
     - bool:
         name: SKIP_GATE
         default: "{skip_gate}"
@@ -642,6 +650,51 @@
     <<: *gl_checkout
     builders:
     - shell: ./script/promote-ui.sh
+
+- job-template:
+    id: managed-services-promote-new-ui
+    name: managed-{ui}-promote-ui
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: "{timeout}"
+    - ansicolor:
+        colormap: xterm
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *managed_services_github_deploy_key
+          - *managed_services_ccit_reportportal
+    parameters:
+    - string:
+        name: REPOSITORY
+        default: "{repository}"
+        description: 'Repository to promote'
+    - choice:
+        name: CHANNEL
+        choices:
+          - stable
+          - beta
+        description: "Channel to promote."
+    - bool:
+        name: SKIP_GATE
+        default: "{skip_gate}"
+        description: If true force the UI promotion without verify for passed tests
+    - bool:
+        name: DRY_RUN
+        default: "{dry_run}"
+        description: If true the changes are not pushed
+    - string:
+        name: REPORTPORTAL_PROJECT
+        default: "{reportportal_project}"
+        description: The name of ReportPortal Project where the Launch is located
+    - string:
+        name: REPORTPORTAL_LAUNCH
+        default: "{reportportal_launch}"
+        description: The name of the ReportPortal Launch that has the gating test results for the repositories
+    <<: *gl_checkout
+    builders:
+    - shell: ./script/promote-new-ui.sh
 
 - job-template:
     id: mas-sso-build-template
@@ -682,6 +735,9 @@
     name: "{gl_group}-{gl_project}-gl-pr-check"
     publishers:
     - <<: *slack_notify
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier
     wrappers:
       - timeout_wrapper:
           timeout: "{timeout}"

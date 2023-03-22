@@ -1,0 +1,53 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: chrome-service-stage
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: chrome-service-stage
+    rules:
+    - alert: App-chrome-service-In-chrome-service-stage-Absent
+      expr: absent(up{service="chrome-service", namespace="chrome-service-stage"}) or up{service="chrome-service", namespace="chrome-service-stage"} == 0
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: platform-experience
+      annotations:
+        dashboard: https://grafana.stage.devshift.net/d/3qqibAG7k/chrome-service
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/chrome-service-stage/deployments"
+        message: "Metrics for chrome-service in STAGE are absent"
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/chrome-service/App-chrome-service-In-chrome-service-stage-Absent.rst
+    - alert: App-chrome-service-In-chrome-service-stage-high-error-rate
+      expr: round(sum(rate(api_3scale_gateway_api_status{exported_service="chrome-service", status=~"[234]xx"}[24h])) / sum(rate(api_3scale_gateway_api_status{exported_service="chrome-service"}[24h])), 0.0001) < 0.90
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: platform-experience
+      annotations:
+        dashboard: https://grafana.stage.devshift.net/d/3qqibAG7k/chrome-service
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/chrome-service-stage/deployments"
+        message: "chrome-service non-200 responses has exceeded 10% in stage"
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/chrome-service/App-chrome-service-In-chrome-service-stage-high-error-rate.rst
+    - alert: App-chrome-service-In-chrome-service-stage-high-latency
+      expr: |
+        sum(rate(api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="chrome-service"}[24h])) / sum(rate(api_3scale_gateway_api_time_bucket{le="+Inf", exported_service="chrome-service"}[24h])) < .90
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: platform-experience
+      annotations:
+        dashboard: https://grafana.stage.devshift.net/d/3qqibAG7k/chrome-service
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/chrome-service-stage/deployments"
+        message: "chrome-service responses with over 2000ms have exceeded 10% in stage"
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/chrome-service/App-chrome-service-In-chrome-service-stage-high-latency.rst

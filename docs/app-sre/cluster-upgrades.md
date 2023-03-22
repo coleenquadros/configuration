@@ -1,30 +1,82 @@
 # Cluster upgrades
 
-The AppSRE clusters are automatically upgraded by an integration called `ocm-upgrade-scheduler`.
+[TOC]
 
-This document explains how the integration decides to upgrade a cluster.
+## Motivation
 
-Jira ticket: https://issues.redhat.com/browse/SDE-1376
+AppSRE manages a fleet of clusters with various workloads and various constraints on how these clusters continuously receive Openshift version updates.
 
-## Cluster upgrades for Red Hat owned OCM organizations
+Following the SRE principles, AppSRE built strong tooling around its upgrade policies and turned a complex continuous effort into a no-toil process. The result is a powerful policy framework driven by a set of integrations (`ocm-upgrade-*`), forming the Advanced Upgrade Service (AUS).
 
-The AppSRE cluster upgrades integration can now be used to manage upgrades in additional OCM organizations, where clusters are not managed in app-interface.
+This document explains the concepts behind the policies, shows how policies can be defined and how they drive the decision about which cluster is upgrade when to what version.
 
-This is the result of a PoC to expose advanced cluster upgrade capabilities to internal RH teams.
+Jira ticket: <https://issues.redhat.com/browse/SDE-1376>
 
-Jira ticket: https://issues.redhat.com/browse/SDE-2341
+> Note: The end goal is to expose this SRE capability to external customers as well, likely as an OCM API.
 
-> Note: The end goal is to expose this capability to external customers as well, likely as an OCM API.
+## Applicability
 
-This documentation applies to both use cases:
-- Cluster upgrades for clusters managed in app-interface (AppSRE clusters)
-- Cluster upgrades for additional OCM organizations (RH only)
+AUS policies can be applied to all clusters from Red Hat owned OCM organizations but depending on the organization ownership
 
-## Overview
+* different [support models](#support-model) apply
+* different ways of [placing a policy](#placing-a-policy) apply
 
-To enable upgrades for a cluster, add the following section to either:
-- the cluster file (if the cluster is managed in app-interface)
-- the `upgradePolicyClusters` section of an OCM file ([example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/4751dee2c4ed02e5a3fbde4617074c508bf74e6c/data/dependencies/ocm/production.yml#L43-50)), along with the cluster `name` field (for RH owned OCM organizations)
+## Concepts
+
+AUS revolves around the concepts of `workloads` and `conditions` to declare upgrades.
+
+`Workloads` are freely chooseable identifiers to define what workloads are hosted on a cluster.
+
+The most central condition is `soak days`, which defines the number of days an Openshift version must run on other clusters with the same `workloads` before it is considered for a cluster. Soak days are an accumulating metric, e.g. a version running on 2 clusters for 3 days satisfies a condition for 6 soak days.
+
+> At least one cluster with 0 `soak days` is required to start the AUS process.
+
+Another condition is `mutexes`, which acts as an exclusive lock a cluster must aquire before an upgrade is applied. This way, one-cluster-at-a-time semantics can be achieved for upgrades. Mutexes only consider clusters and not workloads.
+
+Clusters can also be partitioned into workload aware `sectors`, e.g. stage and production. A version is applied to all clusters of a sector before it is considered for a dependant sector, e.g. first stage then production.
+
+## Placing a policy
+
+Upgrade policies for clusters can be defined in two different places.
+
+### AppSRE managed clusters
+
+For AppSRE managed clusters, upgrade policies can be placed directly into the `/openshift/cluster-1.yml` files.
+
+```yaml
+$schema: /openshift/cluster-1.yml
+name: my-cluster
+...
+upgradePolicy:
+  <workloads and conditions>
+```
+
+### Additional OCM organizations
+
+In the scope of SRE capabilities, upgrade policies are configured in an OCM organization file (`/openshift/openshift-cluster-manager-1.yml`). See this [guide](/docs/app-sre/sop/onboard-ocm-organisation.md) to learn how to onboard such an organization file.
+
+```yaml
+$schema: /openshift/openshift-cluster-manager-1.yml
+name: my-ocm-org
+...
+upgradePolicyClusters:
+- name: my-cluster (1)
+  upgradePolicy:
+    <workloads and conditions>
+- name: my-other-cluster (1)
+  upgradePolicy:
+    <workloads and conditions>
+```
+
+The name of the clusters (1) must match the names in OCM.
+
+OCM organization based cluster upgrades are the result of a PoC ([SDE-2341](https://issues.redhat.com/browse/SDE-2341)) to expose advanced cluster upgrade capabilities to internal RH teams.
+
+Example: [/data/dependencies/ocm/osd-fleet-manager/integration.yml](/data/dependencies/ocm/osd-fleet-manager/integration.yml)
+
+## The anatomy of a policy
+
+The general structure of an upgrade policy looks as follows and can be placed into context as defined in the section [Placing a policy](#placing-a-policy).
 
 ```yaml
 upgradePolicy:
@@ -46,32 +98,169 @@ upgradePolicy:
     sector: sector-1
 ```
 
-## How it works
+Each cluster with an `upgradePolicy` is checked for the following conditions on a regular basis. If all of them are met, a cluster upgrade is triggered via OCM.
 
-For each cluster with an `upgradePolicy`, we check that the following conditions are met:
-- the cluster has no current upgrade pending.
-- there are available versions to upgrade to.
-- the upgrade schedule is within the next 2 hours.
-- the version has been soaking in other clusters with the same workloads (more than `soakDays`).
-- all the configured `mutexes` (by default `[]`) can be acquired. Said differently, there is no ongoing cluster upgrades with any of these `mutexes`.
-- the sector name refers to a sector defined in the cluster OCM organization in app-interface (`ocm` field), with their `dependencies`. An upgrade can be applied on a cluster only if all clusters from previous sectors already run at least that version.
+* The cluster has no current upgrade pending.
+* There are available versions to upgrade to and they are not blocked (see [Blocked upgrades to versions](#block-upgrades-to-versions)).
+* The upgrade schedule is within the next 2 hours.
+* The version has been soaking in other clusters with the same workloads (more than `soakDays`). See the section [Defining soak days](#defining-soak-days) for more details.
+* All the configured `mutexes` can be acquired. Said differently, there is no ongoing cluster upgrades with any of these `mutexes`, so mutexes are the enabler for on-cluster-at-a-time semantics. See the section [Defining mutexes](#defining-mutexes) for more details.
+* An upgrade can be applied on a cluster only if all clusters from previous sectors already run at least that version. See the section [Defining sectors](#defining-sectors) for more details.
 
-The versions to upgrade to are iterated over in reverse order, so it is assumed that the latest version that meets the conditions is chosen.
+The versions to upgrade to are iterated over in reverse order, so it is assumed that the latest/highest version that meets the conditions is chosen.
 
-The accounted soak days:
-- are accumulated from all clusters running that workload on that version
-- also account cluster/workload which have had that version running in the past
-The more clusters have that version, the faster the number of soaking days is increasing.
+## Conditions in detail
 
-Note that clusters also follow different upgrade channels. Clusters following different channels don't get the same version available at the same time.
+### Defining soak days
 
-Since the stable channel get X.Y upgrade paths enabled much later than the candidate and fast channels, we don't use it. This avoids clusters lagging behind, not getting any upgrade (not even patch/CVE) while the others are running fine on later X.Y releases. See [APPSRE-5393](https://issues.redhat.com/browse/APPSRE-5393) for more context and discussion.
+Soak days are a way to gain trust in a version running on other clusters with the same workloads. They are accumulated from all clusters running that workload on a version and also account for clusters that were running that workload/version combination in the past.
 
-All the cluster mutexes must be acquired to be able to schedule the upgrade. A single mutex can be held by only one cluster at a time. Once acquired by a cluster, a mutex is held for the whole duration of the upgrade.
+The more clusters are running a specific workload/version combination, the faster the number of soak days is increasing, unlocking upgrades to that version for other clusters.
+
+In the following example, two stage clusters get new versions immediately (`soakDays: 0`), while the production cluster waits until 4 soak days have been accumulated.
+
+```yaml
+upgradePolicyClusters:
+- name: stage-1
+  upgradePolicy:
+    workloads:
+    - my-service (1)
+    schedule: 0 13 * * 1-5
+    conditions:
+      soakDays: 0 (2)
+- name: stage-2
+  upgradePolicy:
+    workloads:
+    - my-service (1)
+    schedule: 0 13 * * 1-5
+    conditions:
+      soakDays: 0 (2)
+
+- name: prod
+  upgradePolicy:
+    workloads:
+    - my-service (3)
+    schedule: 0 13 * * 1-5 (2)
+    conditions:
+      soakDays: 4 (4)
+```
+
+(1) The stage clusters runs a workload named my-service
+
+(2) A new available Openshift version (based on the upgrade channel) is immedately considered to be applied during the next maintenance window. Each workload needs at least one cluster with 0 `soak days`
+
+(3) The production cluster defines the same workload...
+
+(4) ... so it waits for a version to soak for 4 days on the stage clusters. Since there are 2 stage clusters with `soakDays: 0`, the required soak days can be reached after 2 days.
+
+> For upgrade policies defined in an OCM organization file, all used workload identifiers must also be declared in the `upgradePolicyAllowedWorkloads` config section.
+
+### Defining mutexes
+
+Mutexes are a safe way to achieve one-cluster-at-a-time semantics for upgrades. A cluster needs to aquire all mutexes defined in its upgrade policy, before an upgrade can start. A single mutex can be held by only one cluster at a time. Once acquired by a cluster, a mutex is held for the whole duration of the upgrade.
+
+> Mutexes are not workload aware.
+
+In the following example, only one production cluster can upgrade at a time, even though they define the same maintenance window.
+
+```yaml
+upgradePolicyClusters:
+- name: prod-1
+  upgradePolicy:
+    ...
+    schedule: 0 13 * * 1-5
+    conditions:
+      mutexes:
+      - prod (1)
+- name: prod-2
+  upgradePolicy:
+    ...
+    schedule: 0 13 * * 1-5
+    conditions:
+      mutexes:
+      - prod (1)
+```
+
+(1) both clusters define the same mutex
+
+> For upgrade policies defined in an OCM organization file, all used mutexes must also be declared in the `upgradePolicyAllowedMutexes` config section.
+
+### Defining sectors
+
+Clusters can be grouped in sectors. A version needs to be applied to all clusters of a sectors before it is considered for a dependant sector. Sectors are workload aware.
+
+In the following example, updates progress from the `stage` sector to the `prod-blue` sector and then to the `prod-green` sector. Mutexes are in place in the prod sectors to prevent more than one cluster to be upgraded at the same time.
+
+![sector-example](aus-sector-example.png)
+
+```yaml
+upgradePolicyClusters:
+- name: stage-1
+  upgradePolicy:
+    ...
+    conditions:
+      sector: stage
+- name: stage-2
+  upgradePolicy:
+    ...
+    conditions:
+      sector: stage
+- name: prod-1
+  upgradePolicy:
+    ...
+    conditions:
+      soakDays: 7
+      sector: prod-blue
+      mutexes:
+      - blue-mutex
+- name: prod-2
+  upgradePolicy:
+    ...
+    conditions:
+      soakDays: 7
+      sector: prod-blue
+      mutexes:
+      - blue-mutex
+- name: prod-3
+  upgradePolicy:
+    ...
+    conditions:
+      soakDays: 7
+      sector: prod-green
+      mutexes:
+      - green-mutex
+- name: prod-4
+  upgradePolicy:
+    ...
+    conditions:
+      soakDays: 7
+      sector: prod-green
+      mutexes:
+      - green-mutex
+```
+
+Sectors and their dependencies are defines in the `sectors` section of the organization file (also for upgrade policies defined in cluster files).
+
+```yaml
+sectors:
+- name: stage
+- name: prod-blue
+  dependencies:
+  - name: stage
+- name: prod-green
+  dependencies:
+  - name: prod-blue
+```
+
+## Upgrade channels
+
+Note that each cluster follows an upgrade channel. Clusters following different channels don't get the same version available at the same time (e.g. the `stable` channel enables upgrade paths much later than the `candidate` and `fast` channels). Timely version progression from cluster to cluster works best if all clusters share the same upgrade `channel`.
+
+> AppSRE the `candidate` and `fast` channels for cluster upgrades. This avoids clusters lagging behind during `X.Y` upgrades, not getting any upgrade (not even patch/CVE) while other clusters are running fine on later releases. See [APPSRE-5393](https://issues.redhat.com/browse/APPSRE-5393) for more context and discussion.
 
 ## Version history
 
-Information on how long a version has been running in our clusters can be found in the `version-history` app-interface-output page: https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/version-history.md
+Information on how long a version has been running in our clusters can be found in the `version-history` app-interface-output page: <https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/version-history.md>
 
 This page can be used to debug why certain upgrades are scheduled or not or to help with providing a signal for pre-release OCP versions.
 
@@ -79,17 +268,31 @@ This page can be used to debug why certain upgrades are scheduled or not or to h
 
 In order to block upgrades to specific versions, follow these steps:
 
-1. Disable `ocm-upgrade-scheduler` in [Unleash](https://app-interface.unleash.devshift.net) to prevent any new upgrades to this version from being scheduled.
-1. Add the version to the `blockedVersions` list in the OCM instance file.
+1. Disable `ocm-upgrade-scheduler` in [Unleash](https://app-interface.unleash.devshift.net) to prevent any new upgrades from being triggered for AppSRE managed clusters
+2. Disable `ocm-upgrade-scheduler-org` in [Unleash](https://app-interface.unleash.devshift.net) to prevent any new upgrades from being triggered for clusters defined in OCM organization files
+3. Add the version to the `blockedVersions` list in the OCM instance file.
 
 Notes:
 
-- Regex expressions are supported.
-- These steps will also cause existing upgrades to be cancelled if time allows.
-- All AppSRE clusters are provisioned in the [OCM production instance](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ocm/production.yml#L13).
+* Regex expressions are supported.
+* These steps will also cause existing upgrades to be cancelled if time allows.
+* All AppSRE clusters are provisioned in the [OCM production instance](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ocm/production.yml#L13).
 
+In the following example, all release candidates are being blocked within an OCM organization.
 
-## Upgrade strategy
+```yaml
+blockedVersions:
+- ^.*-rc\..*$
+```
+
+## Support model
+
+Depending on the ownership of the clusters or OCM organizations, different SLOs apply for the AUS service.
+
+* for AppSRE owned clusters and organizations, the [AppSRE SLOs](https://gitlab.cee.redhat.com/app-sre/contract/-/tree/master/#appsre-service-level-objectives) apply
+* for cluster or OCM organizations not managed by AppSRE, the [AUS SRE capability SLOs](/docs/app-sre/sre-capabilities/advanced-upgrade-service.md#aus-service-level-objectives) apply
+
+## AppSRE cluster upgrade policy strategy
 
 ### Hive
 
@@ -98,9 +301,10 @@ The first clusters to be upgraded belong to the integration and SSO test environ
 Once a version has soaked for 10 days, the stage clusters will be upgraded (hive-stage-01, hives02ue1).
 
 Once a version has soaked for 20 days, it will begin rolling out to the production clusters. Start with the least critical ones:
-- hivep04 will go first as it's a hot standby and holds no customer clusters.
-- hivep06 is going to replace hivep03 (2 AZs), and currently also has no customer clusters
-- hivep03 has very few customer clusters and is not being scheduled with any new ones until it's deprecation
+
+* hivep04 will go first as it's a hot standby and holds no customer clusters.
+* hivep06 is going to replace hivep03 (2 AZs), and currently also has no customer clusters
+* hivep03 has very few customer clusters and is not being scheduled with any new ones until it's deprecation
 
 All other Hive production clusters (01, 02, 05) hold most customer clusters and are the only ones being scheduled with new customer clusters.
 
@@ -121,31 +325,35 @@ Once a version has soaked for 6 days, the production cluster will be upgraded (c
 ### OCM
 
 OCM runs on 3 clusters with 0 soakdays, getting upgrades from the candidate channel:
-- app-sre-stage-01
-- appsres04ue2
-- ssotest01ue1
+
+* app-sre-stage-01
+* appsres04ue2
+* ssotest01ue1
 
 Then the production clusters app-sre-prod-04 and appsrep06ue2 will be upgraded from the fast channel after 18 soakdays. Since soakdays are cumulated with each cluster running the workload, the ocm soakdays number will grow fast: they should get upgraded after 18/3=6 days, provided the version is available in the fast channel.
 
 OCM and Quay production clusters share a mutex `ocm-quay-critical` which avoids simultaneous upgrades of these clusters:
-- app-sre-prod-04
-- appsrep06ue2
-- quayp04ue2
-- quayp05ue1
+
+* app-sre-prod-04
+* appsrep06ue2
+* quayp04ue2
+* quayp05ue1
 
 ### Quay
 
 The first cluster to be upgraded is the stage environment cluster quays02ue1, on the candidate channel. It is upgraded with every new version.
 
 Then the 2 production clusters are upgraded after
-- 6 days for quayp05ue1 (fast channel).
-- 11 days for quayp04ue2 (fast channel). This should allow some delay between the two clusters, even if the first one is being done late, on a Monday for example.
+
+* 6 days for quayp05ue1 (fast channel).
+* 11 days for quayp04ue2 (fast channel). This should allow some delay between the two clusters, even if the first one is being done late, on a Monday for example.
 
 OCM and Quay production clusters share a mutex `ocm-quay-critical` which avoids simultaneous upgrades of these clusters:
-- app-sre-prod-04
-- appsrep06ue2
-- quayp04ue2
-- quayp05ue1
+
+* app-sre-prod-04
+* appsrep06ue2
+* quayp04ue2
+* quayp05ue1
 
 ### OCM-Quay
 
@@ -159,6 +367,6 @@ All ocmquay production clusters (read-only and read-write) share a mutex `ocmqua
 
 ### Telemeter
 
-The first cluster with telemeter workload is app-sre-stage-01 which also host other workloads (See [](#AppSRE)). This cluster will be upgraded on every new version in the candidate channel.
+The first cluster with telemeter workload is app-sre-stage-01 which also host other workloads (See [AppSRE](#appsre)). This cluster will be upgraded on every new version in the candidate channel.
 
 Then the telemeter-prod-01 cluster will be upgraded from the fast channel if the version remains up for 6 days.

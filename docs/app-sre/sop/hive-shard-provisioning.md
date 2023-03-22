@@ -297,7 +297,7 @@ At this point, the monitoring is all set, and you're ready to move on to the nex
 ## Adding the shard to support PrivateLink
 
 1. Add the shard's information to the relevant environment's HiveConfig (under .spec.awsPrivateLink.associatedVPCs).
-    * The VPC ID can be retreived from the cluster's AWS account using the AWS Infrastructure Access feature.
+    * The VPC ID can be retreived from [app-interface-output](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/clusters-network.md).
     * The HiveConfig files live in app-interface and are referenced from the hive namespace files.
 
 ## Validations

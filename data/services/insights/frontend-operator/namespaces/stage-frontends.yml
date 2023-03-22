@@ -19,11 +19,20 @@ environment:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
 
+clusterAdmin: true
+
 managedRoles: true
 
 managedResourceTypes:
 # - NetworkPolicy
 - Secret
+- FrontendEnvironment
+
+managedResourceNames:
+- resource: FrontendEnvironment
+  resourceNames:
+  - frontends
+
 
 sharedResources:
 - $ref: /services/unleash/shared-resources/insights-stage.yml
@@ -44,3 +53,9 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /insights-common/iqe-vault.secret.yaml
+- provider: resource-template
+  path: /insights-common/frontend-environment.yaml
+  variables:
+    sso_source: https://sso.stage.redhat.com/auth/
+    hostname: apps.crcs02ue1.urby.p1.openshiftapps.com
+    env_name: frontends

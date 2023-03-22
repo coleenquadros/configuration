@@ -1,0 +1,24 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/timeout: 1h
+    haproxy.router.openshift.io/timeout-tunnel: 2h
+    cert-manager.io/issuer-kind: Issuer
+    cert-manager.io/issuer-name: letsencrypt-backplane-dns
+    haproxy.router.openshift.io/ip_whitelist: {{ ip_whitelist | join(" ") }}
+  labels:
+    app: backplane-api
+    router: apps2
+  name: api-public
+spec:
+  host: api.backplane.openshift.com
+  port:
+    targetPort: 8001
+  to:
+    kind: Service
+    name: backplane-api
+    weight: 100
+  tls:
+    termination: reencrypt
+  wildcardPolicy: None

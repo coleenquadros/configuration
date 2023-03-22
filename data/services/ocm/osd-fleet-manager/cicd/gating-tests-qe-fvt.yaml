@@ -39,7 +39,8 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
-    ref: fafd773897cc96e9e0fc501232cd294d02665769
+    ref: 7ff10e56667b33b21e527fd4e86cd2844b2b6679
+    name: integration-canary
     promotion:
       auto: true
       subscribe:
@@ -50,9 +51,48 @@ resourceTemplates:
       - channel: ocm-osdfm-deployed-int-canary
         data:
         - parent_saas: osd-fleet-manager
-          target_config_hash: ea37179005bede2f
+          target_config_hash: 61df4fed60ebffba
           type: parent_saas_config
     parameters:
-      DEPLOYMENT_NAME: ocm-osdfm-int-canary
+      DEPLOYMENT_NAME: canary
       ENVIRONMENT: integration
       GATE_NAME: ocm-osdfm-qe-gating-test-int
+  - namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
+    ref: 7ff10e56667b33b21e527fd4e86cd2844b2b6679
+    name: integration-main
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-osdfm-deployed-int-main
+      publish:
+      - ocm-osdfm-qe-fvt-int-main-ok
+      promotion_data:
+      - channel: ocm-osdfm-deployed-int-main
+        data:
+        - parent_saas: osd-fleet-manager
+          target_config_hash: 309812c8b4f39d40
+          type: parent_saas_config
+    parameters:
+      DEPLOYMENT_NAME: main
+      ENVIRONMENT: integration
+      GATE_NAME: ocm-osdfm-qe-gating-test-int
+  - namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
+    ref: 7ff10e56667b33b21e527fd4e86cd2844b2b6679
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-osdfm-deployed-stage-main
+      publish:
+      - ocm-osdfm-qe-fvt-stage-main-ok
+      promotion_data:
+      - channel: ocm-osdfm-deployed-stage-main
+        data:
+        - parent_saas: osd-fleet-manager
+          target_config_hash: e7ecb178f9c1bffe
+          type: parent_saas_config
+    parameters:
+      DEPLOYMENT_NAME: main
+      ENVIRONMENT: stage
+      GATE_NAME: ocm-osdfm-qe-gating-test-stage

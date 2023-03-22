@@ -31,7 +31,7 @@
         failure-only: true
         name: '{name}'
         mark-unstable-as-success: false
-    - slack: 
+    - slack:
         room: '{slack_channel_notification}'
         notify-start: false
         notify-success: false
@@ -106,7 +106,7 @@
         - *quay_secret_push
         - *quay_api_token
     publishers:
-    - slack: 
+    - slack:
         room: '{slack_channel_notification}'
         notify-start: false
         notify-success: false
@@ -293,7 +293,7 @@
         - *quay_secret_push
         - *quay_api_token
     publishers:
-    - slack: 
+    - slack:
         room: '{slack_channel_notification}'
         notify-start: false
         notify-success: false
@@ -318,7 +318,7 @@
         - *quay_secret_push
         - *quay_api_token
     publishers:
-    - slack: 
+    - slack:
         room: '{slack_channel_notification}'
         notify-start: false
         notify-success: false
@@ -572,6 +572,132 @@
     <<: *gh_properties
     builders:
     - *stack_analysis
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+
+- job-template:
+    id: 'insights-gl-pipeline'
+    name: '{gl_group}-{gl_project}-pipeline'
+#    slack_channel_notification: 'consoledot-development-fails'
+    project-type: pipeline
+    parameters:
+    - string:
+        name: VAULT_ADDRESS
+        default: "https://vault.devshift.net"
+    - string:
+        name: VAULT_CREDS_ID
+        default: 'vault-creds'
+    - string:
+        name:   VAULT_PATH_SVC_ACCOUNT_EPHEMERAL
+        default: 'insights-cicd/ephemeral-bot-svc-account'
+    - string:
+        name:   VAULT_PATH_QUAY_PUSH
+        default: 'app-sre/quay/cloudservices-push'
+    - string:
+        name: VAULT_PATH_RHR_PULL
+        default: 'insights-cicd/rh-registry-pull'
+    pipeline-scm:
+      # make parameter to override template name
+      script-path: 'Jenkinsfile'
+      scm:
+      - git:
+          url: 'git@gitlab.cee.redhat.com:{gl_group}/{gl_project}.git'
+          credentials-id: '{gitlab_ssh_credentials}'
+          skip-tag: true
+          refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
+          branches:
+          - '${{ghprbActualCommit}}'
+          merge:
+              remote: origin
+              branch: '{branch}'
+          git-config-name: "AppSRE"
+          git-config-email: "sd-app-sre@redhat.com"
+          included-regions:
+          - '{include_path}'
+          prune: true
+          clean:
+              before: true
+          wipe-workspace: true
+    disabled: '{disable}'
+    node: '{node}'
+    concurrent: '{concurrent_build}'
+    run_stack_analysis_path: ''
+    max_previous_builds_count: 20
+    builders:
+    - *stack_analysis
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    <<: *gl_triggers
+
+- job-template:
+    id: 'insights-vulnerability-gh-build-master'
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    slack_channel_notification: 'consoledot-development-fails'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+        - *vulnerabilitybot_github
+    publishers:
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
+    - naginator:
+        max-failed-builds: 3
+    <<: *gh_build_master
+
+- job-template:
+    id: 'insights-vulnerability-gh-pr-check'
+    name: '{gh_org}-{gh_repo}-pr-check'
+    branch: "master"
+    slack_channel_notification: 'consoledot-development-fails'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_crcd_oc_login
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *insightsdroid_github
+        - *quay_api_token
+        - *hac_keycloak_secret
+        - *ibutsu
+        - *hac_prcheck_secret
+        - *chrome_cypress
+        - *vulnerabilitybot_github
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
+    <<: *insights_gh_pr_check
+
 # Wrappers Ignored for Pipeline type:
 # https://opendev.org/jjb/jenkins-job-builder/src/commit/a191e0b174322a55eac082ad4815fb7c35de56fa/jenkins_jobs/modules/wrappers.py#L3003-L3006
 #    wrappers:

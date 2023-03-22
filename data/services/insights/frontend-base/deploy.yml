@@ -27,7 +27,6 @@ managedResourceTypes:
 - RoleBinding
 - ClusterRoleBinding
 - Frontend
-- FrontendEnvironment
 - Bundle
 
 imagePatterns:
@@ -75,7 +74,7 @@ resourceTemplates:
   # Stage Stable Deployment
   - namespace:
       $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
-    ref: 956f6fd6bce9ee88fe07fbbf89134eff67a6ab57
+    ref: 2310ec1c59807157ffedd55796fbba13c181ad26
     parameters:
       ENV_NAME: "frontends"
       IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
@@ -101,7 +100,7 @@ resourceTemplates:
     parameters:
       ENV_NAME: "frontends"
       IMAGE: "quay.io/cloudservices/landing-page-frontend"
-  # Stage Beta
+  # Stage Beta Deployment
   - namespace:
       $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
     ref: master
@@ -117,44 +116,17 @@ resourceTemplates:
   # Stage Stable
   - namespace:
       $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
-    ref: b996d0ae6182de3c43175e4f900ea079a9040155
+    ref: 14cde2066b3ec16977ba014cf7fd87d269b321b6
     parameters:
       ENV_NAME: "frontends"
       IMAGE: "quay.io/cloudservices/insights-dashboard-frontend"
-  # Stage Beta
+  # Stage Beta Deployment
   - namespace:
       $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
     ref: master
     parameters:
       ENV_NAME: "frontends-beta"
       IMAGE: "quay.io/cloudservices/insights-dashboard-frontend"
-
-# Deploys the FrontendEnvironment resources from gitlab
-- name: frontend-env
-  path: /env.yml
-  url: https://gitlab.cee.redhat.com/insights-platform/frontend-environments
-  targets:
-  # This is the "fetest" stage testing environment that will be removed after rollout
-  - namespace:
-      $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
-    ref: main
-    parameters:
-      ENV_NAME: env-stage
-      SSO_SOURCE: 'https://sso.stage.redhat.com/auth/'
-  # This is the stable frontend stage environment
-  - namespace:
-      $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
-    ref: main
-    parameters:
-      ENV_NAME: frontends
-      SSO_SOURCE: 'https://sso.stage.redhat.com/auth/'
-  # This is the beta frontend stage environment
-  - namespace:
-      $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
-    ref: main
-    parameters:
-      ENV_NAME: frontends-beta
-      SSO_SOURCE: 'https://sso.stage.redhat.com/auth/'
 
 - name: frontend-configs
   path: /deploy/deploy.yaml
