@@ -66,3 +66,26 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/notifications-stage/deployments"
           message: "Notifications: Stopped processing messages from Kafka for more than 1h"
           runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NoMessageBeingProcessedProd.html"
+      ##################################
+      # Alerts about external services #
+      ##################################
+      - alert: RbacIsDown
+        expr: absent(up{service="rbac-service", namespace="rbac-stage"}) or up{service="rbac-service", namespace="rbac-stage"} == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: stage
+          app_team: notifications
+        annotations:
+          message: "RBAC service: down in stage for 5 minutes."
+      - alert: SourcesIsDown
+        expr: absent(up{service="sources-api-svc", namespace="sources-stage"}) or up{service="sources-api-svc", namespace="sources-stage"} == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: stage
+          app_team: notifications
+        annotations:
+          message: "Sources service: down in stage for 5 minutes."
