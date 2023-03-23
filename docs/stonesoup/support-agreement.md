@@ -42,7 +42,7 @@ As of 2023-03-21, the key onboarding issues and questions:
 - Define SLIs/SLOs.
 - Runbooks for alerts / SLOs.
 - Decide Networking set up for data plane clusters (although this does not block the onboarding of the control plane components into App-Interface).
-- [Service Preview II] Secret management as required by data plane cluster provisiong.
+- [Service Preview II] Secret management as required by data plane cluster provisioning.
 - [Service Preview II] Cloud resources required by data plane components.
 
 ## Data plane
@@ -59,7 +59,7 @@ Initially, the data plane clusters will be statically defined (without cluster m
 ## Support agreement
 
 - Control plane supported by AppSRE. This component will manage the data plane.
-- Data plane exposes metrics via the control plane. Control plane can also manage components in the data plane through GitOps (ArgoCD). This allows AppSRE to support data plane issues as well (as long as they're surface through alerts and have a runbook associated with them).
+- Data plane exposes metrics via the control plane. Control plane can also manage components in the data plane through GitOps (ArgoCD). This allows AppSRE to support data plane issues as well (as long as they're surfaced through alerts and have a runbook associated with them).
   - Anything not exposed/controllable from the control plane is not under AppSRE support.
 
 ## Notable Changes
