@@ -137,6 +137,26 @@ The steps below are followed for new accounts whether there is an existing user 
     - Zone: Workers Routes: Edit
     - Zone: DNS: Edit
 
+### Enable Cache Reserve on Cloudflare zone
+
+Cache Reserve is a beta product that the Cloudflare terraform provider do not support yet. The quay.io is using that product to further reduce egress cost with S3 through extended cache persistence via Cache Reserve at the Cloudflare edge.
+
+https://developers.cloudflare.com/cache/about/cache-reserve/
+
+https://issues.redhat.com/browse/APPSRE-7225
+
+Initial support for Cloudflare Cache Reserve was added to the cloudflare zone schemas but has not been automated as part of the integration as the integration is tightly coupled with the ExternalResourceSpec pattern and terrascrip;t/terraform. As such for now we need to manually enable/disable Cache Reserve as needed.
+
+1. Validate that the `cache_reserve` setting has been added to the Cloudflare zone in app-interface. As this is a manual change, this step is important to ease the migration/import in the future when this is automated. Note the Cloudflare account, zone name and setting value (`on`/`off`)
+1. Ensure you have [configured your cloudflare user](https://gitlab.cee.redhat.com/service/app-interface#manage-cloudflare-user-access-via-app-interface-using-terraform)
+1. Login to Cloudflare
+1. Access the account for which you want to make a change
+1. Select the Cloudflare zone for which you want to configure Cache Reserve
+1. In the left side menu, expand `Caching` and select `Cache Reserve (beta)`
+1. Click `Enable Storage Sync` or `Disable Storage Sync`
+
+**Note:** If the `Cache Reserve (beta)` menu item does not show up or if the option is grayed, it is likely that the feature is not enabled for the Zone or the Account
+
 ### Import a Cloudflare Zone
 
 Importing a Cloudflare zone is not much different than importing other kinds of terraform resources
