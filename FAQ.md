@@ -20,6 +20,54 @@ The App-SRE IC (interrupt catcher) periodically reviews the MRs in the app-inter
 
 If your MR is urgent or time sensitive requests, see [contacting AppSRE](#contacting-appsre)
 
+### My MR takes a long time to get merged
+
+Generally, during core business hours, Bot will be tending to multiple changes that are currently in flight (which you
+can see [here][1]). If your MR has been approved, then please be patient. Bot will eventually get to it and merge it.
+There might be severalupdates before the change is merged, such as regular rebases, triggered CI job runs, and updates
+to the "Change coverage report".
+
+However, if you believe that something isn't right, review the following:
+
+- Firstly, ensure that your branch is current and up-to-date. Bot will do its best to keep rebasing your branch atop the
+  current master, but if there is a merge conflict, you need to try to resolve it yourself locally and then force-push
+  changes back to the same branch (you can also close this particular MR and open a new one).
+
+- Secondly, if you believe that Bot is not engaged for a while and it hasn't been tending to the MR, especially after you
+  have already provided your `/lgtm` command, then try to force a new build with the `/retest` command - this will trigger
+  a fresh pipeline for the CI job and cause the Bot to react to changes.
+
+- Thirdly, if the MR contains changes that are fully self-serviceable (the MR has been marked as such by the Bot via the
+  `self-serviceable` label), and yet after issuing the `/lgtm` command, there is no reaction from the Bot in and no
+  progress has been made on merging the change, then you might not be the designated approver for all the changes that are
+  included. Make sure that your username appears in the list of approvers for each resource listed in the "Change coverage
+  report" that Bot will add and keep up-to-date to reflect provided approvals, etc. If your username is not listed, you
+  need to contact the required approvers so that the missing `/lgtm` can be provided.
+
+If none of the above works, then don't hesitate to get in touch with AppSRE.
+
+[1]: https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/app-interface-merge-queue.md
+
+### My MR takes a long time to get merged, even though I approved it multiple times
+
+If your username is on the approvers' list for this particular change, then adding a `/lgtm` will trigger a new CI job
+run each time the command is added. Since only an MR with a passing CI job can be merged automatically, adding multiple
+`/lgtm` commands can increase the turnaround time for the MR to be merged.
+
+See for reference:
+
+  - [Approval process][1]
+  - [Granular permission model][2]
+
+[1]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md?#user-content-approval-process
+[2]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/change-types.md
+
+However, if your username is on the approvers' list for this particular change, the change has also been marked as
+`self-serviceable`, you have already provided your `/lgtm` command, but no progress towards the merge has been made,
+even after a while. Then [confirm](#my-mr-takes-a-long-time-to-get-merged) that there aren't any issues with the MR:
+check what labels were added by the Bot, inspect the "Change coverage report" that the Bot posts, and ensure that none
+of the other issues can be the problem here.
+
 ### Contacting AppSRE
 
 You can catch the AppSRE team in the `#sd-app-sre` channel of `redhat-internal.slack.com`.
