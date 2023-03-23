@@ -67,6 +67,8 @@ Cover with auditd rules the following directories
 -a always,exit -S all -F dir=/lib64 -F perm=aw -k system-objects
 ```
 
+We will also cover the Splunk configuration on `/etc` to prevent tampering to the logs without noticing.
+
 
 **3. Administrative actions taken by any individual with higher level privileges (e.g., admin, super user, root, etc)**
 
@@ -80,7 +82,7 @@ type=USER_ACCT msg=audit(timestamp): pid=pid uid=uid auid=auid ses=ses subj=unco
 
 **4. Grant, Modify or Revoke access for a user or a group of users**
 
-Covered by our processes, but not possible to add logging into splunk as it is managed on the AMI build time.
+Covered by our processes, users are added by this job https://ci.int.devshift.net/job/node-user-housekeeping/ when a new worker node is provisioned and adds the users on [bastion users](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/host_vars/bastion.ci.int.devshift.net#L10) and [admin users](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/group_vars/all#L5) to the instance.
 
 **5. Application or process startup, shutdown or restart**
 
@@ -125,7 +127,11 @@ Not required.
 
 ### Push the auditd logs to Splunk.
 
-Using the Splunk forwarder installed on the AMI's we will push the logs to Splunk to be consumed by Monitorin/Infosec teams in case is needed.
+Using the Splunk forwarder installed on the AMI's we will push the logs to Splunk to be consumed by Monitorin/Infosec teams in case is needed. Along with Audit logs, and to follow the guideline of the Monitoring team, we will forward:
+
+* /var/log/audit/audit.log
+* /var/log/messages (syslog)
+* /var/log/secure
 
 ### Update the catalog with the information on the queries used to track each EOI on Splunk.
 
