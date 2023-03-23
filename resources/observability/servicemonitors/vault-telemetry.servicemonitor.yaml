@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  namespace: openshift-customer-monitoring
+  labels:
+    prometheus: app-sre
+  name: servicemonitor-vault-telemetry-{{environment}}
+spec:
+  endpoints:
+  - interval: 60s
+    path: /v1/sys/metrics
+    port: https
+    scheme: https
+    params:
+      format: 
+      - prometheus
+    tlsConfig:
+      insecureSkipVerify: true
+    scrapeTimeout: 30s
+  namespaceSelector:
+    matchNames:
+    - {{namespace}}
+  selector:
+    matchLabels:
+      app: vault
