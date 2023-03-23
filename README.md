@@ -2283,8 +2283,10 @@ When provisioning certificates with [Cloudflare ACM](https://developers.cloudfla
 - `type`: `full` or `partial` (when you only want Cloudflare on some specific CNAME records)
 - `settings`: (Optional) See the Cloudflare Terraform provider docs for [cloudflare_zone_settings_override](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/zone_settings_override) for a list of available options. **Note:** be sure to quote any on/off values (`'on'` or `'off'`), otherwise in YAML they will turn into booleans and will be rejected by the Cloudflare API.
 - `argo`: (Optional) Settings either or both of these options will enable Cloudflare Argo on the zone (an enterprise account is required)
-  - `smart_routing`: `on` of `off`
-  - `tiered_caching`: `on` of `off`
+  - `smart_routing`: `on` or `off`
+  - `tiered_caching`: `on` or `off`
+- `cache_reserve`: (Optional) Control Cloudflare [Cache Reserve](https://developers.cloudflare.com/cache/about/cache-reserve/) options on a zone. **Setting this currently does nothing. See the [Cloudflare Runbook](/docs/app-sre/runbook/cloudflare.md) for more info**
+  - `enabled`: `on` or `off`
 - `records`: A list of records to provision
   - `name`: name of the record
   - `type`: ex: `A`, `CNAME`
