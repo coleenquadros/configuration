@@ -2383,6 +2383,9 @@ App-interface currently supports following Terraform resources for Logpush and L
 #### Logpush
 Cloudflare [Logpush](https://developers.cloudflare.com/logs/about/) supports pushing logs to storage services, SIEMs, and log management providers via the Cloudflare dashboard or API.
 
+Configuring Logpush is a two step process (for some destinations) with app-interface.
+1. Create a MR with Logpush ownership challenge as documented below and merge it. Note: You can skip this step, if the Logpush [destination](https://developers.cloudflare.com/logs/get-started/enable-destinations/) does not require ownership challenge. 
+1. Create a MR with Logpush job resource and merge it. 
 ##### Logpush ownership challenge resource
 
 Certain Logpush [destinations](https://developers.cloudflare.com/logs/get-started/enable-destinations/) require proof of ownership. You can configure ownership challenge through [`logpush_ownership_challenge`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpush_ownership_challenge) Terraform resource.
@@ -2406,6 +2409,8 @@ Following is an example, please set attribute values as per your needs.
 
 Note: Currently we only support `S3` for Logpush destination. Please see additional resources for setting up bucket policy required for `S3` destination before creating ownership challenge.
 
+Once the logpush_ownership_challenge is configured, you can manually inspect the destination to obtain the ownership token which is used during the creation of `logpush_job`.
+
 Additional resource:
 - [Cloudflare destination](https://developers.cloudflare.com/logs/get-started/api-configuration/#destination)
 - [S3 Destination Pre-requisite](https://developers.cloudflare.com/logs/get-started/enable-destinations/aws-s3/#manage-via-api)
@@ -2425,7 +2430,7 @@ Following is an example, please set attribute values as per your needs.
       zone: test-zone
       logpull_options: fields=RayID,ClientIP,EdgeStartTimestamp&timestamps=rfc3339
       destination_conf: s3://bucket/logs?region=us-east-1&sse=AES256
-      ownership_challenge: some-challenge
+      ownership_challenge: some-challenge 
       dataset: http_requests
       frequency: <low|high>
     - provider: logpush_job
