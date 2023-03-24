@@ -1,0 +1,60 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-stage/notifications-stage/notifications.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+
+##################################
+# Alerts about external services #
+##################################
+# RbacIsDown
+- interval: 1m
+  input_series:
+    - series: up{service="rbac-service", namespace="rbac-stage"}
+      values: 0+0x6
+  
+  alert_rule_test:
+    - eval_time: 4m
+      alertname: RbacIsDown
+      exp_alerts:
+
+  alert_rule_test:
+    - eval_time: 5m
+      alertname: RbacIsDown
+      exp_alerts:
+        - exp_labels:
+            app_team: notifications
+            env: stage
+            namespace: rbac-stage
+            service: insights
+            severity: medium
+          exp_annotations:
+            message: "RBAC service: down in stage for 5 minutes."
+
+# SourcesIsDown
+- interval: 1m
+  input_series:
+    - series: up{service="sources-api-svc", namespace="sources-stage"}
+      values: 0+0x6
+  
+  alert_rule_test:
+    - eval_time: 4m
+      alertname: SourcesIsDown
+      exp_alerts:
+
+  alert_rule_test:
+    - eval_time: 5m
+      alertname: SourcesIsDown
+      exp_alerts:
+        - exp_labels:
+            app_team: notifications
+            env: stage
+            namespace: sources-stage
+            service: insights
+            severity: medium
+          exp_annotations:
+            message: "Sources service: down in stage for 5 minutes."
