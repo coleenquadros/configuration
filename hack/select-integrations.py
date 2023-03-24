@@ -104,6 +104,7 @@ def print_cmd(
     int_name,
     override=None,
     has_integrations_changes=False,
+    exclude_accounts=None,
 ):
     cmd = ""
     if pr.get("state"):
@@ -141,14 +142,24 @@ def print_cmd(
     else:
         if override:
             # only qr integrations support sharding
-            shard = override["awsAccount"]["$ref"].split("/")[2]
-            cmd += "ALIAS=" + pr["cmd"] + "_" + shard + " "
+            accounts = get_account_names(override)
+            accounts_param = [" --account-name " + ac for ac in accounts]
+            cmd += "ALIAS=" + pr["cmd"] + "_sharded" + " "
             cmd += "IMAGE=" + override["imageRef"] + " "
-            cmd += "run_int " + pr["cmd"] + " --account-name " + shard + " &"
+            cmd += "run_int " + pr["cmd"] + "".join(accounts_param) + " &"
+        elif exclude_accounts:
+            cmd += "run_int " + pr["cmd"]
+            cmd += (
+                "".join([" --exclude-accounts " + ac for ac in exclude_accounts]) + " &"
+            )
         else:
             cmd += "run_int " + pr["cmd"] + " &"
 
     print(cmd)
+
+
+def get_account_names(override):
+    return [ac["$ref"].split("/")[2] for ac in override["awsAccounts"]]
 
 
 def print_pr_check_cmds(
@@ -171,7 +182,10 @@ def print_pr_check_cmds(
             continue
 
         if pr.get("shardSpecOverride"):
+            aws_accounts = []
             for override in pr.get("shardSpecOverride"):
+                if "awsAccounts" in override:
+                    aws_accounts += get_account_names(override)
                 print_cmd(
                     pr,
                     select_all,
@@ -180,6 +194,15 @@ def print_pr_check_cmds(
                     override,
                     has_integrations_changes,
                 )
+            if int_name == "terraform-resources":
+                print_cmd(
+                    pr,
+                    select_all,
+                    non_bundled_data_modified,
+                    int_name,
+                    exclude_accounts=aws_accounts,
+                )
+                continue
 
         print_cmd(pr, select_all, non_bundled_data_modified, int_name)
 
