@@ -29,7 +29,7 @@ Additional information on specific resource parameters can be found in the [clou
 
 * [Cloudflare Analytics dashboard in grafana](https://grafana.app-sre.devshift.net/d/mWxtnz5Mz/cloudflare-zone-analytics?orgId=1&var-datasource=app-sre-prod-01-prometheus&var-zone=quay.io&from=now-3h&to=now)
 
-We use the [lablabs/cloudflare-exporter](https://github.com/app-sre/cloudflare-exporter) to export metrics from Cloudflaire Analytics into prometheus
+We use the [lablabs/cloudflare-exporter](https://github.com/lablabs/cloudflare-exporter) to export metrics from Cloudflaire Analytics into prometheus. Currently, we maintain a [fork](https://github.com/lablabs/cloudflare-exporter) to address the lack of Logpush metrics on the upstream. The work was completed through [APPSRE-7293](https://issues.redhat.com/browse/APPSRE-7293)
 
 ## Troubleshooting
 

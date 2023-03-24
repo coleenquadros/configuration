@@ -2376,9 +2376,14 @@ Worker scripts are programs that will process requests and possibly change them 
   - `text`: Value of the variable
 
 ### Manage Cloudflare Logpush and Logpull configuration using Terraform
-App-interface supports following Terraform resources for Logpush and Logpull configuration.
+Cloudflare products generate metadata which can be used for purposes such as debugging, identifying configuration adjustments, and creating analytics etc. 
+Cloudflare has (features)[https://developers.cloudflare.com/logs/#features] that allows these logs to be accessible through different means. You can refer to the Cloudflare docs on how those features can be useful to you.
 
-#### Logpush ownership challenge resource
+App-interface currently supports following Terraform resources for Logpush and Logpull configuration.
+#### Logpush
+Cloudflare [Logpush](https://developers.cloudflare.com/logs/about/) supports pushing logs to storage services, SIEMs, and log management providers via the Cloudflare dashboard or API.
+
+##### Logpush ownership challenge resource
 
 Certain Logpush [destinations](https://developers.cloudflare.com/logs/get-started/enable-destinations/) require proof of ownership. You can configure ownership challenge through [`logpush_ownership_challenge`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpush_ownership_challenge) Terraform resource.
 
@@ -2405,7 +2410,7 @@ Additional resource:
 - [Cloudflare destination](https://developers.cloudflare.com/logs/get-started/api-configuration/#destination)
 - [S3 Destination Pre-requisite](https://developers.cloudflare.com/logs/get-started/enable-destinations/aws-s3/#manage-via-api)
 
-#### Logpush job resource
+##### Logpush job resource
 The Cloudflare Logpush job resource definition follows [`logpush_job`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpush_job) Terraform resource.
 
 Following is an example, please set attribute values as per your needs.
@@ -2437,7 +2442,10 @@ Following is an example, please set attribute values as per your needs.
 Additonal resources
 - [Cloudflare datasets](https://developers.cloudflare.com/logs/reference/log-fields/#datasets)
 
-#### Logpull retention resource
+#### Logpull
+Cloudflare [Logpull](https://developers.cloudflare.com/logs/logpull/) is a REST API for consuming request logs over HTTP. These logs contain data related to the connecting client, the request path through the Cloudflare network, and the response from the origin web server.
+
+##### Logpull retention resource
 
 The cloudflare Logpull retention resource definition follows [`logpull_retention`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpull_retention) Terraform resource.
 
