@@ -1120,7 +1120,7 @@ JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/depen
 - `account`: a `$ref` to the account definition to be used in conjunction with the provider
 - `vpc`: (optional) a `$ref` to a VPC to route traffic within. this will cause the hosted zone to be considered private
 - `records`: A list of `record`. The parameters of the `record` match those of Terraform's [aws_route53_record resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record). In addition to the terraform fields, we also support special fields which are distinguishable by their name starting with `_` (underscore). The special fields are described below.
-
+- `allowed_vault_secret_paths`: (optional) a list of the Vault secret paths that are permitted to be used in `_records_from_vault` entries
 
 Additional special fields:
 - `_target_cluster`: A `$ref` to an OpenShift cluster definition. The value of `elbFQDN` on the cluster definition will be used as a target on the record
@@ -1134,6 +1134,16 @@ Additional special fields:
       name: <subdomain>.example.org # example.com should match the zone this entry is added in
   ```
 - `_healthcheck`: Allows defining a health check resource that will be assigned to the record. The parameters from Terraform's [aws_route53_health_check resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_health_check) are permitted.
+- `_records_from_vault`: Allows the use of Vault secrets for the record value(s). **The only approved use case for this at the moment is domain control validation (DCV).** For instance, using the output from `terraform-cloudflare-resources`, this can be used to verify ownership of domains for Cloudflare ACM certificates.
+  - `path`: Full path to the data in Vault
+  - `field`: The field that contains the data
+  - `key`: (optional) If the Vault data is formatted in JSON, the item in the object matching this key name will be selected
+  ```yaml
+  _records_from_vault:
+    - path: app-sre/integrations-output/terraform-cloudflare-resources/app-sre-stage-01/dev-cloudflare/cloudflare-dev-app-sre-zone
+      field: validation_records
+      key: _acme-challenge.cloudflare-dev.app-sre.devshift.net
+  ```
 
 **NOTE:** If you need a record under the `api.openshift.com` zone
 [please go to this document](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/add-route-for-ocm-component.md)
@@ -2299,7 +2309,7 @@ When provisioning certificates with [Cloudflare ACM](https://developers.cloudfla
   - `identifier`: a unique identifier for the worker (terraform identifier)
   - `pattern`: The URL pattern that the worker will act on (ex: `mydomain.com/some/path/*`)
   - `script_name`: The name of the worker script that this worker will use to process requests (must be defined and match the name of a worker script resource)
-- `certificates`: (Optional) A list of Cloudflare certificates to provision for the zone
+- `certificates`: (Optional) A list of Cloudflare certificates to provision for the zone. See the [DCV docs](#domain-control-validation-dcv-for-cloudflare-certificates) for verifying domain ownership.
   - `identifier`: a unique identifier for the certificate (terraform identifier)
   - `type`: the type of certificate (currently supports `advanced` for [Cloudflare ACM certificates](https://developers.cloudflare.com/ssl/edge-certificates/advanced-certificate-manager/))
   - `certificate_authority`: certificate authority to issue the certificate. `lets_encrypt` is the only value that is currently supported.
@@ -2308,6 +2318,45 @@ When provisioning certificates with [Cloudflare ACM](https://developers.cloudfla
   - `validity_days`: how long the certificate is valid for. Let's Encrypt only supports `90`.
   - `cloudflare_branding`: (default **false**) whether to include Cloudflare branding. This will add sni.cloudflaressl.com as the Common Name.
   - `wait_for_active_status`: (default **false**) whether to wait for a certificate pack to reach status active during creation. Note that if this takes longer than expected it could block other changes within your account.
+
+#### Domain Control Validation (DCV) for Cloudflare Certificates
+
+When provisioning certificates with [Cloudflare ACM](https://developers.cloudflare.com/ssl/edge-certificates/advanced-certificate-manager/) you will need to prove ownership of the domain by creating TXT records if the DNS is not hosted at Cloudflare.
+
+If the DNS is hosted in a Route53 zone, you can configure the DCV record(s) as seen in the example below:
+
+```yaml
+---
+$schema: /dependencies/dns-zone-1.yml
+
+labels: {}
+
+name: <your domain>
+description: <some description>
+
+# A list of all paths used below in _records_from_vault
+allowed_vault_secret_paths:
+- app-sre/integrations-output/terraform-cloudflare-resources/app-sre-stage-01/dev-cloudflare/cloudflare-dev-app-sre-zone
+
+records:
+- name: _acme-challenge.cloudflare-dev.app-sre
+  type: TXT
+  _records_from_vault:
+    - path: app-sre/integrations-output/terraform-cloudflare-resources/app-sre-stage-01/dev-cloudflare/cloudflare-dev-app-sre-zone
+      field: validation_records
+      key: _acme-challenge.cloudflare-dev.app-sre.devshift.net
+
+- name: _acme-challenge.cdn01.cloudflare-dev.app-sre
+  type: TXT
+  _records_from_vault:
+    - path: app-sre/integrations-output/terraform-cloudflare-resources/app-sre-stage-01/dev-cloudflare/cloudflare-dev-app-sre-zone
+      field: validation_records
+      key: _acme-challenge.cdn01.cloudflare-dev.app-sre.devshift.net
+```
+
+The Vault `path` will be: `app-sre/integrations-output/terraform-cloudflare-resources/<cluster_name>/<namespace>/<zone_identifier>-zone`
+
+The `field` will always be `validation_records` and the `key` will be the value of the SANs on the certificate, prefixed with `_acme-challenge`.
 
 ### Manage Cloudflare Worker Scripts via App-Interface (`/openshift/namespace-1.yml`) using Terraform
 
