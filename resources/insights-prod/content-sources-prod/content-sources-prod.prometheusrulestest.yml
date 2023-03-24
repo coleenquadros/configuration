@@ -7,7 +7,6 @@ rule_files:
 evaluation_interval: 1m
 
 tests:
-
 # --- Content Sources Backend Pod Down Test --- #
 - interval: 1m
   input_series:
@@ -136,12 +135,12 @@ tests:
 # ------- Latency Tests ------- #
 
 # Okay in the first 10 minutes: 80% of requests at 100ms
-# Alert at 30 min: 35% of requests above 100ms in last 30m (burn rate 5.6 -> error ratio threshold: 28%)
+# Alert at 30 min: 75% of requests above 500ms in last 30m (burn rate 5.6 -> error ratio threshold: 28%)
 - interval: 1m
   input_series:
-    - series: content_sources_http_status_histogram_bucket{le="0.1"}
-      values: 8+8x9 6+6x19
-    - series: content_sources_http_status_histogram_bucket_count
+    - series: content_sources_http_status_histogram_bucket{le="0.5"}
+      values: 8+8x9 0+0x10
+    - series: content_sources_http_status_histogram_count
       values: 10+10x9 10+10x19
   alert_rule_test:
     - eval_time: 10m
@@ -151,18 +150,18 @@ tests:
       alertname: ContentSourcesLatency5mto1hrOr30mto6hBudgetBurn
       exp_alerts:
         - exp_labels:
-            latency: "0.1"
+            latency: "0.5"
             severity: medium
             service: insights
           exp_annotations:
-            message: 'High requests latency budget burn: 34.9% of requests slower than 100ms.'
+            message: 'High requests latency budget burn: 74.8% of requests slower than 500ms.'
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/content-sources/ContentSourcesLatencyAlert.md"
 
 - interval: 1m
   input_series:
-    - series: content_sources_http_status_histogram_bucket{le="0.1"}
+    - series: content_sources_http_status_histogram_bucket{le="0.5"}
       values: 10+10x120 2+2x120
-    - series: content_sources_http_status_histogram_bucket_count
+    - series: content_sources_http_status_histogram_count
       values: 10+10x120 10+10x120
   alert_rule_test:
     - eval_time: 2h
@@ -172,9 +171,9 @@ tests:
       alertname: ContentSourcesLatency2hto1dOr6hto3dBudgetBurn
       exp_alerts:
         - exp_labels:
-            latency: "0.1"
+            latency: "0.5"
             severity: medium
             service: insights
           exp_annotations:
-            message: 'High requests latency budget burn: 39.96% of requests slower than 100ms.'
+            message: 'High requests latency budget burn: 39.96% of requests slower than 500ms.'
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/content-sources/ContentSourcesLatencyAlert.md"

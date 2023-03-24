@@ -1,0 +1,23 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: mk-observability-rw-proxy-production
+spec:
+  groups:
+  - name: mk-observability-rw-proxy-production
+    rules:
+    - alert: MKObservabilityRWProxyDown - production
+      annotations:
+        message: "No targets found for MK Observability Remote Write Proxy in namespace {{ $labels.namespace }}. Observability Remote Write Proxy is down."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop/mk-observability-rw-proxy-down.md"
+      expr: |
+        absent(up{job="observability-rw-proxy-metrics",namespace="managed-services-production"} == 1)
+      for: 15m
+      labels:
+        service: kas-fleet-manager
+        severity: critical

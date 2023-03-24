@@ -52,7 +52,7 @@ Access keys to the issuer or by the Metadata Server using IRSA, kube2iam or simi
 
 ### External Cluster
 
-1. 1st MR: Install redhat-cert-manager operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-02/namespaces/openshift-operators.yaml#L22-L23).
+1. 1st MR: Install redhat-cert-manager operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/d5ab9056287086f7af407a52d75dfc26b014650c/data/openshift/app-sre-stage-01/namespaces/openshift-operators.yaml#L25-26).
     - This will install `cert-manager` in the `openshift-cert-manager` namespace.
 
 2. 2nd MR:
@@ -65,7 +65,7 @@ Access keys to the issuer or by the Metadata Server using IRSA, kube2iam or simi
 
 ### Private Clusters (Not reachable from Internet)
 
-1. 1st MR: Install redhat-cert-manager operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55).
+1. 1st MR: Install redhat-cert-manager operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/d5ab9056287086f7af407a52d75dfc26b014650c/data/openshift/hive-stage-01/namespaces/openshift-operators.yaml#L22-23).
     - This will install `cert-manager` in the `openshift-cert-manager` namespace.
 
 2. 2nd MR: Install `openshift-cert-routes` into `openshift-cert-manager` namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55)

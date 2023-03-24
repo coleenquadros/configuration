@@ -1270,6 +1270,7 @@ JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/cloud
 
 - `identifier`: A globally unique name for the zone.
 - `zone`: Actual domain name.
+- `delete`: Boolean. Use when deleting a zone. See below for example.
 - `plan`: The name of the commercial plan to apply to the zone. Available values: free or enterprise.
 - `account`: Cloudflare account this zone belong to.
 - `type`: Available values: full, partial. This field should always be full. Full zone implies that DNS is hosted with Cloudflare. A partial zone is typically a partner-hosted zone or a CNAME setup.
@@ -1331,7 +1332,9 @@ records:
     value: ns3.example.com
     priority: 3
 ```
-
+##### Delete Cloudflare resource
+* To delete a zone, first set the `delete: true` in the zone file with `deletionApprovals` for cloudflare_zone and cloudflare_zone_settings_override in the account file (See this [MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/62509/diffs) for example). Then remove the zone file in another MR. 
+* To delete a record, simply remove the record related entries.
 ##### Performance
 MR checks and reconciliation times will grow roughly linearly with zone size. We tested creating a zone with 1000 records took around 5 minutes.
 
@@ -2188,6 +2191,7 @@ In order to add a DNS zone, you need to add them to the `externalResources` sect
 - `identifier`: id of the resource to create (example: `dns-example-com`)
 - `name`: name of the resource to create (example: `dns.example.com`)
 - `output_resource_name`: name of Kubernetes Secret to be created.
+- `records`: (optional) same as `records` in [Route53 DNS Zones](#route53-dns-zones), but without support for additional special fields.
 
 Once the changes are merged, the DNS zone will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -2279,8 +2283,10 @@ When provisioning certificates with [Cloudflare ACM](https://developers.cloudfla
 - `type`: `full` or `partial` (when you only want Cloudflare on some specific CNAME records)
 - `settings`: (Optional) See the Cloudflare Terraform provider docs for [cloudflare_zone_settings_override](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/zone_settings_override) for a list of available options. **Note:** be sure to quote any on/off values (`'on'` or `'off'`), otherwise in YAML they will turn into booleans and will be rejected by the Cloudflare API.
 - `argo`: (Optional) Settings either or both of these options will enable Cloudflare Argo on the zone (an enterprise account is required)
-  - `smart_routing`: `on` of `off`
-  - `tiered_caching`: `on` of `off`
+  - `smart_routing`: `on` or `off`
+  - `tiered_caching`: `on` or `off`
+- `cache_reserve`: (Optional) Control Cloudflare [Cache Reserve](https://developers.cloudflare.com/cache/about/cache-reserve/) options on a zone. **Setting this currently does nothing. See the [Cloudflare Runbook](/docs/app-sre/runbook/cloudflare.md) for more info**
+  - `enabled`: `on` or `off`
 - `records`: A list of records to provision
   - `name`: name of the record
   - `type`: ex: `A`, `CNAME`

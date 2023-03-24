@@ -1,0 +1,69 @@
+---
+$schema: /openshift/cluster-1.yml
+labels:
+  service: stonesoup
+name: stonesoupp01ue1
+description: stonesoupp01ue1 cluster
+consoleUrl: https://console-openshift-console.apps.stonesoupp01ue1.kt4n.p1.openshiftapps.com
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: https://api.stonesoupp01ue1.kt4n.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.stonesoupp01ue1.kt4n.p1.openshiftapps.com
+auth:
+- service: github-org-team
+  org: app-sre
+  team: stonesoupp01ue1-cluster
+ocm:
+  $ref: /dependencies/ocm/production.yml
+managedGroups:
+- dedicated-admins
+
+spec:
+  product: osd
+  provider: aws
+  region: us-east-1
+  channel: fast
+  version: 4.12.8
+  initial_version: 4.12.8-fast
+  multi_az: true
+  nodes: 9
+  instance_type: m5.xlarge
+  storage: 600
+  load_balancers: 0
+  private: false
+  id: 22l5kjdgtti2646e7o02iotje47pvvg0
+  external_id: d9aa64c0-604e-4809-8a2e-8f448fef6f42
+  disable_user_workload_monitoring: true
+  provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
+upgradePolicy: # optional, specify an upgrade schedule
+  workloads:
+  - stonesoup
+  schedule: 0 14 * * 1-5
+  conditions:
+    soakDays: 6
+network:
+  type: OVNKubernetes
+  vpc: 10.170.24.0/22
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+automationToken:
+  path: app-sre/creds/kube-configs/stonesoupp01ue1
+  field: token
+clusterAdminAutomationToken:
+  path: app-sre/creds/kube-configs/stonesoupp01ue1-cluster-admin
+  field: token
+clusterAdmin: true
+internal: false
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+awsInfrastructureManagementAccounts:
+- account:
+    $ref: /aws/app-sre/account.yml
+  accessLevel: network-mgmt
+  default: true

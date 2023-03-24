@@ -203,7 +203,7 @@ def main():
     def all_modified(func):
         return all(func(p) for p in modified_files)
 
-    if all_modified(lambda p: re.match(r"^docs/", p)):
+    if all_modified(lambda p: re.match(r"^(.*\.md|docs/)", p)):
         # only docs: no need to run pr check
         return
 

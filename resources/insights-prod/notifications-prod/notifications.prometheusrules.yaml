@@ -90,3 +90,26 @@ spec:
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/notifications-prod/deployments"
           message: "Notifications: Kafka lag of platform.notifications.ingress topic exceeded alert threshold in prod environment."
           runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/SOPs/alerts/NotificationsEngineIngressTopicKafkaLagProd.html"
+      ##################################
+      # Alerts about external services #
+      ##################################
+      - alert: RbacIsDown
+        expr: absent(up{service="rbac-service", namespace="rbac-prod"}) or up{service="rbac-service", namespace="rbac-prod"} == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: notifications
+        annotations:
+          message: "RBAC service: down in production for 5 minutes."
+      - alert: SourcesIsDown
+        expr: absent(up{service="sources-api-svc", namespace="sources-prod"}) or up{service="sources-api-svc", namespace="sources-prod"} == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: notifications
+        annotations:
+          message: "Sources service: down in production for 5 minutes."

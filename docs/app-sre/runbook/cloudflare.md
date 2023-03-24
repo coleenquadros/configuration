@@ -33,11 +33,43 @@ We use the [lablabs/cloudflare-exporter](https://github.com/lablabs/cloudflare-e
 
 ## Troubleshooting
 
+### terraform-cloudflare-dns integration
+
+#### Zone manually deleted
+
+The error message below may indicate that a Cloudflare DNS zone was manually deleted. This can be verified by checking the Cloudflare audit log and searching for the zone in question.
+
+```
+[terraform-cloudflare-dns] error: b'\nError: error finding Zone "0f17ee691c67ac7df9cfc56db9f92372": Invalid zone identifier (1001)\n\n\n'
+```
+
+Reach out to the owners of the zone to figure out if this was in fact deleted manually. If it was, advise the tenants to add `delete: true` to the `/cloudflare/dns-zone-1.yml` file in the future. To stop the errors, the `/cloudflare/dns-zone-1.yml` file can be removed so that the integration will no longer run against that shard.
+
+### terraform-cloudflare-users integration
+
+#### Integration unable to create cloudflare account member
+Sometimes `terraform-cloudflare-users` integration fails with the following error:
+
+```
+error creating Cloudflare account member: Error when processing member: cannot add existing user that is participating in an incompatible authorization system (1005)
+```
+Per Cloudflare support team this happens because:
+
+```
+Users with Domain Scoped Roles enabled can ONLY manage other members also enrolled with Domain Scoped Roles.
+Users without Domain Scoped Roles enabled can NOT manage users with Domain Scoped Roles enabled.
+```
+
+If we run into this issue, we need to do the following
+1. Remove user access temporarily by unsetting `cloudflare_user` field within `/access/user-1.yml` and notify the user.
+1. Reach out to Cloudflare support through a ticket mentioning this issue.
+1. Once Cloudflare support fixes the issue in their backend, set `cloudflare_user` field and verify integration succeeds.
+
 ### Dashboard access
 
 [Cloudflare Dashboard](https://dash.cloudflare.com/)
 
-Credentials to Cloudflare accounts can be found in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/cloudflare). The table below describes which user has access to which account.
+Credentials to Cloudflare accounts can be found in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/cloudflare). The table below describes which user has access to which account.
 
 | User email                               | Accounts                             |
 |------------------------------------------|--------------------------------------|
@@ -104,6 +136,26 @@ The steps below are followed for new accounts whether there is an existing user 
     - Zone: Zone Settings: Edit
     - Zone: Workers Routes: Edit
     - Zone: DNS: Edit
+
+### Enable Cache Reserve on Cloudflare zone
+
+Cache Reserve is a beta product that the Cloudflare terraform provider do not support yet. The quay.io is using that product to further reduce egress cost with S3 through extended cache persistence via Cache Reserve at the Cloudflare edge.
+
+https://developers.cloudflare.com/cache/about/cache-reserve/
+
+https://issues.redhat.com/browse/APPSRE-7225
+
+Initial support for Cloudflare Cache Reserve was added to the cloudflare zone schemas but has not been automated as part of the integration as the integration is tightly coupled with the ExternalResourceSpec pattern and terrascrip;t/terraform. As such for now we need to manually enable/disable Cache Reserve as needed.
+
+1. Validate that the `cache_reserve` setting has been added to the Cloudflare zone in app-interface. As this is a manual change, this step is important to ease the migration/import in the future when this is automated. Note the Cloudflare account, zone name and setting value (`on`/`off`)
+1. Ensure you have [configured your cloudflare user](https://gitlab.cee.redhat.com/service/app-interface#manage-cloudflare-user-access-via-app-interface-using-terraform)
+1. Login to Cloudflare
+1. Access the account for which you want to make a change
+1. Select the Cloudflare zone for which you want to configure Cache Reserve
+1. In the left side menu, expand `Caching` and select `Cache Reserve (beta)`
+1. Click `Enable Storage Sync` or `Disable Storage Sync`
+
+**Note:** If the `Cache Reserve (beta)` menu item does not show up or if the option is grayed, it is likely that the feature is not enabled for the Zone or the Account
 
 ### Import a Cloudflare Zone
 
@@ -240,3 +292,13 @@ https://cdnXX.quay.io/sha256/9c/... (long url that includes AWS parameters as we
 # < cf-ray: 768027d679740595-IAD
 # < cf-cache-status: HIT
 ```
+
+## Known Issues:
+### Records still present after zone removed
+  When a zone is deleted then added back, the old records are still present. Integration will have following errors:
+```
+[2023-03-22 19:25:33] [ERROR] [terraform_client.py:check_output:571] - [redhat-service-delivery-openshift-com - apply] Error: expected DNS record to not already be present but already exists
+[2023-03-22 19:25:33] [ERROR] [terraform_client.py:check_output:571] - [redhat-service-delivery-openshift-com - apply]   on config.tf.json line 14651, in resource.cloudflare_record.cname-metrics-gchaturv-test-openshift-com:
+[2023-03-22 19:25:33] [ERROR] [terraform_client.py:check_output:571] - [redhat-service-delivery-openshift-com - apply] 14651:       },
+```
+Solution: When deleting zone, use the `delete: true` flag on the zone file. See the Delete Cloudflare resource section in App Interface Readme.

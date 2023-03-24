@@ -49,6 +49,11 @@ dev: bundle validate run
 
 server: schemas bundle validate run
 
+dual-bundle-run:
+	@./hack/dual-bundle-qs.sh $(CONTAINER_ENGINE)
+
+dual-bundle-dev: schemas bundle validate dual-bundle-run
+
 qr-promote:
 	@./hack/update-qr-tag.sh
 

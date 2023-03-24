@@ -68,6 +68,10 @@ Glitchtip allows administrators to manage the application via an admin web inter
 
 The qontract-reconcile glitchtip integration manages organizations where the automation account (e.g., `sd-app-sre+glitchtip@redhat.com`) has the owner role! Glitchtip doesn't have the global admin concept; an organization's role handles the permissions. The integration can't see or access other organizations; therefore, it can't control those.
 
+## Employee Personal Information Privacy Statement
+
+Please see [Employee Personal Information Privacy Statement](https://source.redhat.com/departments/legal/globallegalcompliance/compliance_wiki/employee_personal_information_privacy_statement) for more information on how Red Hat collects and processes the personal information of its employees
+
 ## Contact
 
 Don't hesitate to get in touch with the AppSRE team via the [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) Slack channel.

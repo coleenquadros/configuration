@@ -241,6 +241,9 @@ Each user with this role can approve MRs by adding a `/lgtm` comment in the MR i
 
 If a `/lgtm` comment is added and all conditions are valid, an `approved` label will be automatically added to the MR, and it will be automatically rebased and merged within a few minutes.
 
+Adding a `/lgtm` will trigger a new CI job run each time the command is added. Since only an MR with a passing CI job
+can be merged automatically, adding multiple `/lgtm` commands can increase the turnaround time for the MR to be merged.
+
 If any of the above conditions is not met, a member of the App SRE team needs to review the MR and label it with `lgtm` when it is good to go. Reviews are being performed regularly during working hours. As mentioned in the [app-interface etiquette](/README.md#app-interface-etiquette), no need to ping any App SRE team member.
 
 Can I get pinged on merge requests updating saas files I am an approver for? Yes! Add `tag_on_merge_requests: true` to your user file.
