@@ -2285,6 +2285,8 @@ When provisioning certificates with [Cloudflare ACM](https://developers.cloudfla
 - `argo`: (Optional) Settings either or both of these options will enable Cloudflare Argo on the zone (an enterprise account is required)
   - `smart_routing`: `on` or `off`
   - `tiered_caching`: `on` or `off`
+- `tiered_cache`: (Optional) Manages Cloudflare Tiered Cache settings. This allows you to adjust topologies for your zone
+  - `cache_type`: One of: `generic`, `smart`
 - `cache_reserve`: (Optional) Control Cloudflare [Cache Reserve](https://developers.cloudflare.com/cache/about/cache-reserve/) options on a zone. **Setting this currently does nothing. See the [Cloudflare Runbook](/docs/app-sre/runbook/cloudflare.md) for more info**
   - `enabled`: `on` or `off`
 - `records`: A list of records to provision
