@@ -61,7 +61,7 @@ spec:
             
         # SLO Availability p99
         # Based on burn rate alerts from https://sre.google/workbook/alerting-on-slos/#5-multiple-burn-rate-alerts
-        - alert: OSD Fleet Manager returning 5xx error budget burn 5m to 1h - {{ $labels.service }}
+        - alert: OSD Fleet Manager returning 5xx error budget burn 5m to 1h
           annotations:
             message: 'High error budget burn of returning 5xx error codes for {{ $labels.service }}(current value: {{ $value }})'
           expr: |
@@ -75,7 +75,7 @@ spec:
             route: osd-fleet-manager
             severity: high
             team: osd
-        - alert: OSD Fleet Manager returning 5xx error budget burn 30m to 6h - {{ $labels.service }}
+        - alert: OSD Fleet Manager returning 5xx error budget burn 30m to 6h 
           annotations:
             message: 'High error budget burn of returning 5xx error codes for {{ $labels.service }}(current value: {{ $value }})'
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
@@ -90,7 +90,7 @@ spec:
             exported_namespace: osd-fleet-manager-production
             route: osd-fleet-manager
             severity: medium
-        - alert: OSD Fleet Manager returning 5xx error budget burn 2h to 1d - {{ $labels.service }}
+        - alert: OSD Fleet Manager returning 5xx error budget burn 2h to 1d
           annotations:
             message: 'High error budget burn of returning 5xx error codes for {{ $labels.service }}(current value: {{ $value }})'
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
@@ -105,7 +105,7 @@ spec:
             exported_namespace: osd-fleet-manager-production
             route: osd-fleet-manager
             severity: medium
-        - alert: OSD Fleet Manager returning 5xx error budget burn 6h to 3d - {{ $labels.service }}
+        - alert: OSD Fleet Manager returning 5xx error budget burn 6h to 3d
           annotations:
             message: 'High error budget burn of returning 5xx error codes for {{ $labels.service }}(current value: {{ $value }})'
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
@@ -186,7 +186,7 @@ spec:
 
         # SLO API Latency p90 < 100ms
         # Based on burn rate alerts from https://sre.google/workbook/alerting-on-slos/#5-multiple-burn-rate-alerts
-        - alert: OSD Fleet Manager Latency p90 < 100ms 30m to 6h budget burn - {{ $labels.service }}
+        - alert: OSD Fleet Manager Latency p90 < 100ms 30m to 6h budget burn
           annotations:
             message: "High 1h/6h requests latency budget burn for OSD Fleet Manager API p90 (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
@@ -201,7 +201,7 @@ spec:
             quantile: "90"
             namespace: osd-fleet-manager-production
             severity: medium
-        - alert: OSD Fleet Manager Latency p90 < 100ms 6h to 3d budget burn - {{ $labels.service }}
+        - alert: OSD Fleet Manager Latency p90 < 100ms 6h to 3d budget burn 
           annotations:
             message: "High 1d/3d requests latency budget burn for OSD Fleet Manager API p90 (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
@@ -311,7 +311,7 @@ spec:
 
         # SLO API Latency p99 < 1s
         # Based on burn rate alerts from https://sre.google/workbook/alerting-on-slos/#5-multiple-burn-rate-alerts
-        - alert: OSD Fleet Manager Latency p99 < 1s 30m to 6h budget burn - {{ $labels.service }}
+        - alert: OSD Fleet Manager Latency p99 < 1s 30m to 6h budget burn 
           annotations:
             message: "High 6h requests latency budget burn for OSD Fleet Manager API p99 (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
@@ -326,7 +326,7 @@ spec:
             quantile: "99"
             namespace: osd-fleet-manager-production
             severity: medium
-        - alert: OSD Fleet Manager Latency p99 < 1s 6h to 3d budget burn - {{ $labels.service }}
+        - alert: OSD Fleet Manager Latency p99 < 1s 6h to 3d budget burn
           annotations:
             message: "High 1d/3d requests latency budget burn for OSD Fleet Manager API p99 (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
@@ -436,45 +436,45 @@ spec:
 
         # SLO Correctness (Create) p99
         # Based on burn rate alerts from https://sre.google/workbook/alerting-on-slos/#5-multiple-burn-rate-alerts
-        - alert: OSD Fleet Manager Cluster Creation 30m to 6h budget burn - {{ $labels.service }}
+        - alert: OSD Fleet Manager Cluster Creation 30m to 6h budget burn
           annotations:
-            message: "High 6h error budget burn for OSD Fleet Manager create Cluster operations in sector {{ $labels.service }} (current value: {{ $value | humanize }})"
+            message: "High 6h error budget burn for OSD Fleet Manager create Cluster operations in sector {{ $labels.sector }} (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
-            sum by (service) (fleet_manager_cluster_operations:burnrate30m{namespace="osd-fleet-manager-production",operation="create"}) > (5.60 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate30m{namespace="osd-fleet-manager-production",operation="create"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (5.60 * (1-0.99000))
             and
-            sum by (service) (fleet_manager_cluster_operations:burnrate6h{namespace="osd-fleet-manager-production",operation="create"}) > (5.60 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate6h{namespace="osd-fleet-manager-production",operation="create"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (5.60 * (1-0.99000))
           for: 15m
           labels:
             service: osd-fleet-manager
             namespace: osd-fleet-manager-production
             operation: create
             severity: medium
-        - alert: OSD Fleet Manager Cluster Creation 2h to 1d budget burn - {{ $labels.service }}
+        - alert: OSD Fleet Manager Cluster Creation 2h to 1d budget burn
           annotations:
-            message: "High 1d error budget burn for OSD Fleet Manager create Cluster operations in sector {{ $labels.service }} (current value: {{ $value | humanize }})"
+            message: "High 1d error budget burn for OSD Fleet Manager create Cluster operations in sector {{ $labels.sector }} (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
-            sum by (service) (fleet_manager_cluster_operations:burnrate2h{namespace="osd-fleet-manager-production",operation="create"}) > (2.80 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate2h{namespace="osd-fleet-manager-production",operation="create"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (2.80 * (1-0.99000))
             and
-            sum by (service) (fleet_manager_cluster_operations:burnrate1d{namespace="osd-fleet-manager-production",operation="create"}) > (2.80 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate1d{namespace="osd-fleet-manager-production",operation="create"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (2.80 * (1-0.99000))
           for: 1h
           labels:
             service: osd-fleet-manager
             namespace: osd-fleet-manager-production
             operation: create
             severity: medium
-        - alert: OSD Fleet Manager Cluster Creation 6h to 3d budget burn - {{ $labels.service }}
+        - alert: OSD Fleet Manager Cluster Creation 6h to 3d budget burn
           annotations:
-            message: "High 3d error budget burn for OSD Fleet Manager create Cluster operations in sector {{ $labels.service }} (current value: {{ $value | humanize }})"
+            message: "High 3d error budget burn for OSD Fleet Manager create Cluster operations in sector {{ $labels.sector }} (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
-            sum by (service) (fleet_manager_cluster_operations:burnrate6h{namespace="osd-fleet-manager-production",operation="create"}) > (1.00 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate6h{namespace="osd-fleet-manager-production",operation="create"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (1.00 * (1-0.99000))
             and
-            sum by (service) (fleet_manager_cluster_operations:burnrate3d{namespace="osd-fleet-manager-production",operation="create"}) > (1.00 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate3d{namespace="osd-fleet-manager-production",operation="create"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (1.00 * (1-0.99000))
           for: 3h
           labels:
             service: osd-fleet-manager
@@ -561,45 +561,45 @@ spec:
 
         # SLO Correctness (Delete) p99
         # Based on burn rate alerts from https://sre.google/workbook/alerting-on-slos/#5-multiple-burn-rate-alerts
-        - alert: OSD Fleet Manager Cluster Deletion 30m to 6h budget burn - {{ $labels.service }}
+        - alert: OSD Fleet Manager Cluster Deletion 30m to 6h budget burn
           annotations:
-            message: "High 6h error budget burn for OSD Fleet Manager delete Cluster operations (current value: {{ $value | humanize }})"
+            message: "High 6h error budget burn for OSD Fleet Manager delete Cluster operations in sector {{ $labels.sector }} (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
-            sum by (service) (fleet_manager_cluster_operations:burnrate30m{namespace="osd-fleet-manager-production",operation="delete"}) > (5.60 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate30m{namespace="osd-fleet-manager-production",operation="delete"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (5.60 * (1-0.99000))
             and
-            sum by (service) (fleet_manager_cluster_operations:burnrate6h{namespace="osd-fleet-manager-production",operation="delete"}) > (5.60 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate6h{namespace="osd-fleet-manager-production",operation="delete"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (5.60 * (1-0.99000))
           for: 15m
           labels:
             service: osd-fleet-manager
             namespace: osd-fleet-manager-production
             operation: delete
             severity: medium
-        - alert: OSD Fleet Manager Cluster Deletion 2h to 1d budget burn - {{ $labels.service }}
+        - alert: OSD Fleet Manager Cluster Deletion 2h to 1d budget burn
           annotations:
-            message: "High 1d error budget burn for OSD Fleet Manager delete Cluster operations (current value: {{ $value | humanize }})"
+            message: "High 1d error budget burn for OSD Fleet Manager delete Cluster operations in sector {{ $labels.sector }} (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
-            sum by (service) (fleet_manager_cluster_operations:burnrate2h{namespace="osd-fleet-manager-production",operation="delete"}) > (2.80 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate2h{namespace="osd-fleet-manager-production",operation="delete"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (2.80 * (1-0.99000))
             and
-            sum by (service) (fleet_manager_cluster_operations:burnrate1d{namespace="osd-fleet-manager-production",operation="delete"}) > (2.80 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate1d{namespace="osd-fleet-manager-production",operation="delete"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (2.80 * (1-0.99000))
           for: 1h
           labels:
             service: osd-fleet-manager
             namespace: osd-fleet-manager-production
             operation: delete
             severity: medium
-        - alert: OSD Fleet Manager Cluster Deletion 6h to 3d budget burn - {{ $labels.service }}
+        - alert: OSD Fleet Manager Cluster Deletion 6h to 3d budget burn
           annotations:
-            message: "High 3d error budget burn for OSD Fleet Manager delete cluster operations (current value: {{ $value | humanize }})"
+            message: "High 3d error budget burn for OSD Fleet Manager delete cluster operations in sector {{ $labels.sector }} (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
-            sum by (service) (fleet_manager_cluster_operations:burnrate6h{namespace="osd-fleet-manager-production",operation="delete"}) > (1.00 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate6h{namespace="osd-fleet-manager-production",operation="delete"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (1.00 * (1-0.99000))
             and
-            sum by (service) (fleet_manager_cluster_operations:burnrate3d{namespace="osd-fleet-manager-production",operation="delete"}) > (1.00 * (1-0.99000))
+            sum by (sector) (label_replace(fleet_manager_cluster_operations:burnrate3d{namespace="osd-fleet-manager-production",operation="delete"}, "sector", "$1", "service", "fleet-manager-metrics-(.*)")) > (1.00 * (1-0.99000))
           for: 3h
           labels:
             service: osd-fleet-manager
@@ -692,13 +692,13 @@ spec:
             job: fleet-manager-metrics
             namespace: osd-fleet-manager-production
           record: reconciler:fleet_manager_reconciler_failure_count:rate5m
-        - alert: OSD Fleet Manager reconciler failure
+        - alert: OSD Fleet Manager reconciler failure in sector  {{ $labels.sector }} 
           annotations:
-            message: "The reconciler of type {{ $labels.worker_type }} for sector {{ $labels.service }} failed with a rate of {{ $value }}/s over the last 15 minutes."
+            message: "The reconciler of type {{ $labels.worker_type }} for sector {{ $labels.sector }} failed with a rate of {{ $value }}/s over the last 15 minutes."
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
-            reconciler:fleet_manager_reconciler_failure_count:rate5m > 0
+            label_replace(reconciler:fleet_manager_reconciler_failure_count:rate5m, "sector", "$1", "service", "fleet-manager-metrics-(.*)") > 0
           for: 15m
           labels:
             severity: high
@@ -712,13 +712,13 @@ spec:
             job: fleet-manager-metrics
             namespace: osd-fleet-manager-production
           record: reconciler:fleet_manager_reconciler_duration_in_seconds:max
-        - alert: OSD Fleet Manager reconciler long duration
+        - alert: OSD Fleet Manager reconciler long duration in sector  {{ $labels.sector }} 
           annotations:
-            message: "The maximum reconciler duration was {{ $value | humanizeDuration }} for sector {{ $labels.service }} over the last 15 minutes."
+            message: "The maximum reconciler duration was {{ $value | humanizeDuration }} for sector {{ $labels.sector }} over the last 15 minutes."
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
-            reconciler:fleet_manager_reconciler_duration_in_seconds:max > 30
+            label_replace(reconciler:fleet_manager_reconciler_duration_in_seconds:max, "sector", "$1", "service", "fleet-manager-metrics-(.*)") > 30
           for: 15m
           labels:
             severity: medium
@@ -818,9 +818,9 @@ spec:
             job: fleet-manager-metrics
             namespace: osd-fleet-manager-production
           record: saturation:fleet_manager_saturation_level:rate3d
-        - alert: OSD Fleet Manager saturation level exceeding 90% error budget burn 5m to 1h - {{ $labels.service }}
+        - alert: OSD Fleet Manager saturation level exceeding 90% error budget burn 5m to 1h
           annotations:
-            message: 'High error budget burn of saturation level exceeding 90% for {{ $labels.service }} for Service Cluster {{ $labels.service_cluster }} in region {{ $labels.region }} (current value: {{ $value }})'
+            message: 'High error budget burn of saturation level exceeding 90% for Service Cluster {{ $labels.service_cluster }} in region {{ $labels.region }} (current value: {{ $value }})'
           expr: |
             sum(saturation:fleet_manager_saturation_level:rate5m{route="osd-fleet-manager",exported_namespace="osd-fleet-manager-production"}) > (13.44 * (1-0.90000))
             and
@@ -832,9 +832,9 @@ spec:
             route: osd-fleet-manager
             severity: high
             team: osd
-        - alert: OSD Fleet Manager saturation level exceeding 90% error budget burn 30m to 6h - {{ $labels.service }}
+        - alert: OSD Fleet Manager saturation level exceeding 90% error budget burn 30m to 6h 
           annotations:
-            message: 'High error budget burn of saturation level exceeding 90% for {{ $labels.service }} for Service Cluster {{ $labels.service_cluster }} in region {{ $labels.region }} (current value: {{ $value }})'
+            message: 'High error budget burn of saturation level exceeding 90% for Service Cluster {{ $labels.service_cluster }} in region {{ $labels.region }} (current value: {{ $value }})'
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
@@ -847,9 +847,9 @@ spec:
             exported_namespace: osd-fleet-manager-production
             route: osd-fleet-manager
             severity: medium
-        - alert: OSD Fleet Manager saturation level exceeding 90% error budget burn 2h to 1d - {{ $labels.service }}
+        - alert: OSD Fleet Manager saturation level exceeding 90% error budget burn 2h to 1d
           annotations:
-            message: 'High error budget burn of saturation level exceeding 90% for {{ $labels.service }} for Service Cluster {{ $labels.service_cluster }} in region {{ $labels.region }} (current value: {{ $value }})'
+            message: 'High error budget burn of saturation level exceeding 90% for Service Cluster {{ $labels.service_cluster }} in region {{ $labels.region }} (current value: {{ $value }})'
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
@@ -862,9 +862,9 @@ spec:
             exported_namespace: osd-fleet-manager-production
             route: osd-fleet-manager
             severity: medium
-        - alert: OSD Fleet Manager saturation level exceeding 90% error budget burn 6h to 3d - {{ $labels.service }}
+        - alert: OSD Fleet Manager saturation level exceeding 90% error budget burn 6h to 3d
           annotations:
-            message: 'High error budget burn of saturation level exceeding 90% for {{ $labels.service }} for Service Cluster {{ $labels.service_cluster }} in region {{ $labels.region }} (current value: {{ $value }})'
+            message: 'High error budget burn of saturation level exceeding 90% for for Service Cluster {{ $labels.service_cluster }} in region {{ $labels.region }} (current value: {{ $value }})'
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
