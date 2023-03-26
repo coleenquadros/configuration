@@ -2443,7 +2443,7 @@ Following is an example, please set attribute values as per your needs.
       frequency: high
       name: Test Logpush Job
       kind: instant-logs
-      filter: '{\"key\":\"BotScore\",\"operator\":\"lt\",\"value\":\"30\"}'
+      filter: "{\"key\":\"BotScore\",\"operator\":\"lt\",\"value\":\"30\"}"
 ```
 
 Additonal resources
