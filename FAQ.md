@@ -169,7 +169,7 @@ Grafana dashboards are discovered automatically if you follow this [guide](https
 If still missing, ask AppSRE to check logs of the Discovery and Grafana containers.
 Maybe the Grafana pods need to be restarted by AppSRE - [see SOP](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/grafana-dashboard-not-synching.md).
 
-### Reas-only access to RDS console in AWS
+### Read-only access to RDS console in AWS
 
 Make sure your user has the [log-consumer role](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/roles/log-consumer-rds.yml).
 Make sure you are adding the role for the appropriate AWS account, e.g., `app-sre`.
