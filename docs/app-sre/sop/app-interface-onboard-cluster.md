@@ -424,7 +424,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     To enable `openshift-customer-monitoring` just run this command:
     ```bash
-    hack/cluster_provision.py create-obs-customer-monitoring <cluster> <environment>
+    hack/cluster_provision.py create-obs-customer-monitoring <cluster> <environment(integration|stage|production)>
     ```
     This command does the following steps:
     * Creates the `openshift-customer-monitoring` namespace with this [template](https://gitlab.cee.redhat.com/service/app-interface/blob/master/hack/cluster_provision/templates/openshift-customer-monitoring.CLUSTERNAME.tpl). View an example [here](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml)
@@ -483,7 +483,7 @@ We run our custom logging stack. This requires creation of resources in the corr
 
 To enable the logging stack just run this command:
 ```bash
-hack/cluster_provision.py --datadir data create-obs-logging <cluster> <environment>
+hack/cluster_provision.py --datadir data create-obs-logging <cluster> <environment(integration|stage|production)>
 ```
 **Double check the changes introduced, the destination file could have been modified with manual changes**
 
