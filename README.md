@@ -2436,12 +2436,14 @@ Following is an example, please set attribute values as per your needs.
     - provider: logpush_job
       identifier: test-logpush-job-account
       enabled: true
-      zone: test-zone
       logpull_options: fields=RayID,ClientIP,EdgeStartTimestamp&timestamps=rfc3339
       destination_conf: s3://bucket/logs?region=us-east-1&sse=AES256
       ownership_challenge: some-challenge
       dataset: http_requests
       frequency: high
+      name: Test Logpush Job
+      kind: instant-logs
+      filter: "{\"key\":\"BotScore\",\"operator\":\"lt\",\"value\":\"30\"}"
 ```
 
 Additonal resources
