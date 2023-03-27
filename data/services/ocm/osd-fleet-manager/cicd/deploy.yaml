@@ -53,9 +53,6 @@ resourceTemplates:
             machine_type: m5.xlarge
             autoscale: false
             nodes: 3
-          compute_machine_type: m5.xlarge
-          compute_autoscale: false
-          compute_nodes: 3
           network_type: OVNKubernetes
           private: false
 
@@ -71,10 +68,6 @@ resourceTemplates:
             autoscale: true
             autoscale_min_replicas: 3
             autoscale_max_replicas: 36
-          compute_machine_type: m5.4xlarge
-          compute_autoscale: true
-          compute_autoscale_min_replicas: 3
-          compute_autoscale_max_replicas: 36
           network_type: OVNKubernetes
           private: false
     DEVELOPER_USERS:
@@ -142,9 +135,6 @@ resourceTemplates:
               machine_type: m5.xlarge
               autoscale: false
               nodes: 3
-            compute_machine_type: m5.xlarge
-            compute_autoscale: false
-            compute_nodes: 3
             network_type: OVNKubernetes
             private: true
 
@@ -160,12 +150,18 @@ resourceTemplates:
               autoscale: true
               autoscale_min_replicas: 3
               autoscale_max_replicas: 36
-            compute_machine_type: m5.4xlarge
-            compute_autoscale: true
-            compute_autoscale_min_replicas: 3
-            compute_autoscale_max_replicas: 36
             network_type: OVNKubernetes
             private: true
+            additional_machine_pool_gangs:
+            - id_prefix: hosted-clusters
+              machine_type: m5.xlarge
+              autoscale: true
+              autoscale_min_replicas: 4
+              autoscale_max_replicas: 36
+              taints:
+                - key: hypershift.openshift.io/control-plane
+                  value: true
+                  effect: NoSchedule
       DEPLOYMENT_NAME: canary
       PROVISIONING_TIME_WINDOW: '259200'
   - name: osd-fleet-manager-integration-main
