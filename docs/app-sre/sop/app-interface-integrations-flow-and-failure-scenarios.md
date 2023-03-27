@@ -15,8 +15,6 @@ There are 3 stages when running our integrations:
         * Adds the App SRE team members as Maintainers on the fork (acting as the bot)
         * Verifies that the MR is not using `master` as the source branch (disables rebasing)
 1. Baseline collection phase: Run a small set of integrations against the production GraphQL endpoint.
-    * `saas-file-owners` in no-compare mode
-        * Collect information about saas file owners to prevent privilege escalation.
     * `jenkins-job-builder` in no-compare mode
         * Collect JJB data to compare with the desired state in the MR
         * pending https://issues.redhat.com/browse/APPSRE-1854
@@ -27,13 +25,6 @@ There are 3 stages when running our integrations:
 ## Failure scenarions
 
 This section describes common failure scenarios for different integrations.
-
-### saas-file-owners
-
-Mostly fails if baseline collection phase was not succesfull.
-This is usually due to a data reload in the Graphql production endpoint.
-
-Solution: `/retest`
 
 ### jenkins-job-builder
 
