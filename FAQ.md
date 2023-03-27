@@ -169,6 +169,11 @@ Grafana dashboards are discovered automatically if you follow this [guide](https
 If still missing, ask AppSRE to check logs of the Discovery and Grafana containers.
 Maybe the Grafana pods need to be restarted by AppSRE - [see SOP](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/grafana-dashboard-not-synching.md).
 
+### Read-only access to RDS console in AWS
+
+Make sure your user has the [log-consumer role](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/roles/log-consumer-rds.yml).
+Make sure you are adding the role for the appropriate AWS account, e.g., `app-sre`.
+
 ### Tagging options in app-interface
 
 GitLab: Users are not being tagged by default for SaaS file reviews. To be tagged on MRs for SaaS files you own, add `tag_on_merge_requests: true` to your user file.
