@@ -1,0 +1,74 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: uhc
+name: saas-uhc-account-manager-jobs
+description: SaaS tracking file for UHC Account manager jobs
+app:
+  $ref: /services/ocm/ams/app.yml
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+deployResources:
+  requests:
+    cpu: 600m
+    memory: 2000Mi
+  limits:
+    cpu: 1200m
+    memory: 2000Mi
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-uhc-info
+managedResourceTypes:
+- CronJob
+- ConfigMap
+imagePatterns:
+- quay.io/app-sre/uhc-account-manager
+- quay.io/centos/centos
+- quay.io/app-sre/envoyproxy
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+resourceTemplates:
+- name: uhc-account-manager-jobs
+  url: https://gitlab.cee.redhat.com/service/uhc-account-manager
+  path: /templates/cronjob-template.yml
+  parameters:
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/uhc-account-manager
+    JWKS_URL: https://api.openshift.com/.well-known/jwks.json
+    UHC_BASE_URL: http://127.0.0.1:9090
+    UHC_TOKEN_URL: ${SSO_BASE_URL}/protocol/openid-connect/token
+    RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
+    RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
+    RHIT_BASE_REGISTRY_URL: https://container-registry-authorizer.api.redhat.com/v1/
+    RHIT_BASE_REGNUM_URL: https://subscription.api.redhat.com/svcrest/regnum/v5/
+    RHIT_BASE_EXPORT_COMPLIANCE_URL: https://export-compliance.api.redhat.com/v1/
+    RHIT_BASE_TERMS_URL: https://terms.api.redhat.com/svcrest/terms/
+    QUAY_REGISTRY_ORG_NAME: openshift-release-dev
+    AUTOMATIC_BAN: 'true'
+    ENABLE_SENTRY: 'true'
+    RHIT_TIMEOUT: 30s
+    GODEBUG: http2server=0
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-uhc-account-manager-gl-build-master
+    promotion:
+      publish:
+      - ocm-ams-jobs-deployed-int
+    parameters:
+      RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
+      USE_CANDLEPIN_BASIC_AUTH: 'true'
+      DB_MAX_OPEN_CONNS: 250
+      SENTRY_URL: sentry.autom8.in
+      SENTRY_PROJECT: '9'
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+      MOA_SKU: SER0579
+      METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-integration.svc.cluster.local
+      MANDRILL_TIMEOUT: 60s
