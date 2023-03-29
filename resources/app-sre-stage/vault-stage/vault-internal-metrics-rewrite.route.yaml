@@ -1,0 +1,22 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-devshiftnet-dns
+    haproxy.router.openshift.io/rewrite-target: /
+  labels:
+    service: vault
+  name: vault-stage-metrics-rewrite
+spec:
+  host: vault.stage.devshift.net
+  path: "/v1/sys/metrics"
+  port:
+    targetPort: https
+  to:
+    kind: Service
+    name: vault
+    weight: 100
+  tls:
+    termination: reencrypt
+    insecureEdgeTerminationPolicy: Redirect
