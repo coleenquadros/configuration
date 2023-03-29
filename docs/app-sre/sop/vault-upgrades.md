@@ -1,6 +1,8 @@
 # Vault Upgrades
 
-This SOP details the process for evaluating new versions of HashiCorp Vault and promoting to AppSRE-managed Vault instances.  
+This SOP details the process for evaluating new versions of HashiCorp Vault and promoting to AppSRE-managed Vault instances.
+
+App-SRE intends to upgrade its vault instances approximately once every 6 months.
 
 Versions are evaluated against `vault.stage.devshift.net`. See [Version Vetting](#version-vetting) for steps to evaluate new versions.  
 
@@ -17,12 +19,10 @@ Review CVE reports for versions that patch vulnerabilities affecting components 
 **NOTE:** Per [Vault's upgrade documentation](https://developer.hashicorp.com/vault/docs/upgrading), large jumps are supported (ex: 1.5.4 to 1.9.2). However, the upgrade guides for all major versions in between (1.6, 1.7, and 1.8 for this example) must be reviewed for specific steps.
 
 ## Upgrade stage
-* Trigger the [vault stage backup cronjob](https://console-openshift-console.apps.appsres03ue1.5nvu.p1.openshiftapps.com/k8s/ns/vault-stage/cronjobs/vault-backup) 
-* Change the vault k8s deployment strategy to `Recreate` ([example](https://gitlab.cee.redhat.com/service/vault-devshift-net/-/merge_requests/52/diffs#77f031dd616efd80f5713f8c009d99075d45e56b_35_31))
+* Look at the saas file for the vault about to be upgraded. Ensure the vault instance's ref for gitlab.cee.redhat.com/service/vault-devshift-net is a version such that the k8s deployment strategy is set to `Recreate` and NOT `RollingUpdate` ([example](https://gitlab.cee.redhat.com/service/vault-devshift-net/-/blob/29de6cf6dd4c5e84cf24ddcf7c17ed5c41744aa6/openshift-vault.yaml#L30-33)).
     * this is done to ensure that incompatability issues are not encountered by a newer image replica co-existing aloneside original replicas
 * Ensure an image tag exists for the desired version within [quay.io/app-sre/vault](https://quay.io/repository/app-sre/vault?tab=tags)
 * Create an MR that updates [image tag for vault.stage.devshift.net target](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/cicd/saas.yaml#L61)
-* Change the vault k8s deployment strategy back to `RollingUpdate` ([example](https://gitlab.cee.redhat.com/service/vault-devshift-net/-/merge_requests/53/diffs#77f031dd616efd80f5713f8c009d99075d45e56b))
 
 ## Evaluation
 
@@ -130,16 +130,15 @@ At a minimum this email should contain:
 * quality of life improvements
 
 ## Backups
-S3: trigger the vault backup cronjob. example: [vault.devshift.net cronjob](https://console-openshift-console.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/k8s/ns/vault-prod/cronjobs/vault-backup/)  
+S3: trigger the vault backup cronjob. example: [vault.devshift.net cronjob](https://console-openshift-console.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/k8s/ns/vault-prod/cronjobs/vault-backup/). When logged into the cluster and targeting the proper namespace, you can trigger a job based on this cronjob by running: `oc create job --from=cronjob/vault-backup <name for job>`
 RDS: [create a database snapshot](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_CreateSnapshot.html)
 
 ## Upgrade
-* Change the vault k8s deployment strategy to `Recreate` ([example](https://gitlab.cee.redhat.com/service/vault-devshift-net/-/merge_requests/52/diffs#77f031dd616efd80f5713f8c009d99075d45e56b_35_31))
+* Look at the saas file for the vault about to be upgraded. Ensure the vault instance's ref for gitlab.cee.redhat.com/service/vault-devshift-net is a version such that the k8s deployment strategy is set to `Recreate` and NOT `RollingUpdate` ([example](https://gitlab.cee.redhat.com/service/vault-devshift-net/-/blob/29de6cf6dd4c5e84cf24ddcf7c17ed5c41744aa6/openshift-vault.yaml#L30-33)).
     * this is done to ensure that incompatability issues are not encountered by a newer image replica co-existing aloneside original replicas
 * Create an MR that updates the image tag parameter for desired instance.
     * [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/cicd/saas.yaml#L82)
     * **this should match existing image tag for vault.stage.devshift.net**
-* Change the vault k8s deployment strategy back to `RollingUpdate` ([example](https://gitlab.cee.redhat.com/service/vault-devshift-net/-/merge_requests/53/diffs#77f031dd616efd80f5713f8c009d99075d45e56b))
 
 ## Evaluate
 1. Review [production vault-manager](https://console-openshift-console.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/k8s/ns/app-interface-production/deployments/vault-manager/pods) logs
