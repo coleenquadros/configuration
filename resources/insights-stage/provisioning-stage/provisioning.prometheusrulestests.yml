@@ -33,6 +33,26 @@ tests:
                 There is no pod serving provisioning application in the
                 provisioning-stage namespace
 
+  #--------------------- reservation-success-rate ----------------------#
+  - interval: 1h
+    input_series:
+    - series: provisioning_reservation_count{result="success"}
+      values: 0+1x168 0+1x130
+    - series: provisioning_reservation_count
+      values: 0+1x168 0+1x168
+    alert_rule_test:
+    - eval_time: 0s
+      alertname: ProvisioningReservationSuccessRate
+      exp_alerts:
+    - eval_time: 7d
+      alertname: ProvisioningReservationSuccessRate
+      exp_alerts:
+        - exp_labels:
+            service: insights
+            severity: medium
+          exp_annotations:
+            message: "Reservations success rate dropped below 80% in last 7 days"
+
   #------------provisioning-availability-test-------------#
 
   - interval: 1m
