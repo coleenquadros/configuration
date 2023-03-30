@@ -2441,7 +2441,7 @@ Following is an example, please set attribute values as per your needs.
       ownership_challenge: some-challenge
       dataset: http_requests
       frequency: high
-      name: Test Logpush Job
+      name: test-logpush-job # must contain only alphanumeric characters, hyphens, and periods
       kind: instant-logs
       filter: "{\"key\":\"BotScore\",\"operator\":\"lt\",\"value\":\"30\"}"
 ```
