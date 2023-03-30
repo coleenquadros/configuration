@@ -12,18 +12,18 @@ spec:
   - name: provisioning-component-missing
     rules:
       - alert: ProviosioningComponentAbsent
-        expr: | 
+        expr: |
           absent(up{service="provisioning",namespace="provisioning-stage"} == 1)
         labels:
           service: insights
           severity: medium
         annotations:
           message: "There is no pod serving provisioning application in the provisioning-stage namespace"
-   
+
   - name: http-latency
     rules:
       - alert: ProvisioningHTTPRequestsDurationLimit
-        expr: | 
+        expr: |
           sum(rate(provisioning_http_request_duration_ms_bucket{le="200"}[1h]))
           /
           sum(rate(provisioning_http_request_duration_ms_count[1h])) < 0.95
@@ -32,12 +32,25 @@ spec:
           severity: medium
         annotations:
           message: "REST API requests response time over 200 ms per hour"
-  
+
+  - name: reservation-success-rate
+    rules:
+      - alert: ProvisioningReservationSuccessRate
+        expr: |
+          sum(rate(provisioning_reservation_count{result="success"}[7d]))
+          /
+          sum(rate(provisioning_reservation_count[7d])) < 0.80
+        labels:
+          service: insights
+          severity: medium
+        annotations:
+          message: "Reservations success rate dropped below 80% in last 7 days"
+
   - name: source-availability-latency
     rules:
       - alert: ProvisioningSourceAvailabilityRequestsDurationLimit
-        expr: | 
-          sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000"}[1h])) 
+        expr: |
+          sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000"}[1h]))
           /
           sum(rate(provisioning_source_availability_check_request_duration_ms_count[1h])) < 0.5
         labels:
@@ -156,7 +169,7 @@ spec:
           service: insights
           latency: "200"
         record: latencytarget:provisioning_http_request_duration_ms:rate3d
-  
+
   - name: provisioning-availability-stage
     rules:
       - alert: Provisioning5mto1hErrorBudgetBurn
@@ -259,7 +272,7 @@ spec:
           service: insights
           severity: medium
         record: provisioning_http_request_total:burnrate6h
-  
+
   - name: source-availability-checks-latency-stage
     rules:
       - alert: ProvisioningSourceAvailabilityLatency5mto1hrOr30mto6hBudgetBurn
