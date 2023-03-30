@@ -38,3 +38,15 @@ slos:
   SLOTargetUnit: percent_0_1
   prometheusRules: /insights-prod/content-sources-prod/content-sources-prod.prometheusrules.yml
   dashboard: https://grafana.app-sre.devshift.net/d/content-sources/content-sources
+- name: Message Latency
+  SLIType: latency
+  SLISpecification: The proportion of message/task requests that have not started processing in 60 minutes
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/content-sources/MessageLatencySLODetails.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(content_sources_message_latency_bucket{le="3600"}[{{window}}]))/sum(rate(content_sources_message_latency_count[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /insights-prod/content-sources-prod/content-sources-prod.prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/content-sources/content-sources
