@@ -153,13 +153,24 @@ resourceTemplates:
             network_type: OVNKubernetes
             private: true
             additional_machine_pool_gangs:
-            - id_prefix: hosted-clusters
-              machine_type: m5.xlarge
+            - id_prefix: hcps
+              machine_type: m5.4xlarge
               autoscale: true
-              autoscale_min_replicas: 4
+              autoscale_min_replicas: 3
               autoscale_max_replicas: 36
               taints:
                 - key: hypershift.openshift.io/control-plane
+                  value: true
+                  effect: NoSchedule
+            - id_prefix: obo
+              machine_type: r5.4xlarge
+              autoscale: false
+              nodes: 3
+              labels:
+                - key: node-role.kubernetes.io/obo
+                  value: ""
+              taints:
+                - key: obo
                   value: true
                   effect: NoSchedule
       DEPLOYMENT_NAME: canary
