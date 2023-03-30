@@ -721,6 +721,57 @@ resourceTemplates:
             cluster-api-provider-kubevirt: quay.io:443/acm-d/cluster-api-provider-kubevirt-rhel8@sha256:8d7f489b7040e2c528e51e46b290074fc161a42cdf3120c2cc0544b3ca97dde9
       DEPLOYMENT_NAME: blue
       ENABLE_GLOBAL_WORKERS: true
+  - name: osd-fleet-manager-production-canary
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
+    ref: 5af3b4651d20bcb40df11ca1865c5ad74955e390
+    promotion:
+      publish:
+      - ocm-osdfm-deployed-production-canary
+    parameters:
+      DEPLOYMENT_NAME: canary
+      CLUSTER_CHANNEL: stable
+      CLUSTER_TEMPLATES: |2-
+          # HyperShift Service Cluster
+          hs-sc:
+            name_prefix: "hs-sc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: "openshift-v4.12.7"
+            multi_az: true
+            ccs: true
+            default_machine_pool:
+              machine_type: m5.4xlarge
+              autoscale: true
+              autoscale_min_replicas: 3
+              autoscale_max_replicas: 9
+            network_type: OVNKubernetes
+            private: true
+
+          # HyperShift Management Cluster
+          hs-mc:
+            name_prefix: "hs-mc-"
+            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
+            openshift_version: "openshift-v4.12.7"
+            multi_az: true
+            ccs: true
+            default_machine_pool:
+              machine_type: m5.4xlarge
+              autoscale: true
+              autoscale_min_replicas: 3
+              autoscale_max_replicas: 60
+            network_type: OVNKubernetes
+            private: true
+
+      HYPERSHIFT_OPERATOR_OVERRIDING_DATA: |2-
+            # openshift/hypershift.git branch release-4.13 commit 139955c0d99e13dc882fa01663457d896aa9f836
+            hypershift-operator: quay.io:443/acm-d/hypershift-rhel8-operator@sha256:b7ffc7943f14ef464ea0644bce1e3850928d24ce8c482b70994887a7b04804fd
+            apiserver-network-proxy: quay.io:443/acm-d/apiserver-network-proxy-rhel8@sha256:281c31c439d4116a7180519370955254d1845e57fb0c2b9b55a84e4798bec9ce
+            aws-encryption-provider: quay.io:443/acm-d/aws-encryption-provider-rhel8@sha256:5c1afc24ccc9ef5c41f78a6561fc43c6f653bc772c752a656f01d8596ffccaa8
+            cluster-api: quay.io:443/acm-d/cluster-api-rhel8@sha256:c6edc4a5f6cc09f6ac733350615d8c134993af83e8d07025e3aa4dec596a2488
+            cluster-api-provider-agent: quay.io:443/acm-d/cluster-api-provider-agent-rhel8@sha256:7dd4c639450284a8a4893fad89b49183a244deeaf05bc25370446316593a51e3
+            cluster-api-provider-aws: quay.io:443/acm-d/cluster-api-provider-aws-rhel8@sha256:1915ed9c08b461fcaefbf9f7933c5c0b805e175698abde1335d3814ebb5e8148
+            cluster-api-provider-azure: quay.io:443/acm-d/cluster-api-provider-azure-rhel8@sha256:404bde6e2915b24cf46352d9352128392c50c4efd790845be413982ef5154b43
+            cluster-api-provider-kubevirt: quay.io:443/acm-d/cluster-api-provider-kubevirt-rhel8@sha256:8d7f489b7040e2c528e51e46b290074fc161a42cdf3120c2cc0544b3ca97dde9
 - name: osd-fleet-manager-dashboards
   url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
   path: /dashboards
