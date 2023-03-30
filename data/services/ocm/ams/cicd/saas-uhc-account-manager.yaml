@@ -23,7 +23,6 @@ managedResourceTypes:
 - Deployment
 - Service
 - CronJob
-- HorizontalPodAutoscaler
 - ConfigMap
 imagePatterns:
 - quay.io/app-sre/uhc-account-manager
@@ -39,13 +38,10 @@ resourceTemplates:
   path: /templates/named-service-template.yml
   parameters:
     DEPLOYMENT_NAME: uhc-acct-mngr-green
-    DEPLOYMENT_RING: green
-    ENVIRONMENT: production
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: app-sre/uhc-account-manager
     JWKS_URL: https://api.openshift.com/.well-known/jwks.json
     UHC_BASE_URL: http://127.0.0.1:9090
-    CRONJOB_UHC_BASE_URL: ${OCM_BASE_URL}
     UHC_TOKEN_URL: ${SSO_BASE_URL}/protocol/openid-connect/token
     RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
     RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -57,35 +53,11 @@ resourceTemplates:
     QUAY_REGISTRY_ORG_NAME: openshift-release-dev
     AUTOMATIC_BAN: 'true'
     REPLICAS: 1
-    API_REPLICA_COUNT_MIN: '1'
-    API_REPLICA_COUNT_MAX: '1'
-    SUBSCRIPTION_BASED_DATA_RECONCILER_DRY_RUN: 'false'
-    DEPROVISION_OLD_SUBSCRIPTIONS_DRY_RUN: 'false'
-    SUBSCRIPTION_STATUS_RECONCILER_DRY_RUN: 'false'
-    EBS_ACCOUNT_RECONCILER_DRY_RUN: 'false'
-    CLUSTER_TRANSFERS_RECONCILER_DRY_RUN: 'true'
-    OCP_SKU_LIST_FILE: /configs/subscription-skus/ocp-skus.yaml
     RHM_SKU_LIST_FILE: /configs/subscription-skus/rhm-skus-enhanced.yaml
-    USE_CANDLEPIN_BASIC_AUTH: 'false'
     ENABLE_SENTRY: 'true'
     ENABLE_TERMS_ENFORCEMENT: 'true'
-    TELEMETER_ENABLE_MULTIARCH: 'false'
     RHIT_TIMEOUT: 30s
-    RH_MARKETPLACE_QUOTA_RECONCILER_WORKER_COUNT: '1'
-    RH_MARKETPLACE_QUOTA_RECONCILER_CLIENT_CARDINALITY: '1'
-    OCP_USAGE_RECONCILER_WORKER_COUNT: '1'
-    OCP_USAGE_CLEANER_WORKER_COUNT: '1'
-    OCP_USAGE_RECONCILER_ACTIVE_DEADLINE_SECONDS: '21600'
-    OCP_USAGE_CLEANER_ACTIVE_DEADLINE_SECONDS: '30000'
     GODEBUG: http2server=0
-    MOA_SKU: MW01369
-    API_TARGET_AVERAGE_CPU_UTILIZATION: '80'
-    API_TARGET_AVERAGE_MEMORY_UTILIZATION: '75'
-    TARGET_CPU_UTILIZATION: '80'
-    ENABLE_CERTIFICATE_MOCK: 'true'
-    CERTIFICATE_MOCK_404_ORG_EXTERNAL_ID: certificate-mock-404-org-external-id
-    MOCK_SCA_CRT_PATH: /secrets/service/mock-sca.crt
-    MOCK_SCA_KEY_PATH: /secrets/service/mock-sca.key
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
@@ -99,7 +71,6 @@ resourceTemplates:
       - ocm-ams-deployed-int-green
     parameters:
       TELEMETER_DEBUG: 'true'
-      HYDRA_DEBUG: 'false'
       RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
       USE_CANDLEPIN_BASIC_AUTH: 'true'
       CLUSTER_REG_RATE_LIMIT: 30000
@@ -134,8 +105,6 @@ resourceTemplates:
     parameters:
       UHC_BASE_URL: http://127.0.0.1:9090
       REPLICAS: 1
-      API_REPLICA_COUNT_MIN: '1'
-      API_REPLICA_COUNT_MAX: '1'
       CPU_LIMIT: '2'
       MEMORY_LIMIT: 2Gi
       CLUSTER_REG_RATE_LIMIT: 500000
@@ -182,18 +151,16 @@ resourceTemplates:
       RBAC_BASE_URL: https://mtls.internal.console.redhat.com
       RBAC_PROXY: ''
       PPROF_SERVER_BINDADDRESS: ''
-- name: uhc-account-manager-int-migration
+- name: uhc-account-manager-blue
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
-  path: /templates/service-template-int-migration.yml
+  path: /templates/named-service-template.yml
   parameters:
-    ENVIRONMENT: production
     DEPLOYMENT_NAME: uhc-acct-mngr-blue
     DEPLOYMENT_RING: blue
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: app-sre/uhc-account-manager
     JWKS_URL: https://api.openshift.com/.well-known/jwks.json
     UHC_BASE_URL: http://127.0.0.1:9090
-    CRONJOB_UHC_BASE_URL: ${OCM_BASE_URL}
     UHC_TOKEN_URL: ${SSO_BASE_URL}/protocol/openid-connect/token
     RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
     RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -205,63 +172,11 @@ resourceTemplates:
     QUAY_REGISTRY_ORG_NAME: openshift-release-dev
     AUTOMATIC_BAN: 'true'
     REPLICAS: 4
-    API_REPLICA_COUNT_MIN: '4'
-    API_REPLICA_COUNT_MAX: '4'
-    SUBSCRIPTION_BASED_DATA_RECONCILER_DRY_RUN: 'false'
-    DEPROVISION_OLD_SUBSCRIPTIONS_DRY_RUN: 'false'
-    SUBSCRIPTION_STATUS_RECONCILER_DRY_RUN: 'false'
-    EBS_ACCOUNT_RECONCILER_DRY_RUN: 'false'
-    CLUSTER_TRANSFERS_RECONCILER_DRY_RUN: 'false'
-    PULL_SECRET_ROTATIONS_RECONCILER_DRY_RUN: 'false'
-    OCP_SKU_LIST_FILE: /configs/subscription-skus/ocp-skus.yaml
     RHM_SKU_LIST_FILE: /configs/subscription-skus/rhm-skus-enhanced.yaml
-    USE_CANDLEPIN_BASIC_AUTH: 'false'
     ENABLE_SENTRY: 'true'
     ENABLE_TERMS_ENFORCEMENT: 'true'
-    TELEMETER_ENABLE_MULTIARCH: 'false'
     RHIT_TIMEOUT: 30s
-    RH_MARKETPLACE_QUOTA_RECONCILER_WORKER_COUNT: '1'
-    RH_MARKETPLACE_QUOTA_RECONCILER_CLIENT_CARDINALITY: '1'
-    OCP_USAGE_RECONCILER_WORKER_COUNT: '1'
-    OCP_USAGE_CLEANER_WORKER_COUNT: '1'
-    OCP_USAGE_RECONCILER_ACTIVE_DEADLINE_SECONDS: '21600'
-    OCP_USAGE_CLEANER_ACTIVE_DEADLINE_SECONDS: '30000'
-    HYDRA_FETCH_ORGANIZATIONS_DATA_CACHE_EXP: '24'
-    HYDRA_FETCH_ORGANIZATIONS_DATA_CARDINALITY: '500'
-    HYDRA_FETCH_ORGANIZATIONS_DATA_WORKER_COUNT: '3'
     GODEBUG: http2server=0
-    CENTOS_IMAGE_REPOSITORY: centos/centos
-    FETCH_TELEMETER_METRICS_WORKER_COUNT: '16'
-    FETCH_TELEMETER_METRICS_STALE_METRICS_DURATION: 1440h
-    MOA_ENTITLEMENT_RECONCILER_DRY_RUN: 'true'
-    MOA_ENTITLEMENT_RECONCILER_WORKER_COUNT: '1'
-    MOA_SKU: MW01369
-    MOA_ENTITLEMENT_RENEW_DURATION: 120h
-    AUTO_ENTITLEMENT_RECONCILER_DRY_RUN: 'true'
-    AUTO_ENTITLEMENT_RECONCILER_WORKER_COUNT: '1'
-    AUTO_ENTITLEMENT_RENEW_DURATION: 120h
-    API_TARGET_AVERAGE_CPU_UTILIZATION: '80'
-    API_TARGET_AVERAGE_MEMORY_UTILIZATION: '75'
-    TARGET_CPU_UTILIZATION: '80'
-    SUBSCRIPTION_STATUS_RECONCILER_RELEASED_UNRELEASED_TRIGGER_DURATION: 120h
-    SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_1_DURATION: 720h
-    SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_2_DURATION: 336h
-    SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_3_DURATION: 72h
-    ENABLE_CERTIFICATE_MOCK: 'true'
-    CERTIFICATE_MOCK_404_ORG_EXTERNAL_ID: certificate-mock-404-org-external-id
-    MOCK_SCA_CRT_PATH: /secrets/service/mock-sca.crt
-    MOCK_SCA_KEY_PATH: /secrets/service/mock-sca.key
-    SUBSCRIPTION_STATUS_RECONCILER_SCHEDULE_EXPRESSION: 6 * * * *
-    ACCOUNT_RECONCILER_CRON_SCHEDULE: 24 18 * * 1
-    EBS_ACCOUNT_RECONCILER_CRON_SCHEDULE: 11 * * * *
-    HYDRA_FETCH_ORGANIZATIONS_DATA_CRON_SCHEDULE: 16 * * * *
-    OCP_USAGE_CLEANER_CRON_SCHEDULE: 21 */5 * * *
-    OCP_USAGE_RECONCILER_CRON_SCHEDULE: 26 */2 * * *
-    MOA_ENTITLEMENT_RECONCILER_CRON_SCHEDULE: 31 11 * * *
-    AUTO_ENTITLEMENT_RECONCILER_CRON_SCHEDULE: 31 11 * * *
-    RH_MARKETPLACE_QUOTA_RECONCILER_CRON_SCHEDULE: '*/5 * * * *'
-    PULL_SECRET_ROTATIONS_RECONCILER_CRON_SCHEDULE: 0 */6 * * *
-    PPROF_SERVER_BINDADDRESS: ''
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
@@ -274,23 +189,9 @@ resourceTemplates:
       publish:
       - ocm-ams-deployed-int
     parameters:
-      UHC_BASE_URL: http://127.0.0.1:9090
-      API_REPLICA_COUNT_MIN: '2'
-      API_REPLICA_COUNT_MAX: '6'
-      SUSPEND_FETCH_TELEMETER_METRICS_CRON: 'false'
-      FETCH_TELEMETER_METRICS_DRY_RUN: 'false'
       TELEMETER_DEBUG: 'true'
-      SUSPEND_HYDRA_FETCH_ORGANIZATIONS_DATA_CRON: 'true'
-      HYDRA_DEBUG: 'false'
       RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
-      SUSPEND_RBAC_RECONCILER_CRON: 'false'
-      RBAC_RECONCILER_DRY_RUN: 'false'
-      RBAC_RECONCILER_CRON_SCHEDULE: 15,45 * * * *
-      RBAC_RECONCILER_LIMIT: -1
-      RBAC_RECONCILER_WORKER_COUNT: 4
       USE_CANDLEPIN_BASIC_AUTH: 'true'
-      WAREHOUSE_DELETED_CLUSTERS_DRY_RUN: 'false'
-      WAREHOUSE_DELETED_CLUSTERS_MAX_AMOUNT: 1000
       CLUSTER_REG_RATE_LIMIT: 30000
       ORG_CLUSTER_REG_RATE_LIMIT: 30000
       DB_MAX_OPEN_CONNS: 250
@@ -298,48 +199,10 @@ resourceTemplates:
       SENTRY_PROJECT: '9'
       GLOG_V: 5
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
-      SUBSCRIPTION_STATUS_RECONCILER_EVALUATION_DURATION: 24h
-      SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: '1'
-      SUSPEND_ACCOUNT_RECONCILER_CRON: 'false'
-      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: 'false'
-      SUSPEND_OCP_USAGE_RECONCILER_CRON: 'true'
-      SUSPEND_OCP_USAGE_CLEANER_CRON: 'true'
-      SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: 'false'
-      SUSPEND_RH_MARKETPLACE_QUOTA_RECONCILER_CRON: 'false'
-      SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: 'false'
-      SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: 'false'
-      SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: 'false'
-      SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: 'false'
-      SUSPEND_AUTO_ENTITLEMENT_RECONCILER_CRON: 'false'
       MOA_SKU: SER0579
-      RH_MARKETPLACE_QUOTA_RECONCILER_DRY_RUN: 'false'
-      ACCOUNT_RECONCILER_DRY_RUN: 'false'
-      CLUSTER_TRANSFERS_RECONCILER_DRY_RUN: 'false'
-      PULL_SECRET_ROTATIONS_RECONCILER_DRY_RUN: 'false'
-      REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: 'false'
-      REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: '1'
-      REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: '5'
-      REGISTRY_CREDENTIAL_POOL_LOADER_HIGH_WATERMARK: '10'
       UNLEASH_URL: https://ocm-integration.unleash.devshift.net/api
-      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: '*/30 * * * *'
-      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: 0 23 * * 5
-      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: '*/30 * * * *'
-      PULL_SECRET_ROTATIONS_RECONCILER_CRON_SCHEDULE: 0 */6 * * *
-      ACCOUNT_RECONCILER_CRON_SCHEDULE: 30 18 * * *
-      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: 0 * * * *
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-integration.svc.cluster.local
       MANDRILL_TIMEOUT: 60s
-      UMB_CONSUMER_REPLICAS: '2'
-      UMB_URL: umb.api.redhat.com:61612
-      UMB_USER_QUEUE: Consumer.uhcaccountmanager.ocm-user-consumer-integration
-      UMB_USER_TOPIC: VirtualTopic.canonical.user
-      UMB_USER_CONSUMER_DRY_RUN: 'false'
-      ENABLE_UMB_USER_CONSUMER_MOCK: 'false'
-      UMB_SUBSCRIPTION_QUEUE: Consumer.uhcaccountmanager.ocm-subscription-consumer-integration
-      UMB_SUBSCRIPTION_TOPIC: VirtualTopic.canonical.subscription
-      UMB_SUBSCRIPTION_CONSUMER_DRY_RUN: 'false'
-      ENABLE_UMB_SUBSCRIPTION_CONSUMER_MOCK: 'false'
-      UMB_TIMEOUT: 5m
       ENABLE_ORG_SERVICE_ACCT_EMAIL_VALIDATION: 'true'
       PPROF_SERVER_BINDADDRESS: ''
 - name: uhc-account-manager
