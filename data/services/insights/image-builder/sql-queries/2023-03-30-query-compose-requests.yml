@@ -1,0 +1,19 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2023-03-30-query-compose-requests
+namespace:
+  $ref: /services/insights/image-builder/namespaces/prod-image-builder-prod.yml
+identifier: image-builder-prod
+output: stdout
+queries:
+- |
+  select
+    job_id,created_at,org_id,account_number,request->>'distribution' as distribution,
+    req->>'architecture' as architecture,req->>'image_type' as image_type,req->'upload_request'->>'type' as upload_request_type,req->'ostree'->>'url' as ostree_url,
+    request->'customizations'->'packages' as packages,
+    request->'customizations'->'filesystem' as filesystem,
+    request->'customizations'->'payload_repositories' as payload_repositories,
+    json_array_length(request::json->'customizations'->'users') as num_users
+  from
+    composes,json_array_elements(composes.request::json->'image_requests') as req;
