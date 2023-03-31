@@ -1,5 +1,7 @@
 # Managing Secrets
 
+Note, if you are facing a AWS Access Key leak, please refer to the [AppSRE SOP - When an AWS Access Key is Exposed](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/security/compromised-aws-access-key.md#when-an-aws-access-key-is-exposed).
+
 ## Pre-requisites
 
 * The Stonesoup vault role `/teams/stonesoup/roles/stonesoup-vault.yml`, added to your user account
