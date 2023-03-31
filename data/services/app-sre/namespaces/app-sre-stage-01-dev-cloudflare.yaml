@@ -61,3 +61,38 @@ externalResources:
       vars:
         - name: some-var
           text: some-value
+    - provider: logpush_ownership_challenge
+      identifier: app-sre-cloudflare-audit-logs
+      destination_conf: s3://app-sre-cloudflare-audit-logs/?region=us-east-1&sse=AES256
+    - provider: logpush_job
+      identifier: app-sre-cloudflare-audit-logs-logpush-job
+      destination_conf: s3://app-sre-cloudflare-audit-logs/?region=us-east-1&sse=AES256
+      ownership_challenge: eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4R0NNIiwidHlwIjoiSldUIn0..2ZvVoE5sSYlojYm2.ONKumypvp9hwNFURL3vjtrpR42GC1III7uEvCI9JIc2mIiowq6RAXlEqXau2cityO_VWukI-OizsDR1U6_sJjrz90hle8NKRtNvmtS__N_AvnYpMkavjJdavrXTp2eqta4ArHiJBdI21Wiy1ubzT1nbb6kW8EjFVKCS19x7WGMz0TPYlxHzos_xSZ8NAPW6nnW9s_QPDWd-zL4W0DeuMgPQBXqIOoddHI3FePmPv6ZFMlGr6fNOGmYkrtVY9oX2b857_yvUe7HZCn5PrJFMZ4yopDCxrKTNSQqlN1JJ2gG5jGWFLIg.nLkrd6ZKdjOkMpBINrGqKg
+      dataset: audit_logs
+      name: app-sre-audit-logs
+      enabled: true
+
+
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: s3
+    identifier: app-sre-cloudflare-audit-logs
+    defaults: /terraform/resources/s3-private-1.yml
+    bucket_policy:
+      {
+        "Id": "Policy1506627184792",
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "Stmt1506627150918",
+            "Action": ["s3:PutObject"],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::app-sre-cloudflare-audit-logs/*",
+            "Principal": {
+              "AWS": ["arn:aws:iam::391854517948:user/cloudflare-logpush"]
+            }
+          }
+        ]
+      }

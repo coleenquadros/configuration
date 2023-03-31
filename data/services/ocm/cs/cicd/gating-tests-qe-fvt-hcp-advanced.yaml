@@ -13,7 +13,7 @@ deployResources:
     cpu: 600m
     memory: 2000Mi
   limits:
-    cpu: 600m
+    cpu: 1200m
     memory: 2000Mi
 slack:
   workspace:
@@ -39,7 +39,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
-    ref: 53c820a933c832886bbfc59dd96a2b0de721c320
+    ref: c42aa264c8578874bb78defdcb11ecbd37e4ed75
     promotion:
       auto: true
       subscribe:
@@ -55,3 +55,33 @@ resourceTemplates:
     parameters:
       DEPLOYMENT_NAME: cs-gate-int
       ENVIRONMENT: integration
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage.yml
+    ref: c42aa264c8578874bb78defdcb11ecbd37e4ed75
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-cs-deployed-stage
+      publish:
+      - ocm-cs-qe-fvt-hcp-advanced-stage-ok
+      promotion_data:
+      - channel: ocm-cs-deployed-stage
+        data:
+        - parent_saas: saas-uhc-clusters-service
+          target_config_hash: f066828ad7b0a3b8
+          type: parent_saas_config
+    parameters:
+      DEPLOYMENT_NAME: cs-gate-stage
+      ENVIRONMENT: staging
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-production.yml
+    ref: b26c37a0d170855091879c3aa873ab1150553423
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-cs-deployed-prod
+      publish:
+      - ocm-cs-qe-fvt-hcp-advanced-prod-ok
+    parameters:
+      DEPLOYMENT_NAME: cs-gate-prod
+      ENVIRONMENT: production

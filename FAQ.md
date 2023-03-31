@@ -169,6 +169,11 @@ Grafana dashboards are discovered automatically if you follow this [guide](https
 If still missing, ask AppSRE to check logs of the Discovery and Grafana containers.
 Maybe the Grafana pods need to be restarted by AppSRE - [see SOP](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/grafana-dashboard-not-synching.md).
 
+### Read-only access to RDS console in AWS
+
+Make sure your user has the [log-consumer role](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/roles/log-consumer-rds.yml).
+Make sure you are adding the role for the appropriate AWS account, e.g., `app-sre`.
+
 ### Tagging options in app-interface
 
 GitLab: Users are not being tagged by default for SaaS file reviews. To be tagged on MRs for SaaS files you own, add `tag_on_merge_requests: true` to your user file.
@@ -480,13 +485,46 @@ For Prometheus to be able to monitor a service, two things are required:
 
 For further instructions, check out the complete [monitoring](./docs/app-sre/monitoring.md) guide.
 
-### I am having problems accessing a Gabi instance
+### I am having problems accessing a GABI instance
 
-In order to provide generic db access for tenant‘s service, we provide [gabi](https://github.com/app-sre/gabi) to run SQL queries on protected databases.
+To provide generic database access for tenant's service, we provide [GABI][1] to run SQL queries on protected databases.
 
-In case you have lost access to a gabi instance for your service (an `Unauthorized` message) - the reason is likely the instance expiration. Submit a MR to extend the expiration date.
+You can encounter one of three common errors while accessing your GABI instance:
 
-More information: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/gabi-instances-request.md
+  - `401 Unauthorized`, with the error message "Request cannot be authorized"
+
+    The query request cannot be authorized. The most common cause of this error
+    is an empty list of authorized users - there aren't any users who are allowed
+    to access this particular GABI instance.
+
+    Authorized users need to be assigned via the AppInterface.
+
+  - `403 Forbidden`, with error message "User does not have required permissions"
+
+    The user making the query request does not have access permission. The most
+    common cause of this error is the lack of permissions for a given user to
+    access this particular GABI instance.
+
+    A specific user has to be assigned to the right GABI instance (granted access)
+    via the AppInterface.
+
+  - `503 Service Unavailable`, with error message "The service instance has expired"
+
+    The instance has expired. The most common cause of this error is when a particular
+    GABI instance reaches its allotted expiration date.
+
+    The expiry date for a given GABI instance has to be refreshed (note: the expiration
+    date cannot be greater than 90 days from the current date). This can be done via
+    AppInterface.
+
+However, if your requests fail and you are confident that you see none of the above errors,
+see about [contacting AppSRE](#contacting-appsre). Please describe the problem you see and
+how to reproduce it.
+
+For more information, see: [Gabi Instances][2]
+
+[1]: https://github.com/app-sre/gabi
+[1]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/gabi-instances-request.md
 
 ### What kind of tickets will be addressed by jira auto resolve feature?
 

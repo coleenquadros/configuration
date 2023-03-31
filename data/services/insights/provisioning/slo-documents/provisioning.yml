@@ -13,6 +13,21 @@ namespaces:
 - $ref: /services/insights/provisioning/namespaces/provisioning-prod.yml
 
 slos:
+- name: API Reservation Success Rate
+  SLIType: availability
+  SLISpecification: The proportion of successful image launches and total launches
+  SLODetails: https://gitlab.cee.redhat.com/satellite-services/satellite-services.pages.redhat.com/-/blob/main/observability/slos/provisioning/reservation_success_rate.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(provisioning_reservation_count{result="success"}[{{window}}]))
+    /
+    sum(rate(provisioning_reservation_count[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /insights-prod/provisioning-prod/provisioning.prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/211/provisioning?orgId=1&viewPanel=54
+
 - name: API Success Rate
   SLIType: availability
   SLISpecification: The proportion of 2xx HTTP requests

@@ -18,7 +18,7 @@ deployResources:
     cpu: 600m
     memory: 3500Mi
   limits:
-    cpu: 600m
+    cpu: 1200m
     memory: 3500Mi
 
 slack:
@@ -51,7 +51,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
-    ref: master
+    ref: 7bf2fa35b3ba8ecccf0cfab7be7b25b0a8cf3fd7
     parameters:
       CLUSTER_LABEL: app-sre-stage-01
       ENVIRONMENT: staging
@@ -68,7 +68,7 @@ resourceTemplates:
           memory: 10Gi
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.appsres03ue1.yml
-    ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+    ref: f84dab7f66d7ccc73e2843b5ed395ac04c4385c8
     parameters:
       CLUSTER_LABEL: appsres03ue1
       ENVIRONMENT: staging
@@ -82,7 +82,7 @@ resourceTemplates:
           memory: 2500Mi
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.appsres04ue2.yml
-    ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+    ref: f84dab7f66d7ccc73e2843b5ed395ac04c4385c8
     parameters:
       CLUSTER_LABEL: appsres04ue2
       ENVIRONMENT: staging
@@ -195,7 +195,7 @@ resourceTemplates:
       RETENTION: 30d
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
-    ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+    ref: f84dab7f66d7ccc73e2843b5ed395ac04c4385c8
     parameters:
       CLUSTER_LABEL: app-sre-prod-01
       ENVIRONMENT: production
@@ -210,7 +210,7 @@ resourceTemplates:
           memory: 6500Mi
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
-    ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+    ref: f84dab7f66d7ccc73e2843b5ed395ac04c4385c8
     parameters:
       CLUSTER_LABEL: app-sre-prod-04
       ENVIRONMENT: production
@@ -225,18 +225,18 @@ resourceTemplates:
           memory: 7200Mi
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.appsrep05ue1.yml
-    ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+    ref: f84dab7f66d7ccc73e2843b5ed395ac04c4385c8
     parameters:
       CLUSTER_LABEL: appsrep05ue1
       ENVIRONMENT: production
       EXTERNAL_URL: https://prometheus.appsrep05ue1.devshift.net
       PROM_RESOURCES:
         requests:
-          cpu: 500m
-          memory: 7000Mi
+          cpu: "1"
+          memory: 10000Mi
         limits:
           cpu: "2"
-          memory: 9000Mi
+          memory: 13000Mi
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.ocmquayrwp01ue1.yml
     ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
@@ -331,7 +331,7 @@ resourceTemplates:
       PV_SIZE: 100Gi
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.appsrep06ue2.yml
-    ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+    ref: f84dab7f66d7ccc73e2843b5ed395ac04c4385c8
     parameters:
       CLUSTER_LABEL: appsrep06ue2
       ENVIRONMENT: production
@@ -365,7 +365,6 @@ resourceTemplates:
       EXTERNAL_URL: https://prometheus.rhobsp02ue1.devshift.net
       VERSION: v2.36.2
     ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
-# Alertmanager
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.backplanei01ue1.yml
     parameters:
@@ -408,6 +407,22 @@ resourceTemplates:
       ENVIRONMENT: staging
       EXTERNAL_URL: https://prometheus.stonesoups01ue1.devshift.net
     ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.stonesoupp01ue1.yml
+    parameters:
+      CLUSTER_LABEL: stonesoupp01ue1
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://prometheus.stonesoupp01ue1.devshift.net
+    ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.hst01ue1.yml
+    parameters:
+      CLUSTER_LABEL: hst01ue1
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://prometheus.hst01ue1.devshift.net
+      STORAGE_CLASS_NAME: gp3-csi
+    ref: ab64b1ac3262dad5d653ea595b2b9d8058fa5ae0
+# Alertmanager
 - name: alertmanager
   path: /openshift/alertmanager.template.yaml
   url: https://gitlab.cee.redhat.com/service/app-sre-observability
@@ -421,7 +436,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
-    ref: master
+    ref: 7bf2fa35b3ba8ecccf0cfab7be7b25b0a8cf3fd7
     parameters:
       REPLICAS: 1
       ENVIRONMENT: staging
@@ -674,3 +689,16 @@ resourceTemplates:
       ENVIRONMENT: staging
       EXTERNAL_URL: https://alertmanager.stonesoups01ue1.devshift.net
     ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.stonesoupp01ue1.yml
+    parameters:
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://alertmanager.stonesoupp01ue1.devshift.net
+    ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.hst01ue1.yml
+    parameters:
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://alertmanager.hst01ue1.devshift.net
+      STORAGE_CLASS_NAME: gp3-csi
+    ref: ab64b1ac3262dad5d653ea595b2b9d8058fa5ae0

@@ -1,6 +1,7 @@
 - job-template:
     id: 'ocm-portal-deploy'
     name: 'ocm-portal-deploy-{mode}'
+    slack_channel_notification: 'ocm-ui-gitbot'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -15,6 +16,12 @@
         ./push_to_insights.sh {mode}
     publishers:
     - workspace-cleanup
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: False
+        notify-failure: True
+        notify-repeated-failure: True
     <<: *gl_build_master
 
 - job-template:
@@ -50,6 +57,7 @@
 - job-template:
     id: 'ocm-cypress-smoke'
     name: '{gl_group}-{gl_project}-ocm-cypress-smoke'
+    slack_channel_notification: 'qe-ocm-ui-tests'
     environment: staging
     wrappers:
     - timeout_wrapper:
@@ -92,6 +100,12 @@
         flaky-test-reports: true
         junit-attachments: true
         allow-empty-results: true
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: True
+        notify-failure: True
+        notify-repeated-failure: True
     - gitlab_message:
         <<: *gitlab_message_defaults
     - gitlab-notifier

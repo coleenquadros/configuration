@@ -40,10 +40,17 @@ CUSTOMER_MON_NS_PATH = (
     "openshift-customer-monitoring.{cluster}.yml"
 )
 
-CUSTOMER_MON_ENV_STAGE = "staging"
-CUSTOMER_MON_ENV_PROD = "production"
-CUSTOMER_MON_JIRA_STAGE = "app-sre-stage"
-CUSTOMER_MON_JIRA_PROD = "app-sre"
+CUSTOMER_MON_JIRA_PHASE = {
+    "integration": "app-sre-stage",
+    "stage": "app-sre-stage",
+    "production": "app-sre",
+}
+
+OBSERVABILITY_SAAS_ENVIRONMENTS = {
+    "integration": "integration",
+    "stage": "staging",
+    "production": "production",
+}
 
 # OBSERVABILITY
 OBSERVABILITY_ROLE_PATH = (
@@ -175,12 +182,12 @@ def create_customer_monitoring_ns(
 ) -> None:
     """Function to create the customer monitoring namespace"""
     ns_path = CUSTOMER_MON_NS_PATH.format(data_dir=data_dir, cluster=cluster)
-    phase = {
-        CUSTOMER_MON_ENV_PROD: CUSTOMER_MON_JIRA_PROD,
-        CUSTOMER_MON_ENV_STAGE: CUSTOMER_MON_JIRA_STAGE,
-    }
     create_file_from_template(
-        ns_path, CUSTOMER_MON_NS_TEMPLATE, cluster=cluster, phase=phase[environment]
+        ns_path,
+        CUSTOMER_MON_NS_TEMPLATE,
+        cluster=cluster,
+        environment=environment,
+        phase=CUSTOMER_MON_JIRA_PHASE[environment]
     )
 
 
@@ -191,7 +198,7 @@ def configure_customer_monitoring_ns(
     customer monitoring namespace
     """
     _configure_cluster_for_customer_monitoring(data_dir, cluster)
-    _add_customer_monitoring_ns_to_observability_saas(data_dir, cluster, environment)
+    _add_customer_monitoring_ns_to_observability_saas(data_dir, cluster, OBSERVABILITY_SAAS_ENVIRONMENTS[environment])
 
 
 def _configure_cluster_for_customer_monitoring(data_dir: str, cluster: str) -> None:
@@ -255,11 +262,11 @@ def add_cluster_to_observability_role(data_dir: str, cluster: str) -> None:
     _add_entry_to_role_access(role_path, entry)
 
 
-def create_appsre_observability_ns(data_dir: str, cluster: str) -> None:
+def create_appsre_observability_ns(data_dir: str, cluster: str, environment: str) -> None:
     """Function to create the AppSre monitoring namespace"""
     ns_path = APPSRE_OBSERVABILITY_NS_PATH.format(data_dir=data_dir, cluster=cluster)
     create_file_from_template(
-        ns_path, APPSRE_OBSERVABILITY_NS_TEMPLATE, cluster=cluster
+        ns_path, APPSRE_OBSERVABILITY_NS_TEMPLATE, cluster=cluster, environment=environment
     )
 
 
@@ -386,7 +393,7 @@ def configure_customer_monitoring(
 
     create_customer_monitoring_ns(data_dir, cluster, environment)
     configure_customer_monitoring_ns(data_dir, cluster, environment)
-    create_appsre_observability_ns(data_dir, cluster)
+    create_appsre_observability_ns(data_dir, cluster, environment)
     configure_appsre_observability_ns(data_dir, cluster)
     add_cluster_to_observability_role(data_dir, cluster)
 

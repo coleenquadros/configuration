@@ -57,6 +57,23 @@ resourceTemplates:
           QUOTA_TYPE: ams
           OCM_URL: https://api.stage.openshift.com
           AMS_URL: https://api.stage.openshift.com
+          SUPPORTED_CLOUD_PROVIDERS:
+            - name: aws
+              default: true
+              regions:
+                - name: us-east-1
+                  default: true
+                  supported_instance_type:
+                    standard: {}
+                    eval: {}
+                - name: eu-central-1  # TODO(2023-05-01): Remove once eu-west-1 turn up complete
+                  supported_instance_type:
+                    standard: {}
+                    eval: {}
+                - name: eu-west-1
+                  supported_instance_type:
+                    standard: {}
+                    eval: {}
           CLUSTER_LIST:
             # To update: maintain ordering, get information (e.g. `cluster_id`) from `$ ocm list clusters`
             # Remember to add the cluster to the `kubeconfig` secret and bump version in
@@ -66,9 +83,10 @@ resourceTemplates:
               cluster_id: 201t7gancnqq4t82rmnjm2239stvdj6r
               cloud_provider: aws
               region: us-east-1
-              schedulable: true  # This is a no-op (not wired up in ACSCS)
+              multi_az: true
+              schedulable: true
               status: ready
-              central_instance_limit: 1000
+              central_instance_limit: 40
               provider_type: standalone
               supported_instance_type: "eval,standard"
               cluster_dns: apps.acs-stage-dp-02.8csb.p1.openshiftapps.com
@@ -83,9 +101,10 @@ resourceTemplates:
               cluster_id: 222fo0qdulgq6liq4rnk6juo02i7l7jq
               cloud_provider: aws
               region: eu-central-1
-              schedulable: true  # This is a no-op (not wired up in ACSCS)
+              multi_az: true
+              schedulable: true
               status: ready
-              central_instance_limit: 1000
+              central_instance_limit: 20
               provider_type: standalone
               supported_instance_type: "eval,standard"
               cluster_dns: apps.acs-stage-eu-01.ce55.p1.openshiftapps.com
@@ -103,7 +122,7 @@ resourceTemplates:
           name: stackrox-acs-fleet-manager-build-and-push-main
       - namespace:
           $ref: /services/acs-fleet-manager/namespaces/acs-fleet-manager-production-app-sre-prod-04.yml
-        ref: 0d23b4f4c05fdb4ce0c9de1c5047b27c3a40be91
+        ref: 4ee6131675567ca5ae4c20bbb9586efe241f7ae8
         parameters:
           ENVIRONMENT: production
           DATAPLANE_CLUSTER_CONFIG_FILE: /config/dataplane-cluster-configuration.yaml
@@ -118,9 +137,10 @@ resourceTemplates:
               cluster_id: 1u4i1u6p38ho2fpgfq0p8iejfdkpvqin
               cloud_provider: aws
               region: us-east-1
+              multi_az: true
               schedulable: true
               status: ready
-              central_instance_limit: 100
+              central_instance_limit: 150
               provider_type: standalone
               supported_instance_type: "eval,standard"
               cluster_dns: apps.acs-prod-dp-01.pnz3.p1.openshiftapps.com

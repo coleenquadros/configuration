@@ -8,13 +8,6 @@ app:
   $ref: /services/assisted-installer/app.yml
 pipelinesProvider:
   $ref: /services/assisted-installer/pipelines/tekton.assisted-installer-pipelines.appsrep05ue1.yaml
-deployResources:
-  requests:
-    cpu: 200m
-    memory: 700Mi
-  limits:
-    cpu: 200m
-    memory: 700Mi
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
@@ -196,5 +189,17 @@ resourceTemplates:
       KAFKA_EVENT_STREAM_TOPIC: events-stream-stage
       IMAGE_NAME: quay.io/app-sre/assisted-events-stream
       KAFKA_GROUP_ID: enriched-event-projection-stage
+      LOG_LEVEL: debug
+      REPLICAS_COUNT: 3
+  - ref: e6586bdbc82d3398a57097d2b6246a7a58be372a
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
+    promotion:
+      publish:
+      - assisted-events-stream-production-deploy-success-channel
+    parameters:
+      KAFKA_EVENT_STREAM_TOPIC: events-stream-production
+      IMAGE_NAME: quay.io/app-sre/assisted-events-stream
+      KAFKA_GROUP_ID: enriched-event-projection-production
       LOG_LEVEL: debug
       REPLICAS_COUNT: 3

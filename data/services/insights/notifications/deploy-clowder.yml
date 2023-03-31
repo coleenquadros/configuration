@@ -14,14 +14,6 @@ app:
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
-deployResources:
-  requests:
-    cpu: 300m
-    memory: 600Mi
-  limits:
-    cpu: 300m
-    memory: 600Mi
-
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
@@ -69,13 +61,14 @@ resourceTemplates:
       DB_SECRET_USERNAME_KEY: username
       RBAC_AUTHENTICATION_READ_TIMEOUT: 30000
       NOTIFICATIONS_EMAILS_ONLY_MODE_ENABLED: false
-      NOTIFICATIONS_USE_EVENT_TYPE_FOR_SUBSCRIPTION_ENABLED: true
+      NOTIFICATIONS_INSTANT_EMAILS_ENABLED: true
+      NOTIFICATIONS_USE_EVENT_TYPE_FOR_SUBSCRIPTION_ENABLED: false
 
   # stage
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: 814c674922749bf6849709084a47eafdb19908ea
+    ref: a376b20a7d13880e379245188a8d0b1aaa9c6748
     parameters:
       FLOORIST_SUSPEND: 'true'
       FLOORIST_IMAGE_TAG: fe12542 # 2022-06-03
@@ -91,6 +84,7 @@ resourceTemplates:
       SENTRY_DSN: https://3ff0dbd8017a4750a1d92055a1685263@o490301.ingest.sentry.io/5440905?environment=
       SOURCES_ENABLED: true
       NOTIFICATIONS_EMAILS_ONLY_MODE_ENABLED: false
+      NOTIFICATIONS_INSTANT_EMAILS_ENABLED: true
       NOTIFICATIONS_USE_EVENT_TYPE_FOR_SUBSCRIPTION_ENABLED: true
     # upstream:
     #   instance:
@@ -118,6 +112,7 @@ resourceTemplates:
       SENTRY_ENABLED: true
       SOURCES_ENABLED: true
       NOTIFICATIONS_EMAILS_ONLY_MODE_ENABLED: false
+      NOTIFICATIONS_INSTANT_EMAILS_ENABLED: true
       NOTIFICATIONS_USE_EVENT_TYPE_FOR_SUBSCRIPTION_ENABLED: true
     promotion:
       publish:
@@ -143,12 +138,13 @@ resourceTemplates:
       NOTIFICATIONS_USE_RBAC_FOR_FETCHING_USERS: false
       NOTIFICATIONS_USE_TEMPLATES_FROM_DB: true
       NOTIFICATIONS_USE_EVENT_TYPE_FOR_SUBSCRIPTION_ENABLED: true
+      RHEL_ADVISOR_DAILY_DIGEST_ENABLED: true
 
   # stage
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-engine.yaml version
-    ref: 814c674922749bf6849709084a47eafdb19908ea
+    ref: a376b20a7d13880e379245188a8d0b1aaa9c6748
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_LIMIT: 300m
@@ -255,7 +251,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: 814c674922749bf6849709084a47eafdb19908ea
+    ref: a376b20a7d13880e379245188a8d0b1aaa9c6748
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
@@ -304,7 +300,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: 45f4f9f4c035362d0975fc9dae428e21830146bc
+    ref: 5e13b18a03a176e507d538b3f674fbef7c6cfdf0
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
@@ -378,4 +374,3 @@ resourceTemplates:
       name: RedHatInsights-user-preferences-frontend-gh-build-master
     parameters:
       ENV_NAME: env-stage
-

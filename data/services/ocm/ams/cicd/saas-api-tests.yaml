@@ -13,7 +13,7 @@ deployResources:
     cpu: 600m
     memory: 2000Mi
   limits:
-    cpu: 600m
+    cpu: 1200m
     memory: 2000Mi
 slack:
   workspace:
@@ -62,9 +62,55 @@ resourceTemplates:
     targets:
       - namespace:
           $ref: /services/ocm/namespaces/uhc-integration.yml
-        ref: 80118b1accd62435d30635f194c21ed503a96e30
+        ref: f94161ce9a167d8777d5a9696539dcfb1aee980e
         promotion:
           publish:
-            - ocm-apitests-gatewatch-deployed-int
+            - ocm-gatewatch-deployed-int
         parameters:
           NAMESPACE: uhc-integration
+      - namespace:
+          $ref: /services/ocm/namespaces/uhc-stage.yml
+        ref: f94161ce9a167d8777d5a9696539dcfb1aee980e
+        promotion:
+          publish:
+            - ocm-gatewatch-deployed-stage
+        parameters:
+          NAMESPACE: uhc-stage
+      - namespace:
+          $ref: /services/ocm/namespaces/uhc-production.yml
+        ref: f94161ce9a167d8777d5a9696539dcfb1aee980e
+        promotion:
+          publish:
+            - ocm-gatewatch-deployed-prod
+        parameters:
+          NAMESPACE: uhc-production
+      - namespace:
+          $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
+        ref: 2156412db7176ee023202f0e4a139c305d918a38
+        promotion:
+          publish:
+            - ocm-osdfm-gatewatch-deployed-int
+        parameters:
+          NAMESPACE: osd-fleet-manager-integration
+          SECRET_NAME: fleet-manager
+          OCM_CLIENT_ID_PATH: /secrets/service/ocm-service.clientId
+          OCM_CLIENT_SECRET_PATH: /secrets/service/ocm-service.clientSecret
+          SERVICE_ACCOUNT: fleet-manager
+          SECRET_MOUNT: /secrets/service
+
+#      - namespace:
+#          $ref: /services/ocm/osd-fleet-manager/namespaces/stage.yml
+#        ref: 80118b1accd62435d30635f194c21ed503a96e30
+#        promotion:
+#          publish:
+#            - ocm-osdfm-gatewatch-deployed-stage
+#        parameters:
+#          NAMESPACE: uhc-stage
+#      - namespace:
+#          $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
+#        ref: 80118b1accd62435d30635f194c21ed503a96e30
+#        promotion:
+#          publish:
+#            - ocm-osdfm-gatewatch-deployed-prod
+#        parameters:
+#          NAMESPACE: uhc-production

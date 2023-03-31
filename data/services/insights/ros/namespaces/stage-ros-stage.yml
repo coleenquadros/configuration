@@ -36,6 +36,9 @@ openshiftResources:
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/ros-stage/hccm-ros-s3
+  version: 1
 
 managedExternalResources: true
 
@@ -46,10 +49,23 @@ externalResources:
   resources:
   - provider: rds
     identifier: ros-stage
+    annotations:
+      clowder/database: ros-backend
     defaults: /terraform/resources/insights/stage/rds/postgres13-rds-1.yml
     parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-ros-stage.yml
     old_parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-ros-stage.yml
     output_resource_name: ros-db
+    enhanced_monitoring: true
+    overrides:
+      engine_version: "13.9"
+      apply_immediately: false
+  - provider: rds
+    identifier: rosocp-stage
+    annotations:
+      clowder/database: ros-ocp-backend
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-ros-stage.yml
+    output_resource_name: rosocp-stage
     enhanced_monitoring: true
     overrides:
       engine_version: "13.9"

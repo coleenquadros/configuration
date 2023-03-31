@@ -1,0 +1,129 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: uhc
+
+name: saas-ocm-ams-umb-consumer
+description: SaaS tracking file for OCM Account Manager UMB Consumer Deployment
+
+app:
+  $ref: /services/ocm/ams/app.yml
+
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+
+deployResources:
+  requests:
+    cpu: 600m
+    memory: 1Gi
+  limits:
+    cpu: 600m
+    memory: 1Gi
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-uhc-info
+
+managedResourceTypes:
+- Deployment
+- Service
+- ConfigMap
+
+imagePatterns:
+- quay.io/app-sre/uhc-account-manager
+- quay.io/centos/centos
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: uhc-account-manager-umb-consumer
+  url: https://gitlab.cee.redhat.com/service/uhc-account-manager
+  path: /templates/consumer-template.yml
+  parameters:
+    AUTOMATIC_BAN: 'true'
+    DB_MAX_OPEN_CONNS: 250
+    MOA_SKU: SER0579
+    PPROF_SERVER_BINDADDRESS: ''
+    QUAY_REGISTRY_TEAM_NAME: staginginstallers
+    RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
+    SENTRY_PROJECT: '32'
+    UMB_TIMEOUT: 5m
+    USE_CANDLEPIN_BASIC_AUTH: 'false'
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-uhc-account-manager-gl-build-master
+    promotion:
+      publish:
+      - ocm-ams-umb-consumer-deployed-int
+    parameters:
+      METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-integration.svc.cluster.local
+      REPLICAS: '1'
+      SENTRY_URL: sentry.autom8.in
+      UMB_USER_QUEUE: Consumer.uhcaccountmanager.ocm-user-consumer-integration
+      UMB_SUBSCRIPTION_QUEUE: Consumer.uhcaccountmanager.ocm-subscription-consumer-integration
+      UNLEASH_URL: https://ocm-integration.unleash.devshift.net/api
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+      USE_CANDLEPIN_BASIC_AUTH: 'true'
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage.yml
+    ref: 210f59b5b413380682633af03382753626b3febe
+    parameters:
+      AUTOMATIC_BAN: 'false'
+      METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
+      REPLICAS: '2'
+      SENTRY_URL: sentry.stage.devshift.net
+      UMB_USER_QUEUE: Consumer.uhcaccountmanager.ocm-user-consumer-stage
+      UMB_SUBSCRIPTION_QUEUE: Consumer.uhcaccountmanager.ocm-subscription-consumer-stage
+      UNLEASH_URL: https://ocm-stage.unleash.devshift.net/api
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage-appsres04ue2.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-uhc-account-manager-gl-build-master
+    parameters:
+      AUTOMATIC_BAN: 'false'
+      METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
+      REPLICAS: '1'
+      SENTRY_URL: sentry.stage.devshift.net
+      UMB_USER_QUEUE: Consumer.uhcaccountmanager.ocm-user-consumer-stage-appsres04ue2
+      UMB_SUBSCRIPTION_QUEUE: Consumer.uhcaccountmanager.ocm-subscription-consumer-stage-appsres04ue2
+      UNLEASH_URL: https://ocm-stage.unleash.devshift.net/api
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage-sso-test.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-uhc-account-manager-gl-build-master
+    parameters:
+      AUTOMATIC_BAN: 'false'
+      METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
+      REPLICAS: '1'
+      RHIT_BASE_TERMS_URL: https://terms.stage.api.redhat.com/svcrest/terms/
+      RHIT_BASE_TNC_URL: https://www.stage.redhat.com/wapps/tnc
+      UHC_TOKEN_URL: ${SSO_BASE_URL}/protocol/openid-connect/token
+      JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
+      RHIT_BASE_USER_URL: https://user.stage.api.redhat.com/v2/
+      RHIT_BASE_SUBSCRIPTION_URL: https://subscription.stage.api.redhat.com/svcrest/subscription/v5/
+      RHIT_BASE_REGNUM_URL: https://subscription.stage.api.redhat.com/svcrest/regnum/v5/
+      RHIT_BASE_REGISTRY_URL: https://container-registry-authorizer.stage.api.redhat.com/v1/
+      RHIT_BASE_EXPORT_COMPLIANCE_URL: https://export-compliance.stage.api.redhat.com/v1/
+      SENTRY_URL: sentry.stage.devshift.net
+      UMB_USER_QUEUE: Consumer.uhcaccountmanager.temp-ocm-user-consumer-sso-test
+      UMB_SUBSCRIPTION_QUEUE: Consumer.uhcaccountmanager.temp-ocm-subscription-consumer-sso-test
+      UNLEASH_URL: https://ocm-stage.unleash.devshift.net/api
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1

@@ -19,7 +19,7 @@ deployResources:
     cpu: "1"
     memory: 2000Mi
   limits:
-    cpu: "1"
+    cpu: 1200m
     memory: 2000Mi
 
 managedResourceTypes:
@@ -52,6 +52,13 @@ resourceTemplates:
   path: /deploy.yml
   url: https://github.com/openshift/hac-core
   targets:
+  # Stage Beta
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
+    ref: main
+    parameters:
+      ENV_NAME: "frontends-beta"
+      IMAGE: "quay.io/cloudservices/hac-core-frontend"
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -67,6 +74,13 @@ resourceTemplates:
   path: /deploy.yml
   url: https://github.com/openshift/hac-dev
   targets:
+  # Stage Beta
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
+    ref: main
+    parameters:
+      ENV_NAME: "frontends-beta"
+      IMAGE: "quay.io/cloudservices/hac-dev-frontend"
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -99,11 +113,9 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hac/namespaces/ephem.yml
-    ref: master
+    ref: fe47c2679e005b6faff3770bafb9258c073bbff6
     parameters:
       ENV_NAME: ephem-hac
+      IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
       SSO_URL: https://sso.redhat.com/auth/
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: RedHatInsights-insights-chrome-gh-build-master
+

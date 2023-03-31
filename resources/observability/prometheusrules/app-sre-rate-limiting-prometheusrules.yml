@@ -6,7 +6,7 @@ metadata:
   labels:
     prometheus: app-sre
     role: alert-rules
-  name: app-interface-alerts
+  name: rate-limiting-alerts
 spec:
   groups:
   - name: rate-limiting
@@ -14,7 +14,7 @@ spec:
     rules:
     - alert: RateLimitingUnavailable
       labels:
-        service: app-interface
+        service: rate-limiting
         severity: high
         jiralert: ASIC
       expr: absent(limitador_up{job="limitador",namespace="app-sre-rate-limiting"} == 1)
@@ -26,10 +26,10 @@ spec:
         link_url: ""
     - alert: RatelimitingErrorRateHigh
       labels:
-        service: app-interface
+        service: rate-limiting
         severity: high
         jiralert: ASIC
-      expr: (1- sum (rate(envoy_cluster_ratelimit_failure_mode_allowed[1m]))  / (sum(rate(envoy_cluster_ratelimit_failure_mode_allowed[1m])) + sum(rate(authorized_calls[1m])) + sum(rate(limited_calls[1m])))) > 0.99
+      expr: (1- sum (rate(envoy_cluster_ratelimit_failure_mode_allowed[1m]))  / (sum(rate(envoy_cluster_ratelimit_failure_mode_allowed[1m])) + sum(rate(authorized_calls[1m])) + sum(rate(limited_calls[1m])))) <= 0.99
       for: 5m
       annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/rate-limiting.md"

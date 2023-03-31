@@ -9,6 +9,10 @@ description: devshift.net
 account:
   $ref: /aws/app-sre/account.yml
 
+allowed_vault_secret_paths:
+- app-sre/integrations-output/terraform-cloudflare-resources/app-sre-stage-01/dev-cloudflare/cloudflare-dev-app-sre-zone
+
+
 records:
 # ; KB
 - name: kb
@@ -109,14 +113,22 @@ records:
   type: TXT
   records:
   - 822297313-580914865
+
 - name: _acme-challenge.cloudflare-dev.app-sre
   type: TXT
-  records:
-  - o3oVyyWwIiXUMJS91Nqco_GbnsuevXnszULUjYf5HQs
+  _records_from_vault:
+    - path: app-sre/integrations-output/terraform-cloudflare-resources/app-sre-stage-01/dev-cloudflare/cloudflare-dev-app-sre-zone
+      field: validation_records
+      key: _acme-challenge.cloudflare-dev.app-sre.devshift.net
+
 - name: _acme-challenge.cdn01.cloudflare-dev.app-sre
   type: TXT
-  records:
-  - QzJFCJEhsI9IDGfhDw8p3qzC5Jog9YA4Me5biIFxrkA
+  _records_from_vault:
+    - path: app-sre/integrations-output/terraform-cloudflare-resources/app-sre-stage-01/dev-cloudflare/cloudflare-dev-app-sre-zone
+      field: validation_records
+      key: _acme-challenge.cdn01.cloudflare-dev.app-sre.devshift.net
+
+
 - {name: cdn01.cloudflare-dev.app-sre, type: CNAME, records: [cdn01.cloudflare-dev.app-sre.devshift.net.cdn.cloudflare.net]}
 
 - {name: prometheus.telemeter-prod-01, type: CNAME, _target_cluster: {$ref: /openshift/telemeter-prod-01/cluster.yml}}
@@ -384,3 +396,11 @@ records:
   type: CNAME
   _target_cluster:
     $ref: /openshift/stonesoups01ue1/cluster.yml
+- name: prometheus.stonesoupp01ue1
+  type: CNAME
+  _target_cluster:
+    $ref: /openshift/stonesoupp01ue1/cluster.yml
+- name: alertmanager.stonesoupp01ue1
+  type: CNAME
+  _target_cluster:
+    $ref: /openshift/stonesoupp01ue1/cluster.yml

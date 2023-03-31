@@ -13,14 +13,6 @@ app:
 pipelinesProvider:
   $ref: /services/managed-services/pipelines/tekton.kas-fleet-manager-pipelines.appsrep05ue1.yaml
 
-deployResources:
-  requests:
-    cpu: 300m
-    memory: 600Mi
-  limits:
-    cpu: 300m
-    memory: 600Mi
-
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
@@ -55,12 +47,12 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
-    ref: dc023d9d0a3384475809c63fbbc2661de6b931f9
+    ref: dfee555dc92dc69868b80a386cf81d51c29e9f61
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/managedkafka
       OBSERVATORIUM_TOKEN_REFRESHER_IMAGE: quay.io/rhoas/mk-token-refresher
-      OBSERVATORIUM_TOKEN_REFRESHER_IMAGE_TAG: e96a181
+      OBSERVATORIUM_TOKEN_REFRESHER_IMAGE_TAG: 36dc5c3
       OBSERVATORIUM_TOKEN_REFRESHER_REPLICAS: 3
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-production.yml
@@ -70,7 +62,7 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: 8711a4ba73e99d78813a5b81878e5c2bff0521b5
+    ref: ef6eb78a542581964a5bddbd7d62874c81e81d40
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
@@ -83,7 +75,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
-    ref: dc023d9d0a3384475809c63fbbc2661de6b931f9
+    ref: dfee555dc92dc69868b80a386cf81d51c29e9f61
     parameters:
       OBSERVABILITY_REMOTE_WRITE_PROXY_FORWARD_URL: https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/managedkafka/api/v1/receive
       OBSERVABILITY_REMOTE_WRITE_PROXY_TOKEN_VERIFICATION_ENABLED: true
@@ -99,7 +91,7 @@ resourceTemplates:
       OBSERVABILITY_REMOTE_WRITE_PROXY_IMAGE_PULL_POLICY: IfNotPresent
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-production.yml
-    ref: 8711a4ba73e99d78813a5b81878e5c2bff0521b5
+    ref: ef6eb78a542581964a5bddbd7d62874c81e81d40
     parameters:
       OBSERVABILITY_REMOTE_WRITE_PROXY_FORWARD_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka/api/v1/receive
       OBSERVABILITY_REMOTE_WRITE_PROXY_TOKEN_VERIFICATION_ENABLED: true
@@ -162,7 +154,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
-    ref: dc023d9d0a3384475809c63fbbc2661de6b931f9
+    ref: dfee555dc92dc69868b80a386cf81d51c29e9f61
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: stage
@@ -183,34 +175,16 @@ resourceTemplates:
       AMS_URL: ${OCM_BASE_URL}
       # Use the ams based quota management service
       QUOTA_TYPE: ams
-      # Dex identity service url
-      DEX_URL: http://dex-dex.apps.pbraun-observatorium.observability.rhmw.io
-      # Dex identity service username
-      DEX_USERNAME: admin@example.com
-      # A URL to an Observatorium instance where observability metrics will sent to.
-      OBSERVATORIUM_GATEWAY: https://observatorium-observatorium.apps.pbraun-observatorium.observability.rhmw.io
-      # Observatorium tenant where observability metrics will sent to.
-      OBSERVATORIUM_TENANT: test
-      # The value of this auth type ( "dex" or "redhat" ) will determine the auth type ( Dex or Red Hat SSO) implemented for the observability stack
-      OBSERVATORIUM_AUTH_TYPE: redhat
       # Token Refresher URL
       OBSERVATORIUM_TOKEN_REFRESHER_URL: http://token-refresher.managed-services-stage.svc.cluster.local
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.50.2
+      OBSERVABILITY_CONFIG_TAG: v1.50.3
       # Repository for observability resources
       OBSERVABILITY_CONFIG_REPO: quay.io/rhoas/observability-resources-mk
       # Observatorium Red Hat SSO tenant for observability stack
       OBSERVATORIUM_RHSSO_TENANT: managedkafka
-      # Red Hat SSO Observability gateway
-      OBSERVATORIUM_RHSSO_GATEWAY: https://observability-rw-proxy-managed-services-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
-      # Red Hat SSO Observability realm
-      OBSERVATORIUM_RHSSO_REALM: redhat-external
-      # Red Hat SSO Observability auth server url
-      OBSERVATORIUM_RHSSO_AUTH_SERVER_URL: https://sso.redhat.com/auth
       # Enable reading of the data plane observability configuration file
       DATAPLANE_OBSERVABILITY_CONFIG_ENABLE: true
-      # Changing this to true will delete all kafkas after their lifespan expired
-      ENABLE_KAFKA_LIFE_SPAN: true
       MAS_SSO_ENABLE_AUTH: true
       # The tls certificate management strategy. Possible options are manual and automatic.
       KAFKA_TLS_CERTIFICATE_MANAGEMENT_STRATEGY: automatic
@@ -244,9 +218,9 @@ resourceTemplates:
       # The Cluster Logging Operator ID. An empty string indicates that the operator should not be installed.
       CLUSTER_LOGGING_OPERATOR_ADDON_ID: ""
       # Index image used for Observability Operator
-      OBSERVABILITY_OPERATOR_INDEX_IMAGE: "quay.io/rhoas/observability-operator-index:v4.2.0"
+      OBSERVABILITY_OPERATOR_INDEX_IMAGE: "quay.io/rhoas/observability-operator-index:v4.2.1"
       # Starting CSV used for Observability Operator
-      OBSERVABILITY_OPERATOR_STARTING_CSV: "observability-operator.v4.2.0"
+      OBSERVABILITY_OPERATOR_STARTING_CSV: "observability-operator.v4.2.1"
       # As a user, one can only 1 developer instance if they do not have quota to create standard instances
       MAX_ALLOWED_DEVELOPER_INSTANCES: 1
       # A list of usernames representing users who do not have access to the service
@@ -541,7 +515,7 @@ resourceTemplates:
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: 8711a4ba73e99d78813a5b81878e5c2bff0521b5
+    ref: ef6eb78a542581964a5bddbd7d62874c81e81d40
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: production
@@ -590,8 +564,6 @@ resourceTemplates:
       OBSERVATORIUM_TOKEN_REFRESHER_URL: http://token-refresher.managed-services-production.svc.cluster.local
       # Observatorium Red Hat SSO tenant for observability stack
       OBSERVATORIUM_RHSSO_TENANT: managedkafka
-      # Red Hat SSO Observability gateway
-      OBSERVATORIUM_RHSSO_GATEWAY: https://observability-rw-proxy-managed-services-production.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
       # Red Hat SSO Observability realm
       OBSERVATORIUM_RHSSO_REALM: redhat-external
       # Red Hat SSO Observability auth server url
@@ -603,9 +575,9 @@ resourceTemplates:
       # Enable the data plane observability metrics forwarding
       DATAPLANE_OBSERVABILITY_CONFIG_ENABLE: true
       # Index image used for Observability Operator
-      OBSERVABILITY_OPERATOR_INDEX_IMAGE: "quay.io/rhoas/observability-operator-index:v4.2.0"
+      OBSERVABILITY_OPERATOR_INDEX_IMAGE: "quay.io/rhoas/observability-operator-index:v4.2.1"
       # Starting CSV used for Observability Operator
-      OBSERVABILITY_OPERATOR_STARTING_CSV: "observability-operator.v4.2.0"
+      OBSERVABILITY_OPERATOR_STARTING_CSV: "observability-operator.v4.2.1"
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
       # A list of users with read-only permissions for data plane clusters
@@ -820,9 +792,6 @@ resourceTemplates:
         - method: DELETE
           roles:
             - kas-fleet-manager-admin-full-prod
-
-      # Changing this to true will delete all kafkas after their lifespan expired.
-      ENABLE_KAFKA_LIFE_SPAN: true
 
       #"auto": use kas-fleet-shard capacity reporting and the DYNAMIC_SCALING_CONFIG parameter.
       #"manual": use data plane config file via the CLUSTER_LIST parameter.

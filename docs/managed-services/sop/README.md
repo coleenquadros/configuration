@@ -206,14 +206,36 @@ Kafka Service Fleet Manager /metrics/federate endpoint is not performing normall
 
 - OSD Console access to the cluster that runs the Kafka Service Fleet Manager .
 - Access to cluster resources: Pods/Deployments
+- Access to AppSRE Grafana dashboards
 
 ### Relevant secrets
+N/A
 
 ### Steps
 
-Check observatorium for [production](https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADX/api?orgId=1&refresh=1m) or [stage](https://grafana.stage.devshift.net/d/Tg-mH0rizaSJDKSADX/api?orgId=1&refresh=1m) to see if there are any issues indicating the cause of the high latency.
+- Check the state of the MST Observatorium API service to see if there are any issues indicating the cause of the high latency for the /query and /query_range endpoints
+  - Ensure Observatorium is operational. See the following panels in the [AppSRE/Blackbox Exporter Overview](https://grafana.app-sre.devshift.net/d/xtkCtBkiz/blackbox-exporter-overview?orgId=1&refresh=1m) dashboard.
+    - For Production, see [https://observatorium-mst.api.openshift.com](https://grafana.app-sre.devshift.net/d/xtkCtBkiz/blackbox-exporter-overview?orgId=1&refresh=1m&var-interval=%24__auto_interval_interval&var-targets=https:%2F%2Fobservatorium-mst.api.openshift.com)
+    - For Stage, see [https://observatorium-mst.api.stage.openshift.com](https://grafana.app-sre.devshift.net/d/xtkCtBkiz/blackbox-exporter-overview?orgId=1&refresh=1m&var-interval=$__auto_interval_interval&var-targets=https:%2F%2Fobservatorium-mst.api.stage.openshift.com)
+  - Check the Observatorium API dashboards for further information on error rates and duration of requests to the /query and /query_range endpoints.
+    - [Production](https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADX/api?orgId=1&refresh=1m&var-datasource=telemeter-prod-01-prometheus&var-namespace=telemeter-production&var-handler=All)
+    - [Stage](https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADX/api?orgId=1&refresh=1m&var-datasource=app-sre-stage-01-prometheus&var-namespace=telemeter-stage&var-handler=All)
 
-Otherwise refer to the steps in [Kafka Service Fleet Manager availability](#kafka-service-fleet-manager-availability)
+    > **IMPORTANT**: If the issue is due to performance issues with Stage MST Observatorium, the alert can be ignored. The Observatorium team does not enforce SLOs in Stage. It is a greatly scaled down deployment and it is not intended to offer production like levels of service or performance. If the alert continues to fire due to continued increase in latency, sync with the MK Control Plane team if it's worth considering increasing the latency target. Note that this should only ever be considered for Stage. 
+
+- Check the token refresher Kubernetes deployments in [Production](https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/managed-services-production/core~v1~Pod) or [Stage](https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/managed-services-stage/core~v1~Pod). The token refresher pods are prefixed with `token-refresher-`.
+  - Ensure that the number of ready pods matches the desired number specified by the parameter `OBSERVATORIUM_TOKEN_REFRESHER_REPLICAS` of the `observatorium-token-refresher` resource template per namespace in the [saas-kas-fleet-manager.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/managed-services/cicd/saas/saas-kas-fleet-manager.yaml).
+  - Ensure there are no errors or warnings displayed in the logs of these pods. 
+
+- Check to see if there are any issues with sso.redhat.com. The token refresher communicates with this service to fetch tokens for authenticating requests to Observatorium.
+  - Ensure RHSSO is up and communication is possible by checking the following:
+    - Check the [RHSSO health endpoint](https://sso.redhat.com/auth/realms/redhat-external/health/v3/health) to see if it is functioning and communication is possible. The `healthy` field should have the value `true`.
+    - Check the [sso.redhat.com](https://grafana.app-sre.devshift.net/d/xtkCtBkiz/blackbox-exporter-overview?orgId=1&refresh=1m&var-interval=$__auto_interval_interval&var-targets=https:%2F%2Fsso.redhat.com&var-targets=https:%2F%2Fsso.redhat.com%2Fauth%2Frealms%2Fredhat-external%2F.well-known%2Fopenid-configuration) panels in the AppSRE/Blackbox Exporter Overview Grafana dashboard.
+  - Check [status.redhat.com](https://status.redhat.com) to see if there are any announcements or notifications indicating that the service is down or experiencing issues.
+
+  > If the resources above does not give enough information to confirm that the cause of the issue is due to or not due to underlying performance issues with sso.redhat.com, please reach out to the [CIAM team](../../../data/teams/ciam/permissions/ciam-s-client-integration-sre-coreos-slack.yml).
+
+- Otherwise refer to the steps in [Kafka Service Fleet Manager availability](#kafka-service-fleet-manager-availability).
 
 ---
 

@@ -14,14 +14,6 @@ app:
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
-deployResources:
-  requests:
-    cpu: 600m
-    memory: 1Gi
-  limits:
-    cpu: 600m
-    memory: 1Gi
-
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
@@ -518,6 +510,11 @@ resourceTemplates:
         - name: rhsm-worker-internal
           route: /app/rhsm-worker/internal/
           origin: http://swatch-tally-service.rhsm-prod.svc.cluster.local:8000/
+          auth:
+            saml: "'subscription-watch-admins' in user['Role']"
+        - name: swatch-contracts
+          route: /api/swatch-contracts/
+          origin: http://swatch-contracts-service.rhsm-prod.svc.cluster.local:8000/api/swatch-contracts/
           auth:
             saml: "'subscription-watch-admins' in user['Role']"
         - name: rbac

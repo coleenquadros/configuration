@@ -1120,7 +1120,7 @@ JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/depen
 - `account`: a `$ref` to the account definition to be used in conjunction with the provider
 - `vpc`: (optional) a `$ref` to a VPC to route traffic within. this will cause the hosted zone to be considered private
 - `records`: A list of `record`. The parameters of the `record` match those of Terraform's [aws_route53_record resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record). In addition to the terraform fields, we also support special fields which are distinguishable by their name starting with `_` (underscore). The special fields are described below.
-
+- `allowed_vault_secret_paths`: (optional) a list of the Vault secret paths that are permitted to be used in `_records_from_vault` entries
 
 Additional special fields:
 - `_target_cluster`: A `$ref` to an OpenShift cluster definition. The value of `elbFQDN` on the cluster definition will be used as a target on the record
@@ -1134,6 +1134,16 @@ Additional special fields:
       name: <subdomain>.example.org # example.com should match the zone this entry is added in
   ```
 - `_healthcheck`: Allows defining a health check resource that will be assigned to the record. The parameters from Terraform's [aws_route53_health_check resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_health_check) are permitted.
+- `_records_from_vault`: Allows the use of Vault secrets for the record value(s). **The only approved use case for this at the moment is domain control validation (DCV).** For instance, using the output from `terraform-cloudflare-resources`, this can be used to verify ownership of domains for Cloudflare ACM certificates.
+  - `path`: Full path to the data in Vault
+  - `field`: The field that contains the data
+  - `key`: (optional) If the Vault data is formatted in JSON, the item in the object matching this key name will be selected
+  ```yaml
+  _records_from_vault:
+    - path: app-sre/integrations-output/terraform-cloudflare-resources/app-sre-stage-01/dev-cloudflare/cloudflare-dev-app-sre-zone
+      field: validation_records
+      key: _acme-challenge.cloudflare-dev.app-sre.devshift.net
+  ```
 
 **NOTE:** If you need a record under the `api.openshift.com` zone
 [please go to this document](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/add-route-for-ocm-component.md)
@@ -2285,6 +2295,8 @@ When provisioning certificates with [Cloudflare ACM](https://developers.cloudfla
 - `argo`: (Optional) Settings either or both of these options will enable Cloudflare Argo on the zone (an enterprise account is required)
   - `smart_routing`: `on` or `off`
   - `tiered_caching`: `on` or `off`
+- `tiered_cache`: (Optional) Manages Cloudflare Tiered Cache settings. This allows you to adjust topologies for your zone
+  - `cache_type`: One of: `generic`, `smart`
 - `cache_reserve`: (Optional) Control Cloudflare [Cache Reserve](https://developers.cloudflare.com/cache/about/cache-reserve/) options on a zone. **Setting this currently does nothing. See the [Cloudflare Runbook](/docs/app-sre/runbook/cloudflare.md) for more info**
   - `enabled`: `on` or `off`
 - `records`: A list of records to provision
@@ -2297,7 +2309,7 @@ When provisioning certificates with [Cloudflare ACM](https://developers.cloudfla
   - `identifier`: a unique identifier for the worker (terraform identifier)
   - `pattern`: The URL pattern that the worker will act on (ex: `mydomain.com/some/path/*`)
   - `script_name`: The name of the worker script that this worker will use to process requests (must be defined and match the name of a worker script resource)
-- `certificates`: (Optional) A list of Cloudflare certificates to provision for the zone
+- `certificates`: (Optional) A list of Cloudflare certificates to provision for the zone. See the [DCV docs](#domain-control-validation-dcv-for-cloudflare-certificates) for verifying domain ownership.
   - `identifier`: a unique identifier for the certificate (terraform identifier)
   - `type`: the type of certificate (currently supports `advanced` for [Cloudflare ACM certificates](https://developers.cloudflare.com/ssl/edge-certificates/advanced-certificate-manager/))
   - `certificate_authority`: certificate authority to issue the certificate. `lets_encrypt` is the only value that is currently supported.
@@ -2306,6 +2318,45 @@ When provisioning certificates with [Cloudflare ACM](https://developers.cloudfla
   - `validity_days`: how long the certificate is valid for. Let's Encrypt only supports `90`.
   - `cloudflare_branding`: (default **false**) whether to include Cloudflare branding. This will add sni.cloudflaressl.com as the Common Name.
   - `wait_for_active_status`: (default **false**) whether to wait for a certificate pack to reach status active during creation. Note that if this takes longer than expected it could block other changes within your account.
+
+#### Domain Control Validation (DCV) for Cloudflare Certificates
+
+When provisioning certificates with [Cloudflare ACM](https://developers.cloudflare.com/ssl/edge-certificates/advanced-certificate-manager/) you will need to prove ownership of the domain by creating TXT records if the DNS is not hosted at Cloudflare.
+
+If the DNS is hosted in a Route53 zone, you can configure the DCV record(s) as seen in the example below:
+
+```yaml
+---
+$schema: /dependencies/dns-zone-1.yml
+
+labels: {}
+
+name: <your domain>
+description: <some description>
+
+# A list of all paths used below in _records_from_vault
+allowed_vault_secret_paths:
+- app-sre/integrations-output/terraform-cloudflare-resources/app-sre-stage-01/dev-cloudflare/cloudflare-dev-app-sre-zone
+
+records:
+- name: _acme-challenge.cloudflare-dev.app-sre
+  type: TXT
+  _records_from_vault:
+    - path: app-sre/integrations-output/terraform-cloudflare-resources/app-sre-stage-01/dev-cloudflare/cloudflare-dev-app-sre-zone
+      field: validation_records
+      key: _acme-challenge.cloudflare-dev.app-sre.devshift.net
+
+- name: _acme-challenge.cdn01.cloudflare-dev.app-sre
+  type: TXT
+  _records_from_vault:
+    - path: app-sre/integrations-output/terraform-cloudflare-resources/app-sre-stage-01/dev-cloudflare/cloudflare-dev-app-sre-zone
+      field: validation_records
+      key: _acme-challenge.cdn01.cloudflare-dev.app-sre.devshift.net
+```
+
+The Vault `path` will be: `app-sre/integrations-output/terraform-cloudflare-resources/<cluster_name>/<namespace>/<zone_identifier>-zone`
+
+The `field` will always be `validation_records` and the `key` will be the value of the SANs on the certificate, prefixed with `_acme-challenge`.
 
 ### Manage Cloudflare Worker Scripts via App-Interface (`/openshift/namespace-1.yml`) using Terraform
 
@@ -2323,6 +2374,106 @@ Worker scripts are programs that will process requests and possibly change them 
 - `vars`: (Optional) Variables that we want to pass to the worker script as environment variables
   - `name`: Name of the variable
   - `text`: Value of the variable
+
+### Manage Cloudflare Logpush and Logpull configuration using Terraform
+Cloudflare products generate metadata which can be used for purposes such as debugging, identifying configuration adjustments, and creating analytics etc. 
+Cloudflare has (features)[https://developers.cloudflare.com/logs/#features] that allows these logs to be accessible through different means. You can refer to the Cloudflare docs on how those features can be useful to you.
+
+App-interface currently supports following Terraform resources for Logpush and Logpull configuration.
+#### Logpush
+Cloudflare [Logpush](https://developers.cloudflare.com/logs/about/) supports pushing logs to storage services, SIEMs, and log management providers via the Cloudflare dashboard or API.
+
+Configuring Logpush is a two step process (for some destinations) with app-interface.
+1. Create a MR with Logpush ownership challenge as documented below and merge it. Note: You can skip this step, if the Logpush [destination](https://developers.cloudflare.com/logs/get-started/enable-destinations/) does not require ownership challenge. 
+1. Create a MR with Logpush job resource and merge it. 
+##### Logpush ownership challenge resource
+
+Certain Logpush [destinations](https://developers.cloudflare.com/logs/get-started/enable-destinations/) require proof of ownership. You can configure ownership challenge through [`logpush_ownership_challenge`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpush_ownership_challenge) Terraform resource.
+
+Following is an example, please set attribute values as per your needs.
+```yaml
+- provider: cloudflare
+  provisioner:
+    $ref: /cloudflare/app-sre/account.yml
+  resources:
+  # For zone level resource
+  - provider: logpush_ownership_challenge
+    identifier: test-logpush-challenge
+    zone: test-zone
+    destination_conf: s3://bucket/logs?region=us-east-1&sse=AES256 # Update this according to your destination
+  # For account level resource
+  - provider: logpush_ownership_challenge
+    identifier: test-logpush-challenge
+    destination_conf: s3://bucket/logs?region=us-east-1&sse=AES256 # Update this according to your destination
+```
+
+Note: Currently we only support `S3` for Logpush destination. Please see additional resources for setting up bucket policy required for `S3` destination before creating ownership challenge.
+
+Once the logpush_ownership_challenge is configured, you can manually inspect the destination to obtain the ownership token which is used during the creation of `logpush_job`.
+
+Additional resource:
+- [Cloudflare destination](https://developers.cloudflare.com/logs/get-started/api-configuration/#destination)
+- [S3 Destination Pre-requisite](https://developers.cloudflare.com/logs/get-started/enable-destinations/aws-s3/#manage-via-api)
+
+##### Logpush job resource
+The Cloudflare Logpush job resource definition follows [`logpush_job`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpush_job) Terraform resource.
+
+Following is an example, please set attribute values as per your needs.
+```yaml
+- provider: cloudflare
+  provisioner:
+    $ref: /cloudflare/app-sre/account.yml
+  resources:
+    - provider: logpush_job
+      identifier: test-logpush-job-zone
+      enabled: true
+      zone: test-zone
+      logpull_options: fields=RayID,ClientIP,EdgeStartTimestamp&timestamps=rfc3339
+      destination_conf: s3://bucket/logs?region=us-east-1&sse=AES256
+      ownership_challenge: some-challenge 
+      dataset: http_requests
+      frequency: <low|high>
+    - provider: logpush_job
+      identifier: test-logpush-job-account
+      enabled: true
+      logpull_options: fields=RayID,ClientIP,EdgeStartTimestamp&timestamps=rfc3339
+      destination_conf: s3://bucket/logs?region=us-east-1&sse=AES256
+      ownership_challenge: some-challenge
+      dataset: http_requests
+      frequency: high
+      name: test-logpush-job # must contain only alphanumeric characters, hyphens, and periods
+      kind: instant-logs
+      filter: "{\"key\":\"BotScore\",\"operator\":\"lt\",\"value\":\"30\"}"
+```
+
+Additonal resources
+- [Cloudflare datasets](https://developers.cloudflare.com/logs/reference/log-fields/#datasets)
+
+#### Logpull
+Cloudflare [Logpull](https://developers.cloudflare.com/logs/logpull/) is a REST API for consuming request logs over HTTP. These logs contain data related to the connecting client, the request path through the Cloudflare network, and the response from the origin web server.
+
+##### Logpull retention resource
+
+The cloudflare Logpull retention resource definition follows [`logpull_retention`](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/logpull_retention) Terraform resource.
+
+Following is an example, please set attribute values as per your needs.
+
+```yaml
+- provider: cloudflare
+  provisioner:
+    $ref: /cloudflare/app-sre/account.yml
+  resources:
+    - provider: logpull_retention
+      identifier: test-logpull-retention
+      zone: test-zone
+      enabled: true
+```
+#### Monitoring Logpush jobs
+Tenants are encouraged to setup prometheus alerts to monitor Logpush job status in case of any failures. 
+You can utilize following metrics to setup the alerts
+- `cloudflare_logpush_failed_jobs_account_count` with labels `destination`, `job_id` (can be obtained via Cloudflare UI) to monitor Logpush job for account level resources
+- `cloudflare_logpush_failed_jobs_zone_count` with labels `destination`, `job_id` (can be obtained via Cloudflare UI) to monitor Logpush job for zone level resources
+
 
 ### Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)
 

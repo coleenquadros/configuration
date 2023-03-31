@@ -601,32 +601,33 @@
         name: VAULT_PATH_RHR_PULL
         default: 'insights-cicd/rh-registry-pull'
     pipeline-scm:
-      # make parameter to override template name
-      script-path: 'Jenkinsfile'
-      scm:
-      - git:
-          url: 'git@gitlab.cee.redhat.com:{gl_group}/{gl_project}.git'
-          credentials-id: '{gitlab_ssh_credentials}'
-          skip-tag: true
-          refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
-          branches:
-          - '${{ghprbActualCommit}}'
-          merge:
-              remote: origin
-              branch: '{branch}'
-          git-config-name: "AppSRE"
-          git-config-email: "sd-app-sre@redhat.com"
-          included-regions:
-          - '{include_path}'
-          prune: true
-          clean:
+        # make parameter to override template name
+        script-path: 'Jenkinsfile'
+        scm:
+        - git:
+            remotes:
+            - 'origin':
+                url: 'git@gitlab.cee.redhat.com:{gl_group}/{gl_project}.git'
+                credentials-id: '{gitlab_ssh_credentials}'
+                refspec: '+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/${{gitlabMergeRequestIid}}/head:refs/remotes/origin/merge-requests/${{gitlabMergeRequestIid}}'
+            branches:
+            - 'merge-requests/${{gitlabMergeRequestIid}}'
+            merge:
+                remote: 'origin'
+                branch: '${{gitlabTargetBranch}}'
+            included-regions:
+            - '{include_path}'
+            prune: true
+            clean:
               before: true
           wipe-workspace: true
     disabled: '{disable}'
     node: '{node}'
     concurrent: '{concurrent_build}'
+    pr_check_script_path: "./Jenkinsfile"
     run_stack_analysis_path: ''
     max_previous_builds_count: 20
+    <<: *gl_properties
     builders:
     - *stack_analysis
     publishers:
@@ -634,7 +635,19 @@
         results: 'artifacts/junit-*.xml'
     - archive:
         artifacts: 'artifacts/**/*'
-    <<: *gl_triggers
+    triggers:
+    - gitlab:
+        trigger-push: true
+        trigger-merge-request: true
+        trigger-open-merge-request-push: source
+        note-regex: '(?ms).*^(\[test\]|\/retest|\/lgtm|\/lgtm cancel|\/hold|\/hold cancel)\s*$.*'
+        set-build-description: true
+        add-note-merge-request: true
+        add-vote-merge-request: true
+        add-ci-message: true
+        allow-all-branches: true
+        ci-skip: true
+        wip-skip: true
 
 - job-template:
     id: 'insights-vulnerability-gh-build-master'

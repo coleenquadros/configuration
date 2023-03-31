@@ -5,8 +5,8 @@ labels:
   service: ephemeral
   platform: insights
 
-name: consoledot-ephemeral-fe
-description: apps used for testing in ephemeral environments
+name: consoledot-frontend-base
+description: containerized frontends for chrome, landing, dashboard, and api-docs
 
 app:
   $ref: /services/insights/ephemeral/app.yml
@@ -38,7 +38,7 @@ compare: false
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
-  channel: team-consoledot-devprod
+  channel: frontend-deploy-notifications
 
 authentication:
   code:
@@ -54,7 +54,7 @@ deployResources:
     cpu: 400m
     memory: 2000Mi
   limits:
-    cpu: 400m
+    cpu: 1200m
     memory: 2000Mi
 
 resourceTemplates:
@@ -74,7 +74,7 @@ resourceTemplates:
   # Stage Stable Deployment
   - namespace:
       $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
-    ref: 2310ec1c59807157ffedd55796fbba13c181ad26
+    ref: 80cb8d3459229396e3ce99a1e8f014777fb2e5ff
     parameters:
       ENV_NAME: "frontends"
       IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
@@ -87,6 +87,22 @@ resourceTemplates:
       ENV_NAME: "frontends-beta"
       IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
       SSO_URL: 'https://sso.stage.redhat.com/auth/'
+  # Prod Stable Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/prod-frontends.yml
+    ref: 80cb8d3459229396e3ce99a1e8f014777fb2e5ff
+    parameters:
+      ENV_NAME: "frontends"
+      IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
+      SSO_URL: 'https://sso.redhat.com/auth/'
+  # Prod Beta Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/prod-beta-frontends.yml
+    ref: 892cd58378b6de27c668c5e17b6b32f638fb09a9
+    parameters:
+      ENV_NAME: "frontends-beta"
+      IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
+      SSO_URL: 'https://sso.redhat.com/auth/'
 
 # Landing page
 - name: landing-page-frontend
@@ -96,7 +112,7 @@ resourceTemplates:
   # Stage Stable
   - namespace:
       $ref: /services/insights/frontend-operator/namespaces/stage-frontends.yml
-    ref: fcf17a7509eee75ded9b00fa19af4077ac547d6a
+    ref: 0fc334b6a2c28f68c5573455633fe726215c1bc0
     parameters:
       ENV_NAME: "frontends"
       IMAGE: "quay.io/cloudservices/landing-page-frontend"
@@ -104,6 +120,20 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
     ref: master
+    parameters:
+      ENV_NAME: "frontends-beta"
+      IMAGE: "quay.io/cloudservices/landing-page-frontend"
+  # Prod Stable
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/prod-frontends.yml
+    ref: 0fc334b6a2c28f68c5573455633fe726215c1bc0
+    parameters:
+      ENV_NAME: "frontends"
+      IMAGE: "quay.io/cloudservices/landing-page-frontend"
+  # Prod Beta Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/prod-beta-frontends.yml
+    ref: 0fc334b6a2c28f68c5573455633fe726215c1bc0
     parameters:
       ENV_NAME: "frontends-beta"
       IMAGE: "quay.io/cloudservices/landing-page-frontend"
@@ -124,6 +154,20 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
     ref: master
+    parameters:
+      ENV_NAME: "frontends-beta"
+      IMAGE: "quay.io/cloudservices/insights-dashboard-frontend"
+  # Prod Stable
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/prod-frontends.yml
+    ref: fe38a787250b7105e6937f34d10539cbca191839
+    parameters:
+      ENV_NAME: "frontends"
+      IMAGE: "quay.io/cloudservices/insights-dashboard-frontend"
+  # Prod Beta Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/prod-beta-frontends.yml
+    ref: 28259149b13f0a9d125177469c211f6949de8fdf
     parameters:
       ENV_NAME: "frontends-beta"
       IMAGE: "quay.io/cloudservices/insights-dashboard-frontend"
@@ -169,6 +213,20 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
     ref: master
+    parameters:
+      ENV_NAME: "frontends-beta"
+      IMAGE: "quay.io/cloudservices/api-frontend"
+  # Prod Stable Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/prod-frontends.yml
+    ref: a18a1b47b9528c73c4851bf5fc569b86ee70d7fe
+    parameters:
+      ENV_NAME: "frontends"
+      IMAGE: "quay.io/cloudservices/api-frontend"
+  # Prod Beta Deployment
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/prod-beta-frontends.yml
+    ref: 6cc7137e12b505e69aa4055e102614bb599d9a59
     parameters:
       ENV_NAME: "frontends-beta"
       IMAGE: "quay.io/cloudservices/api-frontend"
