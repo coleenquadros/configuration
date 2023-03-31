@@ -572,11 +572,9 @@ resourceTemplates:
     ENVIRONMENT: production
     EXTERNAL_DNS_DOMAIN_FILTER: p3.openshiftapps.com
     HCP_TELEMETER_URL: https://infogw.api.openshift.com/metrics/v1/receive
-    MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: '40'
+    MANAGEMENT_CLUSTER_MAX_HOSTED_CLUSTER: '80'
     MANAGEMENT_CLUSTER_HIGH_SATURATION_THRESHOLD: '80'
     OCM_URL: ${OCM_BASE_URL}
-    READ_ONLY_USERS:
-    - fleet-manager-debug
     REPLICAS: 3
     RHOBS_URL: https://rhobs.rhobsp02ue1.api.openshift.com/api/metrics/v1/hypershift-platform/api/v1/receive
     RHOBS_ENV: prod
@@ -586,10 +584,15 @@ resourceTemplates:
       - predicate:
           region: us-east-2
         sector: nightly
-      # us-east-1 clusters go to the green sector
+      # Just a single service cluster in green during the cycle
+      - predicate:
+          service_cluster_id: cfh93h3of53mns7kd8fg
+        sector: green
+      # TODO this means all us-east-1 service clusters created land in canary
+      #      we need to properly define some logic to allow for multiple sectors
       - predicate:
           region: us-east-1
-        sector: green
+        sector: canary
       # put everything else into the blue sector
       - sector: blue
     SENTRY_PROJECT: 1028
@@ -607,6 +610,9 @@ resourceTemplates:
       $ref: /services/ocm/osd-fleet-manager/namespaces/production.yml
     ref: 5af3b4651d20bcb40df11ca1865c5ad74955e390
     promotion:
+      auto: true
+      subscribe:
+      - ocm-osdfm-deployed-production-canary
       publish:
       - ocm-osdfm-deployed-production-red
     parameters:
