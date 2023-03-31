@@ -10,11 +10,11 @@ app:
   $ref: /services/insights/chrome-service/app.yml
 
 namespaces:
-- $ref: /services/insights/chrome-service/namespaces/chrome-service-stage.yml
+- $ref: /services/insights/chrome-service/namespaces/chrome-service-prod.yml
 
 slos:
 - name: Requests result in successful non-5xx response
-  dashboard: https://grafana.stage.devshift.net/d/3qqibAG7k/chrome-service
+  dashboard: https://grafana.app-sre.devshift.net/d/3qqibAG7k/chrome-service?var-datasource=crcp01ue1-prometheus
   SLIType: availability
   SLISpecification: Proportion of successful requests with a (non-5xx) response against all requests on chrome-service API
   SLOTarget: 0.90
@@ -22,13 +22,13 @@ slos:
   SLOParameters:
     window: 28d
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/chrome-service/SLO.md
-  prometheusRules: /resources/insights-stage/chrome-service-stage/chrome-service.prometheusrules.yml
+  prometheusRules: /resources/insights-prod/chrome-service-prod/chrome-service.prometheusrules.yml
   expr: |
     round(sum(rate(api_3scale_gateway_api_status{exported_service="chrome-service", status=~"[234]xx"}[{{window}}]))
     /
     sum(rate(api_3scale_gateway_api_status{exported_service="chrome-service"}[{{window}}])), 0.0001)
 - name: Request latency
-  dashboard: https://grafana.stage.devshift.net/d/3qqibAG7k/chrome-service
+  dashboard: https://grafana.app-sre.devshift.net/d/3qqibAG7k/chrome-service?var-datasource=crcp01ue1-prometheus
   SLIType: latency
   SLISpecification: Proportion of requests with less than <2000 ms against all requests on chrome-service API
   SLOTarget: 0.90
@@ -36,7 +36,7 @@ slos:
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/chrome-service/SLO.md
   SLOParameters:
     window: 28d
-  prometheusRules: /resources/insights-stage/chrome-service-stage/chrome-service.prometheusrules.yml
+  prometheusRules: /resources/insights-prod/chrome-service-prod/chrome-service.prometheusrules.yml
   expr: |
     sum(rate(api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="chrome-service"}[{{window}}]))
     /
