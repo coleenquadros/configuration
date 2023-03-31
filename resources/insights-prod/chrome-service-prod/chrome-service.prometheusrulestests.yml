@@ -1,0 +1,90 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/chrome-service-prod/chrome-service.prometheusrules.yml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 30s
+  input_series:
+  - series: up{namespace="chrome-service-prod", service="chrome-service"}
+    values: '1+0x5 0+0x10'
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: App-chrome-service-In-chrome-service-prod-Absent
+  - eval_time: 10m
+    alertname: App-chrome-service-In-chrome-service-prod-Absent
+    exp_alerts:
+    - exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: platform-experience
+        namespace: chrome-service-prod
+      exp_annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/3qqibAG7k/chrome-service?var-datasource=crcp01ue1-prometheus
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/chrome-service-prod/deployments/chrome-service-api"
+        message: "Metrics for chrome-service in prod are absent"
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/chrome-service/App-chrome-service-In-chrome-service-prod-Absent.rst
+  - eval_time: 15m
+    alertname: App-chrome-service-In-chrome-service-prod-Absent
+    exp_alerts:
+    - exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: platform-experience
+        namespace: chrome-service-prod
+      exp_annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/3qqibAG7k/chrome-service?var-datasource=crcp01ue1-prometheus
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/chrome-service-prod/deployments/chrome-service-api"
+        message: "Metrics for chrome-service in prod are absent"
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/chrome-service/App-chrome-service-In-chrome-service-prod-Absent.rst
+
+- interval: 1m
+  input_series:
+  - series: api_3scale_gateway_api_status{exported_service="chrome-service", status="5xx"}
+    values: 0+0x4 10+10x9 100+0x4
+  - series: api_3scale_gateway_api_status{exported_service="chrome-service", status="2xx"}
+    values: 20+20x4 110+10x9 220+20x4
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: App-chrome-service-In-chrome-service-prod-high-error-rate
+  - eval_time: 15m
+    alertname: App-chrome-service-In-chrome-service-prod-high-error-rate
+    exp_alerts:
+    - exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: platform-experience
+      exp_annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/3qqibAG7k/chrome-service?var-datasource=crcp01ue1-prometheus
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/chrome-service-prod/deployments/chrome-service-api"
+        message: "chrome-service non-200 responses has exceeded 10% in prod"
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/chrome-service/App-chrome-service-In-chrome-service-prod-high-error-rate.rst
+
+- interval: 1m
+  input_series:
+  - series: api_3scale_gateway_api_time_bucket{exported_service="chrome-service",le="2000.0"}
+    values: '0 0 0 0 0 1 2 3 4 5'
+  - series: api_3scale_gateway_api_time_bucket{exported_service="chrome-service", le="+Inf"}
+    values: '0 1 2 3 4 5 7 8 9 10'
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: App-chrome-service-In-chrome-service-prod-high-latency
+  - eval_time: 6m
+    alertname: App-chrome-service-In-chrome-service-prod-high-latency
+    exp_alerts:
+    - exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: platform-experience
+      exp_annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/3qqibAG7k/chrome-service?var-datasource=crcp01ue1-prometheus
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/chrome-service-prod/deployments/chrome-service-api"
+        message: "chrome-service responses with over 2000ms have exceeded 10% in prod"
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/chrome-service/App-chrome-service-In-chrome-service-prod-high-latency.rst
