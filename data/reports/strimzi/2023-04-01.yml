@@ -1,0 +1,72 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: strimzi
+name: strimzi-2023-04-01
+app:
+  $ref: /services/insights/strimzi/app.yml
+date: '2023-04-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/platform-mq:
+    - branch: master
+      total: 25
+      success: 0
+    https://github.com/RedHatInsights/prometheus-kafka-consumer-group-exporter:
+    - branch: master
+      total: 77
+      success: 0
+  container_vulnerabilities:
+  - cluster: crcs02ue1
+    namespace: platform-mq-stage
+    vulnerabilities:
+      Medium: 16
+      High: 9
+      Low: 3
+  - cluster: crcp01ue1
+    namespace: platform-mq-prod
+    vulnerabilities:
+      Medium: 116
+      High: 108
+      Low: 6
+      Critical: 3
+  post_deploy_jobs:
+  - cluster: insights-perf
+    namespace: platform-mq-perf
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: platform-mq-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: platform-mq-prod
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: platform-mq-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 2
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 25
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 2
+      deployment_validation_operator_no_node_affinity:
+        Failed: 2
+  - cluster: crcp01ue1
+    namespace: platform-mq-prod
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 2
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 2
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 19
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 4
+      deployment_validation_operator_no_node_affinity:
+        Failed: 4
+  service_slo: null

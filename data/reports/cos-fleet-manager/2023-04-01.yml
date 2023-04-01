@@ -1,0 +1,93 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: cos-fleet-manager
+name: cos-fleet-manager-2023-04-01
+app:
+  $ref: /services/managed-connectors/app.yaml
+date: '2023-04-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://gitlab.cee.redhat.com/mk-ci-cd/cos-fleet-manager:
+    - branch: master
+      total: 2
+      success: 2
+    https://gitlab.cee.redhat.com/mk-ci-cd/rhoc-image-mirroring:
+    - branch: master
+      total: 88
+      success: 80
+    https://gitlab.cee.redhat.com/mk-ci-cd/cos-ui:
+    - branch: master
+      total: 44
+      success: 44
+    https://gitlab.cee.redhat.com/mk-ci-cd/cos-debezium-ui:
+    - branch: master
+      total: 10
+      success: 10
+  container_vulnerabilities:
+  - cluster: app-sre-stage-01
+    namespace: managed-connectors-stage
+    vulnerabilities:
+      Negligible: 201
+      Unknown: 8
+      Medium: 512
+      High: 123
+      Low: 393
+  - cluster: app-sre-prod-04
+    namespace: managed-connectors-production
+    vulnerabilities:
+      Negligible: 402
+      Medium: 750
+      High: 174
+      Low: 744
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: managed-connectors-stage
+    post_deploy_job: false
+  - cluster: telemeter-prod-01
+    namespace: observatorium-mst-production
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: app-sre-prod-04
+    namespace: managed-connectors-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: managed-connectors-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 1
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 2
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 2
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 4
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 3
+      deployment_validation_operator_no_node_affinity:
+        Failed: 3
+  - cluster: app-sre-prod-04
+    namespace: managed-connectors-production
+    validations:
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 1
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 1
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 1
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 3
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 1
+      deployment_validation_operator_no_node_affinity:
+        Failed: 1
+  service_slo: null
