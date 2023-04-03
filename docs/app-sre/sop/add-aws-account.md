@@ -140,7 +140,7 @@ supportedDeploymentRegions:
 - us-east-1
 - us-east-2
 - us-west-1
-providerVersion: '3.75.2'
+providerVersion: '3.76.0'
 
 terraformUsername: terraform
 
