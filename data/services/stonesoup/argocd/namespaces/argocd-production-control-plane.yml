@@ -1,0 +1,57 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: stonesoup
+
+name: argocd
+
+description: Namespace for ArgoCD resources deployed by the Gitops Operator
+
+cluster:
+  $ref: /openshift/stonesoupp01ue1/cluster.yml
+
+app:
+  $ref: /services/stonesoup/argocd/app.yml
+
+environment:
+  $ref: /products/stonesoup/environments/production.yml
+
+managedResourceTypes:
+- ArgoCD
+- Application
+
+managedResourceNames:
+- resource: ArgoCD
+  resourceNames:
+  - argocd
+
+managedRoles: true
+
+openshiftResources:
+- provider: resource
+  path: /stonesoup/argocd-control-plane/argocd.yml
+- provider: resource-template
+  type: jinja2
+  path: /stonesoup/argocd-control-plane/app-of-appsets.yaml.j2
+  variables:
+    path: argo-cd-apps/overlays/production
+- provider: vault-secret
+  path: stonesoup/production/platform/stone-prd-host1
+  version: 1
+  labels:
+    appstudio.redhat.com/host-cluster: 'true'
+    argocd.argoproj.io/secret-type: cluster
+- provider: vault-secret
+  path: stonesoup/production/platform/stone-prd-m01
+  version: 1
+  labels:
+    appstudio.redhat.com/member-cluster: 'true'
+    argocd.argoproj.io/secret-type: cluster
+- provider: vault-secret
+  path: stonesoup/production/platform/stone-prd-rh01
+  version: 1
+  labels:
+    appstudio.redhat.com/member-cluster: 'true'
+    appstudio.redhat.com/tekton-ci: 'true'
+    argocd.argoproj.io/secret-type: cluster
