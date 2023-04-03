@@ -4,13 +4,13 @@
 
 [TOC]
 
-## Versions < 6.0.0 or accounts with AWS TF Provider <= 3.30.0
+## Versions < 6.0.0 or accounts with Terraform AWS provider <= 3.30.0
 
 For this cases, the upgrade of the version of the Redis cluster is done normally updating the `engine_version` value on the parameter group file on app-interface.
 
 [Example MR upgrading redis from 6.0.x to 6.2.x](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/39929/diffs)
 
-## Versions >= 6.0.x and terraform provider 3.75.2
+## Versions >= 6.0.x and Terraform AWS provider 3.76.0
 
 During the past year, AWS changed several times how `engine_version` parameter is specified on the parameter groups for Redis ElastiCache clusters.
 
