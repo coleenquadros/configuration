@@ -1,18 +1,13 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: uhc
-
 name: saas-ocm-ams-umb-consumer
 description: SaaS tracking file for OCM Account Manager UMB Consumer Deployment
-
 app:
   $ref: /services/ocm/ams/app.yml
-
 pipelinesProvider:
   $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
-
 deployResources:
   requests:
     cpu: 600m
@@ -20,12 +15,10 @@ deployResources:
   limits:
     cpu: 600m
     memory: 1Gi
-
 slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
   channel: team-uhc-info
-
 managedResourceTypes:
 - Deployment
 - Service
@@ -39,7 +32,6 @@ authentication:
   image:
     path: app-sre/quay/app-sre-pull
     field: all
-
 resourceTemplates:
 - name: uhc-account-manager-umb-consumer
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -73,16 +65,19 @@ resourceTemplates:
       USE_CANDLEPIN_BASIC_AUTH: 'true'
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
-    ref: 210f59b5b413380682633af03382753626b3febe
-
-    # we subscribe this to the primary saas-uhc-account-manager pipeline
-    # and do not publish anything (again, that is handled by the primary pipeline)
+    ref: c68f68ffbcecbdf82332fd654762cba79e4f1ea7
     promotion:
       auto: true
       subscribe:
       - ocm-ams-deployed-int-green
       - ocm-ams-qe-fvt-basic-int-green-ok
 
+      promotion_data:
+      - channel: ocm-ams-deployed-int-green
+        data:
+        - parent_saas: saas-uhc-account-manager
+          target_config_hash: b184a678ecdaca4c
+          type: parent_saas_config
     parameters:
       AUTOMATIC_BAN: 'false'
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
