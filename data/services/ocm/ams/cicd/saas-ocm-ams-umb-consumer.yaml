@@ -62,9 +62,6 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: service-uhc-account-manager-gl-build-master
-    promotion:
-      publish:
-      - ocm-ams-umb-consumer-deployed-int
     parameters:
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-integration.svc.cluster.local
       REPLICAS: '1'
@@ -77,6 +74,15 @@ resourceTemplates:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
     ref: 210f59b5b413380682633af03382753626b3febe
+
+    # we subscribe this to the primary saas-uhc-account-manager pipeline
+    # and do not publish anything (again, that is handled by the primary pipeline)
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-ams-deployed-int-green
+      - ocm-ams-qe-fvt-basic-int-green-ok
+
     parameters:
       AUTOMATIC_BAN: 'false'
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
