@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    # Cert-manager annotation set in gateway-server.route.yaml
+    # All routes using the same host share the same certificate
+    haproxy.router.openshift.io/timeout: 5m
+    haproxy.router.openshift.io/balance: roundrobin
+    haproxy.router.openshift.io/disable_cookies: "true"
+  name: accounts-mgmt-canary
+spec:
+  host: canary.api.openshift.com
+  path: "/api/accounts_mgmt"
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: reencrypt
+  to:
+    kind: Service
+    name: uhc-acct-mngr-green-envoy
+    weight: 100
