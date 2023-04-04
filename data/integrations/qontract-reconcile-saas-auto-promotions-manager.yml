@@ -11,8 +11,7 @@ upstream: https://github.com/app-sre/qontract-reconcile
 pr_check:
   disabled: true
   cmd: saas-auto-promotions-manager
-  state: true
-  run_for_valid_saas_file_changes: true
+  run_for_valid_saas_file_changes: false
 
 managed:
 - namespace:
@@ -26,12 +25,11 @@ managed:
         memory: 1000Mi
         cpu: 600m
     # TODO: We run this in dry-run mode for now
-    extraArgs: --include-trigger-trace --dry-run
+    extraEnv:
+    - name: DRY_RUN
+      value: true
     logs:
       slack: false
-    state: true
-    shards: 1
-    trigger: true
 - namespace:
     $ref: /services/app-interface/namespaces/app-interface-production-int.yml
   spec:
@@ -43,12 +41,11 @@ managed:
         memory: 1000Mi
         cpu: 600m
     # TODO: We run this in dry-run mode for now
-    extraArgs: --include-trigger-trace --dry-run
+    extraEnv:
+    - name: DRY_RUN
+      value: true
     logs:
       slack: false
-    state: true
-    shards: 5
-    trigger: true
 
 schemas:
 - /app-interface/app-interface-settings-1.yml
