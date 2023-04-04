@@ -634,3 +634,30 @@ config:
         #    display_name: rhosak-ui build-new-fe-pipeline
         #    branch: new-fe-pipeline
 
+  - project:
+      name: seats-admin-midstream
+      label: ciam
+      node: managed-services
+      gl_group: ciam
+      gl_project: seats-admin
+      jobs:
+        - 'gl-pr-check':
+            display_name: seats-admin pr-check
+            concurrent_build: true
+        - 'gl-build-master-managed-services':
+            branch: release
+            display_name: seats-admin build-release
+            pr_check_script_path: './build/verify_build.sh'
+        - 'gl-build-master-managed-services-frontend':
+            branch: release-beta
+            display_name: seats-admin build-release-beta
+            build_deploy_script_path: './build/verify_build.sh'
+        - 'promote-ui':
+            display_name: promote-{gl_group}-{gl_project}-ui
+            repository: 'https://github.com/RedHatInsights/seats-admin-ui-build'
+            reportportal_project: ''
+            reportportal_launch: ''
+            timeout: 120
+            skip_gate: false
+            dry_run: true
+
