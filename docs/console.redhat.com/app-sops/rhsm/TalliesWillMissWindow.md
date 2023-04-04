@@ -2,7 +2,7 @@
 Severity: Medium
 
 ## Impact
--  Tally task consumption rate appears to be insufficient to keep up with scheduled tasks. Tally is projected to leave more than too many tasks unprocessed in a two hour window. Based on this projection, we are likely to fail to bill a customer due to missing the AWS billing window.
+-  Tally task consumption rate appears to be insufficient to keep up with scheduled tasks. Tally is projected to leave more than too many tasks unprocessed in a one-hour window. Based on this projection, we are likely to fail to bill a customer due to missing the AWS billing window.
 ## Summary
 This alert fires when the tally processing rate is insufficient to handle hourly scheduled tasks.
 ## Access required
