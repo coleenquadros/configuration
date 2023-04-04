@@ -1,0 +1,48 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: vuln-reporter
+
+name: vuln-reporter
+
+description: |
+  AppSRE cronjob that retrieves ImageManifestVuln data (from CSO), 
+  generates CSV reports, publishes these reports to S3, 
+  and finally sends these to a Google Workspace channel.
+  Currently only used for FedRAMP.
+
+sopsUrl: https://TODO
+grafanaUrls:
+- title: TODO
+  url: https://TODO
+onboardingStatus: OnBoarded
+
+serviceOwners:
+- name: App-SRE Stream 3
+  email: sd-app-sre+stream-3@redhat.com
+
+escalationPolicy:
+  $ref: /teams/app-sre/escalation-policies/stream-3.yaml
+
+architectureDocument: https://TODO
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: vuln-reporter
+    description: vuln-reporter
+    public: true
+
+codeComponents:
+- name: vuln-reporter
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/app-sre/vuln-reporter
