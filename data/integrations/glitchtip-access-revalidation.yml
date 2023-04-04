@@ -1,0 +1,45 @@
+$schema: /app-sre/integration-1.yml
+
+labels: {}
+
+name: glitchtip-access-revalidation
+
+description: Update the Glitchtip Access Workbook submits PR to App-Interface
+
+upstream: https://github.com/app-sre/qontract-reconcile
+
+managed:
+- namespace:
+    $ref: /services/app-interface/namespaces/app-interface-stage-int.yml
+  spec:
+    command: glitchtip-access-revalidation
+    concurrencyPolicy: Replace
+    restartPolicy: Never
+    resources:
+      requests:
+        memory: 400Mi
+        cpu: 100m
+      limits:
+        memory: 600Mi
+        cpu: 200m
+    cron: '0 2 5 4 *'
+    extraArgs: --gitlab-project-id=${APP_INTERFACE_PROJECT_ID}
+- namespace:
+    $ref: /services/app-interface/namespaces/app-interface-production-int.yml
+  spec:
+    command: glitchtip-access-revalidation
+    concurrencyPolicy: Replace
+    restartPolicy: Never
+    resources:
+      requests:
+        memory: 400Mi
+        cpu: 100m
+      limits:
+        memory: 600Mi
+        cpu: 200m
+    cron: '0 2 5 4 *'
+    extraArgs: --gitlab-project-id=${APP_INTERFACE_PROJECT_ID}
+
+schemas:
+- /app-interface/app-interface-settings-1.yml
+- /app-sre/integration-1.yml
