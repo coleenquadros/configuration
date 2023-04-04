@@ -697,6 +697,51 @@
     - shell: ./script/promote-new-ui.sh
 
 - job-template:
+    id: promote-ui
+    name: promote-{gl_group}-{gl_project}-ui
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: "{timeout}"
+    - ansicolor:
+        colormap: xterm
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *managed_services_github_deploy_key
+          - *managed_services_ccit_reportportal
+    parameters:
+    - string:
+        name: REPOSITORY
+        default: "{repository}"
+        description: 'Repository to promote'
+    - choice:
+        name: CHANNEL
+        choices:
+          - stable
+          - beta
+        description: "Channel to promote."
+    - bool:
+        name: SKIP_GATE
+        default: "{skip_gate}"
+        description: If true force the UI promotion without verify for passed tests
+    - bool:
+        name: DRY_RUN
+        default: "{dry_run}"
+        description: If true the changes are not pushed
+    - string:
+        name: REPORTPORTAL_PROJECT
+        default: "{reportportal_project}"
+        description: The name of ReportPortal Project where the Launch is located
+    - string:
+        name: REPORTPORTAL_LAUNCH
+        default: "{reportportal_launch}"
+        description: The name of the ReportPortal Launch that has the gating test results for the repositories
+    <<: *gl_checkout
+    builders:
+    - shell: ./deploy/promote-ui.sh
+
+- job-template:
     id: mas-sso-build-template
     name: "{gl_group}-{gl_project}-gl-build-{branch}"
     description: "mass-sso build template"
