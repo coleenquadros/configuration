@@ -1411,3 +1411,89 @@ resourceTemplates:
       SENTRY_URL: sentry.stage.devshift.net
       UNLEASH_URL: https://ocm-stage.unleash.devshift.net/api
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+
+- name: username-reconciler-job
+  url: https://gitlab.cee.redhat.com/service/uhc-account-manager
+  path: /templates/cronjob-template.yml
+  parameters:
+    JOB_NAME: ocm-ams-username-reconciler
+    AMS_RUN_JOB_CMD: username-reconciler
+    DRY_RUN: 'true'
+    CRON_SCHEDULE: '*/15 * * * *'
+    JOB_ACTIVE_DEADLINE_SECONDS: 600
+    SUSPEND_JOB: 'false'
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/uhc-account-manager
+    UHC_BASE_URL: http://127.0.0.1:9090
+    UHC_TOKEN_URL: ${SSO_BASE_URL}/protocol/openid-connect/token
+    QUAY_REGISTRY_ORG_NAME: openshift-release-dev
+    AUTOMATIC_BAN: 'false'
+    ENABLE_SENTRY: 'true'
+    RHIT_TIMEOUT: 30s
+    GODEBUG: http2server=0
+    DB_MAX_OPEN_CONNS: 250
+    MANDRILL_TIMEOUT: 60s
+    RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
+    USE_CANDLEPIN_BASIC_AUTH: 'false'
+    SENTRY_PROJECT: '23'
+    MOA_SKU: SER0579
+    RHM_SKU_LIST_FILE: /configs/subscription-skus/rhm-skus-enhanced.yaml
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-uhc-account-manager-gl-build-master
+    parameters:
+      USE_CANDLEPIN_BASIC_AUTH: 'true'
+      SENTRY_URL: sentry.autom8.in
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+      METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-integration.svc.cluster.local
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage.yml
+    ref: 210f59b5b413380682633af03382753626b3febe
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-ams-deployed-int-green
+      - ocm-ams-qe-fvt-basic-int-green-ok
+    parameters:
+      METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
+      SENTRY_URL: sentry.stage.devshift.net
+      UNLEASH_URL: https://ocm-stage.unleash.devshift.net/api
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage-appsres04ue2.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-uhc-account-manager-gl-build-master
+    parameters:
+      METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
+      SENTRY_URL: sentry.stage.devshift.net
+      UNLEASH_URL: https://ocm-stage.unleash.devshift.net/api
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage-sso-test.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-uhc-account-manager-gl-build-master
+    parameters:
+      METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
+      RHIT_BASE_TERMS_URL: https://terms.stage.api.redhat.com/svcrest/terms/
+      RHIT_BASE_TNC_URL: https://www.stage.redhat.com/wapps/tnc
+      UHC_TOKEN_URL: ${SSO_BASE_URL}/protocol/openid-connect/token
+      JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
+      RHIT_BASE_USER_URL: https://user.stage.api.redhat.com/v2/
+      RHIT_BASE_SUBSCRIPTION_URL: https://subscription.stage.api.redhat.com/svcrest/subscription/v5/
+      RHIT_BASE_REGNUM_URL: https://subscription.stage.api.redhat.com/svcrest/regnum/v5/
+      RHIT_BASE_REGISTRY_URL: https://container-registry-authorizer.stage.api.redhat.com/v1/
+      RHIT_BASE_EXPORT_COMPLIANCE_URL: https://export-compliance.stage.api.redhat.com/v1/
+      SENTRY_URL: sentry.stage.devshift.net
+      UNLEASH_URL: https://ocm-stage.unleash.devshift.net/api
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
