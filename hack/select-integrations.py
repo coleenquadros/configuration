@@ -106,6 +106,21 @@ def print_cmd(
     has_integrations_changes=False,
     exclude_accounts=None,
 ):
+    """
+    Prints the command to run a integration instance.
+
+    Args:
+        pr (int): The pull request number.
+        select_all (bool): A flag indicating whether to run every integration.
+        non_bundled_data_modified (bool): A flag indicating whether non-bundled data has been modified.
+        int_name (str): The name of the integration to run.
+        override (Optional[Mapping[str, Any]): An optional command to override the default deploy command.
+        has_integrations_changes (bool): A flag indicating whether there are changes to the integrations definitions.
+        exclude_accounts (Optional[List[str]]): An optional list of accounts to exclude in case of a sharded deployment.
+
+    Returns:
+        None
+    """
     cmd = ""
     if pr.get("state"):
         cmd += "STATE=true "
