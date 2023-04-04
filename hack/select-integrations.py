@@ -116,7 +116,7 @@ def print_cmd(
         int_name (str): The name of the integration to run.
         override (Optional[Mapping[str, Any]): An optional command to override the default deploy command.
         has_integrations_changes (bool): A flag indicating whether there are changes to the integrations definitions.
-        exclude_accounts (Optional[List[str]]): An optional list of accounts to exclude in case of a sharded deployment.
+        exclude_accounts (Optional[List[str]]): An optional list of accounts to exclude in case of a sharded deployment That only work on terraform-resources.
 
     Returns:
         None
