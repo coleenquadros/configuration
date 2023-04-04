@@ -159,7 +159,7 @@ def print_cmd(
             # only qr integrations support sharding
             accounts = get_account_names(override)
             accounts_param = [" --account-name " + ac for ac in accounts]
-            cmd += "ALIAS=" + pr["cmd"] + "_sharded" + " "
+            cmd += "ALIAS=" + pr["cmd"] + "_override_" + override["imageRef"] + " "
             cmd += "IMAGE=" + override["imageRef"] + " "
             cmd += "run_int " + pr["cmd"] + "".join(accounts_param) + " &"
         elif exclude_accounts:
