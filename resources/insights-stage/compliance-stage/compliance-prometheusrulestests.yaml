@@ -1,0 +1,84 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-stage/compliance-stage/compliance-prometheusrules.yaml
+
+evaluation_interval: 5m
+
+tests:
+
+# ComplianceNoPodsFound
+- interval: 5m
+  input_series:
+  - series: up{namespace="compliance-stage"}
+    values: 0+0x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ComplianceNoPodsFound
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: compliance
+      exp_annotations:
+        message: "No pods found in the namespace"
+
+- interval: 5m
+  input_series:
+  - series: up{namespace="compliance-stage"}
+    values: 1+1x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ComplianceNoPodsFound
+    exp_alerts: []
+
+# CompliancePodDown
+- interval: 5m
+  input_series:
+  - series: up{namespace="compliance-stage", pod="pod-1"}
+    values: 1+1x4
+  - series: up{namespace="compliance-stage", pod="pod-2"}
+    values: 0+0x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: CompliancePodDown
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: compliance
+        pod: pod-2
+      exp_annotations:
+        message: "Pod (pod-2) down!"
+
+# ComplianceSsgPodDown
+- interval: 5m
+  input_series:
+  - series: kube_deployment_status_replicas_available{namespace="compliance-stage", deployment="compliance-ssg-service"}
+    values: 0+0x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ComplianceSsgPodDown
+    exp_alerts:
+    - exp_labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: compliance
+        deployment: compliance-ssg-service
+        namespace: compliance-stage
+      exp_annotations:
+        message: "SSG pod down!"
+
+- interval: 5m
+  input_series:
+  - series: up{namespace="compliance-stage", pod="pod-1"}
+    values: 1+1x4
+  - series: up{namespace="compliance-stage", pod="pod-2"}
+    values: 1+1x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: CompliancePodDown
