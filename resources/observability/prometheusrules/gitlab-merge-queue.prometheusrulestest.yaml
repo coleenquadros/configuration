@@ -1,0 +1,20 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+rule_files:
+  - /observability/prometheusrules/gitlab-merge-queue.prometheusrules.yaml
+
+evaluation_interval: 1m
+# 0x240 1+0x240
+tests:
+  - interval: 1m
+    input_series:
+      - series: qontract_reconcile_time_to_merge_merge_request_minutes_bucket{project_id="13582", le="60.0"}
+        values: '1+1x56 _ _ _ '
+      - series: qontract_reconcile_time_to_merge_merge_request_minutes_bucket{project_id="13582", le="+Inf"}
+        values: '_x57 1 1 1'
+      - series: qontract_reconcile_merge_requests_waiting{project_id="13582"}
+        values: '1x60'
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: AppInterfaceMergeQueueSlow
+        exp_alerts: [ ]
