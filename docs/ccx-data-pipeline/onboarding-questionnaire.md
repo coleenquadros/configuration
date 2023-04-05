@@ -109,10 +109,10 @@ Yes
 | Vulnerability app design                           | [docs](https://docs.google.com/document/d/1FDCo3ejJ2d-a2wKz6SFeq-Rx2eQCK81BZe1sWvJi7lg/edit#)                         | [recording](https://drive.google.com/file/d/16QPpxjdzIAZEsdG6uWSso-o0WS70dwED/view)             |
 
 ### Service Diagram
-<https://ccx.pages.redhat.com/ccx-docs/customer/external_data_pipeline_architecture.html>
+<https://ccx.pages.redhat.com/ccx-docs/docs/processing/customer/external-data-pipeline/external_data_pipeline_architecture/>
 
 ### Service Documents
-<https://ccx.pages.redhat.com/ccx-docs/customer/index.html>
+<https://ccx.pages.redhat.com/ccx-docs/docs/processing/customer/>
 
 ## Service Status
 
