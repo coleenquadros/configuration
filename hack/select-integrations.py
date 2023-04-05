@@ -104,7 +104,23 @@ def print_cmd(
     int_name,
     override=None,
     has_integrations_changes=False,
+    exclude_accounts=None,
 ):
+    """
+    Prints the command to run a integration instance.
+
+    Args:
+        pr (int): The pull request number.
+        select_all (bool): A flag indicating whether to run every integration.
+        non_bundled_data_modified (bool): A flag indicating whether non-bundled data has been modified.
+        int_name (str): The name of the integration to run.
+        override (Optional[Mapping[str, Any]): An optional command to override the default deploy command.
+        has_integrations_changes (bool): A flag indicating whether there are changes to the integrations definitions.
+        exclude_accounts (Optional[List[str]]): An optional list of accounts to exclude in case of a sharded deployment That only work on terraform-resources.
+
+    Returns:
+        None
+    """
     cmd = ""
     if pr.get("state"):
         cmd += "STATE=true "
@@ -141,14 +157,24 @@ def print_cmd(
     else:
         if override:
             # only qr integrations support sharding
-            shard = override["awsAccount"]["$ref"].split("/")[2]
-            cmd += "ALIAS=" + pr["cmd"] + "_" + shard + " "
+            accounts = get_account_names(override)
+            accounts_param = [" --account-name " + ac for ac in accounts]
+            cmd += "ALIAS=" + pr["cmd"] + "_override_" + override["imageRef"] + " "
             cmd += "IMAGE=" + override["imageRef"] + " "
-            cmd += "run_int " + pr["cmd"] + " --account-name " + shard + " &"
+            cmd += "run_int " + pr["cmd"] + "".join(accounts_param) + " &"
+        elif exclude_accounts:
+            cmd += "run_int " + pr["cmd"]
+            cmd += (
+                "".join([" --exclude-accounts " + ac for ac in exclude_accounts]) + " &"
+            )
         else:
             cmd += "run_int " + pr["cmd"] + " &"
 
     print(cmd)
+
+
+def get_account_names(override):
+    return [ac["$ref"].split("/")[2] for ac in override["awsAccounts"]]
 
 
 def print_pr_check_cmds(
@@ -171,7 +197,10 @@ def print_pr_check_cmds(
             continue
 
         if pr.get("shardSpecOverride"):
+            aws_accounts = []
             for override in pr.get("shardSpecOverride"):
+                if "awsAccounts" in override:
+                    aws_accounts += get_account_names(override)
                 print_cmd(
                     pr,
                     select_all,
@@ -180,6 +209,15 @@ def print_pr_check_cmds(
                     override,
                     has_integrations_changes,
                 )
+            if int_name == "terraform-resources":
+                print_cmd(
+                    pr,
+                    select_all,
+                    non_bundled_data_modified,
+                    int_name,
+                    exclude_accounts=aws_accounts,
+                )
+                continue
 
         print_cmd(pr, select_all, non_bundled_data_modified, int_name)
 
