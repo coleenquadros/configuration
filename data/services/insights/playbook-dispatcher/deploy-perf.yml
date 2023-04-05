@@ -1,0 +1,177 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: playbook-dispatcher
+  platform: insights
+
+name: playbook-dispatcher-perf
+description: The Playbook Dispatcher service enables other services to run Ansible Playbooks on connected hosts
+
+app:
+  $ref: /services/insights/playbook-dispatcher/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+# NOTE jsmejkal: probably outputed here: https://redhat-internal.slack.com/archives/C01B85699P0
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+- ClowdJobInvocation
+- Deployment
+- KafkaConnect
+- KafkaConnector
+- Service
+- ConfigMap
+- CronJob
+
+imagePatterns:
+- quay.io/cloudservices
+
+#TODO ????
+allowedSecretParameterPaths:
+- insights/secrets/perf/strimzi-perf
+
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+
+resourceTemplates:
+- name: playbook-dispatcher
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  targets:
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/perf.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-playbook-dispatcher-gh-build-master
+    parameters:
+      LOG_LEVEL: debug
+      RETURN_URL: https://cert.${PLATFORM_HOSTNAME}/api/ingress/v1/upload
+
+      REPLICAS_API: 1
+      REPLICAS_RESPONSE_CONSUMER: 1
+      REPLICAS_VALIDATOR: 1
+      DB_SSLMODE: disable
+      RBAC_IMPL: mock
+      RBAC_HOST: foobar
+      CLOUD_CONNECTOR_IMPL: mock
+      CLOUD_CONNECTOR_HOST: cloud-connector
+      PSK_AUTH_TEST: xwKhCUzgJ8
+      TENANT_TRANSLATOR_HOST: mock
+      TENANT_TRANSLATOR_IMPL: mock
+- name: playbook-dispatcher-connect
+  path: /deploy/connect.yaml
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  targets:
+  #TODO change for perf
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/perf.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-playbook-dispatcher-gh-build-master
+    parameters:
+      CONNECTOR_PAUSE: "false"
+      KAFKA_TOPIC_PREFIX: "platform-mq-perf."
+    secretParameters:
+      - name: KAFKA_BOOTSTRAP_HOST
+        secret:
+          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          field: hostname
+          version: 1
+      - name: KAFKA_BOOTSTRAP_PORT
+        secret:
+          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          field: port
+          version: 1
+      - name: KAFKA_USERNAME
+        secret:
+          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          field: username
+          version: 1
+      - name: KAFKA_SASL_MECHANISM
+        secret:
+          path: insights/secrets/insights-perf/strimzi-perf/client-config
+          field: sasl_mechanism
+          version: 3
+      - name: KAFKA_SASL_SECURITY_PROTOCOL
+        secret:
+          path: insights/secrets/insights-perf/strimzi-perf/client-config
+          field: security_protocol
+          version: 3
+
+- name: playbook-dispatcher-connect-rhosak
+  path: /deploy/connect-rhosak.yaml
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  targets:
+  # TODO do you need this? ask ^
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/perf.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-playbook-dispatcher-gh-build-master
+    parameters:
+      CONNECTOR_PAUSE: "false"
+    delete: true
+    secretParameters:
+      - name: KAFKA_BOOTSTRAP_HOST
+        secret:
+          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          field: hostname
+          version: 1
+      - name: KAFKA_BOOTSTRAP_PORT
+        secret:
+          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          field: port
+          version: 1
+      - name: KAFKA_USERNAME
+        secret:
+          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          field: username
+          version: 1
+      - name: KAFKA_SASL_MECHANISM
+        secret:
+          path: insights/secrets/insights-perf/strimzi-perf/client-config
+          field: sasl_mechanism
+          version: 3 
+      - name: KAFKA_SASL_SECURITY_PROTOCOL
+        secret:
+          path: insights/secrets/insights-perf/strimzi-perf/client-config
+          field: security_protocol
+          version: 3
+
+# TODO Do you need this? I guess you'll use the API, dashboards sound like frontend which we don't need I think.
+- name: playbook-dispatcher-dashboards
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  path: /dashboard
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-perf.yml
+    ref: master
+    delete: true
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 01f91293e762df5d42dbeec88dfe6b8df57920c0
+    delete: true
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-perf-int.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: 01f91293e762df5d42dbeec88dfe6b8df57920c0
