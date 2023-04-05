@@ -9,47 +9,6 @@
         shell: |
             BUNDLE_IMAGE={bundle_image} CATALOG_IMAGE={catalog_image} {build_catalog_script_path}
 
-    abort_job_multibranch: &abort_job_multibranch
-        system-groovy:
-            command: |
-                import hudson.model.Result
-                import hudson.model.Run
-                import hudson.model.Executor
-                import jenkins.model.CauseOfInterruption
-
-                // get the current branch name
-                // source_branch_env_var_name is different in ci-int and ci-ext
-                def currentBranchName = build.environment.get("{source_branch_env_var_name}")
-                println "[DEBUG] CURRENT BRANCH NAME ${{currentBranchName}}"
-
-                // https://javadoc.jenkins-ci.org/hudson/model/Run.html
-                Run previousBuild = build.getPreviousBuildInProgress()
-                def previousBuildCount = 0
-                def maxPreviousBuildsCount = {max_previous_builds_count}
-                while (previousBuild != null && previousBuildCount < maxPreviousBuildsCount) {{
-                    if (previousBuild.isInProgress()) {{
-                        println "[DEBUG] CHECKING BUILD ${{previousBuild.getId()}} (${{previousBuildCount}}/${{maxPreviousBuildsCount}})"
-                        // https://javadoc.jenkins-ci.org/hudson/model/Executor.html
-                        Executor exec = previousBuild.getExecutor()
-                        // if exec is null it means the build is not running
-                        // just safety even though we checked it before
-                        if (exec != null) {{
-                            def execBuild = exec.getCurrentExecutable()
-                            def execBranchName = execBuild.environment.get("{source_branch_env_var_name}")
-                            println "[DEBUG] CHECKING EXEC BRANCH NAME ${{execBranchName}}"
-                            if (currentBranchName == execBranchName) {{
-                                println "[DEBUG] ABORTING EXEC BRANCH NAME ${{execBranchName}}"
-                                // prepare the cause of interruption
-                                def cause = {{ "interrupted by build ${{build.getId()}}" as String }} as CauseOfInterruption 
-                                exec.interrupt(Result.ABORTED, cause)
-                                println "[DEBUG] ABORTED EXEC BRANCH NAME ${{execBranchName}}"
-                            }}
-                        }}
-                    }}
-                    previousBuild = previousBuild.getPreviousBuildInProgress()
-                    previousBuildCount = previousBuildCount + 1
-                }}
-
     pr_check: &pr_check
         shell: |
             {pr_check_script_path}
@@ -262,7 +221,6 @@
 
     gl_pr_check: &gl_pr_check
         <<: *gl_properties
-        cancel_pending_builds_on_update: false
         scm:
         - git:
             remotes:
@@ -288,7 +246,7 @@
             allow-all-branches: true
             ci-skip: true
             wip-skip: true
-            cancel-pending-builds-on-update: '{cancel_pending_builds_on_update}'
+            cancel-pending-builds-on-update: true
         publishers:
         - gitlab_message:
             <<: *gitlab_message_defaults
