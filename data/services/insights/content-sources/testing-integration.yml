@@ -1,0 +1,36 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  platform: insights
+  service: content-sources
+name: content-sources-integration-testing
+description: content-sources integration testing
+app:
+  $ref: /services/insights/content-sources/app.yml
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: content-services-dev
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+publishJobLogs: true
+imagePatterns:
+- quay.io/cloudservices
+
+managedResourceTypes:
+- ClowdJobInvocation
+
+resourceTemplates:
+- name: content-sources-integration-testing
+  url: https://github.com/content-services/content-sources-backend
+  path: /deployments/testing-integration.yaml
+  targets:
+  - namespace:
+      $ref: /services/insights/content-sources/namespaces/content-sources-stage.yml
+    ref: fea14d3eaea8d6c42376358412533a280d77b2c9
+    promotion:
+      auto: true
+      subscribe:
+      - content-sources-stage-post-deploy-tests-success-channel
+      publish:
+      - content-sources-stage-post-deploy-integration-tests-success-channel
