@@ -1,0 +1,60 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: runtimes-inventory
+
+name: runtimes-inventory-stage
+description: Runtimes Based Inventory on the stage cluster
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+app:
+  $ref: /services/insights/runtimes-inventory/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+- $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+
+managedRoles: true
+
+# managedResourceTypes:
+# - Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+sharedResources:
+- $ref: /services/insights/shared-resources/metrics-export-stage.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: runtimes-inventory-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-runtimes-inventory-stage.yml
+    output_resource_name: runtimes-inventory-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: runtimes-inventory-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
