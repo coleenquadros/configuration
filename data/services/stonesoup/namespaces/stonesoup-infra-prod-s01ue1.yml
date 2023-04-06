@@ -1,0 +1,30 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: stonesoup
+
+name: stonesoup-infra-prod
+
+description: Production namespace for StoneSoup infra
+
+cluster:
+  $ref: /openshift/stonesoupp01ue1/cluster.yml
+
+app:
+  $ref: /services/stonesoup/app.yml
+
+environment:
+  $ref: /products/stonesoup/environments/production.yml
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/stonesoup-prod/account.yml
+  resources:
+  - provider: secrets-manager-service-account
+    identifier: stonesoup-spi-secrets-manager
+    secrets_prefix: spi-prod
+    output_resource_name: spi-secrets-manager
