@@ -123,56 +123,6 @@ resourceTemplates:
       publish:
       - ocm-osdfm-deployed-int-canary
     parameters:
-      CLUSTER_TEMPLATES: |2-
-          # HyperShift Service Cluster
-          hs-sc:
-            name_prefix: "hs-sc-"
-            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-            openshift_version: "openshift-v4.12.6"
-            multi_az: true
-            ccs: true
-            default_machine_pool:
-              machine_type: m5.xlarge
-              autoscale: false
-              nodes: 3
-            network_type: OVNKubernetes
-            private: true
-
-          # HyperShift Management Cluster
-          hs-mc:
-            name_prefix: "hs-mc-"
-            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-            openshift_version: "openshift-v4.12.6"
-            multi_az: true
-            ccs: true
-            default_machine_pool:
-              machine_type: m5.4xlarge
-              autoscale: true
-              autoscale_min_replicas: 3
-              autoscale_max_replicas: 36
-            network_type: OVNKubernetes
-            private: true
-            additional_machine_pool_gangs:
-            - id_prefix: hcps
-              machine_type: m5.4xlarge
-              autoscale: true
-              autoscale_min_replicas: 3
-              autoscale_max_replicas: 36
-              taints:
-                - key: hypershift.openshift.io/control-plane
-                  value: true
-                  effect: NoSchedule
-            - id_prefix: obo
-              machine_type: r5.4xlarge
-              autoscale: false
-              nodes: 3
-              labels:
-                - key: node-role.kubernetes.io/obo
-                  value: ""
-              taints:
-                - key: obo
-                  value: true
-                  effect: NoSchedule
       DEPLOYMENT_NAME: canary
       PROVISIONING_TIME_WINDOW: '259200'
   - name: osd-fleet-manager-integration-main
@@ -180,7 +130,7 @@ resourceTemplates:
       $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
     ref: d43ce046b94b7b8357ba3f46234da10ccde8ce2b
     promotion:
-      auto: true
+      auto: false
       subscribe:
       - ocm-osdfm-deployed-int-canary
       publish:
