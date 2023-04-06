@@ -50,7 +50,7 @@ resourceTemplates:
   url: https://github.com/RedHatInsights/playbook-dispatcher
   targets:
   - namespace:
-      $ref: /services/insights/playbook-dispatcher/namespaces/perf.yml
+      $ref: /services/insights/playbook-dispatcher/namespaces/stage.yml
     ref: master
     upstream:
       instance:
@@ -59,7 +59,19 @@ resourceTemplates:
     parameters:
       LOG_LEVEL: debug
       RETURN_URL: https://cert.${PLATFORM_HOSTNAME}/api/ingress/v1/upload
-
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
+    ref: 6011d85642cdab94adf478c46b67bd605160a4d0
+    parameters:
+      LOG_LEVEL: info
+      RETURN_URL: https://cert.${PLATFORM_HOSTNAME}/api/ingress/v1/upload
+      POPULATOR_RUN_NUMBER: "2"
+      REPLICAS_API: 3
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
       REPLICAS_API: 1
       REPLICAS_RESPONSE_CONSUMER: 1
       REPLICAS_VALIDATOR: 1
@@ -71,13 +83,13 @@ resourceTemplates:
       PSK_AUTH_TEST: xwKhCUzgJ8
       TENANT_TRANSLATOR_HOST: mock
       TENANT_TRANSLATOR_IMPL: mock
+
 - name: playbook-dispatcher-connect
   path: /deploy/connect.yaml
   url: https://github.com/RedHatInsights/playbook-dispatcher
   targets:
-  #TODO change for perf
   - namespace:
-      $ref: /services/insights/playbook-dispatcher/namespaces/perf.yml
+      $ref: /services/insights/playbook-dispatcher/namespaces/stage.yml
     ref: master
     upstream:
       instance:
@@ -85,41 +97,69 @@ resourceTemplates:
       name: RedHatInsights-playbook-dispatcher-gh-build-master
     parameters:
       CONNECTOR_PAUSE: "false"
-      KAFKA_TOPIC_PREFIX: "platform-mq-perf."
+      KAFKA_TOPIC_PREFIX: "platform-mq-stage."
     secretParameters:
       - name: KAFKA_BOOTSTRAP_HOST
         secret:
-          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: hostname
           version: 1
       - name: KAFKA_BOOTSTRAP_PORT
         secret:
-          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: port
           version: 1
       - name: KAFKA_USERNAME
         secret:
-          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: username
           version: 1
       - name: KAFKA_SASL_MECHANISM
         secret:
-          path: insights/secrets/insights-perf/strimzi-perf/client-config
+          path: insights/secrets/insights-stage/strimzi-stage/client-config
           field: sasl_mechanism
           version: 3
       - name: KAFKA_SASL_SECURITY_PROTOCOL
         secret:
-          path: insights/secrets/insights-perf/strimzi-perf/client-config
+          path: insights/secrets/insights-stage/strimzi-stage/client-config
           field: security_protocol
           version: 3
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
+    ref: 949b75abac83bd74d4f3a03ab5d05d440be9cfd3
+    # NOTE:  The ref above "pins" the deployment config to a version of the config
+    # which is NOT configured to use managed kakfa.  This config currently lives
+    # in the "prod_connector_config" branch on
+    # github.com/RedHatInsights/playbook-dispatcher.
+    parameters:
+      IMAGE_TAG: 6011d85
+      # NOTE:  The IMAGE_TAG allows us to use a newer image, while the ref above allows
+      # us to use an older config (which is not configured to use managed kafka).
+      EVENT_CONSUMER_REPLICAS: 0
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    # Set this ref to point at the tip of the ephemeral_config branch.
+    # The configuration in the ephemeral_config branch will need to be
+    # updated as we go along but it shouldn't contain "managed kafka"
+    # settings.
+    ref: 68f6d23c28b8f87401af546900961d4654db2e34
+    disable: true
+    parameters:
+      # Set the image tag to be the latest and greatest
+      IMAGE_TAG: 3ba24c0
+      KAFKA_BOOTSTRAP_HOST: ephemeral-kafka-bootstrap
+      KAFKA_BOOTSTRAP_PORT: 9092
+      KAFKA_REPLICATION_FACTOR: '1'
+      DB_SSLMODE: disable
+      XMX: 512m
+      XMS: 512m
 
 - name: playbook-dispatcher-connect-rhosak
   path: /deploy/connect-rhosak.yaml
   url: https://github.com/RedHatInsights/playbook-dispatcher
   targets:
-  # TODO do you need this? ask ^
   - namespace:
-      $ref: /services/insights/playbook-dispatcher/namespaces/perf.yml
+      $ref: /services/insights/playbook-dispatcher/namespaces/stage.yml
     ref: master
     upstream:
       instance:
@@ -131,38 +171,37 @@ resourceTemplates:
     secretParameters:
       - name: KAFKA_BOOTSTRAP_HOST
         secret:
-          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: hostname
           version: 1
       - name: KAFKA_BOOTSTRAP_PORT
         secret:
-          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: port
           version: 1
       - name: KAFKA_USERNAME
         secret:
-          path: insights/secrets/insights-perf/strimzi-perf/clowder-auth
+          path: insights/secrets/insights-stage/strimzi-stage/clowder-auth
           field: username
           version: 1
       - name: KAFKA_SASL_MECHANISM
         secret:
-          path: insights/secrets/insights-perf/strimzi-perf/client-config
+          path: insights/secrets/insights-stage/strimzi-stage/client-config
           field: sasl_mechanism
-          version: 3 
+          version: 3
       - name: KAFKA_SASL_SECURITY_PROTOCOL
         secret:
-          path: insights/secrets/insights-perf/strimzi-perf/client-config
+          path: insights/secrets/insights-stage/strimzi-stage/client-config
           field: security_protocol
           version: 3
 
-# TODO Do you need this? I guess you'll use the API, dashboards sound like frontend which we don't need I think.
 - name: playbook-dispatcher-dashboards
   url: https://github.com/RedHatInsights/playbook-dispatcher
   path: /dashboard
   provider: directory
   targets:
   - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-perf.yml
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: master
     delete: true
   - namespace:
@@ -170,7 +209,7 @@ resourceTemplates:
     ref: 01f91293e762df5d42dbeec88dfe6b8df57920c0
     delete: true
   - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-perf-int.yml
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
