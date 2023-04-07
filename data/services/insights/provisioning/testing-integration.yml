@@ -1,0 +1,36 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  platform: insights
+  service: provisioning
+name: provisioning-integration-testing
+description: provisioning integration testing
+app:
+  $ref: /services/insights/provisioning/app.yml
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: provisioning-status
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+publishJobLogs: true
+imagePatterns:
+- quay.io/cloudservices
+
+managedResourceTypes:
+- ClowdJobInvocation
+
+resourceTemplates:
+- name: provisioning-integration-testing
+  url: https://github.com/RHEnVision/provisioning-backend
+  path: /deploy/testing-integration.yaml
+  targets:
+  - namespace:
+      $ref: /services/insights/provisioning/namespaces/provisioning-stage.yml
+    ref: b98c577ac4244bcfff60357b5f98c5b8bfd10e8b
+    promotion:
+      auto: true
+      subscribe:
+      - provisioning-stage-post-deploy-tests-success-channel
+      publish:
+      - provisioning-stage-post-deploy-integration-tests-success-channel
