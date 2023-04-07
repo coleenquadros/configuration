@@ -1,0 +1,37 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: image-builder
+name: image-builder-iqe-trigger-e2e
+description: image-builder integration testing
+app:
+  $ref: /services/image-builder/app.yml
+pipelinesProvider:
+  $ref: /services/image-builder/pipelines/tekton.image-builder-pipelines.appsrep05ue1.yml
+managedResourceTypes:
+- Job
+
+publishJobLogs: true
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/redhatqe
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+resourceTemplates:
+- name: IQE-trigger-e2e
+  url: https://github.com/osbuild/image-builder
+  path: /templates/iqe-trigger-integration.yml
+  targets:
+  - namespace:
+      $ref: /services/insights/image-builder/namespaces/stage-image-builder-stage-testing.yml
+    ref: 635e748c5de24e14e212f40d15a47dfa0c116c51
+    promotion:
+      auto: true
+      subscribe:
+      - image-builder-stage-deploy-success-channel
+      publish:
+      - image-builder-stage-post-deploy-integration-tests-success-channel
