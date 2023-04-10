@@ -109,6 +109,10 @@ This may be caused due to several reasons. Follow this procedure:
 
 Please check our [AWS docs](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/aws).
 
+### How can I delete existing resource from AWS?
+
+See the [Delete external resource](#delete-external-resource) section.
+
 ### I can not access ci-ext
 
 Start by following [I can not access X](#i-can-not-access-x)
@@ -378,6 +382,54 @@ resourceTemplates:
 ```
 
 More information: [Continuous Delivery in App-interface](/docs/app-sre/continuous-delivery-in-app-interface.md)
+
+### Delete external resource
+
+To remove an external resource (a resource that has been provisioned through AppInterface and outside of the OpenShift
+clusters, such as a data store from the AWS public cloud or DNS zone from Cloudflare), several steps are usually
+required:
+
+- A change to add so-called "deletion approvals" needs to be raised as a Merge Request against a specific account (as
+  defined in AppInterface) where any given resources are currently being managed. Ensure that the expiration date spans
+  a little into the future to avoid issues related to time zones (the time zone in which the services operate is UTC).
+
+  For more details, see:
+
+    - [Enable deletion of AWS resources in deletion protected accounts][deletion-of-aws-resources]
+    - [Delete Cloudflare resource][delete-cloudflare-resource]
+
+- (_Optionally_) Some resources, such as the RDS database instances, might require an additional change aside from
+  providing deletion approvals: deletion protection has to be disabled on the AWS side; otherwise, the resource deletion
+  would fail with an error (as expected). Deletion protection can be disabled using the `deletion_protection: false`
+  attribute added to the `overrides` property of a given resource. **Note:** this change has to be merged before removing
+  corresponding resource definitions from AppInterface, as otherwise, the change would fail with an error originating
+  from AWS.
+
+- Remove desired resource definitions that you wish to delete from AppInterface. If you aim to remove a resource from
+  AWS public cloud, then there is no need to add the `delete: true` attribute before removing the resource definition.
+  However, other types of resources, such as the Cloudflare DNS zones, require this property to be added before the
+  resource definition is removed - this will, therefore, need a separate change to be merged beforehand. **Note:** the
+  output from the corresponding CI job can be used to prepare required "deletion approvals" (this is especially useful
+  when removing resources from AWS public cloud); locate lines that contain `log_plan_diff` to see a list of all related
+  resources that will also be deleted - each one of them would require a deletion approval to be added for it.
+  Alternatively, seek the `reconcile-terraform-resources.txt` (which contains a results summary that is a little bit
+  easier to consume) output under the `app-interface JSON validation` section from the menu on the left-hand side in the
+  Jenkins web UI for a related job.
+
+- (_Optionally_) If you are removing RDS database instances, then make sure that references to these databases have also
+  been either removed or updated from templates that define SQL queries to be made via AppInterface (this is the access
+  method that predated the addition of the GABI service) as otherwise, the change would fail due to missing references.
+
+  For more details, see:
+
+    - [Execute a SQL Query on an App Interface controlled RDS instance][execute-sql-query-using-app-interface]
+
+Some of the changes raised as part of external resource removal will not be self-serviceable and will require AppSRE
+approval, and if so, feel free to [contact](#contacting-appsre) AppSRE.
+
+[deletion-of-aws-resources]: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#enable-deletion-of-aws-resources-in-deletion-protected-accounts
+[delete-cloudflare-resource]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master#delete-cloudflare-resource
+[execute-sql-query-using-app-interface]: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/#execute-a-sql-query-on-an-app-interface-controlled-rds-instance
 
 ### Migrate resource templates between SaaS files
 
