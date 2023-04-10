@@ -23,7 +23,7 @@ If your MR is urgent or time sensitive requests, see [contacting AppSRE](#contac
 ### My MR takes a long time to get merged
 
 Generally, during core business hours, Bot will be tending to multiple changes that are currently in flight (which you
-can see [here][1]). If your MR has been approved, then please be patient. Bot will eventually get to it and merge it.
+can see [here][merge-queue]). If your MR has been approved, then please be patient. Bot will eventually get to it and merge it.
 There might be severalupdates before the change is merged, such as regular rebases, triggered CI job runs, and updates
 to the "Change coverage report".
 
@@ -46,7 +46,7 @@ However, if you believe that something isn't right, review the following:
 
 If none of the above works, then don't hesitate to get in touch with AppSRE.
 
-[1]: https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/app-interface-merge-queue.md
+[merge-queue]: https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/app-interface-merge-queue.md
 
 ### My MR takes a long time to get merged, even though I approved it multiple times
 
@@ -56,11 +56,11 @@ run each time the command is added. Since only an MR with a passing CI job can b
 
 See for reference:
 
-  - [Approval process][1]
-  - [Granular permission model][2]
+  - [Approval process][approval-process]
+  - [Granular permission model][granular-permission-model]
 
-[1]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md?#user-content-approval-process
-[2]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/change-types.md
+[approval-process]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md?#user-content-approval-process
+[granular-permission-model]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/change-types.md
 
 However, if your username is on the approvers' list for this particular change, the change has also been marked as
 `self-serviceable`, you have already provided your `/lgtm` command, but no progress towards the merge has been made,
@@ -487,7 +487,7 @@ For further instructions, check out the complete [monitoring](./docs/app-sre/mon
 
 ### I am having problems accessing a GABI instance
 
-To provide generic database access for tenant's service, we provide [GABI][1] to run SQL queries on protected databases.
+To provide generic database access for tenant's service, we provide [GABI][gabi-repository] to run SQL queries on protected databases.
 
 You can encounter one of three common errors while accessing your GABI instance:
 
@@ -521,10 +521,10 @@ However, if your requests fail and you are confident that you see none of the ab
 see about [contacting AppSRE](#contacting-appsre). Please describe the problem you see and
 how to reproduce it.
 
-For more information, see: [Gabi Instances][2]
+For more information, see: [Gabi Instances][gabi-instances-request]
 
-[1]: https://github.com/app-sre/gabi
-[1]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/gabi-instances-request.md
+[gabi-repository]: https://github.com/app-sre/gabi
+[gabi-instances-request]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/gabi-instances-request.md
 
 ### What kind of tickets will be addressed by jira auto resolve feature?
 
