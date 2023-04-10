@@ -29,13 +29,19 @@ slack:
   channel: team-clouddot-info
 
 managedResourceTypes:
+- ClusterRole
+- ClusterRoleBinding
 - ConfigMap
 - CronJob
+- Deployment
 - DeploymentConfig
+- Service
+- ServiceAccount
 
 imagePatterns:
 - quay.io/cloudservices
 - quay.io/observatorium
+- quay.io/signalfx
 
 authentication:
   image:
@@ -74,3 +80,18 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
     ref: 4dae3b6175e7602810f252b97442c6bf2b5d89cd
+
+# NOTE: needs Deployment, ConfigMap, Service in managedResources (as is common)
+# but also needs ClusterRole, ClusterRoleBinding, ServiceAccount permissions to inject k8s metadata into traces
+- name: splunk-otel-collector
+  path: /deploy/splunk-otel-collector.yaml
+  url: https://gitlab.cee.redhat.com/rhsm/splunk-otel-collector
+  targets:
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+    ref: main
+    parameters:
+      K8S_CLUSTER_NAME: crcs02ue1
+      COLLECTOR_NAMESPACE: rhsm-stage
+      SIGNALFX_TOKEN_SECRET_NAME: signalfx
+      SIGNALFX_TOKEN_SECRET_KEY: token
