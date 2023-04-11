@@ -16,47 +16,51 @@ slack:
   workspace:
     $ref: /dependencies/slack/redhat-internal.yml
   channel: sd-app-sre-info
+
 authentication:
   image:
-    path: cs-sre/creds/quay/pull
+    path: app-sre/quay/app-sre-pull
     field: all
-    version: 3
+
 managedResourceTypes:
 - Deployment
 - Service
 - ServiceAccount
 - ConfigMap
+- Secret
 
 imagePatterns:
 - quay.io/app-sre/skupper-prometheus-collector
 - quay.io/app-sre/x509-certificate-exporter
 
-resourceTemplates: []
-# - name: x509-certificate-exporter
-#   url: https://github.com/app-sre/x509-certificate-exporter
-#   path: /openshift/template.yml
-#   targets:
-#   # stage
-#   - provider: dynamic
-#     namespaceSelector:
-#       jsonPathSelectors:
-#         include:
-#         - namespace[?@.environment.labels.type="stage" & @.skupperSite]
-#         exclude:
-#         - namespace[?@.skupperSite.delete=true]
-#     ref: main
-#     image:
-#       org:
-#         $ref: /dependencies/quay/app-sre.yml
-#       name: x509-certificate-exporter
-# # production
-# # - provider: dynamic
-# #   namespaceSelector:
-# #     jsonPathSelectors:
-# #       include:
-# #       - namespace[?@.skupperSite]
-# #       exclude:
-# #       - namespace[?@.environment.labels.type="stage"]
-# #       - namespace[?@.skupperSite.delete=true]
-# #   ref: todo
+resourceTemplates:
+- name: x509-certificate-exporter
+  url: https://github.com/app-sre/x509-certificate-exporter
+  path: /openshift/template.yml
+  targets:
+  # stage
+  - provider: dynamic
+    namespaceSelector:
+      jsonPathSelectors:
+        include:
+        - namespace[?@.environment.labels.type="stage" & @.skupperSite]
+        exclude:
+        - namespace[?@.skupperSite.delete=true]
+    ref: main
+    image:
+      org:
+        $ref: /dependencies/quay/app-sre.yml
+      name: x509-certificate-exporter
+    parameters:
+      IMAGE_VERSION: 3.6.0
+# production
+# - provider: dynamic
+#   namespaceSelector:
+#     jsonPathSelectors:
+#       include:
+#       - namespace[?@.skupperSite]
+#       exclude:
+#       - namespace[?@.environment.labels.type="stage"]
+#       - namespace[?@.skupperSite.delete=true]
+#   ref: todo
 # TODO grafana dashboards!
