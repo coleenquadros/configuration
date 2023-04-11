@@ -239,8 +239,11 @@ The Cloudflare API has a rate limit of 1200 requests per 5 minutes as documented
 
 The process to have the rate limit raised is to open a support ticket and copy Tim Flynn and Brian Ceppi on it
 
+#### App Interface Specific Maxium record count per Cloudflare DNS zone
 
-#### Maximum record count per zone
+For performance consideration, we limit each zone to 500 records by default. This number can be raised by setting an overwrite using the zone's `max_items` field. This number should not be raised higher than 1500 and raising it always requires APP SRE's approval. When considering the request, please keep in mind that every addition of 1000 records, it adds around 5 minutes run time to MR checks for any qontract promotions, and anything could trigger terraform-cloudflare-dns integration.
+
+#### Cloudflare Maximum record count per zone
 
 The maximum number of records per zone for Free accounts is 1000. The limit is 3500 for Enterprise accounts.
 
