@@ -1,0 +1,50 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: skupper-network-monitoring
+
+name: skupper-network-monitoring
+
+description: This deploys all components needed to monitor a skupper network
+
+architectureDocument: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/design-docs/skupper-integration.md
+sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/skupper-network-monitoring/sops
+grafanaUrls:
+- title: Skupper Networks Dashboard
+  url: https://grafana.app-sre.devshift.net/TODO
+onboardingStatus: OnBoarded
+
+escalationPolicy:
+  $ref: /teams/app-sre/escalation-policies/stream-2.yaml
+serviceOwners:
+- name: App-SRE Stream 2
+  email: sd-app-sre+stream-2@redhat.com
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-ext/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: skupper-prometheus-collector
+    description: Skupper Prometheus Collector
+    public: true
+  - name: x509-certificate-exporter
+    public: false
+    description: Mirror of enix/x509-certificate-exporter
+    mirror:
+      $ref: /dependencies/image-mirrors/docker.io/x509-certificate-exporter.yml
+
+codeComponents:
+- name: skupper-prometheus-collector
+  resource: upstream
+  url: https://github.com/app-sre/skupper-prometheus-collector
+- name: x509-certificate-exporter
+  resource: upstream
+  url: https://github.com/app-sre/x509-certificate-exporter
