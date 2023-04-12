@@ -1,0 +1,46 @@
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: services-dashboard
+
+name: dashboard-integration
+
+description: Integration namespace for the Services Dashboard
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/services-dashboard/app.yml
+
+environment:
+  $ref: /products/services-dashboard/environments/integration.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Role
+- RoleBinding
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/services-dashboard/runtime
+  version: 1
+
+managedExternalResources: true
+
+  #externalResources:
+  #- provider: aws
+  #  provisioner:
+  #    $ref: /aws/cna-service-integration/account.yml
+  #  resources:
+  #  - provider: s3
+  #    identifier: dashboard-shared-int
+  #    defaults: /terraform/resources/s3-private-1.yml
+  #    output_resource_name: dashboard-shared-int
