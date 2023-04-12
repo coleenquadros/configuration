@@ -657,14 +657,14 @@ spec:
     - name: osd-fleet-manager-nonprod-reconciler
       rules:
         - expr: |
-            sum by (worker_type, service) (rate(fleet_manager_reconciler_failure_count[5m]))
+            sum by (worker_type, service, reconciliation_step) (rate(fleet_manager_reconciler_failure_count[5m]))
           labels:
             job: fleet-manager-metrics
             namespace: {{{ namespace }}}
           record: reconciler:fleet_manager_reconciler_failure_count:rate5m
-        - alert: OSD Fleet Manager reconciler failure in sector  {{ $labels.sector }}
+        - alert: OSD Fleet Manager reconciler failure
           annotations:
-            message: "The reconciler of type {{ $labels.worker_type }} for sector {{ $labels.sector }} in {{{ environment }}} failed with a rate of {{ $value }}/s over the last 15 minutes."
+            message: The reconciler {{ $labels.worker_type }}/{{ $labels.reconciliation_step }} for sector {{ $labels.sector }} in {{{ environment }}} failed with a rate of {{ $value | printf "%.1f" }}/s over the last 15 minutes.
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
@@ -677,14 +677,14 @@ spec:
             service: osd-fleet-manager
 
         - expr: |
-            max by (worker_type, service) (fleet_manager_reconciler_duration_in_seconds)
+            max by (worker_type, service, reconciliation_step) (fleet_manager_reconciler_duration_in_seconds)
           labels:
             job: fleet-manager-metrics
             namespace: {{{ namespace }}}
           record: reconciler:fleet_manager_reconciler_duration_in_seconds:max
-        - alert: OSD Fleet Manager reconciler long duration in sector  {{ $labels.sector }}
+        - alert: OSD Fleet Manager reconciler long duration
           annotations:
-            message: "The maximum reconciler duration was {{ $value | humanizeDuration }} for sector {{ $labels.sector }} in {{{ environment }}} over the last 15 minutes."
+            message: "The maximum reconciler duration was {{ $value | humanizeDuration }} for reconciler {{ $labels.worker_type }}/{{ $labels.reconciliation_step }} in sector {{ $labels.sector }} in {{{ environment }}} over the last 15 minutes."
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
