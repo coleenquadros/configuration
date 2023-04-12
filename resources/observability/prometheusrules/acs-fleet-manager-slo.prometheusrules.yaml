@@ -1,0 +1,164 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+    type: slo-rules
+  name: acs-fleet-manager-slo
+spec:
+  groups:
+    - name: acs-fleet-manager.sli
+      rules:
+        # Pod ready SLI
+        # At least one fleet-manager pod must be ready to count as available.
+        # This is a time series of 0s (down) and 1s (up).
+        - expr: |2
+            clamp_max(
+              sum(
+                kube_pod_container_status_ready{container="service", namespace=~"acs-fleet-manager.*"}
+              ),
+            1) or vector(0)
+          labels:
+            service: acs-fleet-manager
+          record: acs_fleet_manager:sli:pod_ready
+
+        # Error rate SLI
+        # The error rate over the last 10 minutes must be smaller than 35% to count as available.
+        - expr: |2
+            sum(
+              rate(
+                haproxy_backend_http_responses_total{route="acs-fleet-manager", code!="5xx"}[10m]
+              )
+            )
+          labels:
+            service: acs-fleet-manager
+          record: acs_fleet_manager:haproxy_backend_http_responses:not_5xx:rate10m
+
+        - expr: |2
+            sum(
+              rate(
+                haproxy_backend_http_responses_total{route="acs-fleet-manager"}[10m]
+              )
+            )
+          labels:
+            service: acs-fleet-manager
+          record: acs_fleet_manager:haproxy_backend_http_responses:rate10m
+
+        # This is a time series of 0s (down) and 1s (up).
+        # Success rate above 65% is floored to 1.
+        # Success rate below 65% is floored to 0.
+        - expr: |2
+            floor(
+                acs_fleet_manager:haproxy_backend_http_responses:not_5xx:rate10m
+              /
+                acs_fleet_manager:haproxy_backend_http_responses:rate10m
+              + 0.35
+            )
+          labels:
+            service: acs-fleet-manager
+          record: acs_fleet_manager:sli:error_rate
+
+        # Availability SLI
+        # If any of the SLIs is violated, the service counts as unavailable.
+        # This is a time series of 0s (down) and 1s (up).
+        - expr: |2
+            acs_fleet_manager:sli:pod_ready * acs_fleet_manager:sli:error_rate
+          labels:
+            service: acs-fleet-manager
+          record: acs_fleet_manager:sli:availability
+
+        - expr: |2
+            avg_over_time(acs_fleet_manager:sli:availability[1h])
+          labels:
+            service: acs-fleet-manager
+          record: acs_fleet_manager:sli:availability:avg_over_time1h
+
+        - expr: |2
+            avg_over_time(acs_fleet_manager:sli:availability[28d])
+          labels:
+            service: acs-fleet-manager
+          record: acs_fleet_manager:sli:availability:avg_over_time28d
+
+    - name: acs-fleet-manager.slo
+      rules:
+        # Availability SLO
+        - expr: "0.99"
+          labels:
+            service: acs-fleet-manager
+          record: acs_fleet_manager:slo:availability
+
+        # 0% exhaustion means no recorded failures.
+        # 100% exhaustion means the SLO target has been reached.
+        # >100% exhaustion means the SLO target has been violated.
+        - expr: |2
+            (1 - acs_fleet_manager:sli:availability:avg_over_time28d) / (1 - acs_fleet_manager:slo:availability)
+          labels:
+            service: acs-fleet-manager
+          record: acs_fleet_manager:slo:availability:error_budget_exhaustion
+
+        # A burn rate of 1 corresponds to full error budget exhaustion after the SLO window W.
+        # A burn rate of n corresponds to full error budget exhaustion after W/n - in other words,
+        # it measures the exhaustion velocity. To keep the SLO target, a temporary burn rate larger
+        # than 1 must be compensated with a burn rate smaller than 1.
+        - expr: |2
+            (1 - acs_fleet_manager:sli:availability:avg_over_time1h) / (1 - acs_fleet_manager:slo:availability)
+          labels:
+            service: acs-fleet-manager
+          record: acs_fleet_manager:slo:availability:burnrate1h
+
+    - name: acs-fleet-manager.alerts
+      rules:
+        - alert: ACS Fleet Manager availability error budget exhaustion - 90%
+          annotations:
+            message: "High availability error budget exhaustion for acs-fleet-manager. Current exhaustion: {{ $value | humanizePercentage }}."
+            dashboard: "https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-availability"
+          expr: |
+            acs_fleet_manager:slo:availability:error_budget_exhaustion >= 0.9
+          labels:
+            environment: {{{ environment }}}
+            service: acs-fleet-manager
+            severity: {{{ high_severity }}}
+            team: appsre
+
+        - alert: ACS Fleet Manager availability error budget exhaustion - 70%
+          annotations:
+            message: "High availability error budget exhaustion for acs-fleet-manager. Current exhaustion: {{ $value | humanizePercentage }}."
+            dashboard: "https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-availability"
+          expr: |
+            acs_fleet_manager:slo:availability:error_budget_exhaustion >= 0.7
+          labels:
+            environment: {{{ environment }}}
+            service: acs-fleet-manager
+            severity: {{{ low_severity }}}
+
+        - alert: ACS Fleet Manager availability error budget exhaustion - 50%
+          annotations:
+            message: "High availability error budget exhaustion for acs-fleet-manager. Current exhaustion: {{ $value | humanizePercentage }}."
+            dashboard: "https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-availability"
+          expr: |
+            acs_fleet_manager:slo:availability:error_budget_exhaustion >= 0.5
+          labels:
+            environment: {{{ environment }}}
+            service: acs-fleet-manager
+            severity: {{{ low_severity }}}
+
+        - alert: ACS Fleet Manager high availability burn rate
+          annotations:
+            message: "High availability burn rate for acs-fleet-manager. Current burn rate per hour: {{ $value | humanize }}."
+            dashboard: "https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/acs-fleet-manager/sop#acs-fleet-manager-availability"
+          # Corresponds to less than 50% up time over 1 hour assuming a 99% SLO target.
+          # See recording rules for how burn rates relate to SLI and SLO in general.
+          expr: |
+            acs_fleet_manager:slo:availability:burnrate1h >= 50
+          labels:
+            environment: {{{ environment }}}
+            service: acs-fleet-manager
+            severity: {{{ high_severity }}}
+            team: appsre
