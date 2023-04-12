@@ -1,16 +1,17 @@
 # saas-auto-promotions-manager (SAPM)
 
-SAPM is currently only running in test mode, i.e., it does not do any real changes.
-
-If there are any issues with SAPM, please do not bother! For now, just turn it off and ping @kfischer.
+SAPM is responsible for managing auto-promotion MRs.
 
 ## Turning off SAPM
 
 ### Via unleash feature flag
 
-The easiest way is to disable the [unleash feature flag](https://app-interface.unleash.devshift.net/projects/default/features/saas-auto-promotions-manager).
+The easiest way is to disable the whole integration via the [unleash feature toggle](https://app-interface.unleash.devshift.net/projects/default/features/saas-auto-promotions-manager).
 
-### Remove integration from app-interface
+### Disabling MR management
 
-Worst-case you can also remove the integration in full from app-interface if the unleash feature flag doesnt work for you.
+You can also keep SAPM running, but prevent it from doing any MR management.
 
+You can prevent SAPM from opening new MRs via [this feature toggle](https://app-interface.unleash.devshift.net/projects/default/features/saas-auto-promotions-manager-allow-opening-mrs)
+
+Further, you can tell SAPM to stop closing "bad" MRs with [this feature toggle](https://app-interface.unleash.devshift.net/projects/default/features/saas-auto-promotions-manager-allow-deleting-mrs)
