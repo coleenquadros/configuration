@@ -16,7 +16,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 
 ### Can you merge my MR
 
-The App-SRE IC (interrupt catcher) periodically reviews the MRs in the app-interface repository. There is no need to ping us to let us know you've opened a MR.
+The AppSRE IC (Interrupt Catcher) periodically reviews the MRs in the app-interface repository. There is no need to ping us to let us know you've opened a MR.
 
 If your MR is urgent or time sensitive requests, see [contacting AppSRE](#contacting-appsre)
 
@@ -24,7 +24,7 @@ If your MR is urgent or time sensitive requests, see [contacting AppSRE](#contac
 
 Generally, during core business hours, Bot will be tending to multiple changes that are currently in flight (which you
 can see [here][merge-queue]). If your MR has been approved, then please be patient. Bot will eventually get to it and merge it.
-There might be severalupdates before the change is merged, such as regular rebases, triggered CI job runs, and updates
+There might be several updates before the change is merged, such as regular rebases, triggered CI job runs, and updates
 to the "Change coverage report".
 
 However, if you believe that something isn't right, review the following:
@@ -111,7 +111,7 @@ Please check our [AWS docs](https://gitlab.cee.redhat.com/service/app-interface/
 
 ### How can I delete existing resource from AWS?
 
-See the [Delete external resource](#delete-external-resource) section.
+See the [How to delete external resource](#how-to-delete-external-resource) section.
 
 ### I can not access ci-ext
 
@@ -205,9 +205,9 @@ To gate production promotions, follow these steps:
 
 ### Get access to cluster logs via Log Forwarding
 
-With the ClusterLoggingOperator AddOn decommission ([ADR 58](https://docs.google.com/document/d/1RJ66T0eqcaEZzuG3gKYKzedVxw62iXWq-fsJcWECGV4/edit)), App SRE is migrating to using the cluster-logging operator directly. With this change, logs will not be stored in the cluster account anymore. They will centralized in the `app-sre-logs` account. Logs are stored in log groups named `<cluster>.<namespace>`
+With the ClusterLoggingOperator AddOn decommission ([ADR 58](https://docs.google.com/document/d/1RJ66T0eqcaEZzuG3gKYKzedVxw62iXWq-fsJcWECGV4/edit)), AppSRE is migrating to using the cluster-logging operator directly. With this change, logs will not be stored in the cluster account anymore. They will centralized in the `app-sre-logs` account. Logs are stored in log groups named `<cluster>.<namespace>`
 
-To know if your cluster uses the new cluster-logging operator deployment and centralized logs, check if the [cluster-logging-operator saas file](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-cluster-logging-operator.yaml) targets the cluster, and the target is enabled (does not contain `disable: true`).
+To know if your cluster uses the new cluster-logging operator deployment and centralized logs, check if the [cluster-logging-operator SaaS file](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-cluster-logging-operator.yaml) targets the cluster, and the target is enabled (does not contain `disable: true`).
 
 To get access to the `app-sre-logs` account:
 1. Submit a MR to app-interface to add the [log-consumer](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-logs/roles/log-consumer.yml) role to your user file. You will also need to [add your public GPG key](https://gitlab.cee.redhat.com/service/app-interface#adding-your-public-gpg-key) (if you havn't already) in the same MR.
@@ -218,9 +218,9 @@ To get access to the `app-sre-logs` account:
 1. Logout and login to the account again using the configured MFA device.
 1. Access CloudWatch
 
-During the CLO Addon decommission period (see [email](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/app-interface/emails/clo-addon-decommission-anouncement.yaml)):
-* check if you cluster is still using the old logging Addon (`disable: true` in the [saas-file](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-cluster-logging-operator.yaml))
-* If still using the old Addon, please use the following info to access logs on the cluster's AWS account
+During the CLO Add-on decommission period (see [email](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/app-interface/emails/clo-addon-decommission-anouncement.yaml)):
+* check if you cluster is still using the old logging Add-on (`disable: true` in the [SaaS-file](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-cluster-logging-operator.yaml))
+* If still using the old Add-on, please use the following info to access logs on the cluster's AWS account
 
 To get access to CloudWatch on a cluster's AWS account, follow these steps (examples for `app-sre-stage-01`):
 
@@ -259,7 +259,7 @@ Start by accessing the Visual App-Interface at https://visual-app-interface.devs
 
 Choose the relevant service from the list. For example, [cincinnati](https://visual-app-interface.devshift.net/services#/services/cincinnati/app.yml).
 
-Choosing the service will take you to the the service's page, in which you can view a list of `Namespaces` which are related to this service.  In this example the namespaces are:
+Choosing the service will take you to the service's page, in which you can view a list of `Namespaces` which are related to this service.  In this example the namespaces are:
 - `cincinnati-production`
 - `cincinnati-stage`
 
@@ -280,14 +280,14 @@ _Note: To the right of the search for services the drop down defaults to "show c
 __Example service:__ [quay.io](https://visual-app-interface.devshift.net/services#/services/quayio/app.yml)
 If the service is OnBoarded you can contact @app-sre-ic in the #sd-app-sre channel with the reason why you are requesting to "bounce" a pod, (which is actually deleting the pod.)
 We also require a Jira ticket in the backlog of the development team that owns the service to automate pod restarting via liveliness probes or health checks so manual intervention is not required.
-You may also want to collect information from the the cluster and namespace.  Clusters are listed [here](https://visual-app-interface.devshift.net/clusters) ex. [quayp05ue1](https://visual-app-interface.devshift.net/clusters#/openshift/quayp05ue1/cluster.yml). If the application team still needs help to retrieve debugging information please let the @app-sre-ic team know before we "bounce" the pod.
+You may also want to collect information from the cluster and namespace.  Clusters are listed [here](https://visual-app-interface.devshift.net/clusters) ex. [quayp05ue1](https://visual-app-interface.devshift.net/clusters#/openshift/quayp05ue1/cluster.yml). If the application team still needs help to retrieve debugging information please let the @app-sre-ic team know before we "bounce" the pod.
 #### Services not yet OnBoarded
 
 A service may be in some other state such as, but not limited to: _BestEffort_ or _InProgress_
 
 In cases where pods get into an unhealthy state and may require a restart. Below is what you should do:
 1. Verify that you are exposing a `REPLICAS` parameter for templating.
-2. Submit a MR to app-interface to changes `REPLICAS` to 0 (owners of that saas file are able to self-service the merge).
+2. Submit a MR to app-interface to changes `REPLICAS` to 0 (owners of that SaaS file are able to self-service the merge).
 3. After the MR is merged and applied, submit another MR to app-interface to change `REPLICAS` back to the original value.
 
 Now that the fire is out, please work towards not having to do this again. The solution depends on the underlying issue, but here are some common cases:
@@ -302,7 +302,7 @@ It does not scale well to have a team of SREs running ad-hoc commands for recurr
 If AppSRE is asked to run an ad-hoc command, we will ask for an [ASIC ticket](https://issues.redhat.com/projects/ASIC/issues) to be created with the following information:
 
 1. A justification for why this cannot be performed via some other method:
-   1. `Job` or `CronJob` (see [Continous Delivery in app-interface](docs/app-sre/continuous-delivery-in-app-interface.md)). Note that using this method would also make the operation self-service in many cases.
+   1. `Job` or `CronJob` (see [Continuous Delivery in app-interface](docs/app-sre/continuous-delivery-in-app-interface.md)). Note that using this method would also make the operation self-service in many cases.
    2. For database operations: [Execute a SQL Query on an App Interface controlled RDS instance](README.md#execute-a-sql-query-on-an-app-interface-controlled-rds-instance)
 2. A step-by-step list of what needs to be done for this change
 3. An approval from a team member added to the ticket indicating that the command is safe to run
@@ -334,11 +334,11 @@ The general guidance for selecting one or the other is:
 
 In the MR to create the role or user, please provide a detailed explanation of why the access is required and how the data will be used.
 
-### Delete target from SaaS file
+### How to delete target from SaaS file
 
 To delete a target from a SaaS file, set `delete: true` in the target you wish to delete. This will cause all associated resources to be deleted in the next deployment. Follow this up with another MR to delete the target from the SaaS file.
 
-For example, to delete the stage deployment from this saas-file:
+For example, to delete the stage deployment from this SaaS-file:
 ```
 (top of the file)
 resourceTemplates:
@@ -369,7 +369,7 @@ resourceTemplates:
       $ref: /services/insights/example/namespaces/example-prod.yml
     ref: b17281f74dea89f0834c34f697ea257445f3c195
 ```
-Then open up a follow-up MR to delete the target from the saas file:
+Then open up a follow-up MR to delete the target from the SaaS-file:
 ```
 (top of the file)
 resourceTemplates:
@@ -383,7 +383,7 @@ resourceTemplates:
 
 More information: [Continuous Delivery in App-interface](/docs/app-sre/continuous-delivery-in-app-interface.md)
 
-### Delete external resource
+### How to delete external resource
 
 To remove an external resource (a resource that has been provisioned through AppInterface and outside of the OpenShift
 clusters, such as a data store from the AWS public cloud or DNS zone from Cloudflare), several steps are usually
@@ -447,7 +447,7 @@ Seeing this message in ci-ext - `Jenkins is going to shut down. No further build
 Reason:
 Jenkins is configured to perform a [Thin backup](https://plugins.jenkins.io/thinBackup) periodically. It is recommended to perform the backup when no jobs are running. Jenkins will not schedule jobs during the waiting period (waiting for all running jobs to complete). No manual intervention is required, this is expected.
 
-If a job is pending and need to be rushed, contact the App SRE team for assitance (canceling the current restart will get pending jobs to run, but will not cancel the backup).
+If a job is pending and need to be rushed, contact the AppSRE team for assistance (canceling the current restart will get pending jobs to run, but will not cancel the backup).
 
 ### How can I make my PR check job run concurrently
 
@@ -473,7 +473,7 @@ Start by accessing the Visual App-Interface at https://visual-app-interface.devs
 
 Choose the relevant service from the list. For example, [telemeter](https://visual-app-interface.devshift.net/services#/services/rhobs/telemeter/app.yml).
 
-Choosing the service will take you to the the service's page, in which you can view a list of `Namespaces` which are related to this service.  In this example the namespaces are:
+Choosing the service will take you to the service's page, in which you can view a list of `Namespaces` which are related to this service.  In this example the namespaces are:
 - `telemeter-production`
 - `telemeter-stage`
 
@@ -493,7 +493,7 @@ DataHub is not managed by the AppSRE team, but you can find the process to [requ
 
 ### Jenkins Vault plugin upgrade
 
-The App SRE team is upgrading the Vault plugin on it's Jenkins instances from version 2 to 3.
+The AppSRE team is upgrading the Vault plugin on it's Jenkins instances from version 2 to 3.
 
 As a result from this upgrade, jobs may fail due to not being able to read secrets from Vault if they contain empty keys. If you encounter a failing job which seems related to Vault, please check all the secrets used by the job to verify they do not contain empty keys.
 
@@ -505,9 +505,9 @@ Related Jira ticket: https://issues.redhat.com/browse/APPSRE-947
 
 Check your mailbox! It should be there! If not, ask the IC to review [the AppSRE organization](https://github.com/orgs/app-sre/people) and see if your invite is pending or failed. They can cancel the pending invite and send a new one to you.
 
-### I need to add a package to a jenkins worker node
+### I need to add a package to a Jenkins worker node
 
-The App SRE team recommends transitioning to using containerized builds over trying to load specific packages onto a jenkins worker node.  Containerized builds provide numerous advantageous to our users including:
+The AppSRE team recommends transitioning to using containerized builds over trying to load specific packages onto a jenkins worker node.  Containerized builds provide numerous advantageous to our users including:
 
 - Control over the build dependencies
 - Idempotency
@@ -523,7 +523,7 @@ Check your namespace and your saas file! Is your new configuration's type listed
 
 Review #sd-app-sre-reconcile in slack for messages related to your configuration, it should tell you if it is applying it or it is skipping it. See [this ticket](https://issues.redhat.com/browse/APPSRE-3668)
 
-### My tekton deploy PipelineRun is silenty failing for no obvious reason
+### My Tekton deploy PipelineRun is silently failing for no obvious reason
 
 If the `openshift-saas-deploy` Task of the Pipeline fails to finish successfully and leaves no trace about there's a good chance that the pod responsible to execute the Task's steps are hitting the memory limit getting killed by the kernel OOM. In order to verify this, you can search for pods in the tekton provider's namespace associated your saas file. If you see pods related to your `PipelineRun` (which are named after your saas file) showing `OOMKilled` status, you will need to increase the resources assigned to your deployment pods. In order to do that, just add a [`deployResources`](/docs/app-sre/continuous-delivery-in-app-interface.md#saas-file-structure) section in your saas file or increase the resources associated there. The resulting MR can be approved by the saas file owners.
 
@@ -578,11 +578,11 @@ For more information, see: [Gabi Instances][gabi-instances-request]
 [gabi-repository]: https://github.com/app-sre/gabi
 [gabi-instances-request]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/gabi-instances-request.md
 
-### What kind of tickets will be addressed by jira auto resolve feature?
+### What kind of tickets will be addressed by Jira auto resolve feature?
 
-AppSRE has automations that allows us to analyze various metadata from kubernetes manifests, app-interface as well as cloud resources in AWS such as RDS etc. We review this data to ensure it follows AppSRE best practices and create jira tickets in our tenant boards to address the gaps if any.
+AppSRE has automations that allows us to analyze various metadata from Kubernetes manifests, app-interface as well as cloud resources in AWS such as RDS etc. We review this data to ensure it follows AppSRE best practices and create Jira tickets in our tenant boards to address the gaps if any.
 
-You may see tickets such as following created in your jira board. This list is not comprehensive and will change over time. 
+You may see tickets such as following created in your Jira board. This list is not comprehensive and will change over time. 
 - https://issues.redhat.com/browse/APPSRE-5026
 - https://issues.redhat.com/browse/APPSRE-4887
 
@@ -590,8 +590,8 @@ Easy way to identify such tickets in Jira is to check for `JIRALERT{<HASH>}` in 
 
  ***Only tickets created with this label will be resolved automatically once underlying cause has been addressed.***
 
-More information on how to enroll in this feature https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/register-your-service/#creating-an-escalation-policy, look for `issueResolveState` in jira board example.
+More information on how to enroll in this feature https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/register-your-service/#creating-an-escalation-policy, look for `issueResolveState` in Jira board example.
 
 ### Why did my Job not run yesterday?
 
-So, you already checked your namespace events, but it shows they are no longer visible? Take a look at [this documentation](./docs/app-sre/historic-kubernetes-events.md), as it explains how to access historic kubernetes events in Cloudwatch.
+So, you already checked your namespace events, but it shows they are no longer visible? Take a look at [this documentation](./docs/app-sre/historic-kubernetes-events.md), as it explains how to access historic Kubernetes events in CloudWatch.
