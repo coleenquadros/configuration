@@ -68,6 +68,24 @@ even after a while. Then [confirm](#my-mr-takes-a-long-time-to-get-merged) that 
 check what labels were added by the Bot, inspect the "Change coverage report" that the Bot posts, and ensure that none
 of the other issues can be the problem here.
 
+### My MR has nobody assigned to it. Can you assign someone?
+
+An AppSRE team member, whether currently designated as the IC (Interrupt Catcher) on duty or not, will not assign Jira
+tickets or allocate any work to other engineers under most circumstances - this concerns both the reviews and approvals
+alike.
+
+**Note:** the role of an IC is not to distribute work to others but rather to provide support to AppInterface users,
+whether by offering hands-on aid, guidance, or self-service enablement.
+
+If you wish to receive help from the AppSRE team that does not require immediate attention, please consider raising
+either an ASIC ticket or an APPSRE ticket in Jira or contact AppSRE management (feel free to reach out using the
+`@app-sre-manager-oncall` Slack handle).
+
+Otherwise, please observe the established [etiquette][app-sre-etiquette] when [Contacting](#contacting-appsre) the
+AppSRE team or interacting with the IC.
+
+[app-sre-etiquette]: https://gitlab.cee.redhat.com/service/app-interface/#app-interface-etiquette
+
 ### Contacting AppSRE
 
 You can catch the AppSRE team in the `#sd-app-sre` channel of `redhat-internal.slack.com`.
