@@ -74,10 +74,10 @@ ACS Fleet Manager (all the replicas or pods) are down.
     - Search Error/exception events with keywords "ACS Fleet Manager " and with text "image", "deployment" etc.
 - Investigate the metrics in Grafana for any possible evidences of the crash.
     - Application: Volume, Latency, Error
-        - Stage: https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+        - Stage: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
         - Production: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1
     - CPU, Network, Memory, IO
-        - Stage: https://grafana.stage.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+        - Stage: https://grafana.app-sre.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
         - Production: https://grafana.app-sre.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1
 - Check [openshift deployment template](https://github.com/stackrox/acs-fleet-manager/blob/main/templates/service-template.yml) for potential issue cause.
 - Check [ACS Fleet Manager CI job logs](https://ci.ext.devshift.net/job/stackrox-acs-fleet-manager-gh-build-main/) for potential error cause.
@@ -105,10 +105,10 @@ ACS Fleet Manager is not performing normally and is returning an abnormally high
 
 - Investigate the metrics in Grafana for any possible cause of the issue
     - Application: Volume, Latency, Error
-        - Stage: https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+        - Stage: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
         - Production: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1
     - CPU, Network, Memory, IO
-        - Stage: https://grafana.stage.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+        - Stage: https://grafana.app-sre.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
         - Production: https://grafana.app-sre.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1
 - If there are container performance issue are identified (e.g.: CPU spike, high Latency etc.), increase the number of replicas.
 - Check Deployments/acs-fleet-manager, check details page to make sure pods are configured and started. Start the pod if none is running (default:3).
@@ -174,10 +174,10 @@ ACS Fleet Manager encountered reconciliations with a long duration.
   - Identify the ACS tenants that are affected by the reconciliation failure.
 - Investigate the metrics in Grafana for any possible evidences of the failure.
   - Application: Volume, Latency, Error
-    - Stage: https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+    - Stage: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
     - Production: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1
   - CPU, Network, Memory, IO
-    - Stage: https://grafana.stage.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+    - Stage: https://grafana.app-sre.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
     - Production: https://grafana.app-sre.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1
 - Check [OpenShift deployment template](https://github.com/stackrox/acs-fleet-manager/blob/main/templates/service-template.yml) for potential causes.
 - Check [ACS Fleet Manager CI job logs](https://ci.ext.devshift.net/job/stackrox-acs-fleet-manager-gh-build-main/) for potential error cause.
@@ -211,10 +211,10 @@ ACS Fleet Manager encountered reconciliations with a long duration.
   - Confirm if the reconciliations are stuck permanently or exit eventually.
 - Investigate the metrics in Grafana for any possible evidences of the duration.
   - Application: Volume, Latency, Error
-    - Stage: https://grafana.stage.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+    - Stage: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1&from=now-28d&to=now&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
     - Production: https://grafana.app-sre.devshift.net/d/T2kek3H9a/acs-fleet-manager-slos?orgId=1
   - CPU, Network, Memory, IO
-    - Stage: https://grafana.stage.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
+    - Stage: https://grafana.app-sre.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=acs-fleet-manager-stage
     - Production: https://grafana.app-sre.devshift.net/d/D1C839d82/acs-fleet-manager?orgId=1
 - Check [OpenShift deployment template](https://github.com/stackrox/acs-fleet-manager/blob/main/templates/service-template.yml) for potential causes.
 - Check [ACS Fleet Manager CI job logs](https://ci.ext.devshift.net/job/stackrox-acs-fleet-manager-gh-build-main/) for potential error cause.
