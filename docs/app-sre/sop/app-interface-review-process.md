@@ -56,12 +56,12 @@ The `sql-query` integration doesn't support updates on already submitted queries
 
 ### Glitchtip
 
-A `glitchtip_roles.role` must be `member` only. Currently, we don't use the other roles.
+As long as glitchtip project alerts aren't managed by App-Interface, the `glitchtip_roles.role` must be at least `admin`. Otherwise, the tenant won't be able to create/update/delete their alerts.
 ```yaml
 glitchtip_roles:
 - organization:
     $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example TODO>
-role: member
+role: admin
 ```
 
 ## Additional Reviewers
