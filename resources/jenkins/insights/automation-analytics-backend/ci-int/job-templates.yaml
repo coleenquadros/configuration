@@ -227,6 +227,29 @@
         notify-repeated-failure: true
     <<: *gl_pr_check
 
+- job-template:
+    id: 'insights-gl-build-master-benchmark'
+    name: '{gl_group}-{gl_project}-gl-build-{branch}-benchmark'
+    slack_channel_notification: 'consoledot-development-fails'
+    build_deploy_script_path: './build_deploy_benchmark.sh'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+    publishers:
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
+    <<: *gl_build_master
 
 - job-template:
     id: 'insights-automation-analytics-benchmark-gl-pr-check'
