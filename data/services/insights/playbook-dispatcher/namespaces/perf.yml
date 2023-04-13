@@ -1,0 +1,93 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights
+
+name: playbook-dispatcher-perf
+description: Namespace where playbook dispatcher resources are deployed
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/insights/playbook-dispatcher/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+# networkPoliciesAllow:
+# - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+# - $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+# - $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
+# - $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+# - $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
+# - $ref: /services/insights/config-manager/namespaces/config-manager-stage.yml
+# - $ref: /services/insights/edge/namespaces/stage-edge-stage.yml
+
+# sharedResources:
+# - $ref: /services/insights/shared-resources/rhosak-stage.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/perf/playbook-dispatcher-perf/auth-psk-edge
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-dev/cloud-connector-perf/playbook-dispatcher-psk
+  name: client-psk-cloud-connector
+  version: 1
+# - provider: vault-secret
+#   path: insights/secrets/insights-stage/playbook-dispatcher-stage/auth-psk-remediations
+#   version: 1
+# - provider: vault-secret
+#   path: insights/secrets/insights-stage/playbook-dispatcher-stage/auth-psk-config-manager
+#   version: 1
+# - provider: vault-secret
+#   path: insights/secrets/insights-stage/playbook-dispatcher-stage/auth-psk-edge
+#   version: 1
+# - provider: vault-secret
+#   path: insights/secrets/insights-stage/cloud-connector-stage/playbook-dispatcher-psk
+#   name: client-psk-cloud-connector
+#   version: 1
+# - provider: vault-secret
+#   path: insights/secrets/insights-stage/playbook-dispatcher-stage/auth-psk-tasks
+  # version: 1
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: playbook-dispatcher-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+  - provider: rds
+    identifier: playbook-dispatcher-perf
+    defaults: /terraform/resources/insights/perf/rds/rds-playbook-dispatcher-perf-12.yml
+    overrides:
+      username: insights
+      allocated_storage: 400
+      name: insights
+      apply_immediately: true
+    parameter_group: /terraform/resources/insights/perf/rds/postgres12-parameter-group-playbook-dispatcher-perf.yml
+    output_resource_name: playbook-dispatcher-db
+    enhanced_monitoring: true
