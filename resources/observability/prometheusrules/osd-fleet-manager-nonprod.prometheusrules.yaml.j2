@@ -657,10 +657,9 @@ spec:
     - name: osd-fleet-manager-nonprod-reconciler
       rules:
         - expr: |
-            label_replace(sum by (worker_type, service, reconciliation_step) (rate(fleet_manager_reconciler_failure_count[5m])), "sector", "$1", "service", "fleet-manager-metrics-(.*)")
+            label_replace(sum by (worker_type, service, reconciliation_step) (rate(fleet_manager_reconciler_failure_count{namespace="{{{ namespace }}}"}[5m])), "sector", "$1", "service", "fleet-manager-metrics-(.*)")
           labels:
             job: fleet-manager-metrics
-            namespace: {{{ namespace }}}
           record: reconciler:fleet_manager_reconciler_failure_count:rate5m
         - alert: OSD Fleet Manager reconciler failure
           annotations:
@@ -668,19 +667,17 @@ spec:
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
-            reconciler:fleet_manager_reconciler_failure_count:rate5m > 0
+            reconciler:fleet_manager_reconciler_failure_count:rate5m{namespace="{{{ namespace }}}"} > 0
           for: 1m
           labels:
             severity: medium
             team: osd
-            namespace: {{{ namespace }}}
             service: osd-fleet-manager
 
         - expr: |
-            label_replace(max by (worker_type, service, reconciliation_step) (fleet_manager_reconciler_duration_in_seconds), "sector", "$1", "service", "fleet-manager-metrics-(.*)")
+            label_replace(max by (worker_type, service, reconciliation_step) (fleet_manager_reconciler_duration_in_seconds{namespace="{{{ namespace }}}"}), "sector", "$1", "service", "fleet-manager-metrics-(.*)")
           labels:
             job: fleet-manager-metrics
-            namespace: {{{ namespace }}}
           record: reconciler:fleet_manager_reconciler_duration_in_seconds:max
         - alert: OSD Fleet Manager reconciler long duration
           annotations:
@@ -688,10 +685,9 @@ spec:
             dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager1/osd-fleet-manager-metrics1"
             runbook: ""
           expr: |
-            reconciler:fleet_manager_reconciler_duration_in_seconds:max > 30
+            reconciler:fleet_manager_reconciler_duration_in_seconds:max{namespace="{{{ namespace }}}"} > 30
           labels:
             severity: medium
-            namespace: {{{ namespace }}}
             service: osd-fleet-manager
 
     - name: osd-fleet-manager-nonprod-saturation-level
