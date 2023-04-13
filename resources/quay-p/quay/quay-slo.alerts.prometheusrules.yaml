@@ -1,0 +1,168 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: quay-slo
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: quay-slo-rules
+    rules:
+    - alert: QuayPushPullMonitorDegraded
+      expr: |
+        sum(increase(catchpoint_check_failures_total{probe="quayio-pull-monitor-v2"}[5m])) 
+        /
+        sum(increase(catchpoint_checks_total{probe="quayio-pull-monitor-v2"}[5m])) > 0.01
+      for: 10m
+      labels:
+        severity: warn
+        service: quay
+      annotations:
+        message: "quay.io pulls are below SLO of 99.9% in the last 10 minutes"
+        dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1"
+
+    - alert: QuayioRepositoryEndpointDegraded
+      expr: |
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.repository",status!~"5[0-9][0-9]",method="GET"}[5m]))
+        /
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.repository",method="GET"}[5m])) < 0.995
+      for: 10m
+      labels:
+        severity: warn
+        service: quay
+      annotations:
+        message: "quay.io repository endpoint is below SLO of 99.5% in the last 10 minutes"
+
+    - alert: QuayioSecurityEndpointDegraded
+      expr: |
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.repositorymanifestsecurity",status!~"5[0-9][0-9]",method="GET"}[5m])) 
+        / 
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.repositorymanifestsecurity",method="GET"}[5m])) < 0.995
+      for: 10m
+      labels:
+        severity: warn
+        service: quay
+      annotations:
+        message: "quay.io security endpoint is below SLO of 99.5% in the last 10 minutes"
+
+    - alert: QuayioDownloadBlobDegraded
+      expr: |
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.download_blob", status!~"5[0-9][0-9]", method="GET"}[5m])) 
+        / 
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.download_blob", method="GET"}[5m])) < 0.999
+      for: 10m
+      labels: 
+        severity: warn
+        service: quay
+      annotations:
+        message: "quay.io blob downloads are below SLO of 99.9% in the last 10 minutes"
+
+    - alert: QuayioUploadBlobDegraded
+      expr: |
+        (
+          sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.start_blob_upload", method="POST", status!~"5[0-9][0-9]"}[5m])) 
+          + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.monolithic_upload_or_last_chunk", method="PUT", status!~"5[0-9][0-9]"}[5m])) 
+          + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.upload_chunk", method="PATCH", status!~"5[0-9][0-9]"}[5m]))
+        ) 
+        / 
+        (
+          sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.start_blob_upload", method="POST"}[5m])) 
+          + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.monolithic_upload_or_last_chunk", method="PUT"}[5m])) 
+          + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.upload_chunk", method="PATCH"}[5m]))
+        ) < 0.995
+      for: 10m
+      labels:
+        severity: warn
+        service: quay
+      annotations:
+        message: "quay.io blob uploads are below SLO of 99.5% in the last 10 minutes"
+
+    - alert: QuayioTagsEndpointDegraded
+      expr: |
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.listrepositorytags",status!~"5[0-9][0-9]",method="GET"}[5m])) 
+        / 
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.listrepositorytags",method="GET"}[5m])) < 0.995
+      for: 10m
+      labels: 
+        severity: warn
+        service: quay
+      annotations:
+        message: "quay.io tags endpoint is below SLO of 99.5 in the last 10 minutes"
+          
+    - alert: QuayioUsersEndpointDegraded
+      expr: |
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.user",status!~"5[0-9[0-9]",method="GET"}[5m])) 
+        / 
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.user",method="GET"}[5m])) < 0.995
+      for: 10m
+      labels:
+        severity: warn
+        service: quay
+      annotations:
+        message: "quay.io users endpoint is below SLO of 99.5% in the last 10 minutes"
+
+    - alert: QuayioUploadManifestDegraded
+      expr: |
+        (
+          sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_tagname", status!~"5[0-9][0-9]"}[5m]))
+          + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_digest",status!~"5[0-9][0-9]"}[5m]))
+        )
+        / 
+        (
+          sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_tagname"}[5m]))
+           + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_digest"}[5m]))
+        ) < 0.995
+      for: 10m
+      labels:
+        severity: warn
+        service: quay
+      annotations:
+        message: "quay.io upload manifest is below SLO of 99.5% in the last 10 minutes"
+
+    - alert: QuayioGetManifestDegraded
+      expr: | 
+        (
+            sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.fetch_manifest_by_tagname", status!~"5[0-9][0-9]"}[5m]))
+            +
+            sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.fetch_manifest_by_digest", status!~"5[0-9][0-9]"}[5m]))
+        )
+        /
+        (
+            sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.fetch_manifest_by_digest"}[5m]))
+            +
+            sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.fetch_manifest_by_tagname"}[5m]))
+        ) < 0.999
+      for: 10m
+      labels:
+        severity: warn
+        service: quay
+      annotations:
+        message: "quay.io get manifest is below SLO of 99.9% in the last 10 minutes"
+
+    - alert: QuayioAuthDegraded
+      expr: |
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.generate_registry_jwt", method="GET", status!~"5[0-9][0-9]"}[5m]))
+        /
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.generate_registry_jwt", method="GET"}[5m])) < 0.999
+      for: 10m
+      labels:
+        severity: warn
+        service: quay
+      annotations:
+        message: "quay.io auth endpoint is below SLO of 99.9% in the last 10 minutes"
+
+    - alert: QuayioBuildsDegraded
+      expr: |
+        sum(increase(quay_build_jobs_total{success="true"}[5m]))
+        /
+        sum(increase(quay_build_jobs_total[5m])) < 0.995
+      for: 10m
+      labels:
+        severity: warn
+        service: quay
+      annotations:
+        message: "quay.io builds below SLO of 99.5% in the last 10 minutes"
+

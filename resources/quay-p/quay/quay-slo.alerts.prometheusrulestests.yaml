@@ -1,0 +1,112 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /quay-p/quay/quay-slo.alerts.prometheusrules.yaml
+
+target_clusters:
+  - quayp05ue1
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'up{job="node", instance="foo"}'
+        values: '1+0x10'
+      - series: 'up{job="node", instance="bar"}'
+        values: '1+0x5 0+0x5'
+      - series: 'up{job="node", instance="foo"}'
+        values: '1+0x10'
+    alert_rule_test:
+    - eval_time: 5h
+      alertname: QuayPushPullMonitorDegraded
+      exp_alerts:
+      - exp_labels:
+          service: quay
+          serverity: warn
+        exp_annotations:
+          message: "Quay.io push pull monitor perfoming below SLO"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/sop/quay-catchpoint-failure.md"
+    - eval_time: 5h
+      alertname: QuayioRepositoryEndpointDegraded
+      exp_alerts:
+      - exp_labels:
+          service: quay
+          severity: warn
+        exp_annotations:
+          message: "Quay.io repository endpoint performing below SLO"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/issues/api-500.md"
+    - eval_time: 5h
+      alertname: QuayioSecurityEndpointDegraded
+      exp_alerts:
+      - exp_labels:
+          service: quay
+          severity: warn
+        exp_annotations:
+          message: "Quay.io security endpoint performing below SLO"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/issues/api-500.md"
+    - eval_time: 5h
+      alertname: QuayioDownloadBlobDegraded
+      exp_alerts:
+      - exp_labels:
+          service: quay
+          severity: warn
+        exp_annotations:
+          message: "Quay.io blob downloads are performing below SLO"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/issues/api-500.md"
+    - eval_time: 5h
+      alertname: QuayioUploadBlobDegraded
+      exp_alerts:
+      - exp_labels:
+          service: quay
+          severity: warn
+        exp_annotations:
+          message: "Quay.io blob uploads are performing below SLO"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/issues/api-500.md"
+    - eval_time: 5h
+      alertname: QuayioTagsEndpointDegraded
+      exp_alerts:
+      - exp_labels:
+          service: quay
+          severity: warn
+        exp_annotations:
+          message: "Quay.io tags endpoint performing below SLO"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/issues/api-500.md"
+    - eval_time: 5h
+      alertname: QuayioUsersEndpointDegraded
+      exp_alerts:
+      - exp_labels:
+          service: quay
+          severity: warn
+        exp_annotations:
+          message: "Quay.io users endpoint performing below SLO"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/issues/api-500.md"
+    - eval_time: 5h
+      alertname: QuayioUploadManifestDegraded
+      exp_alerts:
+      - exp_labels:
+          service: quay
+          severity: warn
+        exp_annotations:
+          message: "Quay.io manifest uploads are performing below SLO"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/issues/api-500.md"
+    - eval_time: 5h
+      alertname: QuayioGetManifestDegraded
+      exp_alerts:  
+      - exp_labels:
+          service: quay
+          severity: warn
+        exp_annotations:
+          message: "Quay.io manifest downloads are performing below SLO"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/issues/api-500.md"
+    - eval_time: 5h
+      alertname: QuayioBuildsDegraded
+      exp_alerts:
+      - exp_labels:
+          service: quay
+          severity: warn
+        exp_annotations:
+          message: "Quay.io builds are performing below SLO"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/builder.md"
+
