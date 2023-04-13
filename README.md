@@ -591,7 +591,7 @@ Define or create a `role` that includes a `glitchtip_roles` and a `glitchtip_tea
 glitchtip_roles:
 - organization:
     $ref: <glitchtip organization datafile (`/dependencies/glitchtip-organization-1.yml`), for example `/dependencies/glitchtip/glitchtip-production.yml`>
-role: member
+role: admin
 
 glitchtip_teams:
 - $ref: <glitchtip team datafile (`/dependencies/glitchtip-team-1.yml`), for example `/dependencies/glitchtip/teams/app-sre.yml`>
