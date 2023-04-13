@@ -13,7 +13,7 @@ this repository.
 ## Overview
 
 This repository contains of a collection of files under the `data` folder.
-This folder contains everything that constitutes the APP SRE contract. 
+This folder contains everything that constitutes the APP SRE contract.
 
 These files can be `yaml` or `json` files, and they must validate against some
 [well-defined json schemas](https://github.com/app-sre/qontract-schemas).
@@ -226,13 +226,7 @@ Please create the request file [here](/data/app-interface/requests).
 - Management of Quay repos.
 - Management of Quay mirrors.
 - Management of Quay organization members.
-- Management of Sentry users.
-- Management of Sentry teams.
-- Management of Sentry projects.
-- Management of GlitchTip organizations.
-- Management of GlitchTip projects.
-- Management of GlitchTip teams.
-- Management of GlitchTip users.
+- Management of Glitchtip organizations, projects, teams, and users.
 - Management of OpenShift Namespaces.
 - Management of OpenShift Groups.
 - Management of OpenShift LimitRanges.
@@ -540,7 +534,7 @@ organization:
 
 The name, app, description, platform, teams, and organization fields are required. The name must be unique.
 
-Now that the project is defined, you can add it either to an openshift namespace (`/openshift/namespace-1.yml`) - this is the preferred way - or to an app (`/app-sre/app-1.yml`).
+Now that the project is defined, you have to include it in an openshift namespace (`/openshift/namespace-1.yml`):
 
 ```yaml
 $schema: /openshift/namespace-1.yml
@@ -551,8 +545,7 @@ glitchtipProjects:
 - $ref: <glitchtip project datafile (`/dependencies/glitchtip-project-1.yml`), for example `/dependencies/glitchtip/projects/glitchtip-production/app-interface-prod.yml`
 ```
 
-By referencing the project in a namespace, the Glitchtip project DSN can be consumed via a Kubernetes secret. The secret has the following structure:
-
+By referencing the project in a namespace, the **Glitchtip project DSN** can be consumed via a Kubernetes secret. The secret has the following structure:
 ```yaml
 apiVersion: v1
 kind: Secret
@@ -563,6 +556,11 @@ data:
   security_endpoint: <base64 encoded security endpoint>
 ```
 E.g., the [app-interface-prod](data/dependencies/glitchtip/projects/glitchtip-production/app-interface-prod.yml) is referenced in [the app-interface-production-int namespace](data/services/app-interface/namespaces/app-interface-production-int.yml), so the DSN can be retrieved via the `app-interface-production-dsn` secret in the namespace.
+
+> **Note** :information_source:
+>
+> You can also reference the project in an `app` datafile (`/app-sre/app-1.yml`) but this won't generate the Glitchtip project DSN secret and isn't recommended for the most use-cases.
+
 
 ### Create a Glitchtip Team (`/dependencies/glitchtip-team-1.yml`)
 
@@ -600,6 +598,14 @@ glitchtip_teams:
 ```
 E.g.: [app-sre role](data/teams/app-sre/roles/app-sre.yml)
 
+
+### Glitchtip Project Alerts
+
+At the moment, project alerts (emails and webhooks) can't be configured via App-Interface. Please configure them manually via the Glitchtip UI (`Settings -> Projects -> Settings -> Project Alerts`).
+
+> **Attention** :warning:
+>
+> There is no default email alert configured for any Glitchtip project. If you don't configure an email alert, you won't receive any alert emails.
 
 ---
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
