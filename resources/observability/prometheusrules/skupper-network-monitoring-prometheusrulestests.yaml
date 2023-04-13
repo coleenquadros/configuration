@@ -1,0 +1,69 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+rule_files:
+  - /observability/prometheusrules/skupper-network-monitoring-prometheusrules.yaml
+evaluation_interval: 1m
+tests:
+  - interval: 1m
+    input_series:
+      - series: x509_read_errors
+        values: '0+0x30 1+0x30'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: 'Skupper Network - X509ExporterReadErrors'
+        exp_alerts: []
+      - eval_time: 40m
+        alertname: 'Skupper Network - X509ExporterReadErrors'
+        exp_alerts:
+          - exp_labels:
+              service: skupper-network-monitoring
+              severity: high
+            exp_annotations:
+              message: Increasing read errors for x509-certificate-exporter
+              description: Over the last 15 minutes, this x509-certificate-exporter instance has experienced errors reading certificate files or querying the Kubernetes API. This could be caused by a misconfiguration if triggered when the exporter starts.
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/skupper-network-monitoring/sop/X509ExporterReadErrors.md"
+
+  - interval: 1m
+    input_series:
+      - series: x509_cert_error{secret_name="skupper-foobar", secret_namespace="foobar"}
+        values: '0+0x30 1+0x30'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: 'Skupper Network - CertificateError'
+        exp_alerts: []
+      - eval_time: 60m
+        alertname: 'Skupper Network - CertificateError'
+        exp_alerts:
+          - exp_labels:
+              service: skupper-network-monitoring
+              severity: critical
+              secret_name: skupper-foobar
+              secret_namespace: foobar
+            exp_annotations:
+              message: Certificate cannot be decoded
+              description: Certificate could not be decoded in Kubernetes secret "foobar/skupper-foobar"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/skupper-network-monitoring/sop/CertificateError.md"
+
+  - interval: 1m
+    input_series:
+      - series: x509_cert_not_after{secret_name="skupper-foobar", secret_namespace="foobar", subject_CN="foobar-subject"}
+        # 1970-02-01 00:00:00 UTC x30
+        # 1970-01-10 00:00:00 UTC x30
+        values: '2682000+0x30 781200+0x30'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: 'Skupper Network - CertificateExpiration'
+        exp_alerts: []
+      - eval_time: 60m
+        alertname: 'Skupper Network - CertificateExpiration'
+        exp_alerts:
+          - exp_labels:
+              service: skupper-network-monitoring
+              severity: high
+              secret_name: skupper-foobar
+              secret_namespace: foobar
+              subject_CN: foobar-subject
+            exp_annotations:
+              message: Certificate is about to expire
+              description: Certificate for "foobar-subject" is about to expire in Kubernetes secret "foobar/skupper-foobar"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/skupper-network-monitoring/sop/CertificateExpiration.md"
