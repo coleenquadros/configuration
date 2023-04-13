@@ -1290,7 +1290,9 @@ JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/cloud
 - `plan`: The name of the commercial plan to apply to the zone. Available values: free or enterprise.
 - `account`: Cloudflare account this zone belong to.
 - `type`: Available values: full, partial. This field should always be full. Full zone implies that DNS is hosted with Cloudflare. A partial zone is typically a partner-hosted zone or a CNAME setup.
-- `records`: A list of `record`. All parameters of the `record` match those of Terraform's [cloudflare_record](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/record) with an additional required parameter `identifier` that servers as a unique (within zone) identification for each record. The number of total records within a zone is limited to 1000, see Performance section below. 
+- `max_records`: A upper limit of total number of the records allowed in this zone, and it should be larger then existing number of records. If unset, the value is default to the `cloudflareDNSZoneMaxRecords` setting in [App Interface settings](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/app-interface/app-interface-settings.yml). Changing this requires App SRE's approval, please see [Performance Section](#performance) for more information.
+- `records`: A list of `record`. All parameters of the `record` match those of Terraform's [cloudflare_record](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/record) with an additional required parameter `identifier` that servers as a unique (within zone) identification for each record. The number of total records within a zone is limited by max_records mentioned above. See Performance section below for more informatiom. 
+
 
 \* Note that the `identifier` field doesn't allow underscore, but it is a internal variable that we only recommend to be consistent with the record name. Feel free to replace it with dash if underscore is part of the name.
 
@@ -1352,7 +1354,7 @@ records:
 * To delete a zone, first set the `delete: true` in the zone file with `deletionApprovals` for cloudflare_zone and cloudflare_zone_settings_override in the account file (See this [MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/62509/diffs) for example). Then remove the zone file in another MR. 
 * To delete a record, simply remove the record related entries.
 ##### Performance
-MR checks and reconciliation times will grow roughly linearly with zone size. We tested creating a zone with 1000 records took around 5 minutes.
+MR checks and reconciliation times will grow roughly linearly with zone size. We tested creating a zone with 1000 records took around 5 minutes. This has a broad impract on App Interface MR checks, therefore tenant teams are expected to ensure that the Cloudflare API token has the required capaciy to keep the MR checks at around 5-6 minutes run time.
 
 ### Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform
 
