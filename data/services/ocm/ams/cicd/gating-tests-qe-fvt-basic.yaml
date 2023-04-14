@@ -30,12 +30,13 @@ authentication:
     path: app-sre/quay/app-sre-pull
     field: all
 resourceTemplates:
-- name: uhc-account-manager
+- name: uhc-account-manager-canary
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
   path: /templates/gating-tests-qe-fvt-basic-template.yml
   parameters:
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: app-sre/uhc-account-manager
+    DEPLOYMENT_NAME: canary
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
@@ -53,7 +54,6 @@ resourceTemplates:
           target_config_hash: de4292d6fa6a1c39
           type: parent_saas_config
     parameters:
-      DEPLOYMENT_NAME: ams-gate-int
       ENVIRONMENT: integration
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
@@ -71,7 +71,36 @@ resourceTemplates:
           target_config_hash: cd515580f4c16332
           type: parent_saas_config
     parameters:
-      DEPLOYMENT_NAME: ams-gate-stage
+      ENVIRONMENT: staging
+- name: uhc-account-manager-main
+  url: https://gitlab.cee.redhat.com/service/uhc-account-manager
+  path: /templates/gating-tests-qe-fvt-basic-template.yml
+  parameters:
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/uhc-account-manager
+    DEPLOYMENT_NAME: main
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration.yml
+    ref: 631a77a07f5644dffaa414d4cdb7b625c064c913
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-ams-deployed-int
+      publish:
+      - ocm-ams-qe-fvt-basic-int-ok
+    parameters:
+      ENVIRONMENT: integration
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage.yml
+    ref: 631a77a07f5644dffaa414d4cdb7b625c064c913
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-ams-deployed-stage
+      publish:
+      - ocm-ams-qe-fvt-basic-stage-ok
+    parameters:
       ENVIRONMENT: staging
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
@@ -89,5 +118,4 @@ resourceTemplates:
           target_config_hash: a62d3044ea9e9eb3
           type: parent_saas_config
     parameters:
-      DEPLOYMENT_NAME: ams-gate-prod
       ENVIRONMENT: production

@@ -30,13 +30,14 @@ authentication:
     path: app-sre/quay/app-sre-pull
     field: all
 resourceTemplates:
-- name: uhc-account-manager
+- name: uhc-account-manager-main
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
   path: /templates/gating-tests-qe-fvt-quotacost-template.yml
   parameters:
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: app-sre/uhc-account-manager
     CLOUD_PROVIDER: gcp
+    DEPLOYMENT_NAME: main
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
@@ -44,17 +45,10 @@ resourceTemplates:
     promotion:
       auto: true
       subscribe:
-      - ocm-ams-deployed-int-green
+      - ocm-ams-deployed-int
       publish:
-      - ocm-ams-qe-fvt-quotacost-gcp-int-green-ok
-      promotion_data:
-      - channel: ocm-ams-deployed-int-green
-        data:
-        - parent_saas: saas-uhc-account-manager
-          target_config_hash: de4292d6fa6a1c39
-          type: parent_saas_config
+      - ocm-ams-qe-fvt-quotacost-gcp-int-ok
     parameters:
-      DEPLOYMENT_NAME: ams-gate-int
       ENVIRONMENT: integration
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
@@ -62,15 +56,8 @@ resourceTemplates:
     promotion:
       auto: true
       subscribe:
-      - ocm-ams-deployed-stage-green
+      - ocm-ams-deployed-stage
       publish:
-      - ocm-ams-qe-fvt-quotacost-gcp-stage-green-ok
-      promotion_data:
-      - channel: ocm-ams-deployed-stage-green
-        data:
-        - parent_saas: saas-uhc-account-manager
-          target_config_hash: cd515580f4c16332
-          type: parent_saas_config
+      - ocm-ams-qe-fvt-quotacost-gcp-stage-ok
     parameters:
-      DEPLOYMENT_NAME: ams-gate-stage
       ENVIRONMENT: staging
