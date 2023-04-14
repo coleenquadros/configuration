@@ -1,0 +1,13 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2023-04-14-query-stuck-jobs-2
+namespace:
+  $ref: /services/image-builder/namespaces/composer-production.yml
+identifier: image-builder-composer-db-prod
+output: stdout
+queries:
+# stuck koji-init b2086ce9-6132-4a8c-b51a-640193b4c4a4 job
+- select type, args, result, token, queued_at, started_at, finished_at, canceled, channel from jobs where id in ('b2086ce9-6132-4a8c-b51a-640193b4c4a4');
+# jobs that have started_at but were never finished
+- select id, queued_at, started_at, finished_at, canceled, channel from jobs where started_at is not null and finished_at is null;
