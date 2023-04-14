@@ -99,12 +99,12 @@ This declares the current commit sha as either successful or failed for subscrib
 It is important to understand, that publishing a successful deployment does not trigger a deployment for subscribed
 targets. It just allows such deployments to happen if their `ref` moves to the same sha.
 
-For automated promotion to happen, a target must subscribe with `promotion.auto: true`. In this case the publishing
-procedure creates a merge request on the `saas` file of the subscribed `target` to update the `ref` to the successful
-commit sha ([see here](https://github.com/app-sre/qontract-reconcile/blob/5e170ef4b372f158b2c3e1d44afd198f78e0e81f/reconcile/utils/mr/auto_promoter.py#L53)).
+For automated promotion to happen, a target must subscribe with `promotion.auto: true`. In this case the publishing procedure creates a merge request on the `saas` file of the subscribed `target` to update the `ref` to the successful commit sha (see section about [auto-promotions](#auto-promotions)).
 
 #### Automated Promotions with configuration changes
 Saas deployment workflows via promotions are intented to work by updating the `ref` on its targets. Basically, when a job with an automatic promotion runs, a new merge request is raised updating the `ref` value in the subscribed Saas target. Once the merge request is merged, `openshift-saas-deploy-trigger-configs` will detect a change in the saas file and it will trigger the deployment jobs.
+
+Note, that `AutoPromoter` refers to our [saas-auto-promotions-manager (SAPM)](#auto-promotions). 
 
 ![Saas workflow](assets/auto_promotion_flow_1.png)
 
@@ -116,7 +116,7 @@ To solve this problem, the `promotion_data` section has been introduced. The ide
 ![Saas workflow](assets/auto_promotion_flow_2.png)
 
 `promotion_data` is a list of objects grouped by channel. Each channel comes from a single saas file and target, so it identifies which saas file and target is the data relative to.
-Each object in `promotion_data` implements the `PromotionChannelData_v1` interface, by now just exists one implementation to store the `ParentSaasPromotion_v1` case explained before, but it could be extended with other data in the future. Check this qontract-schemas [commit](https://github.com/app-sre/qontract-schemas/commit/30fe5217d4d1c46ffbf1233e8c140702dbb3fac1)to view the full schema definition.
+Each object in `promotion_data` implements the `PromotionChannelData_v1` interface, by now just exists one implementation to store the `ParentSaasPromotion_v1` case explained before, but it could be extended with other data in the future. Check this qontract-schemas [commit](https://github.com/app-sre/qontract-schemas/commit/30fe5217d4d1c46ffbf1233e8c140702dbb3fac1) to view the full schema definition.
 
 ## Example delivery pipeline with triggers and promotions
 All the described building blocks can be put together to build high sophisticated CI/CD pipelines. A good example
@@ -148,3 +148,16 @@ the staging namespace.
 If that went well, the successful acceptance test is promoted to the `github-mirror-stage-post-deploy-tests-success-channel`
 channel, which is picked up by the production target ([see](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/github-mirror/cicd/deploy.yaml#L56-58))
 because the autopromotion resulted in an updated `ref` ([see](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/github-mirror/cicd/deploy.yaml#L54)).
+
+## Auto Promotions
+
+Auto-promotions are managed by the [saas-auto-promotions-manager](https://github.com/app-sre/qontract-reconcile/tree/master/reconcile/saas_auto_promotions_manager) (SAPM). SAPM is a reconcile-based system. In each loop it ...
+
+- ... checks the state of the publishers
+- ... computes desired subscriber state
+- ... opens merge requests for auto-promotions
+- ... closes obsolete / conflicted merge requests (housekeeping)
+
+Auto-promotions are a complex topic and more features are expected to be added in this area. We chose a reconcile based system because for now it is easier to maintain and to iterate on. Design doc and discussions around this approach can be found in [this design doc MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/61204). The following illustrates the flow of auto-promotions:
+
+![](assets/saas-auto-promotions-manager/sapm-design.png)
