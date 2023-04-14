@@ -21,5 +21,23 @@ networkPoliciesAllow:
 
 managedRoles: true
 
+managedExternalResources: true
+
+externalResources:
+  - provider: aws
+    provisioner:
+      $ref: /aws/app-sre-stage/account.yml
+    resources:
+    - provider: rds
+      identifier: acs-fleet-manager-integration
+      defaults: /terraform/resources/acs-fleet-manager/integration/rds-pg14.yml
+      output_resource_name: acs-fleet-manager-integration-rds
+      ca_cert:
+        path: app-interface/global/rds-ca-cert
+        field: us-east-1
+        version: 2
+      overrides:
+        apply_immediately: true
+
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
