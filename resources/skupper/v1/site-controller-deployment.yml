@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kube-linter.io/ignore-all: ignore
+  name: skupper-site-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: skupper-site-controller
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        application: skupper-site-controller
+    spec:
+      containers:
+      - env:
+        - name: WATCH_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        image: {{ siteControllerImage }}
+        name: site-controller
+      serviceAccountName: skupper-site-controller
