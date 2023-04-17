@@ -49,9 +49,39 @@ externalResources:
   - provider: s3
     identifier: redhat-prod-plnsvc
     defaults: /terraform/resources/s3-all-expires-90-days.yml
+    bucket_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement":
+          [
+            {
+              "Sid": "allow-stonesoup-rh-prod-only",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:*",
+              "Resource": "arn:aws:s3:::redhat-prod-plnsvc/*",
+              "Condition": {"StringNotEquals": {"aws:sourceVpc": "arn:aws:ec2:us-east-1:520050076864:vpc/vpc-0a739553ebdc041bc"}},
+            },
+          ],
+      }
   - provider: s3
     identifier: multi-tenant-prod-plnsvc
     defaults: /terraform/resources/s3-all-expires-90-days.yml
+    bucket_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement":
+          [
+            {
+              "Sid": "allow-stonesoup-mt-prod-only",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:*",
+              "Resource": "arn:aws:s3:::multi-tenant-prod-plnsvc/*",
+              "Condition": {"StringNotEquals": {"aws:sourceVpc": "arn:aws:ec2:us-east-1:520050076864:vpc/vpc-09e085263d4357c3e"}},
+            },
+          ],
+      }
 
   # GitOps Service Resources
   - provider: rds
