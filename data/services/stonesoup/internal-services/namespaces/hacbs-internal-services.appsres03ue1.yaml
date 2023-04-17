@@ -1,0 +1,63 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  provider: tekton
+
+name: hacbs-internal-services
+description: hacbs-internal-services namespace
+
+cluster:
+  $ref: /openshift/appsres03ue1/cluster.yml
+
+app:
+  $ref: /services/stonesoup/app.yml
+
+environment:
+  $ref: /products/stonesoup/environments/stage.yml
+
+delete: true
+
+managedRoles: true
+
+managedResourceTypes:
+- Secret
+- ClusterRole
+
+managedResourceNames:
+- resource: ClusterRole
+  resourceNames:
+    - tekton-trigger-access
+
+sharedResources:
+- $ref: /services/app-interface/shared-resources/app-sre-pipelines.yml
+
+openshiftResources:
+- provider: vault-secret
+  name: iib-production-services-config
+  path: hacbs/hacbs-internal-services/iib/iib-production-services-config
+  version: 4
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  name: iib-service-account
+  path: hacbs/hacbs-internal-services/iib/iib-service-account
+  version: 3
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  name: errata-service-account
+  path: hacbs/hacbs-internal-services/errata/errata-service-account
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  name: remote-client-config
+  path: hacbs/hacbs-internal-services/internal-services-controller/remote-client-config/hacbs-staging-x99
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
