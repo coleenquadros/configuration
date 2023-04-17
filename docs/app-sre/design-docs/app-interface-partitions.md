@@ -55,29 +55,27 @@ managed:
       limits:
         memory: 1000Mi
         cpu: 1200m
-  # ...
-
-sharding:
-  strategy: per-openshift-cluster
-  shardSpecOverrides:
-  - shard:
-      $ref: /openshift/appsrep05ue1/cluster.yml
-    subSharding:
-      strategy: static
-      shards: 20
-  - shard:
-      $ref: /openshift/app-sre-stage-01/cluster.yml
-    imageRef: my-dangerous-change
-    resources:
-      requests:
-        memory: 2Gi
-        cpu: 2
-      limits:
-        memory: 2Gazillions
-        cpu: 100
-    subSharding:
-      strategy: static
-      shards: 5
+  sharding:
+    strategy: per-openshift-cluster
+    shardSpecOverrides:
+    - shard:
+        $ref: /openshift/appsrep05ue1/cluster.yml
+      subSharding:
+        strategy: static
+        shards: 20
+    - shard:
+        $ref: /openshift/app-sre-stage-01/cluster.yml
+      imageRef: my-dangerous-change
+      resources:
+        requests:
+          memory: 2Gi
+          cpu: 2
+        limits:
+          memory: 2Gazillions
+          cpu: 100
+      subSharding:
+        strategy: static
+        shards: 5
 
 ---
 # Another case with just a static sharding. But setting the sharding attributes
@@ -93,10 +91,9 @@ managed:
       limits:
         memory: 1000Mi
         cpu: 1200m
-
-sharding:
-  strategy: static
-  shards: 20
+  sharding:
+    strategy: static
+    shards: 20
 
 ```
 
