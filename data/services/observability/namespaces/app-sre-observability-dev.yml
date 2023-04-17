@@ -1,0 +1,72 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-sre-observability-dev
+description: dev namespace for the app-sre observability stack
+
+cluster:
+  $ref: /openshift/appsres03ue1/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/dev.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsres03ue1.yml
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+# - $ref: /services/observability/shared-resources/grafana.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- Secret
+- Route
+
+openshiftResources:
+## Grafana
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-dev/app-sre-observability-htpasswd
+  version: 1
+# - provider: resource-template
+#   type: extracurlyjinja2
+#   path: /observability/grafana/grafana-config.secret.yaml
+#   variables:
+#     auto_assign_org_role: Editor
+#     external_url: https://grafana.dev.devshift.net
+- provider: vault-secret
+  name: grafana-proxy-config
+  path: app-interface/app-sre/app-sre-observability-dev/grafana/grafana-proxy-config
+  version: 1
+- provider: vault-secret
+  name: grafana-proxy-config-openshift
+  path: app-interface/app-sre/app-sre-observability-dev/grafana/grafana-proxy-config
+  version: 1
+- provider: resource-template
+  type: jinja2
+  path: /observability/grafana.route.yaml
+  variables:
+    environment: -dev
+    host: grafana.dev.devshift.net
+    cert_manager_issuer_name: letsencrypt-devshiftnet-dns
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  ## Grafana database
+  - provider: rds
+    identifier: grafana-dev
+    defaults: /terraform/resources/grafana/rds-dev-1.yml
+    output_resource_name: grafana-db
+    overrides:
+      engine_version: "13.8"
