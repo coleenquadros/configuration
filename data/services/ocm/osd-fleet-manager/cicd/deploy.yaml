@@ -101,6 +101,11 @@ resourceTemplates:
       - predicate:
           region: us-east-1
         sector: canary
+      # dynatrace testing will use us-east-2 for now
+      # See https://issues.redhat.com/browse/SDE-2837
+      - predicate:
+          region: us-east-2
+        sector: dynatrace
       # put everything else into the main sector
       - sector: main
     SUPPORTED_CLOUD_PROVIDERS: |-
@@ -125,6 +130,18 @@ resourceTemplates:
     parameters:
       DEPLOYMENT_NAME: canary
       PROVISIONING_TIME_WINDOW: '259200'
+  # Dynatrace-specific sector
+  # See https://issues.redhat.com/browse/SDE-2837
+  - name: osd-fleet-manager-integration-dynatrace
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
+    ref: 9571193b9c5de3bccfdae9c8bdae600d51049dea
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-osdfm-deployed-int-canary
+    parameters:
+      DEPLOYMENT_NAME: dynatrace
   - name: osd-fleet-manager-integration-main
     namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
