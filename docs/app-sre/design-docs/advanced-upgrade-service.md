@@ -41,14 +41,15 @@ We will offer AUS to all Red Hat engineering teams via the [OCM label based cons
 
 To define a upgrade policy, a user places a set of labels to a cluster subscription and the organization. Following the naming scheme described in the consumption model docs, all labels will be prefixed with `sre-capabilities.aus.`.
 
-| Label Type   | Label Key                                | Maps to policy                    | example     | Notes                                                                                              |
-|--------------|------------------------------------------|-----------------------------------|-------------|----------------------------------------------------------------------------------------------------|
-| Subscription | sre-capabilities.aus.workloads           | upgradePolicy.workloads           | wl-1,wl-2   | Multiple values are represented as CSV                                                             |
-| Subscription | sre-capabilities.aus.soak-days           | upgradePolicy.conditions.soakDays | 2           |                                                                                                    |
-| Subscription | sre-capabilities.aus.schedule            | upgradePolicy.schedule            | 0 * * * 1-5 |                                                                                                    |
-| Subscription | sre-capabilities.aus.mutexes             | upgradePolicy.conditions.mutexes  | mtx-1,mtx-2 | Multiple values are represented as CSV                                                             |
-| Subscription | sre-capabilities.aus.sector              | upgradePolicy.conditions.sector   | green       | If a sector is defined, additional sector configuration labels must be defined on the organization |
-| Organization | sre-capabilities.aus.sector-deps.$sector | sectors.name.dependencies         | blue,green  | Multiple values are represented as CSV                                                             |
+| Label Type   | Label Key                                | Maps to policy                    | example         | Notes                                                                                              |
+|--------------|------------------------------------------|-----------------------------------|-----------------|----------------------------------------------------------------------------------------------------|
+| Subscription | sre-capabilities.aus.workloads           | upgradePolicy.workloads           | wl-1,wl-2       | Multiple values are represented as CSV                                                             |
+| Subscription | sre-capabilities.aus.soak-days           | upgradePolicy.conditions.soakDays | 2               |                                                                                                    |
+| Subscription | sre-capabilities.aus.schedule            | upgradePolicy.schedule            | 0 * * * 1-5     |                                                                                                    |
+| Subscription | sre-capabilities.aus.mutexes             | upgradePolicy.conditions.mutexes  | mtx-1,mtx-2     | Multiple values are represented as CSV                                                             |
+| Subscription | sre-capabilities.aus.sector              | upgradePolicy.conditions.sector   | green           | If a sector is defined, additional sector configuration labels must be defined on the organization |
+| Organization | sre-capabilities.aus.blocked-versions    | blockedVersions                   | ^4\.12\..*$     | Regular expressions. Multiple values are represented as CSV                                        |
+| Organization | sre-capabilities.aus.sector-deps         | sectors.name.dependencies         | blue->green,red | Each sector is represented as 'section->CSV of dependant sectors'                                  |
 
 ### Reconciler and runtime
 
