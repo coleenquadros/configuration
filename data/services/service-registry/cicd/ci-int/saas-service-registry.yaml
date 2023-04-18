@@ -58,6 +58,8 @@ resourceTemplates:
     parameters:
       TENANT_MANAGER_URL: https://tenant-manager-envoy.service-registry-stage.svc:9001
       KEYCLOAK_API_CLIENT_ID: registry-api-stage
+      SENTRY_CONFIG_SECRET_NAME: "service-registry-stage-dsn"
+      SENTRY_CONFIG_SECRET_KEY_DSN: "dsn"
   - namespace:
       $ref: /services/service-registry/namespaces/service-registry-production.yml
     # This is the SHA256 of the commit that will be deployed,
@@ -65,7 +67,7 @@ resourceTemplates:
     # Make sure the image from the commit has been built and it is present in quay.io.
     # Do not confuse it with the SHA256 of the *image* itself.
     # Service Registry:
-    ref: 75f4bda8d14b9c83c9636c36de6cd286158ae46c
+    ref: 75f4bda8d14b9c83c9636c36de6cd286158ae46c # TODO: See note below before deploying to production.
     parameters:
       TENANT_MANAGER_URL: https://tenant-manager-envoy.service-registry-production.svc:9001
       TENANT_MANAGER_CA_BUNDLE: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
@@ -94,6 +96,11 @@ resourceTemplates:
       IDENTITY_SERVER_RESOLVER_ENABLED: "false"
       IDENTITY_SERVER_RESOLVER_PATH: "https://api.openshift.com"
       IDENTITY_SERVER_RESOLVER_CACHE_EXPIRATION: "1"
+      # TODO: This is the old Sentry configuration. Should be removed when next deploying to production:
+      SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
+      # New GlitchTip configuration:
+      SENTRY_CONFIG_SECRET_NAME: "service-registry-prod-dsn"
+      SENTRY_CONFIG_SECRET_KEY_DSN: "dsn"
   parameters:
     TENANT_MANAGER_CA_BUNDLE: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
     REGISTRY_LOG_LEVEL: INFO
@@ -127,7 +134,6 @@ resourceTemplates:
     APICURIO_REGISTRY_CPU_REQUEST: 500m
     APICURIO_REGISTRY_CPU_LIMIT: 2000m
     ENABLE_SENTRY: "true"
-    SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
     DATABASE_SSL_CA_SECRET_NAME: rds-ssl-ca
     CORS_ALLOWED_ORIGINS: /(https?:\/\/localhost(:\\d*)?)|(https:\/\/(qaprodauth\.)?(cloud|console)\.redhat\.com)|(https:\/\/(prod|qa|ci|stage)\.foo\.redhat\.com:1337)/
 
@@ -144,6 +150,8 @@ resourceTemplates:
       name: srs-tenant-manager
     parameters:
       KEYCLOAK_API_CLIENT_ID: registry-api-stage
+      SENTRY_CONFIG_SECRET_NAME: "service-registry-stage-dsn"
+      SENTRY_CONFIG_SECRET_KEY_DSN: "dsn"
   - namespace:
       $ref: /services/service-registry/namespaces/service-registry-production.yml
      # This is the SHA256 of the commit that will be deployed,
@@ -151,9 +159,14 @@ resourceTemplates:
      # Make sure the image from the commit has been built and it is present in quay.io.
      # Do not confuse it with the SHA256 of the *image* itself.
      # Tenant Manager:
-    ref: 41fb1e493c0a9e44643bf538e205359a58f39396
+    ref: 41fb1e493c0a9e44643bf538e205359a58f39396 # TODO: See note below before deploying to production.
     parameters:
       KEYCLOAK_API_CLIENT_ID: registry-api
+      # TODO: This is the old Sentry configuration. Should be removed when next deploying to production:
+      SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
+      # New GlitchTip configuration:
+      SENTRY_CONFIG_SECRET_NAME: "service-registry-prod-dsn"
+      SENTRY_CONFIG_SECRET_KEY_DSN: "dsn"
   parameters:
     TENANT_MANAGER_REPLICAS: 3
     KEYCLOAK_REALM: redhat-external
@@ -172,7 +185,6 @@ resourceTemplates:
     TENANT_MANAGER_CPU_LIMIT: 600m
     TENANT_MANAGER_CLIENT_SECRET_NAME: srs-tenant-manager-credentials
     ENABLE_SENTRY: "true"
-    SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
     CORS_ALLOWED_ORIGINS: /(https?:\/\/localhost(:\\d*)?)|(https:\/\/(qaprodauth\.)?(cloud|console)\.redhat\.com)|(https:\/\/(prod|qa|ci|stage)\.foo\.redhat\.com:1337)/
 
 - name: srs-fleet-manager
@@ -194,6 +206,8 @@ resourceTemplates:
         - name: registry-stage-1
           registryDeploymentUrl: https://bu98.serviceregistry-stage.rhcloud.com
           tenantManagerUrl: https://tenant-manager-envoy.service-registry-stage.svc:9001
+      SENTRY_CONFIG_SECRET_NAME: "service-registry-stage-dsn"
+      SENTRY_CONFIG_SECRET_KEY_DSN: "dsn"
   - namespace:
       $ref: /services/service-registry/namespaces/service-registry-production.yml
     # This is the SHA256 of the commit that will be deployed,
@@ -201,7 +215,7 @@ resourceTemplates:
     # Make sure the image from the commit has been built and it is present in quay.io.
     # Do not confuse it with the SHA256 of the *image* itself.
     # Fleet Manager:
-    ref: b72dbee98162fc2d77032dc743af7c7db562ed7e
+    ref: b72dbee98162fc2d77032dc743af7c7db562ed7e # TODO: See note below before deploying to production.
     parameters:
       LOG_LEVEL: INFO
       SRS_LOG_LEVEL: INFO
@@ -226,6 +240,11 @@ resourceTemplates:
       IDENTITY_SERVER_RESOLVER_ENABLED: "false"
       IDENTITY_SERVER_RESOLVER_PATH: "https://api.openshift.com"
       IDENTITY_SERVER_RESOLVER_CACHE_EXPIRATION: "1"
+      # TODO: This is the old Sentry configuration. Should be removed when next deploying to production:
+      SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
+      # New GlitchTip configuration:
+      SENTRY_CONFIG_SECRET_NAME: "service-registry-prod-dsn"
+      SENTRY_CONFIG_SECRET_KEY_DSN: "dsn"
   parameters:
     LOG_LEVEL: INFO
     SRS_LOG_LEVEL: INFO
@@ -248,13 +267,10 @@ resourceTemplates:
     KEYCLOAK_REALM: redhat-external
     KEYCLOAK_URL: https://sso.redhat.com/auth
     KEYCLOAK_API_CLIENT_ID: srs-fleet-manager-api-prod
-    # sentry
     ENABLE_SENTRY: "true"
-    SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
     # AMS - Terms And Conditions
     AMS_TERMS_EVENT_CODE: "register"
     # rds ssl
     DATABASE_SSL_CA_SECRET_NAME: rds-ssl-ca
     CORS_ALLOWED_ORIGINS: /(https?:\/\/localhost(:\\d*)?)|(https:\/\/(qaprodauth\.)?(cloud|console)\.redhat\.com)|(https:\/\/(prod|qa|ci|stage)\.foo\.redhat\.com:1337)/
     REST_API_DISABLED_PATHS_PATTERNS: "/api/serviceregistry_mgmt/v1/admin/tasks.*,/api/serviceregistry_mgmt/v1/admin/registryDeployments.*"
-
