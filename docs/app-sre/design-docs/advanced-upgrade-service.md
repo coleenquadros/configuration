@@ -49,7 +49,7 @@ To define a upgrade policy, a user places a set of labels to a cluster subscript
 | Subscription | sre-capabilities.aus.mutexes             | upgradePolicy.conditions.mutexes  | mtx-1,mtx-2     | Multiple values are represented as CSV                                                             |
 | Subscription | sre-capabilities.aus.sector              | upgradePolicy.conditions.sector   | green           | If a sector is defined, additional sector configuration labels must be defined on the organization |
 | Organization | sre-capabilities.aus.blocked-versions    | blockedVersions                   | ^4\.12\..*$     | Regular expressions. Multiple values are represented as CSV                                        |
-| Organization | sre-capabilities.aus.sector-deps         | sectors.name.dependencies         | blue->green,red | Each sector is represented as 'section->CSV of dependant sectors'                                  |
+| Organization | sre-capabilities.aus.sector-deps.$sector | sectors.name.dependencies         | green,red | Multiple values are represented as CSV                                                       |
 
 ### Reconciler and runtime
 
