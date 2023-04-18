@@ -2,7 +2,7 @@
 $schema: /app-sre/saas-file-2.yml
 labels:
   service: uhc
-name: saas-cs-qe-fvt-hcp-advanced
+name: saas-cs-qe-fvt-hcp
 description: SaaS deployment for CS testing with QEs' automation
 app:
   $ref: /services/ocm/cs/app.yml
@@ -30,12 +30,13 @@ authentication:
     path: app-sre/quay/app-sre-pull
     field: all
 resourceTemplates:
-- name: uhc-clusters-service
+- name: uhc-clusters-service-main
   url: https://gitlab.cee.redhat.com/service/uhc-clusters-service
-  path: /templates/gating-tests-qe-fvt-hcp-advanced-template.yml
+  path: /templates/gating-tests-qe-fvt-template.yml
   parameters:
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: app-sre/uhc-clusters-service
+    DEPLOYMENT_NAME: main
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
@@ -46,15 +47,9 @@ resourceTemplates:
       - ocm-cs-deployed-int
       publish:
       - ocm-cs-qe-fvt-hcp-advanced-int-ok
-      promotion_data:
-      - channel: ocm-cs-deployed-int
-        data:
-        - parent_saas: saas-uhc-clusters-service
-          target_config_hash: 9e4c54339059b4c1
-          type: parent_saas_config
     parameters:
-      DEPLOYMENT_NAME: cs-gate-int
       ENVIRONMENT: integration
+      CLUSTER_PROFILE: hcp-advanced
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
     ref: 7b600d8875bbc58d371f811d0f0c04588de5c67e
@@ -71,23 +66,5 @@ resourceTemplates:
           target_config_hash: 6c74d226c17143d7
           type: parent_saas_config
     parameters:
-      DEPLOYMENT_NAME: cs-gate-stage
       ENVIRONMENT: staging
-  - namespace:
-      $ref: /services/ocm/namespaces/uhc-production.yml
-    ref: 10f43f51d538f566ba02ca339f94907df63fbeae
-    promotion:
-      auto: true
-      subscribe:
-      - ocm-cs-deployed-prod
-      publish:
-      - ocm-cs-qe-fvt-hcp-advanced-prod-ok
-      promotion_data:
-      - channel: ocm-cs-deployed-prod
-        data:
-        - parent_saas: saas-uhc-clusters-service
-          target_config_hash: f744c39957ad2ad3
-          type: parent_saas_config
-    parameters:
-      DEPLOYMENT_NAME: cs-gate-prod
-      ENVIRONMENT: production
+      CLUSTER_PROFILE: hcp-advanced

@@ -1,0 +1,66 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: uhc
+name: saas-cs-qe-fvt-rosa
+description: SaaS deployment for CS testing with QEs' automation
+app:
+  $ref: /services/ocm/cs/app.yml
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+deployResources:
+  requests:
+    cpu: 600m
+    memory: 2000Mi
+  limits:
+    cpu: 1200m
+    memory: 2000Mi
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: ocm-ship-it
+managedResourceTypes:
+- Job
+imagePatterns:
+- quay.io/app-sre/uhc-clusters-service
+- quay.io/app-sre/envoyproxy
+- quay.io/app-sre/ocm-backend-tests
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+resourceTemplates:
+- name: uhc-clusters-service-main
+  url: https://gitlab.cee.redhat.com/service/uhc-clusters-service
+  path: /templates/gating-tests-qe-fvt-template.yml
+  parameters:
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/uhc-clusters-service
+    DEPLOYMENT_NAME: main
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration.yml
+    ref: 656beee494a84ccbfcda9c39f9dd083871cfb39b
+    name: rosa-advanced
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-cs-deployed-int
+      publish:
+      - ocm-cs-qe-fvt-rosa-advanced-int-ok
+    parameters:
+      ENVIRONMENT: integration
+      CLUSTER_PROFILE: rosa-advanced
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage.yml
+    ref: 656beee494a84ccbfcda9c39f9dd083871cfb39b
+    name: rosa-advanced
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-cs-deployed-stage
+      publish:
+      - ocm-cs-qe-fvt-rosa-advanced-stage-ok
+    parameters:
+      ENVIRONMENT: staging
+      CLUSTER_PROFILE: rosa-advanced
