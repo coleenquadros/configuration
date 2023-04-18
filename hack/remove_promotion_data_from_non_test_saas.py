@@ -42,6 +42,8 @@ for root, dirs, files in os.walk("data/services/"):
             continue
         if content.get("$schema") not in {"/app-sre/saas-file-target-1.yml", "/app-sre/saas-file-2.yml"}:
             continue
+        if not content.get("publishJobLogs", False):
+            continue
         if not handle_content(content):
             continue
         new_content = "---\n"
