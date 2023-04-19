@@ -1,4 +1,4 @@
-# HACBS - Cloudwatch logs
+# Cloudwatch logs
 
 ## Pre-requisites
 
@@ -10,11 +10,12 @@
 * Browse to [cloudwatch](https://console.aws.amazon.com/cloudwatch/home)
 * Select a logging group, formatted as `<cluster>.<namespace>`.
 
-Some common logging groups:
+## Some common logging groups:
+
+
+<!-- TODO provide more up-to-date example queries; for now it might be helpful to use these as a starting point
 
 * [hacbss02ue1.hacbs-kcp-syncer](https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:logs-insights$3FqueryDetail$3D~(end~0~start~-3600~timeType~'RELATIVE~unit~'seconds~editorString~'~isLiveTail~false~queryId~'~source~(~'hacbss02ue1.hacbs-kcp-syncer)))
-
-<!-- These ones will be relevant after we migrate back off of kcp
 
 * [hacbss02ue1.application-service](https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:logs-insights$3FqueryDetail$3D~(end~0~start~-3600~timeType~'RELATIVE~unit~'seconds~editorString~'~isLiveTail~false~queryId~'~source~(~'hacbss02ue1.application-service)))
 * [hacbss02ue1.build-service](https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:logs-insights$3FqueryDetail$3D~(end~0~start~-3600~timeType~'RELATIVE~unit~'seconds~editorString~'~isLiveTail~false~queryId~'~source~(~'hacbss02ue1.build-service)))
@@ -29,6 +30,8 @@ Some common logging groups:
 
 ## Example Queries
 
+<!-- TODO provide more up-to-date example queries; for now it might be helpful to use these as a starting point
+
 ### KCP Syncer Watch Failures
 
 ```
@@ -37,3 +40,4 @@ fields @timestamp, @message
 | filter message like "Failed to watch"
 | display message
 ```
+-->
