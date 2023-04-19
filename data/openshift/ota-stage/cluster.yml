@@ -1,0 +1,67 @@
+---
+$schema: /openshift/cluster-1.yml
+labels:
+  service: cincinnati
+name: ota-stage
+description: OTA-owned cluster to host OSUS on OCP Engineering Candidates
+consoleUrl: https://console-openshift-console.apps.ota-stage.q2z4.p1.openshiftapps.com/dashboards
+# TODO(muller): Add observability stuff as an increment
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: https://api.ota-stage.q2z4.p1.openshiftapps.com:6443
+# TODO(muller): Unsure whether we need this, some clusters don't have it
+elbFQDN: 'elb.apps.ota-stage.q2z4.p1.openshiftapps.com'
+internal: false
+
+# TODO(muller): This could solve the 'Cannot return null for non-nullable field Cluster_v1.auth.'
+#               Not sure whether we need *real* values (dunno what this means) but some cluster
+#               have this empty as well.
+auth: []
+
+automationToken:
+  path: app-sre-stage/cincinnati-stage/cincinnati-credentials
+  field: app-interface-sa-on-ota-stage
+
+# TODO(muller): No idea whether we need something like this, maybe
+#observabilityNamespace:
+#  $ref: /services/observability/namespaces/openshift-customer-monitoring.crcd01ue1.yml
+
+# TODO(muller): Not sure whether we need this (how is this different from automationToken above?)
+#clusterAdmin: true
+#clusterAdminAutomationToken:
+#  path: 'TODO(muller): somewhere/something'
+#  field: token
+
+# TODO(muller): Not sure whether to keep this. ota-stage is an OSD cluster so it already has `dedicated-admins`, but not `dedicated-readers`
+#managedGroups:
+# - dedicated-admins
+#- dedicated-readers
+
+#managedClusterRoles: true
+
+# TODO(muller): Not sure whether we want/need this
+#upgradePolicy:
+#  workloads:
+#  - quay
+#  schedule: 0 13 * * 1-4
+#  conditions:
+#    soakDays: 11
+#    mutexes:
+#    - ocm-quay-critical
+
+#network:
+#  type: OpenShiftSDN
+#  vpc: 10.0.0.0/16 # TODO(muller): Unsure whether this is correct, this is the "Machine CIDR" from OCM. The other two ranges also match OCM.
+#  service: 172.30.0.0/16
+#  pod: 10.128.0.0/14
+
+# TODO(muller): The example in https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/14877/diffs has this, but I do not know whether there are more "integrations" to disable
+#disable:
+#  integrations:
+#  - openshift-users
+#  e2eTests:
+#  - create-namespace
+#  - dedicated-admin-rolebindings
+#  - default-network-policies
+#  - default-project-labels
