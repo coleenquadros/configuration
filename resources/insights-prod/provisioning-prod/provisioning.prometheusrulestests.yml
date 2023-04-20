@@ -127,6 +127,27 @@ tests:
             dashboard: "https://grafana.app-sre.devshift.net/d/211/provisioning?orgId=1&viewPanel=32"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningAvailabilityAlert.md"
             message: 'High error budget burn for  (current value: 3)'
+ #--------------------- reservation-success-rate ----------------------#
+  - interval: 1h
+    input_series:
+    - series: provisioning_reservation_count{result="success"}
+      values: 0+1x168 0+1x130
+    - series: provisioning_reservation_count
+      values: 0+1x168 0+1x168
+    alert_rule_test:
+    - eval_time: 0s
+      alertname: ProvisioningReservationSuccessRate
+      exp_alerts:
+    - eval_time: 7d
+      alertname: ProvisioningReservationSuccessRate
+      exp_alerts:
+        - exp_labels:
+            service: insights
+            severity: medium
+          exp_annotations:
+            message: "Reservations success rate dropped below 80% in last 7 days"
+            dashboard: "https://grafana.app-sre.devshift.net/d/211/provisioning?orgId=1&viewPanel=59"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningAvailabilityAlert.md"
 
 #---------------------provisioning-latency-tests----------------------#
   - interval: 1m
