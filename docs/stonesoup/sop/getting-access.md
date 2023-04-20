@@ -2,7 +2,7 @@
 
 ## General comments on App Interface merge requests
 
-* App Interface is a very active repo. You may need to rebase your MR a few times until you get passing tests and the approvals you need (a `\lgtm` from the required approver or approvers).
+* App Interface is a very active repo. You may need to rebase your MR a few times until you get passing tests and the approvals you need (a `/lgtm` from the required approver or approvers).
 * New users frequently forget to add the bot to their fork: `the user @devtools-bot is not a Maintainer in your fork of app-interface. Please add the @devtools-bot user to your fork as a Maintainer and retest by commenting "/retest" on the Merge Request.`
 * Watch the bot-generated comments on your merge request to see what approvals you need, and from whom.  When you're requesting a role, you will generally need an approval from someone in the RHTAP team who already has that role.
 * You can also reach out on #sd-app-sre-onboarding for help with getting your request approved, if it's urgent.
