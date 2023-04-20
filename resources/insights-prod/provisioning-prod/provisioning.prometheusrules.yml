@@ -35,6 +35,21 @@ spec:
           runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningLatencyAlert.md"
           dashboard: "https://grafana.app-sre.devshift.net/d/211/provisioning?orgId=1&viewPanel=36"
 
+  - name: reservation-success-rate
+    rules:
+      - alert: ProvisioningReservationSuccessRate
+        expr: |
+          sum(rate(provisioning_reservation_count{result="success"}[7d]))
+          /
+          sum(rate(provisioning_reservation_count[7d])) < 0.80
+        labels:
+          service: insights
+          severity: medium
+        annotations:
+          message: "Reservations success rate dropped below 80% in last 7 days"
+          dashboard: "https://grafana.app-sre.devshift.net/d/211/provisioning?orgId=1&viewPanel=59"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningAvailabilityAlert.md"
+
   - name: source-availability-latency
     rules:
       - alert: ProvisioningSourceAvailabilityRequestsDurationLimit
