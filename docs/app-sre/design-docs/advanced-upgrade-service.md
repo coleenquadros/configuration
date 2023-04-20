@@ -95,7 +95,7 @@ Both metrics combined hold the information currently present on the [fleet upgra
 
 The Grafana dashboard can be filtered per OCM organization to provide users an overview of their organization.
 
-#### Future
+### Future
 
 Eventually the cluster uprade core code might move from qontract-reconcile into a dedicated code repository. app-interface would evolve into a consumer of AUS instead of being the provider of it.
 
