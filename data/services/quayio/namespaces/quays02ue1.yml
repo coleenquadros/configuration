@@ -283,6 +283,50 @@ externalResources:
       default: false
       openshift_service: quay-py3-cloudflare-debug-load-balancer-service
     rules:
+    # Allow foo.stage.quay.io/v2/auth
+    - condition:
+      - type: host-header
+        host_header:
+        - 'foo.stage.quay.io'
+      - type: path-pattern
+        path_pattern:
+        - /v2/auth*
+      action:
+        type: forward
+        forward:
+          target_group:
+          - target: quayio-stage-py3
+            weight: 100
+          - target: quayio-stage-debug
+            weight: 0
+    # Allow foo.stage.quay.io/v2/syahmed/update-banner-job
+    - condition:
+      - type: host-header
+        host_header:
+        - 'foo.stage.quay.io'
+      - type: path-pattern
+        path_pattern:
+        - /v2/syahmed/update-banner-job/*
+      action:
+        type: forward
+        forward:
+          target_group:
+          - target: quayio-stage-py3
+            weight: 100
+          - target: quayio-stage-debug
+            weight: 0
+    # Return HTTP 403 for all other requests to foo.stage.quay.io
+    - condition:
+      - type: host-header
+        host_header:
+        - 'foo.stage.quay.io'
+      action:
+        type: fixed-response
+        fixed_response:
+          status_code: 403
+          content_type: text/plain
+          message_body: YOU ARE NOT AUTHORIZED TO ACCESS THIS RESOURCE
+    # Send requests for /v2/bcaton/push-pull-monitor-debug to quayio-stage-debug
     - condition:
       - type: path-pattern
         path_pattern:
