@@ -64,3 +64,25 @@
     - shell:
         command: "{ci_cmd}"
     <<: *gh_checkout
+- job-template:
+      id: "osde2e-parameterized-job"
+      name: "osde2e-parameterized-job"
+      instance_type: "m5.xlarge"
+      region: "us-east-1"
+      wrappers:
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *osde2e-aws-keys
+          - *osde2e-ocm-access
+      builders:
+      - shell:
+          command: "{ci_cmd}"
+      parameters:
+      - string:
+          name: INSTANCE_TYPE
+          default: "{instance_type}"
+      - string:
+          name: CLOUD_PROVIDER_REGION
+          default: "{region}"
+      <<: *gh_checkout
