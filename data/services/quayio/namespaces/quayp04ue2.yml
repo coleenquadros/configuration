@@ -155,3 +155,70 @@ externalResources:
       default: true
       openshift_service: quay-py3-load-balancer-service
     rules: []
+  ######################################
+  # BEGIN POC for ocm-quay APPSRE-7479 #
+  ######################################
+  - provider: acm
+    identifier: quayio-production-ocmquay
+    region: us-east-2
+    domain:
+      domain_name: '*.q1w2.quay.devshift.net'
+      alternate_names:
+      - 'q1w2.quay.devshift.net'
+  - provider: alb
+    identifier: quayio-production-ocmquay
+    output_resource_name: quayio-production-ocmquay
+    idle_timeout: 3600
+    ip_address_type: dualstack
+    vpc:
+      $ref: /aws/quayio-prod/vpcs/quayio-prod.yml # VPC in us-east-2
+    certificate_arn: arn:aws:acm:us-east-2:206170669542:certificate/1ccddcb2-62c1-477c-9c3c-fe67ea028a33
+    ingress_cidr_blocks: ["0.0.0.0/0"]
+    targets:
+    - name: quayio-production-py3
+      default: true
+      openshift_service: quay-py3-load-balancer-service
+    rules:
+    - condition:
+      - type: host-header
+        host_header:
+        - 'pull.q1w2.quay.devshift.net'
+      - type: path-pattern
+        path_pattern:
+        - '/v2/auth*'
+      action:
+        type: forward
+        forward:
+          target_group:
+          - target: quayio-production-py3
+            weight: 100
+          - target: quayio-production-py3
+            weight: 0
+    - condition:
+      - type: host-header
+        host_header:
+        - 'pull.q1w2.quay.devshift.net'
+      - type: path-pattern
+        path_pattern:
+        - '/v2/openshift-release-dev/*'
+      action:
+        type: forward
+        forward:
+          target_group:
+          - target: quayio-production-py3
+            weight: 100
+          - target: quayio-production-py3
+            weight: 0
+    - condition:
+      - type: host-header
+        host_header:
+        - 'pull.q1w2.quay.devshift.net'
+      action:
+        type: fixed-response
+        fixed_response:
+          status_code: 401
+          content_type: application/json
+          message_body: '{"errors":[{"code":"UNAUTHORIZED","detail":{},"message":"access to the requested resource is not authorized"}]}'
+  ######################################
+  # END POC for ocm-quay APPSRE-7479 #
+  ######################################
