@@ -3,9 +3,10 @@
 ## Categories
 The following categories will correspond to the SLIs and SLOs below.
 
-1. HTTP Server
-2. Database Engine
-3. Pod Uptime
+1. Availability
+2. Latency
+3. Thoroughput
+4. Error rate
 
 ## SLIs
 1. Availability - The proportion of successful requests, as measured from the load balancer metrics. Any HTTP status other than 500–599 is considered successful.
