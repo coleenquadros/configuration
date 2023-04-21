@@ -69,6 +69,7 @@
       name: "osde2e-parameterized-job"
       instance_type: "m5.xlarge"
       region: "us-east-1"
+      report_dir: "/tmp/osde2e-report"
       wrappers:
       - vault-secrets:
           <<: *vault_defaults
@@ -85,4 +86,15 @@
       - string:
           name: CLOUD_PROVIDER_REGION
           default: "{region}"
+      - string:
+            name: REPORT_DIR
+            default: "{report_dir}"    
+      publishers:
+      - archive:
+            artifacts: '{report_dir}'    
+            allow-empty: 'false'
+      properties:
+      - build-discarder:
+            days-to-keep: 30
+            artifact-days-to-keep: 30
       <<: *gh_checkout
