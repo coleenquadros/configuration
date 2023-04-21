@@ -62,7 +62,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
 * `deprecated` - (optional) if set to true, resource templates can be migrated to different saas files.
 * `compare` - (optional) if set to false, the job does not compare desired to current resource and applies all resources even if they have not changed
 * `timeout` - (optional) set a timeout for the deployment job. It defaults to `60m` for Tekton provider. It is expressed in Go's [`ParseDuration`](https://pkg.go.dev/time#ParseDuration) format (up to seconds). See this important [issue](https://github.com/tektoncd/pipeline/issues/4035) about Tekton timeouts.
-* `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](/docs/app-sre/continuous-testing-in-app-interface.md), set this to `true` to publish Job's pods logs as artifacts in the Jenkins job.
+* `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](/docs/app-sre/continuous-testing-in-app-interface.md), set this to `true` to publish Job's pods logs as artifacts in the Jenkins job. This will also ensure that deployments are triggered on config changes in any subscribed publisher target. See `promotion_data`.
 * `clusterAdmin` - (optional) set this to `true` if the resources deployed in the saas file require cluster-admin permissions (CRDs for example).
 * `imagePatterns` - a list of strings specifying allowed images to deploy
     * examples: `quay.io/app-sre`, `quay.io/prom/prometheus`

@@ -113,6 +113,9 @@ e.g.: updating one of the `parameters` on a target will trigger a deployment on 
 
 To solve this problem, the `promotion_data` section has been introduced. The idea is to track the configuration data of the publisher target on the subscribed targets by adding a computed hash of configuration in the promotion merge request. With this approach, any change introduced in the publisher target will change the subscriber target even if the `ref` is not updated. The configuration hash will differ, and the promotion merge request will have changes to promote.
 
+Note, that only saas files for test pipelines are required to be triggered on config changes. Currently we use the `publishJobLogs` setting to
+determine if a saas file is dedicated for tests. I.e., any other saas file will not contain `promotion_data`.
+
 ![Saas workflow](assets/auto_promotion_flow_2.png)
 
 `promotion_data` is a list of objects grouped by channel. Each channel comes from a single saas file and target, so it identifies which saas file and target is the data relative to.
