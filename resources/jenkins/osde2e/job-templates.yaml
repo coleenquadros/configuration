@@ -70,6 +70,7 @@
       instance_type: "m5.xlarge"
       region: "us-east-1"
       report_dir: "/tmp/osde2e-report"
+      configs: "rosa,stage,e2e-suite"
       wrappers:
       - vault-secrets:
           <<: *vault_defaults
@@ -87,14 +88,27 @@
           name: CLOUD_PROVIDER_REGION
           default: "{region}"
       - string:
-            name: REPORT_DIR
-            default: "{report_dir}"    
+          name: REPORT_DIR
+          default: "{report_dir}"    
+      - string:
+          name: CONFIGS
+          default: "{configs}"
+      - bool:
+          name: STS
+          default: true    
+      - choice:
+          name: ENVIRONMENT
+          choices:
+            - prod
+            - stage
+          default: "stage"
+          description: "OCM environment"
       publishers:
       - archive:
-            artifacts: '{report_dir}'    
-            allow-empty: 'false'
+          artifacts: "{report_dir}"    
+          allow-empty: 'false'
       properties:
       - build-discarder:
-            days-to-keep: 30
-            artifact-days-to-keep: 30
+          days-to-keep: 30
+          artifact-days-to-keep: 30
       <<: *gh_checkout
