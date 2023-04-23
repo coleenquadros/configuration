@@ -155,7 +155,7 @@ tests:
 #---------------------provisioning-latency-tests----------------------#
   - interval: 1m
     input_series:
-    - series: provisioning_http_request_duration_ms_bucket{le="200"}
+    - series: provisioning_http_request_duration_ms_bucket{code="200", le="200"}
       values: 0+1x5  6+1x30
     - series: provisioning_http_request_duration_ms_count
       values: 0+1x5 7+7x30 
@@ -175,26 +175,3 @@ tests:
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningLatencyAlert.md"
             message: "REST API requests response time over 200 ms per hour"
             dashboard: "https://grafana.stage.devshift.net/d/211/provisioning?orgId=1&viewPanel=36"
-
-#---------------source-availability-latency-tests-------------------#
-
-  - interval: 1m
-    input_series:
-    - series: provisioning_source_availability_check_request_duration_ms_bucket{le="5000"}
-      values: 0+1x5  4+1x30
-    - series: provisioning_source_availability_check_request_duration_ms_count
-      values: 0+1x5 10+10x30 
-    alert_rule_test:
-    # Test the no alert case
-    - eval_time: 5m
-      alertname: ProvisioningSourceAvailabilityRequestsDurationLimit
-      exp_alerts:
-    - eval_time: 10m
-      alertname: ProvisioningSourceAvailabilityRequestsDurationLimit
-      exp_alerts:
-        - exp_labels:
-            service: insights
-            severity: medium
-          exp_annotations:
-            message: "source availability requests response time over 5 seconds per hour"
-            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningSourceAvailabilityLatencyAlert.md"

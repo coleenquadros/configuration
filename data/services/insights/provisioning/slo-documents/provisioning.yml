@@ -35,7 +35,7 @@ slos:
   SLOParameters:
     window: 28d
   expr: |
-    sum(rate(provisioning_http_request_total{code=~"2.*"}[{{window}}]))/sum(rate(provisioning_http_request_total[{{window}}]))
+    sum(rate(api_3scale_gateway_api_status{exported_service="provisioning",status!="5xx"}[{{window}}]))/sum(rate(api_3scale_gateway_api_status{exported_service="provisioning"}[{{window}}]))
   SLOTarget: 0.95
   SLOTargetUnit: percent_0_1
   prometheusRules: /insights-prod/provisioning-prod/provisioning.prometheusrules.yml
@@ -48,34 +48,9 @@ slos:
   SLOParameters:
     window: 28d
   expr: |
-    sum(rate(provisioning_http_request_duration_ms_bucket{le="200"}[{{window}}])) / sum(rate(provisioning_http_request_duration_ms_count[{{window}}]))
+    sum(rate(provisioning_http_request_duration_ms_bucket{code=~"2\\d\\d", le="200"}[{{window}}])) / sum(rate(provisioning_http_request_duration_ms_count[{{window}}]))
   SLOTarget: 0.95
   SLOTargetUnit: percent_0_1
   prometheusRules: /insights-prod/provisioning-prod/provisioning.prometheusrules.yml
   dashboard: https://grafana.app-sre.devshift.net/d/211/provisioning?orgId=1&viewPanel=33
 
-- name: Source Availability Success Rate
-  SLIType: availability
-  SLISpecification: The proportion of successful and processed requests received from sources
-  SLODetails: https://gitlab.cee.redhat.com/satellite-services/satellite-services.pages.redhat.com/-/blob/main/observability/slos/provisioning/source_check_success_rate.md
-  SLOParameters:
-    window: 28d
-  expr: |
-    (sum(rate(provisioning_source_availability_check_request_total[{{window}}]))+ sum(rate(provisioning_invalid_source_availability_check_request_total[{{window}}])))/sum(rate(provisioning_http_request_total{path="/api/provisioning/v1/availability_status/sources/"}[{{window}}]))
-  SLOTarget: 0.75
-  SLOTargetUnit: percent_0_1
-  prometheusRules: /insights-prod/provisioning-prod/provisioning.prometheusrules.yml
-  dashboard: https://grafana.app-sre.devshift.net/d/211/provisioning
-
-- name: Source Availability request latency
-  SLIType: latency
-  SLISpecification: The proportion of source availability checks requests that succeeds within 5 seconds
-  SLODetails: https://gitlab.cee.redhat.com/satellite-services/satellite-services.pages.redhat.com/-/blob/main/observability/slos/provisioning/source_check_latency.md
-  SLOParameters:
-    window: 28d
-  expr: |
-    sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000"}[{{window}}])) / sum(rate(provisioning_source_availability_check_request_duration_ms_count[{{window}}]))
-  SLOTarget: 0.5
-  SLOTargetUnit: percent_0_1
-  prometheusRules: /insights-prod/provisioning-prod/provisioning.prometheusrules.yml
-  dashboard: https://grafana.app-sre.devshift.net/d/211/provisioning
