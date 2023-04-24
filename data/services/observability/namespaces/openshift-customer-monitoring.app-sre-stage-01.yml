@@ -91,36 +91,44 @@ openshiftResources:
 
 ## Prometheus Rules
 ### Federated Kubernetes metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
+  type: resource
 ### kube-metrics pod-crashlooping
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/kube-metrics-pod-crashlooping.prometheusrules.yaml.j2
   enable_query_support: true
 ### OCM metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/ocm-metrics.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/ocm-metrics-test.prometheusrules.yaml
 ### Prometheus alerts
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/prometheus-app-sre.prometheusrules.yaml.j2
   enable_query_support: true
 ### Prometheus mixin alerts
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
+  type: resource
 ### OLM alerts
-- provider: resource
+- provider: prometheus-rule
   path: /observability/olm/olm.prometheusrules.yaml
+  type: resource
 ### App SRE prometheus PVC metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
+  type: resource
 
 ### AWS resource exporter checks
-- provider: resource
+- provider: prometheus-rule
   path: /observability/aws-resource-exporter/prometheusrules/aws-resource-exporter.prometheusrules.yaml
-- provider: resource-template
-  type: extracurlyjinja2
+  type: resource
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/aws-resource-exporter/prometheusrules/aws-resource-exporter-templated.prometheusrules.yaml.j2
   variables:
     aws_resources_exporter_instances:
@@ -131,33 +139,39 @@ openshiftResources:
     - aws-resource-exporter-osd-privatelink-int
 
 ### SignalFX Prometheus Exporter
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/signalfx-prometheus-exporter.prometheusrules.yaml
+  type: resource
 
 ### AWS resource exporter privatelink-int alerts
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/aws-resources-privatelink.prometheusrules.yaml.j2
   enable_query_support: true
   variables:
     job_stage: aws-resource-exporter-osd-privatelink-int
     environment: int
     severity: medium
+  tests:
+  - /observability/prometheusrules/aws-resources-privatelink.prometheusrulestests.yaml
 ### AWS resource exporter privatelink-stage alerts
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/aws-resources-privatelink.prometheusrules.yaml.j2
   enable_query_support: true
   variables:
     job_stage: aws-resource-exporter-osd-privatelink-stage
     environment: stage
     severity: medium
+  tests:
+  - /observability/prometheusrules/aws-resources-privatelink.prometheusrulestests.yaml
 
 ### AWS Cloudwatch exporter
-- provider: resource
+- provider: prometheus-rule
   path: /observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter.prometheusrules.yaml
-- provider: resource-template
-  type: extracurlyjinja2
+  type: resource
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter-templated.prometheusrules.yaml.j2
   enable_query_support: true
   variables:
@@ -170,23 +184,32 @@ openshiftResources:
     - cloudwatch-exporter
     - cloudwatch-exporter-quay
     - cloudwatch-exporter-crc
+  tests:
+  - /observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter-templated.prometheusrulestests.yaml
 
 ################## Add  any cluster-specific content below this line ##################
 
 ## PrometheusRules
 ### Vault
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/vault-stage.prometheusrules.yaml
+  type: resource
 ### Cincinnati
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/cincinnati-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/cincinnati-stage.prometheusrulestests.yaml
 
 ### UHC Gateway
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/uhc-gateway-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/uhc-gateway-stage.prometheusrulestests.yaml
 ### UHC Account Manager
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/uhc-acct-mngr.prometheusrules.yaml
   variables:
     environment: stage
@@ -196,261 +219,462 @@ openshiftResources:
     severity_terms_errors: medium
     severity_pod_restart: info
     severity_pod_restart_many_times: medium
+  tests:
+  - /observability/prometheusrules/uhc-acct-mngr.prometheusrulestests.yaml
 ### UHC Account Manager RDS
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/uhc-acct-mngr-rds.prometheusrules.yaml
   variables:
     environment: stage
+  tests:
+  - /observability/prometheusrules/uhc-acct-mngr-rds.prometheusrulestests.yaml
 ### OCM Service Log
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/ocm-service-log.prometheusrules.yaml
   variables:
     environment: stage
     severity_500_errors: medium
+  tests:
+  - /observability/prometheusrules/ocm-service-log.prometheusrulestests.yaml
 ### OCM Managed Services
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/ocm-managed-services.prometheusrules.yaml
   variables:
     environment: stage
     severity_500_errors: medium
     severity_oms_down: medium
+  tests:
+  - /observability/prometheusrules/ocm-managed-services.prometheusrulestests.yaml
 ### UHC Clusters Service
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/uhc-clusters-service-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/uhc-clusters-service-stage.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/uhc-clusters-service-integration.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/uhc-clusters-service-integration.prometheusrulestests.yaml
 ### UHC Cluster Service Cleaner
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/uhc-clusters-cleaner-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/uhc-clusters-cleaner-stage.prometheusrulestests.yaml
 ### Job Queue
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/job-queue-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/job-queue-stage-test.prometheusrules.yaml
  ### UHC Account Manager Consumers
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/uhc-acct-mngr-consumer.prometheusrules.yaml
   variables:
     environment: stage
+  tests:
+  - /observability/prometheusrules/uhc-acct-mngr-consumer.prometheusrulestests.yaml
 ### Telemeter
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/telemeter-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/telemeter-slos-stage.prometheusrules.yaml
+  type: resource
 ### Observatorium
 #### SLOs
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/rhobs-slos-telemeter-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/rhobs-slos-telemeter.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/rhobs-slos-mst-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/rhobs-slos-mst.prometheusrulestests.yaml
 #### Thanos
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/observatorium-thanos-stage.prometheusrules.yaml
+  type: resource
 #### Querier Cache
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/observatorium-querier-cache-stage.prometheusrules.yaml
+  type: resource
 #### Jaeger
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/observatorium-jaeger.prometheusrules.yaml
+  type: resource
 #### HTTP Traffic
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/observatorium-http-traffic-stage.prometheusrules.yaml
+  type: resource
 #### API
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/observatorium-api-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/observatorium-api.prometheusrulestests.yaml
 #### Tenants
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/observatorium-tenants-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/observatorium-tenants.prometheusrulestest.yaml
 #### Custom
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/observatorium-custom-metrics-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/observatorium-custom-metrics.prometheusrulestests.yaml
 #### Sendgrid Service
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/ocm-sendgrid-svc-stage.prometheusrules.yaml
+  type: resource
 #### Observatorium logs
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/rhobs-logs-mst-stage.prometheusrules.yaml
-  #### Gubernator (Rate limiting)
-- provider: resource
+  type: resource
+#### Gubernator (Rate limiting)
+- provider: prometheus-rule
   path: /observability/prometheusrules/observatorium-gubernator-stage.prometheusrules.yaml
+  type: resource
 ### Kas Fleet Manager
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/kas-fleet-manager-cluster-correctness-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/kas-fleet-manager-cluster-correctness-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/kas-fleet-manager-cluster-latency-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/kas-fleet-manager-cluster-latency-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/kas-fleet-manager-slos-availability-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/kas-fleet-manager-slos-availability-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/kas-fleet-manager-slos-kafka-correctness-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/kas-fleet-manager-slos-kafka-correctness-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/kas-fleet-manager-slos-kafka-latency-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/kas-fleet-manager-slos-kafka-latency-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/kas-fleet-manager-slos-latency-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/kas-fleet-manager-slos-latency-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/kas-fleet-manager-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/kas-fleet-manager-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/kas-fleet-manager-cluster-capacity-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/kas-fleet-manager-cluster-capacity-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/kas-fleet-manager-kafka-version-mismatch-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/kas-fleet-manager-kafka-version-mismatch-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/kas-fleet-manager-kafkas-stuck-in-suspending-state-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/kas-fleet-manager-kafkas-stuck-in-suspending-state-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/kas-fleet-manager-kafkas-stuck-in-resuming-state-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/kas-fleet-manager-kafkas-stuck-in-resuming-state-stage.prometheusrulestest.yaml
 ### MK Observability Remote Write Proxy
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/mk-observability-rw-proxy-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/mk-observability-rw-proxy-stage.prometheusrulestest.yaml
 ### COS Fleet Manager
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/cos-fleet-manager-slos-availability-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/cos-fleet-manager-slos-availability-stage.prometheusrulestest.yaml
 ### Token refresher
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/token-refresher-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/token-refresher.stage.prometheusrulestest.yaml
 ### OSD Fleet Manager Integration
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/osd-fleet-manager-nonprod.prometheusrules.yaml.j2
   variables:
     environment: integration
     namespace: osd-fleet-manager-integration
-    sectors: 
-      - main
-      - canary
+    sectors:
+    - main
+    - canary
 ### OSD Fleet Manager Stage
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/osd-fleet-manager-nonprod.prometheusrules.yaml.j2
   variables:
     environment: stage
     namespace: osd-fleet-manager-stage
-    sectors: 
-      - main
-      - perf
-      - perf2
-      - perf3
+    sectors:
+    - main
+    - perf
+    - perf2
+    - perf3
       #- canary
 ### MAS SSO
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/mas-sso-slo-availability-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/mas-sso-slo-availability-stage.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/mas-sso-availability-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/mas-sso-availability-stage.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/mas-sso-slo-latency-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/mas-sso-slo-latency-stage.prometheusrulestests.yaml
 ### Status Board
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/status-board-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/status-board-stage.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /status-board/stage/status-board-rds.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /status-board/stage/status-board-rds.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/status-board-slo-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/status-board-slo-stage.prometheusrulestests.yaml
 #### Web RCA
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/web-rca-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/web-rca-stage.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /web-rca/stage/web-rca-rds.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /web-rca/stage/web-rca-rds.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /web-rca/stage/web-rca-s3.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /web-rca/stage/web-rca-s3.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/web-rca-slo-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/web-rca-slo-stage.prometheusrulestests.yaml
 #### CNA
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/cna-slo-stage.prometheusrules.yaml
 
+  type: resource
+  tests:
+  - /observability/prometheusrules/cna-slo-stage.prometheusrulestests.yaml
 ### Qontract-reconcile SLOs
-- provider: resource-template
+- provider: prometheus-rule
   path: /observability/prometheusrules/qontract-reconcile-time-to-reconcile-slo.prometheusrules.yaml
-  type: extracurlyjinja2
+  type: resource-template-extracurlyjinja2
   variables:
     namespace: app-interface-stage
     severity: medium
 ### OCM Clusters service SLO rules
-- provider: resource-template
+- provider: prometheus-rule
   path: /observability/prometheusrules/uhc-clusters-service-slo.prometheusrules.yaml
-  type: extracurlyjinja2
+  type: resource-template-extracurlyjinja2
   variables:
     namespace: uhc-stage
 ### OCM Accounts mgmt SLO rules
-- provider: resource-template
+- provider: prometheus-rule
   path: /observability/prometheusrules/uhc-accounts-mgmt-slo.prometheusrules.yaml
-  type: extracurlyjinja2
+  type: resource-template-extracurlyjinja2
   variables:
     namespace: uhc-stage
 ### Cincinnati SLO rules
-- provider: resource-template
+- provider: prometheus-rule
   path: /observability/prometheusrules/cincinnati-slo.prometheusrules.yaml
-  type: extracurlyjinja2
+  type: resource-template-extracurlyjinja2
   variables:
     namespace: cincinnati-stage
     route: cincinnati-route-stg
 ### Devfile Registry
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/devfile-registry-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/devfile-registry-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/devfile-registry-redhat-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/devfile-registry-redhat-stage.prometheusrulestest.yaml
 ### Insights AWS rules
-- provider: resource
+- provider: prometheus-rule
   path: /insights-stage/playbook-dispatcher/playbook-dispatcher-rds.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /insights-stage/playbook-dispatcher/playbook-dispatcher-rds.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /insights-stage/host-inventory-stage/host-inventory-rds.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /insights-stage/host-inventory-stage/host-inventory-rds.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /insights-stage/cloud-connector/cloud-connector-rds.prometheusrules.yaml
+  type: resource
+  tests:
+  - /insights-stage/cloud-connector/cloud-connector-rds.prometheusrulestests.yaml
 ### Service Registry
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/srs-fleet-manager-slos-availability-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/srs-fleet-manager-slos-availability-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/srs-fleet-manager-slos-latency-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/srs-fleet-manager-slos-latency-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/srs-fleet-manager-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/srs-fleet-manager-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/srs-fleet-manager-errors-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/srs-fleet-manager-errors-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/srs-service-registry-slos-availability-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/srs-service-registry-slos-availability-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/srs-service-registry-slos-latency-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/srs-service-registry-slos-latency-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/srs-service-registry-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/srs-service-registry-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/srs-tenant-manager-slos-availability-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/srs-tenant-manager-slos-availability-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/srs-tenant-manager-slos-latency-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/srs-tenant-manager-slos-latency-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/srs-tenant-manager-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/srs-tenant-manager-stage.prometheusrulestest.yaml
 ### Clair
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/clair-slo-availability-index-report-creation-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/clair-slo-availability-index-report-creation-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/clair-availability-index-report-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/clair-availability-index-report-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/clair-slo-availability-vulnerability-report-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/clair-slo-availability-vulnerability-report-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/clair-slo-latency-index-report-creation-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/clair-slo-latency-index-report-creation-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/clair-latency-index-report-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/clair-latency-index-report-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/clair-slo-latency-vulnerability-report-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/clair-slo-latency-vulnerability-report-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/clair-rate-limiting-index-report-creation-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/clair-rate-limiting-index-report-creation-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/clair-volumes-full-indexer-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/clair-volumes-full-indexer-stage.prometheusrulestest.yaml
 ### ACS Fleet Manager
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/acs-fleet-manager-stage.prometheusrules.yaml
-- provider: resource-template
+  type: resource
+  tests:
+  - /observability/prometheusrules/acs-fleet-manager-stage.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/acs-fleet-manager-slo.prometheusrules.yaml
-  type: extracurlyjinja2
+  type: resource-template-extracurlyjinja2
   variables:
     environment: stage
     high_severity: medium
     low_severity: medium
+  tests:
+  - /observability/prometheusrules/acs-fleet-manager-slo.prometheusrulestest.yaml
 
 ## Container Security Operator rules
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/container-security-operator.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/container-security-operator.prometheusrulestest.yaml
 
 ## Glitchtip rules
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/glitchtip-stage-prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/glitchtip-stage-prometheusrulestests.yaml
 
 ## ServiceMonitors
 ### Cincinnati- Policy Engine
@@ -484,30 +708,36 @@ openshiftResources:
     namespace: managed-connectors-stage
 
 ### Test RDS version alerts (used for Prometheus tests, etc.)
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/rds-approved-versions-test.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/rds-approved-versions-test.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/rds-deprecated-major-versions-test.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/rds-deprecated-major-versions-test.prometheusrulestests.yaml
 
 ### RDS version alerts
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /services/app-sre-observability/rds-approved-versions.prometheusrules.yaml.j2
   enable_query_support: true
   variables:
     accounts_with_aws_resource_exporter:
-      - app-sre-stage
-      - insights-stage
-      - quayio-stage
-- provider: resource-template
-  type: extracurlyjinja2
+    - app-sre-stage
+    - insights-stage
+    - quayio-stage
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /services/app-sre-observability/rds-deprecated-major-versions.prometheusrules.yaml.j2
   enable_query_support: true
   variables:
     accounts_with_aws_resource_exporter:
-      - app-sre-stage
-      - insights-stage
-      - quayio-stage
+    - app-sre-stage
+    - insights-stage
+    - quayio-stage
 
 ### Github-Mirror
 - provider: resource-template
@@ -807,10 +1037,16 @@ openshiftResources:
     namespace: managed-services-stage
 
 ### Assisted-Installer Service
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/assisted-installer-stage.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/assisted-installer-stage.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/assisted-installer-events-stage.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/assisted-installer-events-stage.prometheusrulestests.yaml
 
 ### Devfile Registry
 - provider: resource-template
@@ -935,10 +1171,18 @@ openshiftResources:
   path: /observability/servicemonitors/image-builder.servicemonitor.yml
   variables:
     namespace: composer-stage
-- provider: resource
+- provider: prometheus-rule
   path: /image-builder/stage/composer/image-builder-composer-prometheusrules.yml
-- provider: resource
+  type: resource
+  tests:
+  - /image-builder/stage/composer/image-builder-composer-prometheusrules-tests.yml
+  - /image-builder/stage/composer/image-builder-composer-prometheusexpressions-tests.yml
+- provider: prometheus-rule
   path: /image-builder/stage/worker/image-builder-worker-prometheusrules.yml
+  type: resource
+  tests:
+  - /image-builder/stage/worker/image-builder-worker-prometheusrules-tests.yml
+  - /image-builder/stage/worker/image-builder-worker-prometheusexpressions-tests.yml
 
 ### Signalfx Prometheus Exporter
 - provider: resource-template
@@ -1018,15 +1262,15 @@ openshiftResources:
     namespace: app-sre-observability-stage
 
 ### Gabi
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/gabi-stage.prometheusrules.yaml
   variables:
     cluster: app-sre-stage-01
 
 ### Unleash
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/unleash-stage.prometheusrules.yaml
   variables:
     cluster: app-sre-stage-01

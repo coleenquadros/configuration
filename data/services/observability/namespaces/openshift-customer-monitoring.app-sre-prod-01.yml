@@ -61,51 +61,72 @@ openshiftResources:
 
 ## Prometheus Rules
 ### Federated Kubernetes metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
+  type: resource
 ### kube-metrics pod-crashlooping
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/kube-metrics-pod-crashlooping.prometheusrules.yaml.j2
   enable_query_support: true
 ### OCM metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/ocm-metrics.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/ocm-metrics-test.prometheusrules.yaml
 ### Prometheus alerts
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/prometheus-app-sre.prometheusrules.yaml.j2
   enable_query_support: true
+  tests:
+  - /observability/prometheusrules/prometheus-app-sre.prometheusrulestests.yaml
 ### Prometheus mixin alerts
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
+  type: resource
 ### OLM alerts
-- provider: resource
+- provider: prometheus-rule
   path: /observability/olm/olm.prometheusrules.yaml
+  type: resource
 ### App SRE prometheus PVC metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
+  type: resource
 #### AppSRE tekton openshift saas deployments
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/app-sre-openshift-saas-deployment-jobs.prometheusrules.yaml
+  type: resource
 ### MT-SRE tekton openshift saas deployments
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/mt-sre-tekton.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/mt-sre-tekton.prometheusrulestests.yaml
 ### Domain Exporter Alerts
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/domain-exporter.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/domain-exporter.prometheusrulestest.yaml
 ### MT-SRE github ci-ext Alerts
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/mt-sre-ci-ext.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/mt-sre-ci-ext.prometheusrulestests.yaml
 ### AWS resource exporter privatelink-prod alerts
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/aws-resources-privatelink.prometheusrules.yaml.j2
   enable_query_support: true
   variables:
     job_stage: aws-resource-exporter-osd-privatelink-prod
     environment: prod
     severity: high
+  tests:
+  - /observability/prometheusrules/aws-resources-privatelink.prometheusrulestests.yaml
 
 ################## Add  any cluster-specific content below this line ##################
 
@@ -116,13 +137,17 @@ openshiftResources:
 #   path: /observability/prometheusrules/observatorium-api-production.prometheusrules.yaml
 ## Prometheus Rules
 ### App-interface
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/app-interface-production.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/app-interface-production.prometheusrulestests.yaml
 ### AWS resource exporter checks
-- provider: resource
+- provider: prometheus-rule
   path: /observability/aws-resource-exporter/prometheusrules/aws-resource-exporter.prometheusrules.yaml
-- provider: resource-template
-  type: extracurlyjinja2
+  type: resource
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/aws-resource-exporter/prometheusrules/aws-resource-exporter-templated.prometheusrules.yaml.j2
   variables:
     aws_resources_exporter_instances:
@@ -134,13 +159,17 @@ openshiftResources:
     - aws-resource-exporter-osd-privatelink-prod
 
 ### Blackbox exporter checks
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/blackbox-exporter.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/blackbox-exporter.prometheusrulestests.yaml
 ### AWS Cloudwatch exporter
-- provider: resource
+- provider: prometheus-rule
   path: /observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter.prometheusrules.yaml
-- provider: resource-template
-  type: extracurlyjinja2
+  type: resource
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter-templated.prometheusrules.yaml.j2
   enable_query_support: true
   variables:
@@ -161,39 +190,60 @@ openshiftResources:
     - cloudwatch-exporter-ocm-quay-eu-west-1
     - cloudwatch-exporter-ocm-quay-us-west-2
 ### SignalFX Prometheus Exporter
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/signalfx-prometheus-exporter.prometheusrules.yaml
+  type: resource
 ### ci.ext.devshift.net
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/ci-ext.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/ci-ext.prometheusrulestests.yaml
 ### Github Mirror Service
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/github-mirror-production.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/github-mirror-production.prometheusrulestest.yaml
 ### Qontract-reconcile SLOs
-- provider: resource-template
+- provider: prometheus-rule
   path: /observability/prometheusrules/qontract-reconcile-time-to-reconcile-slo.prometheusrules.yaml
-  type: extracurlyjinja2
+  type: resource-template-extracurlyjinja2
   variables:
     namespace: app-interface-production
     severity: medium
 ## Insights AWS rules
-- provider: resource
+- provider: prometheus-rule
   path: /insights-prod/playbook-dispatcher/playbook-dispatcher-rds.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /insights-prod/playbook-dispatcher/playbook-dispatcher-rds.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /insights-prod/host-inventory-prod/host-inventory-rds.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /insights-prod/host-inventory-prod/host-inventory-rds.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /insights-prod/cloud-connector/cloud-connector-rds.prometheusrules.yaml
+  type: resource
+  tests:
+  - /insights-prod/cloud-connector/cloud-connector-rds.prometheusrulestests.yaml
 ## Insights AA-tower RDS metrics
-- provider: resource
+- provider: prometheus-rule
   path: /insights-prod/tower-analytics-prod/automation-analytics.prometheusrules-app-sre-prod-01.yaml
-
+  type: resource
 ## Insights SLO
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/insights-ccx-processing-slo.prometheusrules.yaml
-
+  type: resource
+  tests:
+  - /observability/prometheusrules/insights-ccx-processing-slo.prometheusrulestests.yaml
 ## Container Security Operator rules
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/container-security-operator.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/container-security-operator.prometheusrulestest.yaml
 
 ## ServiceMonitors
 ### App-SRE PushGateway
@@ -349,8 +399,11 @@ openshiftResources:
     namespace: registry-quarkus-redhat-production
 
 ### Quarkus Registry
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/registry-quarkus-redhat-production.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/registry-quarkus-redhat-production.prometheusrulestests.yaml
 
 ### Hosted Che Servicemonitor
 - provider: resource-template
@@ -376,44 +429,46 @@ openshiftResources:
     name: signalfx-prometheus-exporter
 
 ### RDS version alerts
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /services/app-sre-observability/rds-approved-versions.prometheusrules.yaml.j2
   enable_query_support: true
   variables:
     accounts_with_aws_resource_exporter:
-      - app-sre
-      - insights-prod
-      - ocm-quay
-      - osio
-      - quayio-prod
-- provider: resource-template
-  type: extracurlyjinja2
+    - app-sre
+    - insights-prod
+    - ocm-quay
+    - osio
+    - quayio-prod
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /services/app-sre-observability/rds-deprecated-major-versions.prometheusrules.yaml.j2
   enable_query_support: true
   variables:
     accounts_with_aws_resource_exporter:
-      - app-sre
-      - insights-prod
-      - ocm-quay
-      - osio
-      - quayio-prod
+    - app-sre
+    - insights-prod
+    - ocm-quay
+    - osio
+    - quayio-prod
 
 ### RDS logs storage size
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /services/app-sre-observability/rds-logs-storage-size.prometheusrules.yaml.j2
   enable_query_support: true
   variables:
     accounts_with_aws_resource_exporter:
-      - app-sre-stage
-      - insights-stage
-      - quayio-stage
-      - app-sre
-      - insights-prod
-      - ocm-quay
-      - osio
-      - quayio-prod
+    - app-sre-stage
+    - insights-stage
+    - quayio-stage
+    - app-sre
+    - insights-prod
+    - ocm-quay
+    - osio
+    - quayio-prod
+  tests:
+  - /services/app-sre-observability/rds-logs-storage-size.prometheusrulestest.yaml
 
 ### Promlens
 - provider: resource-template
@@ -421,21 +476,28 @@ openshiftResources:
   path: /observability/servicemonitors/promlens.servicemonitor.yaml
   variables:
     namespace: app-sre-observability-production
-- provider: resource-template
+- provider: prometheus-rule
   path: /observability/prometheusrules/promlens.prometheusrules.yaml
+  type: resource-template-extracurlyjinja2
 
 ### Unleash
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/unleash-prod.prometheusrules.yaml
   variables:
     cluster: app-sre-prod-01
 
 # image-builder
-- provider: resource
+- provider: prometheus-rule
   path: /image-builder/stage/db/image-builder-db-prometheusrules.yml
-- provider: resource
+  type: resource
+  tests:
+  - /image-builder/stage/db/image-builder-db-prometheusrules-tests.yml
+- provider: prometheus-rule
   path: /image-builder/production/db/image-builder-db-prometheusrules.yml
+  type: resource
+  tests:
+  - /image-builder/production/db/image-builder-db-prometheusrules-tests.yml
 
 ### CloudFlare
 - provider: resource-template
@@ -445,19 +507,25 @@ openshiftResources:
     namespace: app-sre-observability-production
 
 ## Quayio
-- provider: resource
+- provider: prometheus-rule
   path: /quay-p/quay/quay-catchpoint.alerts.prometheusrules.yaml
+  type: resource
 
 ### UHC Account Manager RDS
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/uhc-acct-mngr-rds.prometheusrules.yaml
   variables:
     environment: production
+  tests:
+  - /observability/prometheusrules/uhc-acct-mngr-rds.prometheusrulestests.yaml
 
 ### OCM CS RDS
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/uhc-clusters-service-production-rds.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/uhc-clusters-service-production-rds.prometheusrulestests.yaml
 
 ### Web RCA
 - provider: resource-template
@@ -466,14 +534,26 @@ openshiftResources:
   variables:
     environment: production
     namespace: web-rca-production
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/web-rca-production.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/web-rca-production.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /observability/prometheusrules/web-rca-slo-production.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /observability/prometheusrules/web-rca-slo-production.prometheusrulestests.yaml
+- provider: prometheus-rule
   path: /web-rca/production/web-rca-s3.prometheusrules.yaml
-- provider: resource
+  type: resource
+  tests:
+  - /web-rca/production/web-rca-s3.prometheusrulestest.yaml
+- provider: prometheus-rule
   path: /web-rca/production/web-rca-rds.prometheusrules.yaml
+  type: resource
+  tests:
+  - /web-rca/production/web-rca-rds.prometheusrulestest.yaml
 
 sharedResources:
 - $ref: /services/observability/shared-resources/dvo-openshift.yml

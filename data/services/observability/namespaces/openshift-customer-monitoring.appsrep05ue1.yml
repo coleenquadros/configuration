@@ -52,81 +52,102 @@ openshiftResources:
 
 ## Prometheus Rules
 ### Federated Kubernetes metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
+  type: resource
 ### kube-metrics pod-crashlooping
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/kube-metrics-pod-crashlooping.prometheusrules.yaml.j2
   enable_query_support: true
 ### OCM metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/ocm-metrics.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/ocm-metrics-test.prometheusrules.yaml
 ### Prometheus alerts
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/prometheus-app-sre.prometheusrules.yaml.j2
   enable_query_support: true
 ### Prometheus mixin alerts
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
+  type: resource
 ### OLM alerts
-- provider: resource
+- provider: prometheus-rule
   path: /observability/olm/olm.prometheusrules.yaml
+  type: resource
 ### App SRE prometheus PVC metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
 
 ################## Add  any cluster-specific content below this line ##################
 
 ## Prometheus Rules
 ### App-interface
-- provider: resource
+  type: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/app-interface-production-int.prometheusrules.yaml
+  type: resource
 ### Qontract-reconcile SLOs
-- provider: resource-template
+- provider: prometheus-rule
   path: /observability/prometheusrules/qontract-reconcile-time-to-reconcile-slo.prometheusrules.yaml
-  type: extracurlyjinja2
+  type: resource-template-extracurlyjinja2
   variables:
     namespace: app-interface-production
     severity: medium
 ### ci.int.devshift.net
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/ci-int.prometheusrules.yaml
+  type: resource
 ### Hive Capacity
 ## hive-production
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/hive-production-capacity.prometheusrules.yaml
   variables:
     appsre_env: production
     max_clusters_per_shard: 700
     grafana_datasource: appsrep05ue1-prometheus
+  tests:
+  - /observability/prometheusrules/hive-production-capacity.prometheusrules-test.yaml
 ## hive-stage
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/hive-stage-capacity.prometheusrules.yaml
   variables:
     appsre_env: staging
     max_clusters_per_shard: 700
     grafana_datasource: appsrep05ue1-prometheus
 ### App-SRE contract
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /app-sre/app-sre-contract/app-sre-contract.prometheusrules.yaml.j2
 # Vault rules
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/vault-production.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/vault-production.prometheusrulestest.yaml
 ### Container Security Operator rules
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/container-security-operator.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/container-security-operator.prometheusrulestest.yaml
 ### Blackbox exporter checks
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/blackbox-exporter-int.prometheusrules.yaml
+  type: resource
 
 ### gitlab merge queue
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/gitlab-merge-queue.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/gitlab-merge-queue.prometheusrulestest.yaml
 
 ## ServiceMonitors
 ### App-SRE contract
@@ -144,8 +165,11 @@ openshiftResources:
     environment: production
     namespace: app-interface-production
 ### MT-SRE Jenkins (ci-int) builds
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/mt-sre-ci-int.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/mt-sre-ci-int.prometheusrulestests.yaml
 ### Vault
 #### TODO: sunset the vault-exporter. This will require refactor of existing vault alerting rules
 - provider: resource-template
@@ -167,8 +191,11 @@ openshiftResources:
   path: /observability/servicemonitors/x509-certificate-exporter.servicemonitor.yaml
   variables:
     namespace: app-sre-observability-production
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/skupper-network-monitoring-prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/skupper-network-monitoring-prometheusrulestests.yaml
 
 sharedResources:
 - $ref: /services/observability/shared-resources/dvo-openshift.yml
