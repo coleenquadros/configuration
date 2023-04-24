@@ -24,7 +24,7 @@ spec:
     rules:
       - alert: ProvisioningHTTPRequestsDurationLimit
         expr: | 
-          sum(rate(provisioning_http_request_duration_ms_bucket{le="200"}[1h]))
+          sum(rate(provisioning_http_request_duration_ms_bucket{code=~"2\\d\\d", le="200"}[1h]))
           /
           sum(rate(provisioning_http_request_duration_ms_count[1h])) < 0.95
         labels:
@@ -49,20 +49,6 @@ spec:
           message: "Reservations success rate dropped below 80% in last 7 days"
           dashboard: "https://grafana.app-sre.devshift.net/d/211/provisioning?orgId=1&viewPanel=59"
           runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningAvailabilityAlert.md"
-
-  - name: source-availability-latency
-    rules:
-      - alert: ProvisioningSourceAvailabilityRequestsDurationLimit
-        expr: | 
-          sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000"}[1h])) 
-          /
-          sum(rate(provisioning_source_availability_check_request_duration_ms_count[1h])) < 0.5
-        labels:
-          service: insights
-          severity: medium
-        annotations:
-          message: "source availability requests response time over 5 seconds per hour"
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningSourceAvailabilityLatencyAlert.md"
 
   - name: provisioning-latency-prod
     rules:
@@ -289,116 +275,3 @@ spec:
           service: insights
           severity: medium
         record: provisioning_http_request_total:burnrate6h
-  
-  - name: source-availability-checks-latency-prod
-    rules:
-      - alert: ProvisioningSourceAvailabilityLatency5mto1hrOr30mto6hBudgetBurn
-        annotations:
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningSourceAvailabilityLatencyAlert.md"
-          message: 'High requests latency budget burn for latency=5000 (current value: {{ $value }})'
-        expr: |
-          (
-            latencytarget:provisioning_source_availability_check_request_duration_ms:rate1h{latency="5000"} > (14.4*1.000000)
-            and
-            latencytarget:provisioning_source_availability_check_request_duration_ms:rate5m{latency="5000"} > (14.4*1.000000)
-          )
-          or
-          (
-            latencytarget:provisioning_source_availability_check_request_duration_ms:rate6h{latency="5000"} > (6*1.000000)
-            and
-            latencytarget:provisioning_source_availability_check_request_duration_ms:rate30m{latency="5000"} > (6*1.000000)
-          )
-        labels:
-          service: insights
-          latency: "5000"
-          severity: medium
-      - alert: ProvisioningSourceAvailabilityLatency2hto1dOr6hto3dBudgetBurn
-        annotations:
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningSourceAvailabilityLatencyAlert.md"
-          message: 'High requests latency budget burn for latency=5000 (current value: {{ $value }})'
-        expr: |
-          (
-            latencytarget:provisioning_source_availability_check_request_duration_ms:rate1d{latency="5000"} > (3*1.000000)
-            and
-            latencytarget:provisioning_source_availability_check_request_duration_ms:rate2h{latency="5000"} > (3*1.000000)
-          )
-          or
-          (
-            latencytarget:provisioning_source_availability_check_request_duration_ms:rate3d{latency="5000"} > (1.000000)
-            and
-            latencytarget:provisioning_source_availability_check_request_duration_ms:rate6h{latency="5000"} > (1.000000)
-          )
-        labels:
-          service: insights
-          latency: "5000"
-          severity: medium
-      - expr: |
-          1 - (
-            sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000",code!~"5.."}[5m]))
-            /
-            sum(rate(provisioning_source_availability_check_request_duration_ms_count{job="prometheus"}[5m]))
-          )
-        labels:
-          service: insights
-          latency: "5000"
-        record: latencytarget:provisioning_source_availability_check_request_duration_ms:rate5m
-      - expr: |
-          1 - (
-            sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000",code!~"5.."}[30m]))
-            /
-            sum(rate(provisioning_source_availability_check_request_duration_ms_count{job="prometheus"}[30m]))
-          )
-        labels:
-          service: insights
-          latency: "5000"
-        record: latencytarget:provisioning_source_availability_check_request_duration_ms:rate30m
-      - expr: |
-          1 - (
-            sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000",code!~"5.."}[1h]))
-            /
-            sum(rate(provisioning_source_availability_check_request_duration_ms_count{job="prometheus"}[1h]))
-          )
-        labels:
-          service: insights
-          latency: "5000"
-        record: latencytarget:provisioning_source_availability_check_request_duration_ms:rate1h
-      - expr: |
-          1 - (
-            sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000",code!~"5.."}[2h]))
-            /
-            sum(rate(provisioning_source_availability_check_request_duration_ms_count{job="prometheus"}[2h]))
-          )
-        labels:
-          service: insights
-          latency: "5000"
-        record: latencytarget:provisioning_source_availability_check_request_duration_ms:rate2h
-      - expr: |
-          1 - (
-            sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000",code!~"5.."}[6h]))
-            /
-            sum(rate(provisioning_source_availability_check_request_duration_ms_count{job="prometheus"}[6h]))
-          )
-        labels:
-          service: insights
-          latency: "5000"
-        record: latencytarget:provisioning_source_availability_check_request_duration_ms:rate6h
-      - expr: |
-          1 - (
-            sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000",code!~"5.."}[1d]))
-            /
-            sum(rate(provisioning_source_availability_check_request_duration_ms_count{job="prometheus"}[1d]))
-          )
-        labels:
-          service: insights
-          latency: "5000"
-        record: latencytarget:provisioning_source_availability_check_request_duration_ms:rate1d
-      - expr: |
-          1 - (
-            sum(rate(provisioning_source_availability_check_request_duration_ms_bucket{le="5000",code!~"5.."}[3d]))
-            /
-            sum(rate(provisioning_source_availability_check_request_duration_ms_count{job="prometheus"}[3d]))
-          )
-        labels:
-          service: insights
-          latency: "5000"
-        record: latencytarget:provisioning_source_availability_check_request_duration_ms:rate3d
