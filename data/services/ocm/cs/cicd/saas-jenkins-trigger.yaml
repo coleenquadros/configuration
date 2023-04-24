@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: uhc
+name: saas-jenkins-trigger
+description: SaaS deployment for triggering CS jobs in Jenkins
+app:
+  $ref: /services/ocm/cs/app.yml
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: ocm-ship-it
+managedResourceTypes:
+- ServiceAccount
+- Job
+imagePatterns:
+- quay.io/app-sre/ubi8-ubi-minimal
+resourceTemplates:
+- name: uhc-clusters-service
+  url: https://gitlab.cee.redhat.com/service/uhc-clusters-service
+  path: /templates/jenkins-trigger-template.yml
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration-tests.yml
+    ref: 4c214d7ff3b1350bc42b3a51e5fb19ed812f5c21
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-cs-deployed-int
+      publish:
+      - ocm-jenkins-trigger-int-ok
+    parameters:
+      JENKINS_JOB_NAME: uhc-integration-tests-integration
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage-tests.yml
+    ref: 4c214d7ff3b1350bc42b3a51e5fb19ed812f5c21
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-cs-deployed-stage
+      publish:
+      - ocm-jenkins-trigger-stage-ok
+    parameters:
+      JENKINS_JOB_NAME: uhc-integration-tests-staging
