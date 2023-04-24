@@ -92,7 +92,7 @@ server = "http://localhost:4000/graphql"
 * In a different terminal, from the directory where you have cloned `qontract-reconcile`:
 
   ```
-  $ qontract-cli --config config.promtool.toml run-prometheus-test-old -s config \
+  $ qontract-cli --config config.promtool.toml run-prometheus-test -s config \
     resources/observability/prometheusrules/app-interface-production.prometheusrulestests.yaml  \
     app-sre-prod-01
   Unit Testing:  /var/folders/dx/y5_klhc1187gnzzmyb4pswb40000gn/T/tmp7kj8agy1
