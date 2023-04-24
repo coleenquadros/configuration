@@ -116,7 +116,6 @@ resourceTemplates:
     parameters:
       WORKER_COUNT: '2'
       CRON_SCHEDULE: 36 17 * * 3
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -133,6 +132,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 
 - name: deprovision-old-subscriptions-job
@@ -221,7 +221,6 @@ resourceTemplates:
     parameters:
       CRON_SCHEDULE: 36 17 * * *
       SUSPEND_JOB: 'true'
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -238,6 +237,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: ocp-usage-reconciler-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -247,7 +247,7 @@ resourceTemplates:
     AMS_RUN_JOB_CMD: ocp-usage-reconciler
     CRON_SCHEDULE: 0 0 1 1 *
     JOB_BACKOFF_LIMIT: 2
-    JOB_ACTIVE_DEADLINE_SECONDS: 36000
+    JOB_ACTIVE_DEADLINE_SECONDS: '21600'
     SUSPEND_JOB: 'true'
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: app-sre/uhc-account-manager
@@ -326,8 +326,6 @@ resourceTemplates:
       GLOG_V: 10
       CRON_SCHEDULE: 26 */2 * * *
       SUSPEND_JOB: 'false'
-      OCP_USAGE_RECONCILER_ACTIVE_DEADLINE_SECONDS: '21600'
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -344,6 +342,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: ocp-usage-cleaner-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -353,7 +352,7 @@ resourceTemplates:
     AMS_RUN_JOB_CMD: ocp-usage-cleaner
     CRON_SCHEDULE: 0 0 1 1 *
     JOB_BACKOFF_LIMIT: 2
-    JOB_ACTIVE_DEADLINE_SECONDS: 36000
+    JOB_ACTIVE_DEADLINE_SECONDS: '30000'
     SUSPEND_JOB: 'true'
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: app-sre/uhc-account-manager
@@ -431,8 +430,6 @@ resourceTemplates:
     parameters:
       CRON_SCHEDULE: 21 */5 * * *
       SUSPEND_JOB: 'false'
-      OCP_USAGE_CLEANER_ACTIVE_DEADLINE_SECONDS: '30000'
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -449,6 +446,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: subscription-status-reconciler-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -474,6 +472,7 @@ resourceTemplates:
     SENTRY_PROJECT: '12'
     MOA_SKU: SER0579
     RHM_SKU_LIST_FILE: /configs/subscription-skus/rhm-skus-enhanced.yaml
+    MAX_DELETE_CLUSTERS: '1'
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
@@ -495,7 +494,6 @@ resourceTemplates:
         $ref: /dependencies/ci-int/ci-int.yml
       name: service-uhc-account-manager-gl-build-master
     parameters:
-      SUBSCRIPTION_STATUS_RECONCILER_MAX_DELETE_CLUSTERS: 1
       AUTOMATIC_BAN: 'false'
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local
       SENTRY_URL: glitchtip.devshift.net
@@ -533,8 +531,6 @@ resourceTemplates:
       $ref: /services/ocm/namespaces/uhc-production.yml
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
-      SUBSCRIPTION_STATUS_RECONCILER_MAX_DELETE_CLUSTERS: '1'
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -551,6 +547,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: subscription-based-data-reconciler-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -636,7 +633,6 @@ resourceTemplates:
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
       CRON_SCHEDULE: 3-59/30 * * * *
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -653,6 +649,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: rh-marketplace-quota-reconciler-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -737,7 +734,6 @@ resourceTemplates:
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
       CRON_SCHEDULE: '*/5 * * * *'
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -754,6 +750,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: ebs-account-reconciler-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -839,7 +836,6 @@ resourceTemplates:
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
       CRON_SCHEDULE: 11 * * * *
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -856,6 +852,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: auto-entitlement-reconciler-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -940,7 +937,6 @@ resourceTemplates:
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
       CRON_SCHEDULE: 31 11 * * *
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -957,6 +953,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: hydra-fetch-organizations-data-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -982,6 +979,8 @@ resourceTemplates:
     SENTRY_PROJECT: '12'
     MOA_SKU: SER0579
     RHM_SKU_LIST_FILE: /configs/subscription-skus/rhm-skus-enhanced.yaml
+    CLIENT_CARDINALITY: '500'
+    WORKER_COUNT: '3'
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
@@ -1044,9 +1043,6 @@ resourceTemplates:
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
       CRON_SCHEDULE: 16 * * * *
-      HYDRA_FETCH_ORGANIZATIONS_DATA_CARDINALITY: '500'
-      HYDRA_FETCH_ORGANIZATIONS_DATA_WORKER_COUNT: '3'
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -1063,6 +1059,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: fetch-telemeter-metrics-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -1149,9 +1146,7 @@ resourceTemplates:
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
       CRON_SCHEDULE: '*/5 * * * *'
-      FETCH_TELEMETER_METRICS_WORKER_COUNT: '16'
-      FETCH_TELEMETER_METRICS_STALE_METRICS_DURATION: 1440h
-      DB_QUERY_READ_TIMEOUT: '300000'
+      WORKER_COUNT: '16'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -1168,6 +1163,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: warehouse-deleted-subscriptions-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -1252,7 +1248,6 @@ resourceTemplates:
       $ref: /services/ocm/namespaces/uhc-production.yml
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -1269,6 +1264,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: registry-credential-pool-loader-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -1357,7 +1353,6 @@ resourceTemplates:
       CRON_SCHEDULE: 46 * * * *
       CLIENT_CARDINALITY: 100
       POOL_HIGH_WATER_MARK: 3000
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -1374,6 +1369,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: cluster-transfers-reconciler-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -1457,7 +1453,6 @@ resourceTemplates:
       $ref: /services/ocm/namespaces/uhc-production.yml
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -1474,6 +1469,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: pull-secret-rotations-reconciler-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -1557,7 +1553,6 @@ resourceTemplates:
       $ref: /services/ocm/namespaces/uhc-production.yml
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -1574,6 +1569,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: rbac-reconciler-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -1671,7 +1667,6 @@ resourceTemplates:
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
       RBAC_BASE_URL: https://mtls.internal.console.redhat.com
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -1688,6 +1683,7 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
 
 - name: username-reconciler-job
   url: https://gitlab.cee.redhat.com/service/uhc-account-manager
@@ -1769,7 +1765,6 @@ resourceTemplates:
       $ref: /services/ocm/namespaces/uhc-production.yml
     ref: 47b7f41314aebd08cf09e57703b75a5235e2dde0
     parameters:
-      DB_QUERY_READ_TIMEOUT: '300000'
       JWKS_URL: ${OCM_BASE_URL}/.well-known/jwks.json
       RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
       RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -1786,3 +1781,4 @@ resourceTemplates:
       QUAY_REGISTRY_TEAM_NAME: installers
       METRICS_BASE_URL: uhc-acct-mngr-metrics.uhc-production.svc.cluster.local
       SENTRY_PROJECT: '17'
+      MOA_SKU: MW01369
