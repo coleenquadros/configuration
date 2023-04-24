@@ -1,3 +1,5 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -11,19 +13,19 @@ spec:
     rules:
     - alert: FailingOperator
       annotations:
-        message: Failed to install Operator {{ $labels.name }} version {{ $labels.version
-          }}. Reason-{{ $labels.reason }}
+        message: Failed to install Operator {{ $labels.name }} version {{ $labels.version }}. Reason-{{ $labels.reason }}
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/olm-FailingOperator.md
       expr: csv_abnormal{phase="Failed"}
       for: 5m
       labels:
         severity: high
+        service: olm
     - alert: CSVPending1h
       annotations:
-        message: The CSV for Operator {{ $labels.name }} version {{ $labels.version
-          }} has been in a Pending state for more than 1 hour. Reason-{{ $labels.reason }}
+        message: The CSV for Operator {{ $labels.name }} version {{ $labels.version }} has been in a Pending state for more than 1 hour. Reason-{{ $labels.reason }}
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/olm-CSVPending1h.md
       expr: csv_abnormal{phase="Pending"}
       labels:
         severity: high
+        service: olm
       for: 1h
