@@ -51,25 +51,34 @@ openshiftResources:
 
 ## Prometheus Rules
 ### Federated Kubernetes metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
+  type: resource
 ### kube-metrics pod-crashlooping
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /observability/prometheusrules/kube-metrics-pod-crashlooping.prometheusrules.yaml.j2
   enable_query_support: true
 ### OCM metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/ocm-metrics.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/ocm-metrics-test.prometheusrules.yaml
 ### Prometheus mixin alerts
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
+  type: resource
 ### App SRE prometheus PVC metrics
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
+  type: resource
 ### Container Security Operator rules
-- provider: resource
+- provider: prometheus-rule
   path: /observability/prometheusrules/container-security-operator.prometheusrules.yaml
+  type: resource
+  tests:
+  - /observability/prometheusrules/container-security-operator.prometheusrulestest.yaml
 
 ################## Add  any cluster-specific content below this line ##################
 
@@ -122,8 +131,8 @@ openshiftResources:
 
 # PrometheusRule
 ## hive-stage-01
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /services/hive/hive-stage-common.prometheusrules.yaml
   variables:
     shard_name: hive-stage-01
@@ -131,12 +140,14 @@ openshiftResources:
     grafana_datasource: hive-stage-01-prometheus
 
 ## backplane-api
-- provider: resource-template
-  type: extracurlyjinja2
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
   path: /services/backplane/backplane-api-stage-common.prometheusrules.yml
   variables:
     shard_name: hive-stage-01
 
+  tests:
+  - /services/backplane/backplane-api-stage-common.prometheusrules-test.yml
 sharedResources:
 - $ref: /services/observability/shared-resources/dvo-openshift.yml
 - $ref: /services/observability/shared-resources/dvo-alerts.yml
