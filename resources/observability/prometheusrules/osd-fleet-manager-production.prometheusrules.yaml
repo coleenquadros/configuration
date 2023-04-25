@@ -46,6 +46,20 @@ spec:
             team: osd
             namespace: osd-fleet-manager-production
             service: osd-fleet-manager
+    
+        - alert: OSD Fleet manager crashing - production
+          annotations:
+            message: OSD Fleet manager production clusters container '{{ $labels.container }}' of pod '{{ $labels.pod }}' is crashing
+          expr: |
+            sum(increase(kube_pod_container_status_restarts_total{namespace="osd-fleet-manager-production",pod=~"^fleet-manager-.*$"}[10m]))
+            by (pod,container)
+            >= 2
+          for: 1m
+          labels:
+            severity: high
+            team: osd
+            namespace: osd-fleet-manager-production
+            service: osd-fleet-manager
             
         # SLO Availability p99
         # Based on burn rate alerts from https://sre.google/workbook/alerting-on-slos/#5-multiple-burn-rate-alerts
