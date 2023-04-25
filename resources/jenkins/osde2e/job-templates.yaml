@@ -71,7 +71,9 @@
       region: "us-east-1"
       report_dir: "osde2e-report"
       configs: "rosa,stage,e2e-suite"
+      branch: main
       wrappers:
+      - ansicolor 
       - vault-secrets:
           <<: *vault_defaults
           secrets:
@@ -87,12 +89,18 @@
       - string:
           name: CLOUD_PROVIDER_REGION
           default: "{region}"
+          required: true
       - string:
           name: REPORT_DIR
           default: "{report_dir}"    
       - string:
           name: CONFIGS
           default: "{configs}"
+          required: true
+      - string:
+          name: CLUSTER_ID  
+      - string:
+          name: INSTALL_LATEST_XY
       - bool:
           name: STS
           default: true    
@@ -102,10 +110,20 @@
             - stage
             - prod
           description: "OCM environment"
+      - bool:
+           name: SKIP_HEALTH_CHECKS
+           default: false
+      - bool:
+          name: SKIP_DESTROY_CLUSTER
+          default: false  
+      - bool:
+          name: MUST_GATHER
+          default: true
       publishers:
-      - archive:
-          artifacts: "{report_dir}"    
-          allow-empty: 'false'
+      - junit:
+          results: '**/junit*.xml'
+          allow-empty-results: true
+          skip-marking-build-unstable: true
       properties:
       - build-discarder:
           days-to-keep: 30
