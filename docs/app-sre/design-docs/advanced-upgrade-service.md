@@ -12,7 +12,7 @@ Gerd Oberlechner / April 2023
 
 ## Problem Statement
 
-Advanced cluster Upgrade Service (AUS) as described [here](https://service.pages.redhat.com/dev-guidelines/docs/sre-capabilities/advanced-upgrade-service/) are valueable beyond the scope of AppSRE tenants and app-interface. While interested parties can open tickets with AppSRE to get their OCM organization and clusters configured for AUS into app-interface without actual app-interface touchpoints, it leaves the toil of change-management with AppSRE.
+Advanced cluster Upgrade Service (AUS) as described [here](https://service.pages.redhat.com/dev-guidelines/docs/sre-capabilities/advanced-upgrade-service/) is valueable beyond the scope of AppSRE tenants and app-interface. While interested parties can open tickets with AppSRE to get their OCM organization and clusters configured for AUS into app-interface without actual app-interface touchpoints, it leaves the toil of change-management with AppSRE.
 
 ## Goals
 
@@ -22,8 +22,8 @@ Advanced cluster Upgrade Service (AUS) as described [here](https://service.pages
 
 ## Non goals
 
-- support model specific alerting for SRE capabilitites - this will be coverd in Milestone 2 of the [SRE capabilitites initiative](docs/app-sre/inititives/sre-capabilities.md)
-- dedicated runtime environment for SRE capabilitites - this will be covered in Milestone 3 of the [SRE capabilitites initiative](docs/app-sre/inititives/sre-capabilities.md)
+- support model specific alerting for SRE capabilitites - this will be coverd in Milestone 2 of the [SRE capabilitites initiative](docs/app-sre/initiatives/sre-capabilities.md)
+- dedicated runtime environment for SRE capabilitites - this will be covered in Milestone 3 of the [SRE capabilitites initiative](docs/app-sre/initiatives/sre-capabilities.md)
 
 ## Proposals
 
@@ -57,7 +57,7 @@ This consumption model is not mean to be used at scale. The number of involved l
 
 ### Reconciler and runtime
 
-The label based AUS reconciler is going to be implemented as a new integration in qontract-reconcile. This is in alignment with Milestone 1 of the [SRE capabilitites initiative](docs/app-sre/inititives/sre-capabilities.md).
+The label based AUS reconciler is going to be implemented as a new integration in qontract-reconcile. This is in alignment with Milestone 1 of the [SRE capabilitites initiative](docs/app-sre/initiatives/sre-capabilities.md).
 
 The existing core functionality for cluster upgrades is part of the qontract-reconcile repository. The code in `reconcile.aus` is prepared to be reused with other datasources than app-interface, so it makes more than sense to reuse that code for the label based AUS implementation.
 
@@ -65,7 +65,7 @@ AUS will be managed via the integrations-manager within the regular app-interfac
 
 ![](images/aus-m1.png)
 
-The [SRE capabilitites initiative](docs/app-sre/inititives/sre-capabilities.md) defines a change in runtime environment for capabilities in Milesteone 3. Capabilitites will be homed in a dedicated environment that is detached from app-interface but still close enough so that most integrations can be run as a capability without a major overhaul.
+The [SRE capabilitites initiative](docs/app-sre/initiatives/sre-capabilities.md) defines a change in runtime environment for capabilities in Milesteone 3. Capabilitites will be homed in a dedicated environment that is detached from app-interface but still close enough so that most integrations can be run as a capability without a major overhaul.
 
 ### Alerting
 
@@ -73,7 +73,7 @@ For the time being, alertig for the AUS capability will follow the qontract-reco
 
 AUS can still fail in other situations and would trigger pages.
 
-Milestone 2 of the [SRE capabilitites initiative](docs/app-sre/inititives/sre-capabilities.md) defines work revoling around alerting schemes for capabilitites, covering alert severity levels for different integrations/capabilitites and for data partitions/shards (e.g. don't alert for OCM stage).
+Milestone 2 of the [SRE capabilitites initiative](docs/app-sre/initiatives/sre-capabilities.md) defines work revoling around alerting schemes for capabilitites, covering alert severity levels for different integrations/capabilitites and for data partitions/shards (e.g. don't alert for OCM stage).
 
 ### Reporting
 
@@ -108,13 +108,13 @@ If this alternative would be considered again, the number of required labels wou
 
 ### Dedicated policy API
 
-Instead of using OCM subscription and organization labels to store policy metadata, a dedicated API service could be offered to provide CRUD functionality for policies. This idea has been set aside for now because the OCM label approach can be offered in a timely manner. See the section [Evolution Model](#evolution-model) for a way from labels to a dedicated API.
+Instead of using OCM subscription and organization labels to store policy metadata, a dedicated API service could be offered to provide CRUD functionality for policies. This idea has been set aside for now because it would take more time to design and build such an API. See the section [Evolution Model](#evolution-model) for a way from labels to a dedicated API.
 
 ## Evolution Model
 
 The OCM label consumption model approach is not suitable at scale. If AUS proves value and is opened to a wider audience, the consumption model needs to evolve. A dedicated OCM-like API itself could be a solution, but defining the nature and offering of such an API is out of scope of this design document.
 
-The crucial part is a sound migration strategy from OCM labels to another model. Since the proposal for labels stores config data in well structured config parameter atoms, and since context to clusters and organization is established, moving them to another store is feasible. Detecting continued usage of labels, after another offering has been established, can be detected by the `updated_at` property.
+The crucial part is a sound migration strategy from OCM labels to another model. Since the proposal for labels stores config data in well structured config parameters, and since context to clusters and organization is established, moving them to another store is feasible. Detecting continued usage of labels, after another offering has been established, can be detected by the `updated_at` property.
 
 ## Milestones
 
