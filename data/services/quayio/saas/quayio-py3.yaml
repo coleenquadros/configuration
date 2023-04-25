@@ -32,6 +32,9 @@ managedResourceTypes:
 - Role
 - RoleBinding
 - Job
+- ClowdApp
+- ClowdJobInvocation
+- Frontend
 
 imagePatterns:
 - quay.io/app-sre
@@ -129,3 +132,18 @@ resourceTemplates:
       QUAY_APP_CONFIG_SECRET: quay-py3-config-secret-readonly
       QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "quay_py3_2023_04_11-1" # Update image ref
       IGNORE_VALIDATION: "true"
+
+- name: quayio-frontend
+  path: /deploy/openshift/quayio-frontend-deploy-template.yaml
+  url: https://github.com/quay/quay
+  targets:
+  - namespace:
+      $ref: /services/insights/frontend-operator/namespaces/stage-beta-frontends.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: quay-quay-gh-build-master-frontend
+    parameters:
+      ENV_NAME: "frontends-beta"
+      IMAGE: "quay.io/app-sre/quayio-frontend"
