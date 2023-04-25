@@ -63,7 +63,7 @@ Options:
 In order to use this tool, the easiest option is to use pip to install `qontract-reconcile`.
 
 ```
-$ pip install --user qontract-reconcile --upgrade
+$ pip install --user qontract-reconcile --upgrade --pre
 ```
 
 If you need to have multiple Python versions installed locally, you can use projects such as [pyenv](https://github.com/pyenv/pyenv).

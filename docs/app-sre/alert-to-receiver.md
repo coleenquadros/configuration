@@ -32,7 +32,7 @@ Options:
 In order to use this tool, the easiest option is to use pip to install `qontract-reconcile`.
 
 ```
-$ $ pip install --user qontract-reconcile --upgrade
+$ pip install --user qontract-reconcile --upgrade --pre
 ```
 
 and `amtool` version 0.24. You can find as part of the Alertmanager [distribution](https://github.com/prometheus/alertmanager/releases/tag/v0.24.0).
