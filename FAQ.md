@@ -2,7 +2,9 @@
 
 This document serves as a first tier support for issues around app-interface.
 
-For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) on CoreOS Slack.
+For questions unanswered by this document, please reach out to `@app-sre-ic` in [#sd-app-sre](https://redhat-internal.slack.com/archives/CCRND57FW) channel on [Internal Red Hat][internal-redhat-slack] Slack.
+
+[internal-redhat-slack]: https://redhat-internal.slack.com
 
 ## ToC
 
