@@ -127,6 +127,7 @@ Implement the reconciler based on OCM labels and deploy along the app-interface 
 - alerting scheme based on capability support model (part of M2 of the initiative)
 - deploy AUS into a dedicated runtime environment (part of M3 of the initiative)
 - Grafana based cluster and policy [reporting](https://issues.redhat.com/browse/APPSRE-7360)
+- tools missing but users can still use it
 
 ### Milestone 3
 
