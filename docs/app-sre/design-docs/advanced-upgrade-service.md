@@ -35,7 +35,7 @@ The following proposal covers several aspects:
 
 ### Defining policies via OCM label
 
-We will offer AUS to all Red Hat engineering teams via the [OCM label based consumption model](https://service.pages.redhat.com/dev-guidelines/docs/sre-capabilities/framework/ocm-labels) from the [SRE capabilities framework](https://service.pages.redhat.com/dev-guidelines/docs/sre-capabilities/framework).
+We will offer AUS to selected Red Hat engineering teams via the [OCM label based consumption model](https://service.pages.redhat.com/dev-guidelines/docs/sre-capabilities/framework/ocm-labels) from the [SRE capabilities framework](https://service.pages.redhat.com/dev-guidelines/docs/sre-capabilities/framework).
 
 > TLDR about the label based approach: configuration information is placed on clusters via subscription labels. For organization wide configurations, organization labels are used. Labels can be placed by any organization admin.
 
@@ -51,13 +51,9 @@ To define a upgrade policy, a user places a set of labels to a cluster subscript
 | Organization | sre-capabilities.aus.blocked-versions    | blockedVersions                   | ^4\.12\..*$     | Regular expressions. Multiple values are represented as CSV                                        |
 | Organization | sre-capabilities.aus.sector-deps.$sector | sectors.name.dependencies         | green,red       | Multiple values are represented as CSV                                                             |
 
-### Considerations for the use of OCM labels
+The [OCM label based consumption model](https://service.pages.redhat.com/dev-guidelines/docs/sre-capabilities/framework/ocm-labels) states that labels should hold only small pieces of configuration information. The label values required for an average cluster upgrade policy (including blocked version and sector configuration) are less than 100 bytes spread across 3-5 subscription labels per cluster and 0-2 organizations labels.
 
-The [OCM label based consumption model](https://service.pages.redhat.com/dev-guidelines/docs/sre-capabilities/framework/ocm-labels) states that labels should hold only small pieces of configuration information. The label values required for an average cluster upgrade policy (including blocked version and sector configuration) are less than 100 bytes spread across 5-7 labels.
-
-Reading all the relevant labels fleet wide and establishing context by reading all involved subscriptions and clusters requires 3 OCM API calls. After the configuration state has been established, each involved cluster needs to be queried for existing upgrade policies and gate agreements. These are per-cluster OCM API endpoints. The number of OCM API calls scales with the number of involved clusters.
-
-For the time being, we will limit the number of OCM organizations that can use AUS, to keep the number of clusters and the load for the OCM API at bay.
+This consumption model is not mean to be used at scale. The number of involved labels might become problematic (unverified assumption). See the sections [Alternatives considered](#alternatives-considered) (especially the one about an OCM-like API) and [Evolution Model](#evolution-model).
 
 ### Reconciler and runtime
 
@@ -95,9 +91,30 @@ Both metrics combined hold the information currently present on the [fleet upgra
 
 The Grafana dashboard can be filtered per OCM organization to provide users an overview of their organization.
 
-### Future
+## Impact on OCM
 
-Eventually the cluster uprade core code might move from qontract-reconcile into a dedicated code repository. app-interface would evolve into a consumer of AUS instead of being the provider of it.
+Reading all the relevant labels fleet wide and establishing context by reading involved subscriptions and clusters requires 3 OCM API calls (not considering paging).
+After discovered clusters and their metadata are handed to the existing AUS implementation, which issues additional queries for existing upgrade policies and gate agreements. Since these are per-cluster OCM APIs, the number of calls scales with the number of involved clusters. To mitigate bigger impact on OCM, we will limit the number of OCM organizations and clusters that can use AUS, e.g. 5 organizations and 100 clusters.
+
+Additional mitigation strategies revolve around caching certain API call results. This needs to be investigated.
+
+## Alternatives considered
+
+### Use fewer OCM labels
+
+Instead of using multiple OCM subscription labels, all cluster upgrade policy properties could be encoded in one label (JSON, YAML, ...). This idea was discussed [here](https://redhat-internal.slack.com/archives/C04SEJAJBGQ/p1680534239469539) but discarded. The current label usage patterns revolves around having only small label values.
+
+If this alternative would be considered again, the number of required labels would decrease and their handling/validation would simplify a lot. Nevertheless, it would not change the general perception that labels are not a long term scalable way to offer capabilitites.
+
+### Dedicated policy API
+
+Instead of using OCM subscription and organization labels to store policy metadata, a dedicated API service could be offered to provide CRUD functionality for policies. This idea has been set aside for now because the OCM label approach can be offered in a timely manner. See the section [Evolution Model](#evolution-model) for a way from labels to a dedicated API.
+
+## Evolution Model
+
+The OCM label consumption model approach is not suitable at scale. If AUS proves value and is opened to a wider audience, the consumption model needs to evolve. A dedicated OCM-like API itself could be a solution, but defining the nature and offering of such an API is out of scope of this design document.
+
+The crucial part is a sound migration strategy from OCM labels to another model. Since the proposal for labels stores config data in well structured config parameter atoms, and since context to clusters and organization is established, moving them to another store is feasible. Detecting continued usage of labels, after another offering has been established, can be detected by the `updated_at` property.
 
 ## Milestones
 
