@@ -15,7 +15,7 @@ In order to use this tool, the easiest option is to use pip to install `qontract
 Clone [qontract-reconcile](https://github.com/app-sre/qontract-reconcile).
 
 ```sh
-$ pip install --user qontract-reconcile --upgrade
+$ pip install --user qontract-reconcile --upgrade --pre
 ```
 
 3. **Configure qontract-reconcile**

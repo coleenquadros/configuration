@@ -35,7 +35,7 @@ docker run -v $(pwd)/config.customer.toml:/config.customer.toml -v $(pwd)/file-t
 ### Install natively via pip
 
 ```
-pip install --upgrade qontract-reconcile
+pip install --upgrade qontract-reconcile --upgrade --pre
 qontract-cli --config /config.customer.toml gpg-encrypt --file-path /file-to-share --for-user kfischer
 ```
 
