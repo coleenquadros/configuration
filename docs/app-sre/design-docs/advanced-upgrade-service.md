@@ -22,8 +22,8 @@ Advanced cluster Upgrade Service (AUS) as described [here](https://service.pages
 
 ## Non goals
 
-- support model specific alerting for SRE capabilitites - this will be coverd in Milestone 2 of the [SRE capabilitites initiative](docs/app-sre/initiatives/sre-capabilities.md)
-- dedicated runtime environment for SRE capabilitites - this will be covered in Milestone 3 of the [SRE capabilitites initiative](docs/app-sre/initiatives/sre-capabilities.md)
+- support model specific alerting for SRE capabilities - this will be coverd in Milestone 2 of the [SRE capabilities initiative](docs/app-sre/initiatives/sre-capabilities.md)
+- dedicated runtime environment for SRE capabilities - this will be covered in Milestone 3 of the [SRE capabilities initiative](docs/app-sre/initiatives/sre-capabilities.md)
 
 ## Proposals
 
@@ -41,23 +41,23 @@ We will offer AUS to selected Red Hat engineering teams via the [OCM label based
 
 To define a upgrade policy, a user places a set of labels to a cluster subscription and the organization. Following the naming scheme described in the consumption model docs, all labels will be prefixed with `sre-capabilities.aus.`.
 
-| Label Type   | Label Key                                | Maps to policy                    | example         | Notes                                                                                              |
-|--------------|------------------------------------------|-----------------------------------|-----------------|----------------------------------------------------------------------------------------------------|
-| Subscription | sre-capabilities.aus.workloads           | upgradePolicy.workloads           | wl-1,wl-2       | Multiple values are represented as CSV                                                             |
-| Subscription | sre-capabilities.aus.soak-days           | upgradePolicy.conditions.soakDays | 2               |                                                                                                    |
-| Subscription | sre-capabilities.aus.schedule            | upgradePolicy.schedule            | 0 * * * 1-5     |                                                                                                    |
-| Subscription | sre-capabilities.aus.mutexes             | upgradePolicy.conditions.mutexes  | mtx-1,mtx-2     | Multiple values are represented as CSV                                                             |
-| Subscription | sre-capabilities.aus.sector              | upgradePolicy.conditions.sector   | green           | If a sector is defined, additional sector configuration labels must be defined on the organization |
-| Organization | sre-capabilities.aus.blocked-versions    | blockedVersions                   | ^4\.12\..*$     | Regular expressions. Multiple values are represented as CSV                                        |
-| Organization | sre-capabilities.aus.sector-deps.$sector | sectors.name.dependencies         | green,red       | Multiple values are represented as CSV                                                             |
+| Label Type   | Label Key                                | Maps to policy                    | example         | Notes                                                                                              | Mandatory / Default    |
+|--------------|------------------------------------------|-----------------------------------|-----------------|----------------------------------------------------------------------------------------------------|------------------------|
+| Subscription | sre-capabilities.aus.workloads           | upgradePolicy.workloads           | wl-1,wl-2       | Multiple values are represented as CSV                                                             | mandatory / no default |
+| Subscription | sre-capabilities.aus.soak-days           | upgradePolicy.conditions.soakDays | 2               |                                                                                                    | defaults to 0          |
+| Subscription | sre-capabilities.aus.schedule            | upgradePolicy.schedule            | 0 * * * 1-5     |                                                                                                    | mandatory / no default |
+| Subscription | sre-capabilities.aus.mutexes             | upgradePolicy.conditions.mutexes  | mtx-1,mtx-2     | Multiple values are represented as CSV                                                             | optional / no default  |
+| Subscription | sre-capabilities.aus.sector              | upgradePolicy.conditions.sector   | green           | If a sector is defined, additional sector configuration labels must be defined on the organization | optional / no default  |
+| Organization | sre-capabilities.aus.blocked-versions    | blockedVersions                   | ^4\.12\..*$     | Regular expressions. Multiple values are represented as CSV                                        | optional / no default  |
+| Organization | sre-capabilities.aus.sector-deps.$sector | sectors.name.dependencies         | green,red       | `$sector` is a sector name and the label value contains a CSV list of sectors it depends on        | optional / no default  |
 
 The [OCM label based consumption model](https://service.pages.redhat.com/dev-guidelines/docs/sre-capabilities/framework/ocm-labels) states that labels should hold only small pieces of configuration information. The label values required for an average cluster upgrade policy (including blocked version and sector configuration) are less than 100 bytes spread across 3-5 subscription labels per cluster and 0-2 organizations labels.
 
-This consumption model is not mean to be used at scale. The number of involved labels might become problematic (unverified assumption). See the sections [Alternatives considered](#alternatives-considered) (especially the one about an OCM-like API) and [Evolution Model](#evolution-model).
+This consumption model is not meant to be used at scale. The number of involved labels might become problematic (unverified assumption). See the sections [Alternatives considered](#alternatives-considered) (especially the one about an OCM-like API) and [Evolution Model](#evolution-model).
 
 ### Reconciler and runtime
 
-The label based AUS reconciler is going to be implemented as a new integration in qontract-reconcile. This is in alignment with Milestone 1 of the [SRE capabilitites initiative](docs/app-sre/initiatives/sre-capabilities.md).
+The label based AUS reconciler is going to be implemented as a new integration in qontract-reconcile. This is in alignment with Milestone 1 of the [SRE capabilities initiative](docs/app-sre/initiatives/sre-capabilities.md).
 
 The existing core functionality for cluster upgrades is part of the qontract-reconcile repository. The code in `reconcile.aus` is prepared to be reused with other datasources than app-interface, so it makes more than sense to reuse that code for the label based AUS implementation.
 
@@ -65,15 +65,15 @@ AUS will be managed via the integrations-manager within the regular app-interfac
 
 ![](images/aus-m1.png)
 
-The [SRE capabilitites initiative](docs/app-sre/initiatives/sre-capabilities.md) defines a change in runtime environment for capabilities in Milesteone 3. Capabilitites will be homed in a dedicated environment that is detached from app-interface but still close enough so that most integrations can be run as a capability without a major overhaul.
+The [SRE capabilities initiative](docs/app-sre/initiatives/sre-capabilities.md) defines a change in runtime environment for capabilities in Milesteone 3. Capabilitites will be homed in a dedicated environment that is detached from app-interface but still close enough so that most integrations can be run as a capability without a major overhaul.
 
 ### Alerting
 
-For the time being, alertig for the AUS capability will follow the qontract-reconcile alerting scheme (tldr: a failing reconcile run will trigger a page after some time). To adhere to the differences in the support model between integrations and capabilitites, the AUS capability will not fail for situations uncovered by the support model, e.g. bad configuration data provided via OCM labels. These situations will be highlighted to users via OCM service logs and will not trigger pages for AppSRE.
+For the time being, alertig for the AUS capability will follow the qontract-reconcile alerting scheme (tldr: a failing reconcile run will trigger a page after some time). To adhere to the differences in the support model between integrations and capabilities, the AUS capability will not fail for situations uncovered by the support model, e.g. bad configuration data provided via OCM labels. These situations will be highlighted to users via OCM service logs and will not trigger pages for AppSRE.
 
 AUS can still fail in other situations and would trigger pages.
 
-Milestone 2 of the [SRE capabilitites initiative](docs/app-sre/initiatives/sre-capabilities.md) defines work revoling around alerting schemes for capabilitites, covering alert severity levels for different integrations/capabilitites and for data partitions/shards (e.g. don't alert for OCM stage).
+Milestone 2 of the [SRE capabilities initiative](docs/app-sre/initiatives/sre-capabilities.md) defines work revoling around alerting schemes for capabilities, covering alert severity levels for different integrations/capabilities and for data partitions/shards (e.g. don't alert for OCM stage).
 
 ### Reporting
 
@@ -82,7 +82,7 @@ Instead of relying on `app-interface-output` reports to show the active upgrade 
 The static/slowly changing policy and cluster base information is represented in an info metric `aus_cluster_info`. The information about remaining soak days per cluster and version is exposed as `aus_cluster_version_remaining_soak_days`.
 
 ```text
-aus_cluster_info{cluster_id="xxx", cluster_name="name", org_id="yyy", version="4.12.5", channel="stable", schedule="0 * * * *", sector="main", mutexes="m-1,m-2", soak_days=5, workloads="wl-1,wl-2"} 1
+aus_cluster_info{cluster_id="aaa", external_cluster_id="bbb", subscription_id="ccc", org_id="ddd", cluster_name="name", version="4.12.5", channel="stable", schedule="0 * * * *", sector="main", mutexes="m-1,m-2", soak_days="5", workloads="wl-1,wl-2"} 1
 
 aus_remaining_soak_days{cluster_id="xxx", version="4.12.10"} 12.93
 ```
@@ -93,10 +93,15 @@ The Grafana dashboard can be filtered per OCM organization to provide users an o
 
 ## Impact on OCM
 
-Reading all the relevant labels fleet wide and establishing context by reading involved subscriptions and clusters requires 3 OCM API calls (not considering paging).
-After discovered clusters and their metadata are handed to the existing AUS implementation, which issues additional queries for existing upgrade policies and gate agreements. Since these are per-cluster OCM APIs, the number of calls scales with the number of involved clusters. To mitigate bigger impact on OCM, we will limit the number of OCM organizations and clusters that can use AUS, e.g. 5 organizations and 100 clusters.
+Reading all the relevant labels fleet wide and establishing context by reading involved subscriptions and clusters requires 3 OCM API calls (not considering paging):
 
-Additional mitigation strategies revolve around caching certain API call results. This needs to be investigated.
+- fetching all labels related to AUS
+- resolving involved subscriptions from subscription and organization labels
+- resolving clusters
+
+After discovered clusters and their metadata are handed to the existing AUS implementation, which issues additional queries for existing upgrade policies and gate agreements. Since these are per-cluster OCM APIs, the number of calls scales with the number of involved clusters. To mitigate bigger impact on OCM, we will limit the number of OCM organizations and clusters that can use AUS for the time being, e.g. 5 organizations and 100 clusters.
+
+Additional mitigation strategies revolve around caching certain API call results. An event based solution to inform AUS or similar components about the creation/deletion/update of certain OCM objects would also be interessting. This needs to be investigated.
 
 ## Alternatives considered
 
@@ -104,7 +109,7 @@ Additional mitigation strategies revolve around caching certain API call results
 
 Instead of using multiple OCM subscription labels, all cluster upgrade policy properties could be encoded in one label (JSON, YAML, ...). This idea was discussed [here](https://redhat-internal.slack.com/archives/C04SEJAJBGQ/p1680534239469539) but discarded. The current label usage patterns revolves around having only small label values.
 
-If this alternative would be considered again, the number of required labels would decrease and their handling/validation would simplify a lot. Nevertheless, it would not change the general perception that labels are not a long term scalable way to offer capabilitites.
+If this alternative would be considered again, the number of required labels would decrease and their handling/validation would simplify a lot. Nevertheless, it would not change the general perception that labels are not a long term scalable way to offer capabilities.
 
 ### Dedicated policy API
 
