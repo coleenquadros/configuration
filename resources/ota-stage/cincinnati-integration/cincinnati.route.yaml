@@ -1,0 +1,22 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-prod-http
+  labels:
+    service: cincinnati-policy-engine
+  name: cincinnati-route-intg
+spec:
+  # TODO(muller): Where to get this hostname?
+  # I assume api.integration.openshift.com is correct b/c that's what the hive01ue1 environment says.
+  host: TODO.api.integration.openshift.com
+  port:
+    targetPort: policy-engine
+  to:
+    kind: Service
+    name: cincinnati-policy-engine
+    weight: 100
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
