@@ -24,18 +24,19 @@ $schema: /openshift/openshift-cluster-manager-1.yml
 
 labels: {}
 
-name: <org-name>
+name: <org-name> (1)
 description: <meaningful description>
 environment:
   $ref: /dependencies/ocm/environments/production.yml (1)
 orgId: <organization ID>
 ```
 
-(1) ... or use the staging or integration one depending on the usecase
+(1) OCM organizations don't have a name but in app-interface we can maintain one for more context in logs
+(2) ... or use the staging or integration one depending on the usecase
 
-(2) The [sre-capabilities OCM service account](https://gitlab.cee.redhat.com/service/ocm-resources/-/blob/master/data/uhc-production/users/service-account-sre-capabilities.yaml) is not bound to any organization and has for all relevant cluster and cluster-upgrade permissions in all (⚠️) organizations. Using this account simplifies the onboarding of an OCM organization because no additional SSO account, OCM SA and permissions need to be requested.
+The [sre-capabilities OCM service account](https://gitlab.cee.redhat.com/service/ocm-resources/-/blob/master/data/uhc-production/users/service-account-sre-capabilities.yaml) is not bound to any organization and has for all relevant cluster and cluster-upgrade permissions in all (⚠️) organizations. Using this account simplifies the onboarding of an OCM organization because no additional SSO account, OCM SA and permissions need to be requested.
 
-If the organization should rely on a dedicated service account, dedicated credentials can be specified that take precedence over the ones from the referenced environment:
+If the organization should rely on a dedicated service account (should be rarely the case), dedicated credentials can be specified that take precedence over the ones from the referenced environment:
 
 ```yaml
 $schema: /openshift/openshift-cluster-manager-1.yml
