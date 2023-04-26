@@ -27,7 +27,7 @@ labels: {}
 name: <org-name> (1)
 description: <meaningful description>
 environment:
-  $ref: /dependencies/ocm/environments/production.yml (1)
+  $ref: /dependencies/ocm/environments/production.yml (2)
 orgId: <organization ID>
 ```
 
