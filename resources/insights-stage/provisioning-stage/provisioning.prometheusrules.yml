@@ -1,4 +1,4 @@
-
+---
 $schema: /openshift/prometheus-rule-1.yml
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -7,271 +7,72 @@ metadata:
     prometheus: app-sre
     role: alert-rules
   name: provisioning-stage
+
 spec:
   groups:
-  - name: provisioning-component-missing
+  - name: provisioning-metrics-present
     rules:
-      - alert: ProviosioningComponentAbsent
-        expr: |
-          absent(up{service="provisioning",namespace="provisioning-stage"} == 1)
-        labels:
-          service: insights
-          severity: medium
-        annotations:
-          message: "There is no pod serving provisioning application in the provisioning-stage namespace"
+    - alert: ProvisioningMetricsAbsent
+      expr: |
+        absent(up{service="provisioning",namespace="provisioning-stage"} == 1)
+      labels:
+        service: insights
+        env: stage
+        app_team: provisioning
+        severity: medium
+      annotations:
+        message: "There are no metrics present for provisioning"
 
-  - name: http-latency
+  - name: provisioning-reservation-success-rate
     rules:
-      - alert: ProvisioningHTTPRequestsDurationLimit
-        expr: |
-          sum(rate(provisioning_http_request_duration_ms_bucket{code=~"2\\d\\d", le="200"}[1h]))
-          /
-          sum(rate(provisioning_http_request_duration_ms_count[1h])) < 0.95
-        labels:
-          service: insights
-          severity: medium
-        annotations:
-          message: "REST API requests response time over 200 ms per hour"
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningLatencyAlert.md"
-          dashboard: "https://grafana.stage.devshift.net/d/211/provisioning?orgId=1&viewPanel=36"
+    - alert: ProvisioningReservationSuccessRate
+      expr: |
+        sum(rate(provisioning_reservation_count{result="success"}[3h]))
+        /
+        sum(rate(provisioning_reservation_count[3h])) < 0.70
+      for: 15m
+      labels:
+        service: insights
+        env: stage
+        app_team: provisioning
+        severity: medium
+      annotations:
+        message: "Reservations success rate is high"
+        dashboard: "https://grafana.stage.devshift.net/d/211/provisioning"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningAvailabilityAlert.md"
 
-  - name: reservation-success-rate
+  - name: provisioning-http-success-rate
     rules:
-      - alert: ProvisioningReservationSuccessRate
-        expr: |
-          sum(rate(provisioning_reservation_count{result="success"}[7d]))
-          /
-          sum(rate(provisioning_reservation_count[7d])) < 0.80
-        labels:
-          service: insights
-          severity: medium
-        annotations:
-          message: "Reservations success rate dropped below 80% in last 7 days"
-          dashboard: "https://grafana.stage.devshift.net/d/211/provisioning?orgId=1&viewPanel=59"
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningAvailabilityAlert.md"
+    - alert: ProvisioningHTTPSuccessRate
+      expr: |
+        (sum(rate(api_3scale_gateway_api_status{exported_service="provisioning",status="5xx"}[10m]))
+        /
+        sum(rate(api_3scale_gateway_api_status{exported_service="provisioning"}[10m]))) > 0.15
+      for: 15m
+      labels:
+        service: insights
+        env: stage
+        app_team: provisioning
+        severity: medium
+      annotations:
+        message: "REST API success rate (3scale) is high"
+        dashboard: "https://grafana.stage.devshift.net/d/211/provisioning"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningAvailabilityAlert.md"
 
-  - name: provisioning-latency-stage
+  - name: provisioning-http-latency
     rules:
-      - alert: ProvisioningLatency5mto1hrOr30mto6hBudgetBurn
-        annotations:
-          message: 'High requests latency budget burn for latency=200 (current value: {{ $value }})'
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningLatencyAlert.md"
-          dashboard: "https://grafana.stage.devshift.net/d/211/provisioning?orgId=1&viewPanel=36"
-        expr: |
-          (
-            latencytarget:provisioning_http_request_duration_ms:rate1h{latency="200"} > (13.44 * (1-0.95000))
-            and
-            latencytarget:provisioning_http_request_duration_ms:rate5m{latency="200"} > (13.44 * (1-0.95000))
-          )
-          or
-          (
-            latencytarget:provisioning_http_request_duration_ms:rate6h{latency="200"} > (5.6 * (1-0.95000))
-            and
-            latencytarget:provisioning_http_request_duration_ms:rate30m{latency="200"} > (5.6 * (1-0.95000))
-          )
-        labels:
-          service: insights
-          latency: "200"
-          severity: medium
-      - alert: ProvisioningLatency2hto1dOr6hto3dBudgetBurn
-        annotations:
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningLatencyAlert.md"
-          message: 'High requests latency budget burn for latency=200 (current value: {{ $value }})'
-          dashboard: "https://grafana.stage.devshift.net/d/211/provisioning?orgId=1&viewPanel=36"
-        expr: |
-          (
-            latencytarget:provisioning_http_request_duration_ms:rate1d{latency="200"} > (2.8 * (1-0.95000))
-            and
-            latencytarget:provisioning_http_request_duration_ms:rate2h{latency="200"} > (2.8 * (1-0.95000))
-          )
-          or
-          (
-            latencytarget:provisioning_http_request_duration_ms:rate3d{latency="200"} > (1 * (1-0.95000))
-            and
-            latencytarget:provisioning_http_request_duration_ms:rate6h{latency="200"} > (1 * (1-0.95000))
-          )
-        labels:
-          service: insights
-          latency: "200"
-          severity: medium
-      - expr: |
-          1 - (
-            sum(rate(provisioning_http_request_duration_ms_bucket{le="200",code!~"5.."}[5m]))
-            /
-            sum(rate(provisioning_http_request_duration_ms_count[5m]))
-          )
-        labels:
-          service: insights
-          latency: "200"
-        record: latencytarget:provisioning_http_request_duration_ms:rate5m
-      - expr: |
-          1 - (
-            sum(rate(provisioning_http_request_duration_ms_bucket{le="200",code!~"5.."}[30m]))
-            /
-            sum(rate(provisioning_http_request_duration_ms_count[30m]))
-          )
-        labels:
-          service: insights
-          latency: "200"
-        record: latencytarget:provisioning_http_request_duration_ms:rate30m
-      - expr: |
-          1 - (
-            sum(rate(provisioning_http_request_duration_ms_bucket{le="200",code!~"5.."}[1h]))
-            /
-            sum(rate(provisioning_http_request_duration_ms_count[1h]))
-          )
-        labels:
-          service: insights
-          latency: "200"
-        record: latencytarget:provisioning_http_request_duration_ms:rate1h
-      - expr: |
-          1 - (
-            sum(rate(provisioning_http_request_duration_ms_bucket{le="200",code!~"5.."}[2h]))
-            /
-            sum(rate(provisioning_http_request_duration_ms_count[2h]))
-          )
-        labels:
-          service: insights
-          latency: "200"
-        record: latencytarget:provisioning_http_request_duration_ms:rate2h
-      - expr: |
-          1 - (
-            sum(rate(provisioning_http_request_duration_ms_bucket{le="200",code!~"5.."}[6h]))
-            /
-            sum(rate(provisioning_http_request_duration_ms_count[6h]))
-          )
-        labels:
-          service: insights
-          latency: "200"
-        record: latencytarget:provisioning_http_request_duration_ms:rate6h
-      - expr: |
-          1 - (
-            sum(rate(provisioning_http_request_duration_ms_bucket{le="200",code!~"5.."}[1d]))
-            /
-            sum(rate(provisioning_http_request_duration_ms_count[1d]))
-          )
-        labels:
-          service: insights
-          latency: "200"
-        record: latencytarget:provisioning_http_request_duration_ms:rate1d
-      - expr: |
-          1 - (
-            sum(rate(provisioning_http_request_duration_ms_bucket{le="200",code!~"5.."}[3d]))
-            /
-            sum(rate(provisioning_http_request_duration_ms_count[3d]))
-          )
-        labels:
-          service: insights
-          latency: "200"
-        record: latencytarget:provisioning_http_request_duration_ms:rate3d
-
-  - name: provisioning-availability-stage
-    rules:
-      - alert: Provisioning5mto1hErrorBudgetBurn
-        annotations:
-          message: 'High error budget burn for  (current value: {{ $value }})'
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningAvailabilityAlert.md"
-          dashboard: "https://grafana.stage.devshift.net/d/211/provisioning?orgId=1&viewPanel=32"
-        expr: |
-          sum(provisioning_http_request_total:burnrate5m) > (13.44 * (1-0.95000))
-          and
-          sum(provisioning_http_request_total:burnrate1h) > (13.44 * (1-0.95000))
-        for: 2m
-        labels:
-          service: insights
-          severity: medium
-      - alert: Provisioning30mto6hErrorBudgetBurn
-        annotations:
-          message: 'High error budget burn for  (current value: {{ $value }})'
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningAvailabilityAlert.md"
-          dashboard: "https://grafana.stage.devshift.net/d/211/provisioning?orgId=1&viewPanel=32"
-        expr: |
-          sum(provisioning_http_request_total:burnrate30m) >  (5.6 * (1-0.95000))
-          and
-          sum(provisioning_http_request_total:burnrate6h) > (5.6 * (1-0.95000))
-        for: 15m
-        labels:
-          service: insights
-          severity: medium
-      - alert: Provisioning2hto1dErrorBudgetBurn
-        annotations:
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningAvailabilityAlert.md"
-          message: 'High error budget burn for  (current value: {{ $value }})'
-          dashboard: "https://grafana.stage.devshift.net/d/211/provisioning?orgId=1&viewPanel=32"
-        expr: |
-          sum(provisioning_http_request_total:burnrate2h) >  (2.8 * (1-0.95000))
-          and
-          sum(provisioning_http_request_total:burnrate1d) >  (2.8 * (1-0.95000))
-        for: 1h
-        labels:
-          service: insights
-          severity: medium
-      - alert: Provisioning6hto3dErrorBudgetBurn
-        annotations:
-          message: 'High error budget burn for  (current value: {{ $value }})'
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningAvailabilityAlert.md"
-          dashboard: "https://grafana.stage.devshift.net/d/211/provisioning?orgId=1&viewPanel=32"
-        expr: |
-          sum(provisioning_http_request_total:burnrate6h) > (1.00 * (1-0.95000))
-          and
-          sum(provisioning_http_request_total:burnrate3d) > (1.00 * (1-0.95000))
-        for: 3h
-        labels:
-          service: insights
-          severity: medium
-      - expr: |
-          sum(rate(provisioning_http_request_total{code=~"5.."}[1d]))
-          /
-          sum(rate(provisioning_http_request_total[1d]))
-        labels:
-          service: insights
-          severity: medium
-        record: provisioning_http_request_total:burnrate1d
-      - expr: |
-          sum(rate(provisioning_http_request_total{code=~"5.."}[1h]))
-          /
-          sum(rate(provisioning_http_request_total[1h]))
-        labels:
-          service: insights
-          severity: medium
-        record: provisioning_http_request_total:burnrate1h
-      - expr: |
-          sum(rate(provisioning_http_request_total{code=~"5.."}[2h]))
-          /
-          sum(rate(provisioning_http_request_total[2h]))
-        labels:
-          service: insights
-          severity: medium
-        record: provisioning_http_request_total:burnrate2h
-      - expr: |
-          sum(rate(provisioning_http_request_total{code=~"5.."}[30m]))
-          /
-          sum(rate(provisioning_http_request_total[30m]))
-        labels:
-          service: insights
-          severity: medium
-        record: provisioning_http_request_total:burnrate30m
-      - expr: |
-          sum(rate(provisioning_http_request_total{code=~"5.."}[3d]))
-          /
-          sum(rate(provisioning_http_request_total[3d]))
-        labels:
-          service: insights
-          severity: medium
-        record: provisioning_http_request_total:burnrate3d
-      - expr: |
-          sum(rate(provisioning_http_request_total{code=~"5.."}[5m]))
-          /
-          sum(rate(provisioning_http_request_total[5m]))
-        labels:
-          service: insights
-          severity: medium
-        record: provisioning_http_request_total:burnrate5m
-      - expr: |
-          sum(rate(provisioning_http_request_total{code=~"5.."}[6h]))
-          /
-          sum(rate(provisioning_http_request_total[6h]))
-        labels:
-          service: insights
-          severity: medium
-        record: provisioning_http_request_total:burnrate6h
+    - alert: ProvisioningHTTPLatency
+      expr: |
+        sum(rate(provisioning_http_request_duration_ms_bucket{code=~"2\\d\\d", le="200"}[10m]))
+        /
+        sum(rate(provisioning_http_request_duration_ms_count[10m])) < 0.85
+      for: 15m
+      labels:
+        service: insights
+        env: stage
+        app_team: provisioning
+        severity: medium
+      annotations:
+        message: "REST API latency is high"
+        dashboard: "https://grafana.stage.devshift.net/d/211/provisioning"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/provisioning/ProvisioningHTTPLatencySLO.md"

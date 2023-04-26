@@ -1,15 +1,17 @@
-ProvisioningLatencyAlert
-==========================
+ProvisioningReservationSuccessRate
+==================================
 
 Impact
 ------
 
-Provisioning API has been returning with high latency.
+Provisioning instance launch reservation has been returning with a high error rate.
 
 Summary
 -------
 
-This alert fires when a high ratio of requests have been returning with a response time greater than 200ms in the last 28 days.
+This alert fires when the target SLO for successful reservation is high. A reservation is a hyperscaler instance launch (e.g. launch a AWS VM). This means that hyperscalers could not complete the requests.
+
+This can be caused by API outages, user misconfigurations (permissions) or lack of resources on the hyperscaler side.
 
 Access required
 ---------------
@@ -34,6 +36,7 @@ Steps
 - View the logs to identify specific errors.
 - Check status of Sources service if they are not experiencing an outage.
 - Check status of AWS/Azure/GCP datacenters if they are not experiencing an outage.
+
 
 Escalations
 -----------
