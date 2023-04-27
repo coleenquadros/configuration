@@ -318,7 +318,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     managedResourceTypes:
     - Template
     - Project
-    - ClusterRoleBinding
+    - ClusterRoleBinding.rbac.authorization.k8s.io
 
     # when using `oc`, use the override as the kind instead of the resource
     managedResourceTypeOverrides:
@@ -333,7 +333,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     - resource: Project
       resourceNames:
         - cluster
-    - resource: ClusterRoleBinding
+    - resource: ClusterRoleBinding.rbac.authorization.k8s.io
       resourceNames:
       - dedicated-readers
       - self-provisioners
