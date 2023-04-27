@@ -1,0 +1,204 @@
+---
+$schema: /app-sre/slo-document-1.yml
+labels:
+  service: quay
+name: quayio
+
+app:
+  $ref: /services/quayio/app.yml
+
+namespaces:
+  - $ref: /services/quayio/namespaces/quayp05ue1.yml
+slos:
+- name: Quay.io success rate for pushes and pulls
+  dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1"
+  SLIType: correctness
+  SLISpecification: Percentage of successful push and pull operations in NA region
+  SLOTarget: 0.999
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 30d
+  SLODetails: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/slos/push-pull.md"
+  expr: |
+    sum(increase(catchpoint_check_failures_total{probe="quayio-pull-monitor-v2"}[5m])) 
+    /
+    sum(increase(catchpoint_checks_total{probe="quayio-pull-monitor-v2"}[5m]))
+  prometheusRules: /resources/quay-p/quay/quay-slo.alerts.prometheusrules.yaml
+
+- name: Quay.io availability for repository endpoint
+  dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1"
+  SLIType: availability
+  SLISpecification: Percentage of quay.io API requests for repository endpoint that were served successfully
+  SLOTarget: 0.995
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 30d
+  SLODetails: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/slos/v1-api.md"
+  expr: |
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.repository",status!~"5[0-9][0-9]",method="GET"}[5m]))
+        /
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.repository",method="GET"}[5m]))
+  prometheusRules: /resources/quay-p/quay/quay-slo.alerts.prometheusrules.yaml
+   
+- name: Quay.io API (Security) Availability
+  dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1&from=1680768113115&to=1680789713115&viewPanel=43"
+  SLIType: availability
+  SLISpecification: Percentage of quay.io API requests for security endpoint that were served successfully
+  SLOTarget: 0.995
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 30d
+  SLODetails: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/slos/v1-api.md"
+  expr: |
+    sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.repositorymanifestsecurity",status!~"5[0-9][0-9]",method="GET"}[5m])) 
+    / 
+    sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.repositorymanifestsecurity",method="GET"}[5m]))
+  prometheusRules: /resources/quay-p/quay/quay-slo.alerts.prometheusrules.yaml
+
+- name: Quay.io API (Download blob) availability
+  dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1&from=1680768363058&to=1680789963058&viewPanel=58"
+  SLIType: availability
+  SLISpecification: Percentage of quay.io API requests for downloading blobs taht were served successfully
+  SLOTarget: 0.999
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 30d
+  SLODetails: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/slos/v2-api.md"
+  expr: |
+    sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.download_blob", status!~"5[0-9][0-9]", method="GET"}[5m])) 
+    / 
+    sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.download_blob", method="GET"}[5m]))
+  prometheusRules: /resources/quay-p/quay/quay-slo.alerts.prometheusrules.yaml
+
+- name: Quay.io API (Upload blob) availability
+  dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1&from=1680768363058&to=1680789963058&viewPanel=58"
+  SLIType: availability
+  SLISpecification: Percentage of quay.io API requests for uploading blobs that were served sucessfully
+  SLOTarget: 0.995
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 30d
+  SLODetails: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/slos/v2-api.md"
+  expr: |
+    (
+      sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.start_blob_upload", method="POST", status!~"5[0-9][0-9]"}[5m])) 
+      + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.monolithic_upload_or_last_chunk", method="PUT", status!~"5[0-9][0-9]"}[5m])) 
+      + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.upload_chunk", method="PATCH", status!~"5[0-9][0-9]"}[5m]))
+    ) 
+    / 
+    (
+      sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.start_blob_upload", method="POST"}[5m])) 
+      + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.monolithic_upload_or_last_chunk", method="PUT"}[5m])) 
+      + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.upload_chunk", method="PATCH"}[5m]))
+    )
+  prometheusRules: /resources/quay-p/quay/quay-slo.alerts.prometheusrules.yaml
+
+- name: Quay.io API (Tags) availability
+  dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1&from=1680768113115&to=1680789713115&viewPanel=43"
+  SLIType: availability
+  SLISpecification: Percentage of requests to quay.io tags endpoint that were served sucessfully
+  SLOTarget: 0.995
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 30d
+  SLODetails: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/slos/v1-api.md"
+  expr: |
+    sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.listrepositorytags",status!~"5[0-9][0-9]",method="GET"}[5m])) 
+    / 
+    sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="api.listrepositorytags",method="GET"}[5m]))
+  prometheusRules: /resources/quay-p/quay/quay-slo.alerts.prometheusrules.yaml
+
+- name: Quay.io users endpoint availibility
+  dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1&from=1680768113115&to=1680789713115&viewPanel=43"
+  SLIType: availability
+  SLISpecification: Percentage of requests to quay.io users endpoint that were served sucessfully
+  SLOTarget: 0.995
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 30d
+  SLODetails: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/slos/v1-api.md"
+  expr: |
+    (
+      sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_tagname", status!~"5[0-9][0-9]"}[5m]))
+      + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_digest",status!~"5[0-9][0-9]"}[5m]))
+    )
+    / 
+    (
+      sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_tagname"}[5m]))
+       + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_digest"}[5m]))
+    )
+  prometheusRules: /resources/quay-p/quay/quay-slo.alerts.prometheusrules.yaml
+
+- name: Quay.io API (Upload manifest) availability
+  dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1&from=1680768363058&to=1680789963058&viewPanel=58"
+  SLIType: availability
+  SLISpecification: Percentage of quay.io API requests for uploading a manifest that were served successfully
+  SLOTarget: 0.995
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 30d
+  SLODetails: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/slos/v2-api.md"
+  expr: |
+    (
+      sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_tagname", status!~"5[0-9][0-9]"}[5m]))
+    + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_digest",status!~"5[0-9][0-9]"}[5m]))
+    )
+    / 
+    (
+      sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_tagname"}[5m]))
+      + sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.write_manifest_by_digest"}[5m]))
+    )
+  prometheusRules: /resources/quay-p/quay/quay-slo.alerts.prometheusrules.yaml
+
+- name: Quay.io API (Download Manifest) availability
+  dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1&from=1680768363058&to=1680789963058&viewPanel=58"
+  SLIType: availability
+  SLISpecification: Percentage of quay.io API requests for retrieving a manifest that were served successfully
+  SLOTarget: 0.999
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 30d
+  SLODetails: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/slos/v2-api.md"
+  expr: |
+    (
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.fetch_manifest_by_tagname", status!~"5[0-9][0-9]"}[5m]))
+        +
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.fetch_manifest_by_digest", status!~"5[0-9][0-9]"}[5m]))
+    )
+    /
+    (
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.fetch_manifest_by_digest"}[5m]))
+        +
+        sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.fetch_manifest_by_tagname"}[5m]))
+    )
+  prometheusRules: /resources/quay-p/quay/quay-slo.alerts.prometheusrules.yaml
+
+- name: Quay.io API (Auth) availability
+  dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1&from=1680768363058&to=1680789963058&viewPanel=58"
+  SLIType: availability
+  SLISpecification: Percentage of quay.io API requests to auth endpoint that were served successfully
+  SLOTarget: 0.999
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 30d
+  SLODetails: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/slos/v2-api.md"
+  expr: |
+    sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.generate_registry_jwt", method="GET", status!~"5[0-9][0-9]"}[5m]))
+    /
+    sum(increase(aggregation:quay_request_duration_seconds_count:rate1m:sum{route="v2.generate_registry_jwt", method="GET"}[5m]))
+  prometheusRules: /resources/quay-p/quay/quay-slo.alerts.prometheusrules.yaml
+
+- name: Quay.io builds availability
+  dashboard: "https://grafana.app-sre.devshift.net/d/quay-slo/quay-slo?orgId=1"
+  SLIType: correctness
+  SLISpecification: Percentage of successful builds on quay.io
+  SLOTarget: 0.995
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 30d
+  SLODetails: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/slos/builders.md"
+  expr: |
+    sum(increase(quay_build_jobs_total{success="true"}[5m]))
+    /
+    sum(increase(quay_build_jobs_total[5m]))
+  prometheusRules: /resources/quay-p/quay/quay-slo.alerts.prometheusrules.yaml
