@@ -1,15 +1,15 @@
-ProvisioningSourceAvailabilityLatencyAlert
-==========================
+ProvisioningHTTPLatency
+=======================
 
 Impact
 ------
 
-Provisioning Source Availability has been returning with high latency.
+Provisioning REST API has been returning with high latency.
 
 Summary
 -------
 
-This alert fires when source availability check requests to one of the hyperscalers (AWS, Azure, GCP) did not that respond within 5 seconds.
+This alert fires when a high ratio of requests have been returning with a response time greater than 200ms in the last 28 days.
 
 Access required
 ---------------
@@ -33,6 +33,7 @@ Steps
 - View the dashboard to see the trend of errors.
 - View the logs to identify specific errors.
 - Check status of Sources service if they are not experiencing an outage.
+- Check status of AWS/Azure/GCP datacenters if they are not experiencing an outage.
 
 Escalations
 -----------

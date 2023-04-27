@@ -1,15 +1,15 @@
-ProvisioningAvailabilityAlert
-==========================
+ProvisioningHTTPSuccessRate
+===========================
 
 Impact
 ------
 
-Provisioning API has been returning with a high error rate.
+Provisioning REST API has been returning high rate of error responses.
 
 Summary
 -------
 
-This alert fires when a high ratio of requests have been returning with 5xx in the last 28 days.
+This alert fires when provisioning REST API has been returning high rate of error responses.
 
 Access required
 ---------------
@@ -33,8 +33,6 @@ Steps
 - View the dashboard to see the trend of errors.
 - View the logs to identify specific errors.
 - Check status of Sources service if they are not experiencing an outage.
-- Check status of AWS/Azure/GCP datacenters if they are not experiencing an outage.
-
 
 Escalations
 -----------
