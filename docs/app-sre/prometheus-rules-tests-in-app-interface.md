@@ -101,6 +101,21 @@ server = "http://localhost:4000/graphql"
 
 **IMPORTANT**: The local server loads the graph based on the state of the repository when the server is started. Thus, you must *restart* the server to make it reflect any local edits to the tests or rules files. In order to do it, just hit Ctrl-C in the terminal where you're runnning the local server and start it again via `make server`.
 
+### An example configuration via venv
+
+If you use Fedora, you can install the required Python version and use venv:
+
+```
+cd app-interface
+dnf install python3.9
+python3.9 -m venv ./venv
+source venv/bin/activate
+pip install qontract-reconcile --upgrade
+wget -qO- https://github.com/prometheus/prometheus/releases/download/v2.33.3/prometheus-2.33.3.linux-amd64.tar.gz | tar xvz -C /tmp
+mv /tmp/prometheus-2.33.3.linux-amd64/{promtool,prometheus} venv/bin/
+rm -rf /tmp/prometheus-2.33.3.linux-amd64
+```
+
 ### A note on secrets
 
 The previous example assumes that any potential secret will be searched locally in the `config.promtool.toml`. In case that a local secret is needed to be configured, you will receive an error message about it. Please read [this doc](/docs/app-sre/alert-to-receiver.md#secrets-reader) in order to know how to add the relevant bits to your configuration.
