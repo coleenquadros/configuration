@@ -66,16 +66,26 @@ resourceTemplates:
     KAFKA_CONNECT_IMAGE: quay.io/cloudservices/kafka-connect
   targets:
   - namespace:
-      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
-    ref: master
-    parameters:
-      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
-      KAFKA_CONNECT_VERSION: 3.1.0
-  - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
     ref: 886340ec51f9bd583bcd5d0503d1069562b8d809
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
+      KAFKA_CONNECT_VERSION: 3.1.0
+- name: rhosak-connect
+  path: /deploys/openshift/rhosak-connect.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  parameters:
+    KAFKA_CONNECT_IMAGE: quay.io/cloudservices/kafka-connect
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
+    ref: master
+    parameters:
+      KAFKA_CONNECT_IMAGE: quay.io/cloudservices/kafka-connect
+      BOOTSTRAP_CONFIG_PROVIDER: ${secrets:platform-mq-stage/mk-oauth-secret:bootstrap_server_host}
+      AUTH_CONFIG_PROVIDER_ID: ${secrets:platform-mq-stage/mk-oauth-secret:client_id}
+      MANAGED_KAFKA_AUTH_ENDPOINT: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+      AUTH_SECRET_NAME: mk-oauth-secret
       KAFKA_CONNECT_VERSION: 3.1.0
 - name: strimzi
   path: /deploys/openshift/amq-streams.yaml
