@@ -1405,32 +1405,41 @@ $ gpg --full-generate-key
 
 #### Adding your public GPG key
 
-Note: If terminal cannot find `gpg` after install, your executable may be named `gpg2`.
+Note: If you cannot find the `gpg` binary in your terminal after installation, your executable may be named `gpg2`.
 
-A base64 encoded binary GPG key should be added to the user file, under the `public_gpg_key` parameter.
+A Base64-encoded GPG key should be added to the user file under the `public_gpg_key` parameter.
 
-To export your key:
+To export your key as binary data to be then Base64-encoded, run:
+
 ```
 gpg --export <redhat_username>@redhat.com | base64
 ```
 
-To get your base64 encoded binary GPG key from an [ascii armored output](https://www.gnupg.org/gph/en/manual/x56.html):
+To get your Base64-encoded binary GPG key from an [ASCII-armored](https://www.gnupg.org/gph/en/manual/x56.html) output, run:
+
 ```
 cat <redhat_username>.gpg.asc | gpg --dearmor | base64
 ```
 
-To test if your binary base64 encoded GPG key in MR is good You may put part of MR containing key to some file (f.e. FILENAME) and use command:
+To test if your Base64-encoded GPG key in the Merge Request is valid, store the key in a file (i.e., `FILENAME`) and use the following command:
+
 ```
 cat FILENAME | sed -e 's/\ //g'| base64 -d | gpg
 ```
 
 Example: https://gitlab.cee.redhat.com/service/app-interface/blob/f40e0f27eacf5510a954c034292e937632caecc7/data/teams/app-sre/users/jmelisba.yml#L27
 
-**Key extension is NOT supported**
+Note: Please **DO NOT** paste your GPG/PGP key as a single long string! If you have such an output, please wrap it to
+preferably to be 64 characters wide (typical width when using ASCII-armored output) but no longer than 76 characters
+wide (typical width when using the `base64` binary).
 
-Please be aware, that currently our tooling does not support the extension of already expired keys.
-If your key expired, you have to create a new key instead of extending the expired one.
+**WARNING**
 
+If you intend to use the Base64-encoded portion of the ASCII-armored output (you have run e.g., `gpg --export --armor`,
+or obtained the compliant output using other means), then please ensure that the CRC24 checksum that is appended at the
+last line before the key tags is removed. This extra checksum is an extension only supported by various GPG/PGP software
+and will work for vanilla Base64 decoders such as the commonly found `base64` binary. You can fold this long line using
+the `fold` binary (available on both Linux and macOS) using the `-s -w64` recommended command-line switches.
 
 ### Manage external resources via App-Interface (`/openshift/namespace-1.yml`)
 
