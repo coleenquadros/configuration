@@ -33,7 +33,9 @@ cleanup:
   age: 6m
 ```
 
-This schema change will be picked up by a new integration responsible for removing AMIs older that `age` that meet the regex expression provided that they're not in use. The new integration will run as cronjob.
+This schema change will be picked up by a new integration responsible for removing AMIs older that `age` that meet the regex expression provided that they're not in use. It will make use of the AWS API to list the AMIs that belong to the account. The new integration will run as a cronjob.
+
+At the moment we do not have any AMI created via Terraform (and there are no plans for it, we use Packer). This cleanup should not be used to remove any resource that was created via Terraform. That's the main use of the `regex`, to be able to select exactly the recipient of the cleanup job.
 
 We will use the [Provider Pattern](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-interface/qontract-reconcile-patterns.md#the-provider-pattern) to support any future cleanup related needs.
 
