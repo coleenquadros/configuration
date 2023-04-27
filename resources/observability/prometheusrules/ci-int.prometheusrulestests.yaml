@@ -1,0 +1,61 @@
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/ci-int.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 1m
+  input_series:
+  # 5 minutes node exporter and jenkins up
+  # 10 minutes node exporter down and jenkins up
+  # 10 minutes node exporter down and jenkins down
+  - series: up{instance="ci.int.devshift.net:9100", job="jenkins_controllers"}
+    values: 1+0x4 0+0x9 0+0x9
+  - series: up{instance="ci.int.devshift.net:443", job="jenkins_int"}
+    values: 1+0x4 1+0x9 0+0x9
+
+  alert_rule_test:
+  - eval_time: 4m
+    alertname: JenkinsControllerNodeExporterDown
+  - eval_time: 14m
+    alertname: JenkinsControllerNodeExporterDown
+    exp_alerts:
+    - exp_labels:
+        instance: ci.int.devshift.net:9100
+        job: jenkins_controllers
+        service: ci-int
+        severity: critical-fts
+      exp_annotations:
+        message: "Node exporter for ci.int.devshift.net:9100 has been down for more than 5 minutes."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/JenkinsControllerNodeExporterDown.md"
+  - eval_time: 24m
+    alertname: JenkinsControllerNodeExporterDown
+
+- interval: 1m
+  input_series:
+    # 10 minutes queue growing, 20 minutes queue stable, 60 minutes queue growing
+    # one time series in the aggregated of all rhel8 nodes, the other simulates the individual node
+    # we will only get an alert for the rhel8 node related time series
+  - series: default_jenkins_executors_queue_length{instance="ci.int.devshift.net:443", job="jenkins_int", label="rhel8"}
+    values: 0+1x9 10+0x19 10+1x59
+  - series: default_jenkins_executors_queue_length{instance="ci.int.devshift.net:443", job="jenkins_int", label="i-001ae6312ea7e32e2"}
+    values: 0+1x9 10+0x19 10+1x59
+  alert_rule_test:
+  - eval_time: 30m
+    alertname: JenkinsExecutorQueueLengthGrowing
+  - eval_time: 70m
+    alertname: JenkinsExecutorQueueLengthGrowing
+    exp_alerts:
+    - exp_labels:
+        instance: ci.int.devshift.net:443
+        job: jenkins_int
+        label: rhel8
+        service: ci-int
+        severity: critical-fts
+      exp_annotations:
+        message: "Executor queue length for rhel8 has been growing for the last 30 minutes."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/JenkinsExecutorQueueLengthGrowing.md"
+ 
+ 
