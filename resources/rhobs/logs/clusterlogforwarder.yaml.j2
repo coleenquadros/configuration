@@ -1,0 +1,34 @@
+---
+apiVersion: logging.openshift.io/v1
+kind: ClusterLogForwarder
+metadata:
+  name: instance
+  namespace: openshift-logging
+spec:
+  {% if RHOBS_TOOLS_LOGGING | default(false) %}
+  inputs:
+    - application:
+        selector:
+          matchLabels:
+            app.kubernetes.io/part-of: observatorium
+      name: send-observatorium-app-logs
+  outputs:
+    - name: loki-app
+      secret:
+        name: {{ RHOBS_TOOLS_LOKI_SECRET_NAME | default("lokistack-gateway-bearer-token") }}
+      type: loki
+      url: >-
+        {{ RHOBS_TOOLS_LOKI_URL | default("https://observatorium-lokistack-gateway-http.observatorium-tools.svc:8080/api/logs/v1/application") }}
+  pipelines:
+    - inputRefs:
+        - send-observatorium-app-logs
+      outputRefs:
+        - loki-app
+ {% else %}
+  pipelines:
+  - name: app-to-default
+    inputRefs:
+    - application
+    outputRefs:
+    - default
+ {% endif %}
