@@ -16,6 +16,12 @@ For **InProgress or OnBoarded apps, tenants will only be allowed to access read-
 
 For best-effort apps tenant can access to actual DBs (stage and prod)
 
+**Note:** When adding a dedicated read replica for GABI, please ensure that the RDS database instance will **NOT** be
+added as Multi-AZ (without support for multiple availability zones) and that only a standalone single-zone deployment
+has been created. GABI uses read replica to shed a load of potentially costly queries and reduce the blast radius from
+the main primary database and does not require the RDS instance to offer extended availability guarantees. This approach
+is also more cost-effective and reduces complexity.
+
 Gabi will be deployed in the namespaces with the RDS resource definition.
 
 ## Request Gabi Instances
