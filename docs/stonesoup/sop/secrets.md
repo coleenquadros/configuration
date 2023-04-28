@@ -4,7 +4,9 @@ Note, if you are facing a AWS Access Key leak, please refer to the [AppSRE SOP -
 
 ## Pre-requisites
 
-* The Stonesoup vault role `/teams/stonesoup/roles/stonesoup-vault.yml`, added to your user account
+* [Gain access to Add or update secrets in the AppSRE Vault](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/stonesoup/sop/getting-access.md) - specifically add the Stonesoup vault role `/teams/stonesoup/roles/stonesoup-vault.yml` to your user account
+* [Gain access to Argo CD](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/stonesoup/sop/fleet-manager-argocd.md) to re-start applications after changing secrets
+
 
 ## Adding New Secrets
 
@@ -78,3 +80,5 @@ Be aware, the secret will appear in the staging or production environment after 
 3. Click "Create new version +" in the top-right corner.
 
 4. Wait for the secret to be refreshed on the cluster, determined by the `refreshInterval` value set in the secret's `ExternalSecret` resource.
+
+5. Pods will not usually pick up the new secrets without a re-start. Access [Argo CD](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/stonesoup/sop/fleet-manager-argocd.md) for each affected application, drill down to the affected pod(s) and click on the "Delete" button.  The pods will be re-created automatically.
