@@ -56,7 +56,7 @@ resourceTemplates:
     ENV_NAME: perf
     CLOWDER_ENABLED: 'true'
     REPLICAS_P1: 5
-    REPLICAS_PMIN: 3
+    REPLICAS_PMIN: 5
     CPU_REQUEST: 500m
     CPU_LIMIT: 1
     MEMORY_REQUEST: 500Mi
@@ -64,29 +64,29 @@ resourceTemplates:
     DEDUP_MEMORY_LIMIT: 2Gi
     MEMORY_REQUEST_REAPER: 256Mi
     MEMORY_LIMIT_REAPER: 512Mi
-    BULK_QUERY_SOURCE: xjoin
-    BULK_QUERY_SOURCE_BETA: xjoin
     URLLIB3_LOG_LEVEL: DEBUG
+    SCRIPT_CHUNK_SIZE: '100'
   targets:
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/perf-host-inventory-perf.yml
     ref: master
     parameters:
       CJI_RANDOM_SUFFIX: 'mj-3'
-      REPLICAS_P1: 5
-      #REPLICAS_SP: 1
-      REPLICAS_PMIN: 5
       REPLICAS_SVC: 25
       INVENTORY_DB_SSL_MODE: verify-full
       REAPER_SUSPEND: 'true'
       SP_VALIDATOR_SUSPEND: 'true'
-      FLOORIST_SUSPEND: 'true'
-      FLOORIST_IMAGE_TAG: fe12542 # 2022-06-03
-      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-perf
-      FLOORIST_SCHEDULE: '20 0 * * *'
       PENDO_SYNCHER_SUSPEND: 'true'
       PENDO_CRON_SCHEDULE: '@daily'
       PENDO_SYNC_ACTIVE: 'true'
+      FLOORIST_SUSPEND: 'true'
+      FLOORIST_IMAGE_TAG: b57a5a8
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-perf
+      FLOORIST_SCHEDULE: '20 0 * * *'
+      MEMORY_LIMIT_FLOO: 4Gi
+      MEMORY_REQUEST_FLOO: 2Gi
+      GUNICORN_WORKERS: 4
+      GUNICORN_THREADS: 8
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/perf-host-inventory-devel-perf.yml
     ref: master
