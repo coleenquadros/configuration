@@ -403,3 +403,22 @@
         notify-success: false
         notify-failure: true
         notify-repeated-failure: true
+
+- job-template:
+    id: 'insights-gh-scheduled-rebuild'
+    name: '{gh_org}-{gh_repo}-scheduled-rebuild-{branch}'
+    wrappers:
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *insightsdroid_github
+        - *quay_api_token
+        - *quay_secret_push
+    cron_expression: '{cron_expression}'
+    ci_cmd: './build_deploy.sh' 
+    <<: *gh_timed
+
