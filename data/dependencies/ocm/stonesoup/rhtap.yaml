@@ -1,0 +1,86 @@
+---
+$schema: /openshift/openshift-cluster-manager-1.yml
+
+labels: {}
+
+name: rhtap
+description: This is for managing ROSA clusters for Red Hat-Developer Tools-Stonesoup
+environment:
+  $ref: /dependencies/ocm/environments/production.yml
+orgId: 2KYM6mWvxTvqkGXPrNTG7SEPDmG
+
+upgradePolicyAllowedWorkloads:
+- host
+- member
+
+upgradePolicyAllowedMutexes:
+- stage-infra
+- prod-infra
+
+sectors:
+- name: stage
+- name: prod
+  dependencies:
+  - name: stage
+
+upgradePolicyClusters:
+- name: stone-stg-host
+  upgradePolicy:
+    workloads:
+    - host
+    schedule: 0 9 * * 1-4
+    conditions:
+      sector: stage
+      soakDays: 0
+      mutexes:
+      - stage-infra
+- name: stone-stg-m01
+  upgradePolicy:
+    workloads:
+    - member
+    schedule: 0 9 * * 1-4
+    conditions:
+      sector: stage
+      soakDays: 0
+      mutexes:
+      - stage-infra
+- name: stone-stg-rh01
+  upgradePolicy:
+    workloads:
+    - member
+    schedule: 0 9 * * 1-4
+    conditions:
+      sector: stage
+      soakDays: 1
+      mutexes:
+      - stage-infra
+- name: stone-prd-host1
+  upgradePolicy:
+    workloads:
+    - host
+    schedule: 0 9 * * 1-4
+    conditions:
+      sector: prod
+      soakDays: 7
+      mutexes:
+      - prod-infra
+- name: stone-prd-m01
+  upgradePolicy:
+    workloads:
+    - member
+    schedule: 0 9 * * 1-4
+    conditions:
+      sector: prod
+      soakDays: 7
+      mutexes:
+      - prod-infra
+- name: stone-prd-rh01
+  upgradePolicy:
+    workloads:
+    - member
+    schedule: 0 9 * * 1-4
+    conditions:
+      sector: prod
+      soakDays: 7
+      mutexes:
+      - prod-infra
