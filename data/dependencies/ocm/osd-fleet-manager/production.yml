@@ -28,6 +28,7 @@ upgradePolicyAllowedWorkloads:
 upgradePolicyAllowedMutexes:
 - canary
 - us-east-2
+- us-west-2
 - eu-west-1
 - green
 - blue
@@ -42,12 +43,15 @@ sectors:
   dependencies:
   - name: green
 - name: canary
-- name: us-east-2
-  dependencies:
-  - name: canary
 - name: eu-west-1
   dependencies:
-  - name: us-east-2
+  - name: canary
+- name: us-west-2
+  dependencies:
+  - name: eu-west-1
+- name: us-east-2
+  dependencies:
+  - name: us-west-2
 upgradePolicyDefaults:
 - name: production-canary
   matchLabels:
@@ -77,6 +81,14 @@ upgradePolicyDefaults:
 - name: production-us-east-2
   matchLabels:
     ext-hypershift.openshift.io/cluster-sector: us-east-2
+  upgradePolicyTemplate:
+    path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
+    variables:
+      schedule: 0 13 * * 1-5
+      soakDays: 0
+- name: production-us-west-2
+  matchLabels:
+    ext-hypershift.openshift.io/cluster-sector: us-west-2
   upgradePolicyTemplate:
     path: /ocm/osd-fleet-manager/upgrade-policy.yaml.j2
     variables:
