@@ -27,10 +27,10 @@ Enhance the AWS account file schema with a new section called `cleanup`. This se
 cleanup:
 - provider: ami
   regex: '^osbuild-composer-worker.*'
-  age: 3m
+  age: 90d
 - provider: ami
   regex: '^ci-int-jenkins-worker.*'
-  age: 6m
+  age: 180d
 ```
 
 This schema change will be picked up by a new integration responsible for removing AMIs older that `age` that meet the regex expression provided that they're not in use. It will make use of the AWS API to list the AMIs that belong to the account. The new integration will run as a cronjob.
