@@ -1,0 +1,89 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: ingress
+name: ingress-2023-05-01
+app:
+  $ref: /services/insights/ingress/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/insights-puptoo:
+    - branch: master
+      total: 4
+      success: 4
+    - branch: master
+      total: 1
+      success: 1
+    https://github.com/RedHatInsights/insights-storage-broker:
+    - branch: master
+      total: 2
+      success: 2
+    - branch: master
+      total: 1
+      success: 1
+    https://github.com/RedHatInsights/insights-ingress-go:
+    - branch: master
+      total: 1
+      success: 1
+    - branch: master
+      total: 5
+      success: 1
+    - branch: master
+      total: 2
+      success: 2
+  container_vulnerabilities:
+  - cluster: crcp01ue1
+    namespace: ingress-prod
+    vulnerabilities:
+      Unknown: 12
+      Medium: 26
+      High: 136
+      Low: 2
+      Critical: 2
+  - cluster: crcs02ue1
+    namespace: ingress-stage
+    vulnerabilities:
+      High: 7
+      Low: 3
+      Critical: 3
+  post_deploy_jobs:
+  - cluster: insights-perf
+    namespace: ingress-perf
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: ingress-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: ingress-prod
+    post_deploy_job: false
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcp01ue1
+    namespace: ingress-prod
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 7
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 3
+      deployment_validation_operator_no_node_affinity:
+        Failed: 3
+  - cluster: crcs02ue1
+    namespace: ingress-stage
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 11
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 3
+      deployment_validation_operator_no_node_affinity:
+        Failed: 3
+  service_slo: null

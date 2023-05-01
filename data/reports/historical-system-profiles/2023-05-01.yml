@@ -1,0 +1,78 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: historical-system-profiles
+name: historical-system-profiles-2023-05-01
+app:
+  $ref: /services/insights/historical-system-profiles/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/historical-system-profiles-backend:
+    - branch: master
+      total: 8
+      success: 7
+    - branch: master
+      total: 9
+      success: 1
+  container_vulnerabilities:
+  - cluster: crcp01ue1
+    namespace: historical-system-profiles-prod
+    vulnerabilities:
+      Unknown: 8
+      Medium: 148
+      High: 39
+      Low: 10
+  - cluster: crcs02ue1
+    namespace: historical-system-profiles-stage
+    vulnerabilities:
+      Unknown: 8
+      Medium: 88
+      High: 27
+      Low: 10
+  post_deploy_jobs:
+  - cluster: insights-perf
+    namespace: historical-system-profiles-perf
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: historical-system-profiles-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: historical-system-profiles-prod
+    post_deploy_job: false
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcp01ue1
+    namespace: historical-system-profiles-prod
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 6
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 6
+      deployment_validation_operator_no_node_affinity:
+        Failed: 6
+  - cluster: crcs02ue1
+    namespace: historical-system-profiles-stage
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 6
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 7
+      deployment_validation_operator_no_node_affinity:
+        Failed: 7
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: historical-system-profiles-prod
+    slo_name: hsp latency
+    slo_doc_name: historical-system-profiles
+    slo_value: 100.0
+    slo_target: 90.0
+  - cluster: crcp01ue1
+    namespace: historical-system-profiles-prod
+    slo_name: hsp availability
+    slo_doc_name: historical-system-profiles
+    slo_value: 100.0
+    slo_target: 90.0

@@ -1,0 +1,92 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: observatorium-metrics
+name: observatorium-metrics-2023-05-01
+app:
+  $ref: /services/rhobs/observatorium/observatorium-metrics/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/rhobs/configuration:
+    - branch: master
+      total: 24
+      success: 24
+  container_vulnerabilities:
+  - cluster: app-sre-stage-01
+    namespace: observatorium-metrics-stage
+    vulnerabilities:
+      Unknown: 121
+      Medium: 3127
+      High: 1189
+      Low: 350
+      Critical: 32
+  - cluster: telemeter-prod-01
+    namespace: observatorium-metrics-production
+    vulnerabilities:
+      Unknown: 121
+      Medium: 3127
+      High: 1189
+      Low: 350
+      Critical: 32
+  post_deploy_jobs:
+  - cluster: rhobs-testing
+    namespace: openshift-customer-monitoring
+    post_deploy_job: false
+  - cluster: app-sre-stage-01
+    namespace: openshift-customer-monitoring
+    post_deploy_job: false
+  - cluster: telemeter-prod-01
+    namespace: openshift-customer-monitoring
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: observatorium-metrics-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 15
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 6
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 5
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 5
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 6
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 21
+      deployment_validation_operator_no_node_affinity:
+        Failed: 21
+      deployment_validation_operator_duplicate_env_var:
+        Failed: 1
+  - cluster: app-sre-stage-01
+    namespace: observatorium-metrics-cluster-scope-stage
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 2
+  - cluster: telemeter-prod-01
+    namespace: observatorium-metrics-production
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 15
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 6
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 4
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 4
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 5
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 20
+      deployment_validation_operator_no_node_affinity:
+        Failed: 20
+      deployment_validation_operator_duplicate_env_var:
+        Failed: 1
+  - cluster: telemeter-prod-01
+    namespace: observatorium-metrics-cluster-scope-production
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 2
+  service_slo: null

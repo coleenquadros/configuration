@@ -1,0 +1,81 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: sources
+name: sources-2023-05-01
+app:
+  $ref: /services/insights/sources/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/sources-api-go:
+    - branch: master
+      total: 4
+      success: 4
+    https://github.com/RedHatInsights/sources-satellite:
+    - branch: master
+      total: 1
+      success: 1
+    https://github.com/RedHatInsights/sources-ui:
+    - branch: master
+      total: 16
+      success: 16
+  container_vulnerabilities:
+  - cluster: crcp01ue1
+    namespace: sources-prod
+    vulnerabilities:
+      Unknown: 9
+      Medium: 101
+      High: 33
+      Low: 10
+  - cluster: crcs02ue1
+    namespace: sources-stage
+    vulnerabilities:
+      Unknown: 14
+      Medium: 95
+      High: 35
+      Low: 10
+  post_deploy_jobs:
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: sources-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: sources-prod
+    post_deploy_job: false
+  - cluster: insights-perf
+    namespace: sources-perf
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: sources-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 5
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 1
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 1
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 16
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 10
+      deployment_validation_operator_no_node_affinity:
+        Failed: 10
+      deployment_validation_operator_duplicate_env_var:
+        Failed: 1
+  - cluster: crcp01ue1
+    namespace: sources-prod
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 15
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 11
+      deployment_validation_operator_no_node_affinity:
+        Failed: 11
+      deployment_validation_operator_duplicate_env_var:
+        Failed: 1
+  service_slo: null

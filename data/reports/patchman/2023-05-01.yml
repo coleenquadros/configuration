@@ -1,0 +1,92 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: patchman
+name: patchman-2023-05-01
+app:
+  $ref: /services/insights/patchman/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/patchman-engine:
+    - branch: master
+      total: 9
+      success: 9
+    - branch: master
+      total: 1
+      success: 1
+    https://github.com/RedHatInsights/patchman-ui:
+    - branch: master
+      total: 21
+      success: 21
+  container_vulnerabilities:
+  - cluster: crcp01ue1
+    namespace: patchman-engine-prod
+    vulnerabilities:
+      Unknown: 14
+      Medium: 121
+      High: 39
+      Low: 10
+  - cluster: crcs02ue1
+    namespace: patchman-engine-stage
+    vulnerabilities:
+      Unknown: 14
+      Medium: 91
+      High: 33
+      Low: 10
+  post_deploy_jobs:
+  - cluster: insights-perf
+    namespace: patchman-engine-perf
+    post_deploy_job: false
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: patchman-engine-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: patchman-engine-prod
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcp01ue1
+    namespace: patchman-engine-prod
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 8
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 12
+      deployment_validation_operator_no_node_affinity:
+        Failed: 12
+      deployment_validation_operator_duplicate_env_var:
+        Failed: 1
+  - cluster: crcs02ue1
+    namespace: patchman-engine-stage
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 8
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 12
+      deployment_validation_operator_no_node_affinity:
+        Failed: 12
+      deployment_validation_operator_duplicate_env_var:
+        Failed: 1
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: patchman-engine-prod
+    slo_name: patchman latency
+    slo_doc_name: patchman
+    slo_value: 98.3171705647458
+    slo_target: 90.0
+  - cluster: crcp01ue1
+    namespace: patchman-engine-prod
+    slo_name: patchman availability
+    slo_doc_name: patchman
+    slo_value: 99.9992790654862
+    slo_target: 90.0

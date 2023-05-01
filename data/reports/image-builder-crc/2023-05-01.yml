@@ -1,0 +1,101 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: image-builder-crc
+name: image-builder-crc-2023-05-01
+app:
+  $ref: /services/insights/image-builder/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/osbuild/image-builder:
+    - branch: master
+      total: 59
+      success: 45
+    - branch: master
+      total: 19
+      success: 19
+    https://github.com/RedHatInsights/image-builder-frontend:
+    - branch: master
+      total: 63
+      success: 63
+    - branch: master
+      total: 39
+      success: 8
+  container_vulnerabilities:
+  - cluster: crcs02ue1
+    namespace: image-builder-stage
+    vulnerabilities:
+      Unknown: 6
+      Medium: 3
+      High: 6
+  - cluster: crcp01ue1
+    namespace: image-builder-prod
+    vulnerabilities:
+      Unknown: 6
+      Medium: 33
+      High: 12
+  - cluster: appsres03ue1
+    namespace: image-builder-stage-tests
+    vulnerabilities:
+      Unknown: 1
+      Medium: 1
+      High: 2
+  post_deploy_jobs:
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: image-builder-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: image-builder-prod
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: image-builder-stage
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 6
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 3
+      deployment_validation_operator_no_node_affinity:
+        Failed: 3
+  - cluster: crcp01ue1
+    namespace: image-builder-prod
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 6
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 3
+      deployment_validation_operator_no_node_affinity:
+        Failed: 3
+  - cluster: appsres03ue1
+    namespace: image-builder-stage-tests
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 3
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 5
+      deployment_validation_operator_no_node_affinity:
+        Failed: 5
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: image-builder-prod
+    slo_name: image-builder latency
+    slo_doc_name: image-builder
+    slo_value: 99.0323010806782
+    slo_target: 95.0
+  - cluster: crcp01ue1
+    namespace: image-builder-prod
+    slo_name: image-builder compose success
+    slo_doc_name: image-builder
+    slo_value: 0.00406562179000311
+    slo_target: 95.0
