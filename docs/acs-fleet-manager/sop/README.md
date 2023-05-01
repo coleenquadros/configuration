@@ -354,7 +354,7 @@ refer to the steps [ACS Central provisioning latency](#acs-central-provisioning-
 
 ## Status page
 
-The ACS cloud service publishes its operational status under `Cloud Application Services/Red Hat Advanced Cluster Security Cloud Service`
+The ACS cloud service publishes its operational status under `console.redhat.com` + `Red Hat Advanced Cluster Security Cloud Service`
 on [status.redhat.com](https://status.redhat.com). The status page integration is managed via app-interface as documented by the
 [dev-guidelines](https://service.pages.redhat.com/dev-guidelines/docs/appsre/advanced/statuspage/).
 
