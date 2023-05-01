@@ -1,0 +1,57 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: crc-pdf-generator
+name: crc-pdf-generator-2023-05-01
+app:
+  $ref: /services/insights/crc-pdf-generator/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/pdf-generator:
+    - branch: master
+      total: 4
+      success: 4
+    - branch: master
+      total: 2
+      success: 2
+  container_vulnerabilities:
+  - cluster: crcp01ue1
+    namespace: crc-pdf-generator-prod
+    vulnerabilities:
+      Medium: 27
+      High: 33
+  post_deploy_jobs:
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: crc-pdf-generator-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: crc-pdf-generator-prod
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: crc-pdf-generator-stage
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 6
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 1
+      deployment_validation_operator_no_node_affinity:
+        Failed: 1
+  - cluster: crcp01ue1
+    namespace: crc-pdf-generator-prod
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 6
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 1
+      deployment_validation_operator_no_node_affinity:
+        Failed: 1
+  service_slo: null

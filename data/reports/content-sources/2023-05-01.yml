@@ -1,0 +1,89 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: content-sources
+name: content-sources-2023-05-01
+app:
+  $ref: /services/insights/content-sources/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/content-services/content-sources-frontend:
+    - branch: master
+      total: 5
+      success: 5
+    https://github.com/content-services/content-sources-backend:
+    - branch: master
+      total: 27
+      success: 19
+  container_vulnerabilities:
+  - cluster: crcs02ue1
+    namespace: content-sources-stage
+    vulnerabilities:
+      Unknown: 6
+      Medium: 3
+      High: 6
+  - cluster: appsres03ue1
+    namespace: content-sources-stage-tests
+    vulnerabilities:
+      Unknown: 1
+      Medium: 1
+      High: 2
+  post_deploy_jobs:
+  - cluster: appsres03ue1
+    namespace: rhsm-stage-tests
+    post_deploy_job: false
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: content-sources-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: content-sources-prod
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: content-sources-stage
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 5
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 6
+      deployment_validation_operator_no_node_affinity:
+        Failed: 6
+  - cluster: crcp01ue1
+    namespace: content-sources-prod
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 5
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 3
+      deployment_validation_operator_no_node_affinity:
+        Failed: 3
+  - cluster: appsres03ue1
+    namespace: content-sources-stage-tests
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 3
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 5
+      deployment_validation_operator_no_node_affinity:
+        Failed: 5
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: content-sources-prod
+    slo_name: API request latency
+    slo_doc_name: content-sources
+    slo_value: 97.5552270193513
+    slo_target: 90.0
+  - cluster: crcp01ue1
+    namespace: content-sources-prod
+    slo_name: API success rate
+    slo_doc_name: content-sources
+    slo_value: 100.0
+    slo_target: 95.0

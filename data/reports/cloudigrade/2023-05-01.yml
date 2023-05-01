@@ -1,0 +1,90 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: cloudigrade
+name: cloudigrade-2023-05-01
+app:
+  $ref: /services/insights/cloudigrade/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/cloudigrade/cloudigrade:
+    - branch: master
+      total: 3
+      success: 3
+    - branch: master
+      total: 3
+      success: 3
+  container_vulnerabilities:
+  - cluster: crcp01ue1
+    namespace: cloudigrade-prod
+    vulnerabilities:
+      Unknown: 48
+      Medium: 200
+      High: 59
+      Low: 10
+  - cluster: crcs02ue1
+    namespace: cloudigrade-stage
+    vulnerabilities:
+      Unknown: 29
+      Medium: 145
+      High: 45
+      Low: 10
+  post_deploy_jobs:
+  - cluster: crcs02ue1
+    namespace: cloudigrade-stage
+    post_deploy_job: false
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: cloudigrade-prod
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: insights-perf
+    namespace: cloudigrade-perf
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcp01ue1
+    namespace: cloudigrade-prod
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 1
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 7
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 6
+      deployment_validation_operator_no_node_affinity:
+        Failed: 6
+      deployment_validation_operator_dangling_horizontalpodautoscaler:
+        Failed: 2
+  - cluster: crcs02ue1
+    namespace: cloudigrade-stage
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 7
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 8
+      deployment_validation_operator_no_node_affinity:
+        Failed: 8
+      deployment_validation_operator_dangling_horizontalpodautoscaler:
+        Failed: 2
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: cloudigrade-prod
+    slo_name: cloudigrade api latency
+    slo_doc_name: app-interface
+    slo_value: 100.0
+    slo_target: 95.0
+  - cluster: crcp01ue1
+    namespace: cloudigrade-prod
+    slo_name: cloudigrade api success
+    slo_doc_name: app-interface
+    slo_value: 100.0
+    slo_target: 95.0

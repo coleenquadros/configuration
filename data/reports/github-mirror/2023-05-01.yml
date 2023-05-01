@@ -1,0 +1,50 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: github-mirror
+name: github-mirror-2023-05-01
+app:
+  $ref: /services/github-mirror/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities: null
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: github-mirror-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: github-mirror-production
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-prod-01
+    namespace: github-mirror-production
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 4
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 1
+      deployment_validation_operator_no_node_affinity:
+        Failed: 1
+  - cluster: app-sre-stage-01
+    namespace: github-mirror-stage
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 4
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 2
+      deployment_validation_operator_no_node_affinity:
+        Failed: 2
+  - cluster: app-sre-stage-01
+    namespace: rporresm-github-mirror-stage-restore
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 2
+  service_slo: null

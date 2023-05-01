@@ -1,0 +1,100 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: compliance
+name: compliance-2023-05-01
+app:
+  $ref: /services/insights/compliance/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/compliance-backend:
+    - branch: master
+      total: 13
+      success: 13
+    https://gitlab.cee.redhat.com/insights-platform/compliance-ssg:
+    - branch: master
+      total: 2
+      success: 2
+    - branch: master
+      total: 1
+      success: 1
+    https://github.com/RedHatInsights/compliance-frontend:
+    - branch: master
+      total: 3
+      success: 3
+    https://github.com/RedHatInsights/attache:
+    - branch: master
+      total: 1
+      success: 1
+  container_vulnerabilities:
+  - cluster: crcp01ue1
+    namespace: compliance-prod
+    vulnerabilities:
+      Unknown: 14
+      Medium: 184
+      High: 81
+      Low: 10
+  - cluster: crcs02ue1
+    namespace: compliance-stage
+    vulnerabilities:
+      Unknown: 14
+      Medium: 91
+      High: 33
+      Low: 10
+  post_deploy_jobs:
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: consoledot-frontend-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: compliance-prod
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: insights-perf
+    namespace: compliance-perf
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcp01ue1
+    namespace: compliance-prod
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 6
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 10
+      deployment_validation_operator_no_node_affinity:
+        Failed: 10
+      deployment_validation_operator_duplicate_env_var:
+        Failed: 3
+  - cluster: crcs02ue1
+    namespace: compliance-stage
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 6
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 14
+      deployment_validation_operator_no_node_affinity:
+        Failed: 14
+      deployment_validation_operator_duplicate_env_var:
+        Failed: 3
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: compliance-prod
+    slo_name: compliance latency
+    slo_doc_name: compliance
+    slo_value: 96.1469778516341
+    slo_target: 90.0
+  - cluster: crcp01ue1
+    namespace: compliance-prod
+    slo_name: compliance availability
+    slo_doc_name: compliance
+    slo_value: 99.9252961946856
+    slo_target: 90.0

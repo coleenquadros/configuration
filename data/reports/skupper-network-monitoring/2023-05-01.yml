@@ -1,0 +1,59 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: skupper-network-monitoring
+name: skupper-network-monitoring-2023-05-01
+app:
+  $ref: /services/skupper-network-monitoring/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities: null
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: app-sre-stage-01
+    namespace: skupper-integration-stage
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: skupper-integration-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-prod-01
+    namespace: skupper-integration-production
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 3
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 2
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 2
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 2
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 4
+      deployment_validation_operator_no_node_affinity:
+        Failed: 4
+  - cluster: app-sre-stage-01
+    namespace: skupper-integration-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 3
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 1
+      deployment_validation_operator_unset_cpu_requirements:
+        Failed: 2
+      deployment_validation_operator_unset_memory_requirements:
+        Failed: 2
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 2
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 5
+      deployment_validation_operator_no_node_affinity:
+        Failed: 5
+  service_slo: null

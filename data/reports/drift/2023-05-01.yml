@@ -1,0 +1,79 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: drift
+name: drift-2023-05-01
+app:
+  $ref: /services/insights/drift/app.yml
+date: '2023-05-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/RedHatInsights/drift-backend:
+    - branch: master
+      total: 9
+      success: 9
+    - branch: master
+      total: 1
+      success: 1
+    https://github.com/RedHatInsights/drift-frontend:
+    - branch: master
+      total: 2
+      success: 2
+  container_vulnerabilities:
+  - cluster: crcp01ue1
+    namespace: drift-prod
+    vulnerabilities:
+      Medium: 20
+      High: 4
+  post_deploy_jobs:
+  - cluster: insights-perf
+    namespace: drift-perf
+    post_deploy_job: false
+  - cluster: crcs02ue1
+    namespace: consoledot-frontend-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: drift-prod
+    post_deploy_job: false
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: appsres03ue1
+    namespace: app-sre-observability-stage
+    post_deploy_job: false
+  - cluster: appsrep05ue1
+    namespace: app-sre-observability-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcp01ue1
+    namespace: drift-prod
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 6
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 1
+      deployment_validation_operator_no_node_affinity:
+        Failed: 1
+  - cluster: crcs02ue1
+    namespace: drift-stage
+    validations:
+      deployment_validation_operator_dangling_networkpolicy:
+        Failed: 6
+      deployment_validation_operator_dnsconfig_options:
+        Failed: 1
+      deployment_validation_operator_no_node_affinity:
+        Failed: 1
+  service_slo:
+  - cluster: crcp01ue1
+    namespace: drift-prod
+    slo_name: drift latency
+    slo_doc_name: drift
+    slo_value: 100.0
+    slo_target: 60.0
+  - cluster: crcp01ue1
+    namespace: drift-prod
+    slo_name: drift availability
+    slo_doc_name: drift
+    slo_value: 100.0
+    slo_target: 90.0
