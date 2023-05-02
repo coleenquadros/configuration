@@ -20,7 +20,6 @@ networkPoliciesAllow:
 
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
-- $ref: /services/observability/shared-resources/grafana.yml
 
 managedRoles: true
 
@@ -55,6 +54,17 @@ openshiftResources:
     environment: -dev
     host: grafana.dev.devshift.net
     cert_manager_issuer_name: letsencrypt-devshiftnet-dns
+- provider: resource
+  path: /observability/grafana/grafana-dashboards.configmap.yaml
+  validate_json: true
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/grafana/dev/grafana-datasources.secret.yaml
+  enable_query_support: true
+  variables:
+    clusters:
+    - name: app-sre-stage-01
+      slug: app-sre-stage-0.k3s7.p1
 
 managedExternalResources: true
 
