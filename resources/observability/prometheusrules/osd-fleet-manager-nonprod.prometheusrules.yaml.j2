@@ -702,6 +702,17 @@ spec:
           labels:
             severity: medium
             service: osd-fleet-manager
+        
+        - alert: OSD Fleet Manager cluster provision long duration
+          annotations:
+            message: "Long provision duration {{ $value | humanizeDuration }} for cluster {{ $labels.cluster_id }} of type {{ $labels.cluster_type }} in sector {{ $labels.sector }} in {{{ environment }}}"
+            dashboard: "https://grafana.stage.devshift.net/d/osd_fleet_manager/osd-fleet-manager-metrics"
+            runbook: ""
+          expr: |
+            fleet_manager_cluster_provisioning_elapsed_time_in_seconds{namespace="{{{ namespace }}}"} > 18000
+          labels:
+            severity: medium
+            service: osd-fleet-manager
 
     - name: osd-fleet-manager-nonprod-saturation-level
       rules:

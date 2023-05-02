@@ -84,6 +84,20 @@ spec:
             team: osd
             namespace: osd-fleet-manager-production
             service: osd-fleet-manager
+        
+        # Alert if provision time is greater than 5h
+        - alert: OSD Fleet Manager cluster provision long duration
+          annotations:
+            message: "Long provision duration {{ $value | humanizeDuration }} for cluster {{ $labels.cluster_id }} of type {{ $labels.cluster_type }} in sector {{ $labels.sector }}"
+            dashboard: "https://grafana.app-sre.devshift.net/d/osd_fleet_manager/osd-fleet-manager-metrics"
+            runbook: ""
+          expr: |
+            fleet_manager_cluster_provisioning_elapsed_time_in_seconds{namespace="osd-fleet-manager-production"} > 18000
+          labels:
+            severity: medium
+            team: osd
+            namespace: osd-fleet-manager-production
+            service: osd-fleet-manager
             
         # SLO Availability p99
         # Based on burn rate alerts from https://sre.google/workbook/alerting-on-slos/#5-multiple-burn-rate-alerts
