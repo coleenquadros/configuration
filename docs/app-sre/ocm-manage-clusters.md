@@ -3,7 +3,7 @@
 OSDv4 clusters are managed via OCM.
 
 - Production: https://console.redhat.com/openshift
-- Staging: https://qaprodauth.console.redhat.com/openshift
+- Staging: https://qaprodauth.console.redhat.com/openshift (or https://console.redhat.com/openshift?env=staging if the former does not work).
 
 ## Creating an Account
 
