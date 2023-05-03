@@ -524,24 +524,6 @@ resourceTemplates:
       OUTPUT: "file"
       DB_NAME: ccx-notification-writer
 
-### CCX Helpers
-
-- name: ccx-kafka-monitor
-  path: /deploy/clowdapp.yaml
-  url: https://github.com/RedHatInsights/insights-kafka-monitor
-  targets:
-  - namespace:
-      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: RedHatInsights-insights-kafka-monitor-gh-build-master
-  - namespace:
-      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 22730da7317411b6db2953d426179a7169342f3e
-
-
 - name: insights-content-template-renderer
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/insights-content-template-renderer
@@ -561,6 +543,8 @@ resourceTemplates:
     disable: true # TODO: enable when there is any test running in ephemeral
     ref: internal
 
+### CCX Upgrade Risks Predictions related services
+
 - name: ccx-upgrades-inference
   path: /deploy/clowdapp.yaml
   url: https://gitlab.cee.redhat.com/ccx/ccx-upgrades-inference
@@ -573,8 +557,8 @@ resourceTemplates:
     ref: e910ef61963c85d135ffd6bd1f23b448be924810
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true # TODO: enable when there is any test running in ephemeral
     ref: internal
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
 
 - name: ccx-upgrades-data-eng
   path: /deploy/clowdapp.yaml
@@ -593,8 +577,50 @@ resourceTemplates:
       RHOBS_QUERY_MAX_MINUTES_FOR_DATA: "120"
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true # TODO: enable when there is any test running in ephemeral
+    parameters:
+      RHOBS_URL: http://rhobs-mock-svc:8080/default
+      RHOBS_QUERY_MAX_MINUTES_FOR_DATA: "120"
+      RH_SSO_URL: http://sso-mock-svc:8080/default
+      ALLOW_INSECURE: 'True'
     ref: internal
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+
+- name: ccx-upgrades-sso-mock
+  path: /deploy/sso-mock.yaml
+  url: https://gitlab.cee.redhat.com/ccx/ccx-upgrades-data-eng
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    ref: internal
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+
+
+- name: ccx-upgrades-rhobs-mock
+  path: /deploy/clowdapp.yaml
+  url: https://gitlab.cee.redhat.com/ccx/rhobs-mock
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    ref: internal
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+
+### CCX Helpers
+
+- name: ccx-kafka-monitor
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-kafka-monitor
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-kafka-monitor-gh-build-master
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: 22730da7317411b6db2953d426179a7169342f3e
+
 
 ### Grafana Dashboards
 
