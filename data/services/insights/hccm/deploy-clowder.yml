@@ -625,6 +625,28 @@ resourceTemplates:
       POPULATE_SCHEDULE: "0 11 * * *"
       POPULATE_SOURCES: "ocp"
 
+- name: nise-populator-hcs
+  # repo deploy file: https://github.com/project-koku/nise-populator/blob/main/deploy/clowdapp.yaml
+  # container image: quay.io/cloudservices/nise-populator
+  # container repo:  https://quay.io/repository/cloudservices/nise-populator
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/project-koku/nise-populator
+  targets:
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: project-koku-nise-populator-gh-build-main
+    parameters:
+      CPU_REQUEST: 250m
+      CPU_LIMIT: 500m
+      MEMORY_REQUEST: 1Gi
+      MEMORY_LIMIT: 2Gi
+      POPULATE_SCHEDULE: "0 17 * * *"
+      SECRET_NAME: nise-populator-hcs-secret
+
 - name: parquet-compactor
   # repo deploy file: https://github.com/project-koku/parquet-compactor/blob/main/deploy/clowdapp.yaml
   # container image: quay.io/cloudservices/parquet-compactor
