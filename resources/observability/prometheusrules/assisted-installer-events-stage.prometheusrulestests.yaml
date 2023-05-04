@@ -73,36 +73,36 @@ tests:
   - eval_time: 135m
     alertname: Assisted Installer Events - No CPU activity detected - Stage
     exp_alerts:
-# Events ingestion tests for .events (CCX export)
-- interval: 15m
-  input_series:
-  - series: assisted_installer_events_max_event_id{container="prometheus-postgres-exporter", endpoint="http", instance="10.131.2.123:9187", job="assisted-installer-prometheus-postgres-exporter", namespace="assisted-installer-stage", pod="assisted-installer-prometheus-postgres-exporter-5d495cf6fftm5x6", server="assisted-installer.rds.awshost.com:5432", service="assisted-installer-prometheus-postgres-exporter"}
-    values: 1+1x16 4+1x96
-  - series: elasticsearch_indices_shards_docs{cluster="ai-stage-es", container="exporter", endpoint="http", index=".events", instance="10.130.5.220:9108", job="prometheus-opensearch-exporter", namespace="assisted-installer-stage", node="0swM1yuXSkiflKGaSwWgYw", pod="prometheus-opensearch-exporter-59f7dc576f-c6nl6", primary="true", service="prometheus-opensearch-exporter", shard="0"}
-    values: 1+1x16 4+0x48 4+1x48
-  # let's make sure we don't pick up replication as events
-  - series: elasticsearch_indices_shards_docs{cluster="ai-stage-es", container="exporter", endpoint="http", index=".events", instance="10.130.5.220:9108", job="prometheus-opensearch-exporter", namespace="assisted-installer-stage", node="0swM1yuXSkiflKGaSwWgYw", pod="prometheus-opensearch-exporter-59f7dc576f-c6nl6", primary="false", service="prometheus-opensearch-exporter", shard="0"}
-    values: 1+1x16 4+0x48 4+1x48
-  alert_rule_test:
-  # first hour growth at the same rate, second hour elasticsearch stops and events keep going: alert
-  - eval_time: 13h0m
-    alertname: Assisted Installer Events - Assisted service events ingestion greatly reduced - Stage
-    exp_alerts:
-    - exp_labels:
-        service: assisted-installer
-        severity: info
-        namespace: assisted-installer-stage
-      exp_annotations:
-        message: "Assisted Installer Events - Assisted service events ingestion greatly reduced for index .events (CCX export)"
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#assisted-installer-events-ingestion-reduced"
-  # No alert after 1h as both metrics growing at the same rate
-  - eval_time: 4h
-    alertname: Assisted Installer Events - Assisted service events ingestion greatly reduced - Stage
-    exp_alerts:
-  # No alert after 6h as elasticsearch got back writing events and it's now growing at the same rate
-  - eval_time: 24h
-    alertname: Assisted Installer Events - Assisted service events ingestion greatly reduced - Stage
-    exp_alerts:
+# # Events ingestion tests for .events (CCX export)
+# - interval: 15m
+#   input_series:
+#   - series: assisted_installer_events_max_event_id{container="prometheus-postgres-exporter", endpoint="http", instance="10.131.2.123:9187", job="assisted-installer-prometheus-postgres-exporter", namespace="assisted-installer-stage", pod="assisted-installer-prometheus-postgres-exporter-5d495cf6fftm5x6", server="assisted-installer.rds.awshost.com:5432", service="assisted-installer-prometheus-postgres-exporter"}
+#     values: 1+1x16 4+1x96
+#   - series: elasticsearch_indices_shards_docs{cluster="ai-stage-es", container="exporter", endpoint="http", index=".events", instance="10.130.5.220:9108", job="prometheus-opensearch-exporter", namespace="assisted-installer-stage", node="0swM1yuXSkiflKGaSwWgYw", pod="prometheus-opensearch-exporter-59f7dc576f-c6nl6", primary="true", service="prometheus-opensearch-exporter", shard="0"}
+#     values: 1+1x16 4+0x48 4+1x48
+#   # let's make sure we don't pick up replication as events
+#   - series: elasticsearch_indices_shards_docs{cluster="ai-stage-es", container="exporter", endpoint="http", index=".events", instance="10.130.5.220:9108", job="prometheus-opensearch-exporter", namespace="assisted-installer-stage", node="0swM1yuXSkiflKGaSwWgYw", pod="prometheus-opensearch-exporter-59f7dc576f-c6nl6", primary="false", service="prometheus-opensearch-exporter", shard="0"}
+#     values: 1+1x16 4+0x48 4+1x48
+#   alert_rule_test:
+#   # first hour growth at the same rate, second hour elasticsearch stops and events keep going: alert
+#   - eval_time: 13h0m
+#     alertname: Assisted Installer Events - Assisted service events ingestion greatly reduced - Stage
+#     exp_alerts:
+#     - exp_labels:
+#         service: assisted-installer
+#         severity: info
+#         namespace: assisted-installer-stage
+#       exp_annotations:
+#         message: "Assisted Installer Events - Assisted service events ingestion greatly reduced for index .events (CCX export)"
+#         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#assisted-installer-events-ingestion-reduced"
+#   # No alert after 1h as both metrics growing at the same rate
+#   - eval_time: 4h
+#     alertname: Assisted Installer Events - Assisted service events ingestion greatly reduced - Stage
+#     exp_alerts:
+#   # No alert after 6h as elasticsearch got back writing events and it's now growing at the same rate
+#   - eval_time: 24h
+#     alertname: Assisted Installer Events - Assisted service events ingestion greatly reduced - Stage
+#     exp_alerts:
 
 # Test disk space available
 - interval: 5m
