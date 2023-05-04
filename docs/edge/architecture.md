@@ -19,7 +19,7 @@ The above illustrates the orientation of the primary production components. ([Lu
 
 ## Components: 
 
-![architecture](images/edgearch2.png "Edge Management Architectural Overview")
+![architecture](images/edgearch3.png "Edge Management Architectural Overview")
 
 **Edge Frontend** - This portal application is the primary user interface for interacting with Fleet Management.  Mainline UI/UX development is focused on this application.
 - Cloud-Services-Config
@@ -154,6 +154,8 @@ Source Image from upstream: https://github.com/RedHatInsights/playbook-dispatche
 #### Ingress 
 The Ingress service is designed to receive payloads from clients and distribute them via a Kafka message queue to other platform services. The service sits behind a 3Scale gateway that handles authentication, routing, and assignment of unique ID to the upload. Ingress has an interface into cloud storage to retain customer data. It also connects to a Kafka message queue in order to notify services of new and available uploads for processing. The Content-Type of the payload provides the mechanism for passing upload packages to the proper processing services.
 
+### Content Sources
+Content Sources provides a custom repository service for Image Builder to include custom packages in an OS build. Edge Management has replaced its custom repository feature with the Content Sources service. Custom repositories are created, updated, and deleted via the Content Sources UI. Custom repositories and packages are selected for builds via the Edge Management Create/Update Image wizard.
 
 ## State: 
 
