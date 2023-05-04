@@ -81,6 +81,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * `path` - path to secret in Vault containing credentials
         * `field` - secret field (key) to use
         * `version` - secret version to use (if this is a KV v2 secret engine)
+* `validateTargetsInApp` - (optional) set this to `true` to validate that all targets belong to the same `app` as the saas file.
 * `resourceTemplates` - a list of configurations of OpenShift templates to deploy
     * `name` - a descriptive name of the deployed resources
     * `url` - git repository URL (https and not SSH)
