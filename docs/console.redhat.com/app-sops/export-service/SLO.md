@@ -12,7 +12,7 @@ The following categories will correspond to the SLIs and SLOs below.
 1. Availability - The proportion of successful requests, as measured from the load balancer metrics. Any HTTP status other than 500–599 is considered successful.
 2. Latency - The proportion of sufficiently fast requests, as measured from the load balancer metrics. "Sufficiently fast” is defined as < 400 ms or < 850 ms. 
 3. Thoroughput - The number of requests the service can handle in a given period. The service should be capable of supporting at least 100 requests per second (RPS)
-4. Error rate - The percentage of requests that result in an error or failure. Any server HTTP status other than 4xx or 5xx is considered successful.
+4. Error rate - The percentage of requests that result in an error or failure. Any HTTP status other than 500–599 is considered successful.
 
 ## SLOs
 
