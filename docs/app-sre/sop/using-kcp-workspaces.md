@@ -112,7 +112,6 @@ disable:
   - openshift-network-policies
   - openshift-resourcequotas
   - openshift-limitranges
-  e2eTests: []
 ```
 
 ### Can I deploy everything?
