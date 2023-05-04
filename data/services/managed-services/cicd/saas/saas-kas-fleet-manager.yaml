@@ -393,27 +393,16 @@ resourceTemplates:
               default: true
               supported_instance_type:
                 standard:
-                  limit: 0
+                  limit: 1 # set to one temporarily to make sure that the existing AWS cluster is not removed. This will be set back to 0 once `enable_dynamic_data_plane_scale_down` is set to false.
                 developer:
                   limit: 0
-        - name: gcp
-          default: false
-          regions:
-            - name: us-east1
-              default: true
-              supported_instance_type:
-                standard:
-                  limit: 0
-                developer:
-                  limit: 0
-
-
+ 
       #manual: use data plane config file, auto: use kas-fleet-shard
       DATAPLANE_CLUSTER_SCALING_TYPE: auto
       DYNAMIC_SCALING_CONFIG:
         new_data_plane_openshift_version: openshift-v4.11.28
-        enable_dynamic_data_plane_scale_up: false # temporarily disabled until https://issues.redhat.com/browse/MGDSTRM-10047 is fixed
-        enable_dynamic_data_plane_scale_down: false # temporarily disabled until https://issues.redhat.com/browse/MGDSTRM-10047 is fixed
+        enable_dynamic_data_plane_scale_up: false
+        enable_dynamic_data_plane_scale_down: true
         compute_machine_per_cloud_provider:
           aws:
             cluster_wide_workload:
@@ -432,34 +421,9 @@ resourceTemplates:
                 compute_node_autoscaling:
                   min_compute_nodes: 3
                   max_compute_nodes: 3
-          gcp:
-            cluster_wide_workload:
-              compute_machine_type: custom-8-32768
-              compute_node_autoscaling:
-                min_compute_nodes: 3
-                max_compute_nodes: 18
-            kafka_workload_per_instance_type:
-              standard:
-                compute_machine_type: custom-4-32768-ext
-                compute_node_autoscaling:
-                  min_compute_nodes: 3
-                  max_compute_nodes: 21
-              developer:
-                compute_machine_type: custom-8-32768
-                compute_node_autoscaling:
-                  min_compute_nodes: 3
-                  max_compute_nodes: 3
 
       # cluster list if dataplane cluster scaling type is set to manual
       CLUSTER_LIST:
-        - name: Stage Cluster (In GCP Prod)
-          cluster_id: 20j0bm8rbqedso2qbvn5vvguthulsoci
-          cloud_provider: gcp
-          region: us-east1
-          multi_az: true
-          schedulable: true
-          kafka_instance_limit: 37
-          supported_instance_type: standard,developer
         - name: Stage Cluster (In OSD Prod)
           cluster_id: 1lfl3g1vdea86ghh26vkmbqjkain900q
           cloud_provider: aws
@@ -468,7 +432,6 @@ resourceTemplates:
           schedulable: true
           kafka_instance_limit: 37
           supported_instance_type: standard,developer
-
 
       SSO_SPECIAL_MANAGEMENT_ORG_ID: 13640203
 
@@ -838,22 +801,6 @@ resourceTemplates:
           schedulable: true # change this to false if you do not want the cluster to be schedulable
           kafka_instance_limit: 6 # change this to match any value of configuration
           supported_instance_type: standard
-        - name: mk-0503-013202
-          cluster_id: 1rv3g4iu2m4jqsh8agh5lphl9cgqbb0p
-          cloud_provider: aws
-          region: us-east-1
-          multi_az: false
-          schedulable: true # change this to false if you do not want the cluster to be schedulable
-          kafka_instance_limit: 100 # change this to match any value of configuration
-          supported_instance_type: developer
-        - name: mk-0727-163232
-          cluster_id: 1tngp49ofbg8h7l26d8b6bhqbanv0l4f
-          cloud_provider: aws
-          region: eu-west-1
-          multi_az: false
-          schedulable: true # change this to false if you do not want the cluster to be schedulable
-          kafka_instance_limit: 100 # change this to match any value of configuration
-          supported_instance_type: developer
 
       SSO_SPECIAL_MANAGEMENT_ORG_ID: 14410147
 
