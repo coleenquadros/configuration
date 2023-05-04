@@ -1,0 +1,31 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: ocm
+name: osd-fleet-manager-grafana-dashboards
+description: SaaS file for OSD Fleet Manager Grafana dashboards
+app:
+  $ref: /services/ocm/osd-fleet-manager/app.yml
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+slack:
+  workspace:
+    $ref: /dependencies/slack/redhat-internal.yml
+  channel: team-uhc-info
+managedResourceTypes:
+- ConfigMap
+
+imagePatterns: []
+
+resourceTemplates:
+- name: osd-fleet-manager-dashboards
+  url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage-int.yml
+    ref: main
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: 9571193b9c5de3bccfdae9c8bdae600d51049dea
