@@ -1,70 +1,4 @@
 - job-template:
-    id: 'osde2e-metrics-sync'
-    name: 'osde2e-metrics-sync'
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *osde2e-aws-access
-        - *osde2e-datahub
-        - *app_sre_push_gateway
-    <<: *gh_timed
-- job-template:
-    id: 'osde2e-weather-report'
-    name: 'osde2e-weather-report'
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *osde2e-datahub
-    <<: *gh_timed
-    publishers:
-    - git:
-        push-only-if-success: true
-        branches:
-        - branch:
-            remote: origin
-            name: gh-pages
-- job-template:
-    id: 'osde2e-weather-report-to-slack'
-    name: 'osde2e-weather-report-to-slack'
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *osde2e-aws-access
-        - *osde2e-datahub
-        - *osde2e-slack
-    <<: *gh_timed
-- job-template:
-    id: 'osde2e-granular-alerting'
-    name: 'osde2e-granular-alerting'
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *osde2e-aws-access
-        - *osde2e-datahub
-        - *osde2e-slack
-    <<: *gh_timed
-- job-template:
-    id: 'osde2e-trigger-jobs'
-    name: 'osde2e-trigger-jobs'
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *app_sre_ci_trigger_jobs_bot
-        - *osde2e-trigger-jobs
-    triggers:
-    - reverse:
-        jobs: '{upstream}'
-        results: 'success'
-    builders:
-    - shell:
-        command: "{ci_cmd}"
-    <<: *gh_checkout
-- job-template:
       id: "osde2e-parameterized-job"
       name: "osde2e-parameterized-job"
       instance_type: "m5.xlarge"
@@ -73,7 +7,7 @@
       configs: "rosa,stage,e2e-suite"
       branch: main
       wrappers:
-      - ansicolor 
+      - ansicolor
       - vault-secrets:
           <<: *vault_defaults
           secrets:
@@ -92,18 +26,18 @@
           required: true
       - string:
           name: REPORT_DIR
-          default: "{report_dir}"    
+          default: "{report_dir}"
       - string:
           name: CONFIGS
           default: "{configs}"
           required: true
       - string:
-          name: CLUSTER_ID  
+          name: CLUSTER_ID
       - string:
           name: INSTALL_LATEST_XY
       - bool:
           name: STS
-          default: true    
+          default: true
       - choice:
           name: ENVIRONMENT
           choices:
@@ -115,7 +49,7 @@
            default: false
       - bool:
           name: SKIP_DESTROY_CLUSTER
-          default: false  
+          default: false
       - bool:
           name: MUST_GATHER
           default: true
