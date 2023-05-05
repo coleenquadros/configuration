@@ -115,6 +115,9 @@ resourceTemplates:
       - predicate:
           region: us-east-2
         sector: dynatrace
+      - predicate:
+          region: eu-west-1
+        sector: upgradetesting    
       # put everything else into the main sector
       - sector: main
     SUPPORTED_CLOUD_PROVIDERS: |-
@@ -122,6 +125,7 @@ resourceTemplates:
         regions:
           - name: us-west-2
           - name: us-east-2
+          - name: eu-west-1
     TELEMETER_SERVER_URL: https://infogw.api.integration.openshift.com
     TERRAFORM_ALLOWED_ACTIONS: none
     TRANSIT_ACCOUNT_ARN: arn:aws:iam::232799112676:user/svc-cluster-aws-vpce-operator
@@ -166,6 +170,19 @@ resourceTemplates:
     parameters:
       DEPLOYMENT_NAME: main
       ENABLE_GLOBAL_WORKERS: true
+  - name: osd-fleet-manager-integration-upgradetesting
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
+    ref: 974d6901373c1ff8f82401c91d8ee8581c431531
+    promotion:
+      auto: true
+      subscribe:
+      - ocm-osdfm-deployed-int-canary
+      publish:
+      - osd-fleet-manager-integration-upgradetesting
+    parameters:
+      DEPLOYMENT_NAME: upgradetesting
+      ENABLE_GLOBAL_WORKERS: false
 - name: osd-fleet-manager-stage
   url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
   path: /templates/named-service-template.yml
