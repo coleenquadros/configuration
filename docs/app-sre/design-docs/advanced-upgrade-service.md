@@ -69,11 +69,11 @@ The [SRE capabilities initiative](docs/app-sre/initiatives/sre-capabilities.md) 
 
 ### Alerting
 
-For the time being, alertig for the AUS capability will follow the qontract-reconcile alerting scheme (tldr: a failing reconcile run will trigger a page after some time). To adhere to the differences in the support model between integrations and capabilities, the AUS capability will not fail for situations uncovered by the support model, e.g. bad configuration data provided via OCM labels. These situations will be highlighted to users via OCM service logs and will not trigger pages for AppSRE.
+For the time being, alerting for the AUS capability will follow the qontract-reconcile alerting scheme (tldr: a failing reconcile run will trigger a page after some time). To adhere to the differences in the support model between integrations and capabilities, the AUS capability will not fail for situations uncovered by the support model, e.g. bad configuration data provided via OCM labels. These situations will be highlighted to users via OCM service logs and will not trigger pages for AppSRE.
 
 AUS can still fail in other situations and would trigger pages.
 
-Milestone 2 of the [SRE capabilities initiative](docs/app-sre/initiatives/sre-capabilities.md) defines work revoling around alerting schemes for capabilities, covering alert severity levels for different integrations/capabilities and for data partitions/shards (e.g. don't alert for OCM stage).
+Milestone 2 of the [SRE capabilities initiative](docs/app-sre/initiatives/sre-capabilities.md) defines work revolving around alerting schemes for capabilities, covering alert severity levels for different integrations/capabilities and for data partitions/shards (e.g. don't alert for OCM stage).
 
 ### Reporting
 
@@ -84,7 +84,7 @@ The static/slowly changing policy and cluster base information is represented in
 ```text
 aus_cluster_info{cluster_id="aaa", external_cluster_id="bbb", subscription_id="ccc", org_id="ddd", cluster_name="name", version="4.12.5", channel="stable", schedule="0 * * * *", sector="main", mutexes="m-1,m-2", soak_days="5", workloads="wl-1,wl-2"} 1
 
-aus_remaining_soak_days{cluster_id="xxx", version="4.12.10"} 12.93
+aus_cluster_version_remaining_soak_days{cluster_id="xxx", version="4.12.10"} 12.93
 ```
 
 Both metrics combined hold the information currently present on the [fleet upgrade policies page](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-fleet-upgrade-policies.md).
@@ -101,7 +101,7 @@ Reading all the relevant labels fleet wide and establishing context by reading i
 
 After discovered clusters and their metadata are handed to the existing AUS implementation, which issues additional queries for existing upgrade policies and gate agreements. Since these are per-cluster OCM APIs, the number of calls scales with the number of involved clusters. To mitigate bigger impact on OCM, we will limit the number of OCM organizations and clusters that can use AUS for the time being, e.g. 5 organizations and 100 clusters.
 
-Additional mitigation strategies revolve around caching certain API call results. An event based solution to inform AUS or similar components about the creation/deletion/update of certain OCM objects would also be interessting. This needs to be investigated.
+Additional mitigation strategies revolve around caching certain API call results. An event based solution to inform AUS or similar components about the creation/deletion/update of certain OCM objects would also be interesting. This needs to be investigated.
 
 ## Alternatives considered
 
