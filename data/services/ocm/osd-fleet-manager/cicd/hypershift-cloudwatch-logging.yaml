@@ -1,0 +1,41 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels: {}
+
+name: hypershift-cloudwatch-logging
+description: SaaS file to deploy Cluster Logging on Hypershift Servcie and Management clusters
+
+app:
+  $ref: /services/ocm/osd-fleet-manager/app.yml
+
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+
+# slack:
+#   workspace:
+#     $ref: /dependencies/slack/redhat-internal.yml
+#   channel: team-uhc-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns: []
+
+resourceTemplates:
+- name: hypershift-cloudwatch-logging-integration
+  url: https://gitlab.cee.redhat.com/service/hypershift-cloudwatch-logging
+  path: /hypershift-cloudwatch-logging.yaml
+  parameters:
+    ENVIRONMENT: integration
+    HIVE_NAMESPACE: osd-fleet-manager-integration
+  targets:
+  - name: hypershift-cloudwatch-logging-integration-canary-hivei01ue1
+    namespace:
+      $ref: /services/ocm/osd-fleet-manager/namespaces/hive/osd-fleet-manager-integration-hivei01ue1.yml
+    ref: main
+    parameters:
+      SECTOR: canary
+      REGION: us-east-1
+    promotion:
+      publish:
+      - hypershift-cloudwatch-logging-integration-hivei01ue1
