@@ -16,7 +16,7 @@ From a desire to bring this expertise and know-how to a broader audience, the id
 
 With SRE capabilities we are opening up new pathways for AppSRE tooling, making it usable for all Red Hat engineering teams. The current tenant interaction model, support model etc. are not build for that.
 
-In app-interface, the service acts as a centerpiece that gives context to all the infrastructure and process information that is woven around it. With SRE capabilities, where single automation aspects of app-interface might be used a-la-card and a full onboarding is not desirable, this centerpiece is missing. Placing configuration data into app-interface without the context of the service is undesirable because it blurs the relationship to tenants/users, bloats the repository beyond its purpose and leaves AppSRE with an unclear support model.
+In app-interface, the service acts as a centerpiece that gives context to all the infrastructure and process information that is woven around it. With SRE capabilities, where single automation aspects of app-interface might be used à la carte and a full onboarding is not desirable, this centerpiece is missing. Placing configuration data into app-interface without the context of the service is undesirable because it blurs the relationship to tenants/users, bloats the repository beyond its purpose and leaves AppSRE with an unclear support model.
 
 Even if certain AppSRE integrations and SRE capabilities will provide the same service, they will do it differently and will require specific processes, environments and boundary conditions while doing so.
 
@@ -25,7 +25,7 @@ Even if certain AppSRE integrations and SRE capabilities will provide the same s
 - define the consumption model and feedback model for capabilities that does not revolve around app-interface touchpoints
 - define a dedicated support model for capabilities that does not revolve around the AppSRE tenant relationship and the contact
 - provide a dedicated runtime environment and alerting model for capabilities that is aligned with the support model
-- but most importantly: start where we are with what we have, a-la-card for a small set of capabilities
+- but most importantly: start where we are with what we have, à la carte for a small set of capabilities
 
 ## Milestones
 
