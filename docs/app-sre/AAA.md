@@ -78,6 +78,10 @@ Most of the resources required as an AppSRE will be obtained via a user definiti
 * Make sure your user file includes the `public_gpg_key` field.
   [Instructions](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#adding-your-public-gpg-key).
 
+### Preventing key leaks
+
+This is **VERY** important since key leaks happen and they are very expensive both cloud resources and in engineer to fix them. Please follow this [guide](https://gitlab.corp.redhat.com/infosec-public/developer-workbench/tools/-/tree/main/rh-pre-commit) to install a pre-commit hook that will prevent you from committing any change that can expose a key.
+
 ### Access and Surfaces list
 
 Every AppSRE/MT-SRE engineer should have access to the following:
