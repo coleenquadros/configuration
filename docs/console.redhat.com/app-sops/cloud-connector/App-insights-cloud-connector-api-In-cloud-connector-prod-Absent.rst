@@ -31,6 +31,13 @@ Steps
 -  Log into the console / namespace and verify if pods are up / stuck / etc
 -  Check logs / events for pods in the cloud-connector namespace
     - Check the logs for a ``Failed to connect to MQTT broker`` error message or an ``Unable to connect to MQTT broker`` error message
+      - If the cloud-connector-mqtt-message-consumer pod is running into this issue (unable to connect to the MQTT broker)
+        - Set the cleanSession flag (MQTT_CONSUMER_MQTT_CLEAN_SESSION) to true and let app-interface restart the mqtt consumer
+        - Let the mqtt consumer process the mqtt messages
+        - Set the cleanSession flag (MQTT_CONSUMER_MQTT_CLEAN_SESSION) to false and let app-interface restart the mqtt consumer
+        This is required due to a limitation on the broker side.  This is a workaround.
+      - If the cloud-connector-kafka-message-consumer pod or the cloud-connector-api pod is running into this issue
+        (unable to connect to the MQTT broker), then contact Akamai support as described below.
 -  Check if there were any recent changes to the CR's in the namespace
 -  ``oc rsh`` into one of the continers if available
 
