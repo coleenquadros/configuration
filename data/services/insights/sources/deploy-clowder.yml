@@ -38,6 +38,10 @@ resourceTemplates:
 - name: sources-api
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/sources-api-go
+  parameters:
+    MIN_REPLICAS: 3
+    AVAILABILITY_MIN_REPLICAS: 3
+    BACKGROUND_WORKER_MIN_REPLICAS: 3
   targets:
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
@@ -65,9 +69,6 @@ resourceTemplates:
     ref: 885fe8aa490063d3699ffa2144ba77bf7f7d6f8a
     parameters:
       SOURCES_ENV: prod
-      MIN_REPLICAS: 3
-      AVAILABILITY_MIN_REPLICAS: 3
-      BACKGROUND_WORKER_MIN_REPLICAS: 3
       KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-prod.svc.cluster.local
       KOKU_SOURCES_API_PORT: "10000"
       CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-prod.svc.cluster.local
@@ -100,6 +101,8 @@ resourceTemplates:
 - name: sources-superkey-worker
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/sources-superkey-worker
+  parameters:
+    MIN_REPLICAS: 3
   targets:
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
@@ -123,12 +126,13 @@ resourceTemplates:
     ref: ce93818c652d105fa95d34585e6a14b193a91d66
     parameters:
       LOG_LEVEL: INFO
-      MIN_REPLICAS: 3
       MEMORY_LIMIT: 150Mi
 # Svc depends on receptor which is not migrated to the Clowder
 - name: sources-satellite
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/sources-satellite
+  parameters:
+    MIN_REPLICAS: 3
   targets:
 #  - namespace:
 #      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
@@ -151,7 +155,6 @@ resourceTemplates:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
     ref: 922da470ca2827b68e891bfd1a9175660d2ac062
     parameters:
-      MIN_REPLICAS: 3
       UPDATE_SOURCES_VIA_API: '1'
       RECEPTOR_CONTROLLER_SECRET_NAME: sources-psk
       RECEPTOR_CONTROLLER_SECRET_KEY_PSK: client-psk
