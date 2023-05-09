@@ -21,11 +21,19 @@ managedResourceTypes:
 - ArgoCD
 - Application
 - Secret
+- PrometheusRule
+- ServiceMonitor
 
 managedResourceNames:
 - resource: ArgoCD
   resourceNames:
   - argocd
+- resource: PrometheusRule
+  resourceNames:
+  - argocd-alerting-rules
+- resource: ServiceMonitor
+  resourceNames:
+  - appstudio-argocd-metrics
 
 managedRoles: true
 
@@ -56,3 +64,10 @@ openshiftResources:
     appstudio.redhat.com/member-cluster: 'true'
     appstudio.redhat.com/quality-dashboard: 'true'
     argocd.argoproj.io/secret-type: cluster
+- provider: prometheus-rule
+  type: resource-template-extracurlyjinja2
+  path: /stonesoup/argocd-control-plane/monitoring/alerting-rules.yml.j2
+  variables:
+    env: staging
+- provider: resource
+  path: /stonesoup/argocd-control-plane/monitoring/servicemonitors.yml
