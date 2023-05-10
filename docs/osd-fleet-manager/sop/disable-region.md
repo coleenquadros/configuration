@@ -57,7 +57,15 @@ And then
 $ ocm delete /api/osd_fleet_mgmt/v1/management_clusters/${ID}
 $ ocm delete /api/osd_fleet_mgmt/v1/service_clusters/${ID}
 ```
- 
+
+Now, check the status of the service and management cluster:
+```$ ocm get /api/osd_fleet_mgmt/v1/management_clusters/${ID}```
+```$ ocm get /api/osd_fleet_mgmt/v1/service_clusters/${ID}```
+
+Once the status is `cleanup_ack_pending`, perform any checks needed (ie: making sure the MC has no more HC on it) and then you can send the following request to ack the deletion, this will unblock the OCM deletion:
+```$ ocm delete /api/osd_fleet_mgmt/v1/management_clusters/${ID}/ack```
+```$ ocm delete /api/osd_fleet_mgmt/v1/service_clusters/${ID}/ack```
+
 ## 2.4 Validate
  
 ```
