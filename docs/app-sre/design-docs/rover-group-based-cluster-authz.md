@@ -21,7 +21,7 @@ OCM provides group management functionality for the `cluster-admin` and `dedicat
 
 ## Non goals
 
-- manage arbitrary cluster groups besides the mentioned ones
+- manage arbitrary cluster groups besides the mentioned ones (depends on [SDA-8214](https://issues.redhat.com/browse/SDA-8214))
 - offer rover group based cluster group management via app-interface configuration (we will write the code in a way though, that it can be reused for this scenario, e.g. see the AUS approach)
 
 ## Proposal
