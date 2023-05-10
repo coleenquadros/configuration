@@ -59,7 +59,7 @@ Once the status is `cleanup_ack_pending`, perform any checks needed (ie: making 
  
 ## 2.4 Validate
  
-The Management Cluster status shall be `Cleanup*` or shall a return a 404:
+The Management Cluster status shall be `Cleanup` or shall a return a 404:
 ```$ ocm get /api/osd_fleet_mgmt/v1/management_clusters/${ID}```
  
 ## 2.5 Issue All Clear
