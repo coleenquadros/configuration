@@ -51,7 +51,7 @@ The [SRE capabilities initiative](docs/app-sre/initiatives/sre-capabilities.md) 
 
 ### Alerting
 
-For the time being, alerting for this capability will follow the qontract-reconcile alerting scheme (tldr: a failing reconcile run will trigger a page after some time). To adhere to the differences in the support model between integrations and capabilities, this capability will not fail for situations uncovered by the support model, e.g. bad configuration data provided via OCM labels. These situations will be highlighted to users via OCM service logs and will not trigger pages for AppSRE.
+For the time being, alerting for this capability will follow the qontract-reconcile alerting scheme (tldr: a failing reconcile run will ping app-sre-ic in #sd-app-sre-alert). To adhere to the differences in the support model between integrations and capabilities, this capability will not fail for situations uncovered by the support model, e.g. bad configuration data provided via OCM labels. These situations will be highlighted to users via OCM service logs and will not trigger pages for AppSRE.
 
 ### Relationship with cluster AuthN
 
