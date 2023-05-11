@@ -14,7 +14,7 @@ From a desire to bring this expertise and know-how to a broader audience, the id
 
 ## Problem Statement
 
-With SRE capabilities we are opening up new pathways for AppSRE tooling, making it usable for all Red Hat engineering teams. The current tenant interaction model, support model etc. are not build for that.
+With SRE capabilities we are opening up new pathways for AppSRE tooling, making it usable for all Red Hat engineering teams. The current tenant interaction model, support model etc. are not built for that.
 
 In app-interface, the service acts as a centerpiece that gives context to all the infrastructure and process information that is woven around it. With SRE capabilities, where single automation aspects of app-interface might be used à la carte and a full onboarding is not desirable, this centerpiece is missing. Placing configuration data into app-interface without the context of the service is undesirable because it blurs the relationship to tenants/users, bloats the repository beyond its purpose and leaves AppSRE with an unclear support model.
 
@@ -41,7 +41,7 @@ This milestone is all about shaping the general structure of capabilities, the i
 
 - define consumption models for capabilities - how are users going to interact with various kinds of capabilities?
 - define feedback models for capabilities - how are users getting feedback about their interaction with a capability, how can they get support?
-- define implementation patterns for capabilities -  how to reuse AppSRE integrations as capabilitiets without app-interface backing?
+- define implementation patterns for capabilities -  how to reuse AppSRE integrations as capabilities without app-interface backing?
 
 ### Milestone 2 - alerting scheme for integrations/capabilities
 
