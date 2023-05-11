@@ -5,7 +5,7 @@ labels:
   service: app-sre-observability
 
 name: saas-loki-for-netobserv
-description: Temporary Loki instance for the netobserv operator (to be replaced in 4.12 with https://github.com/grafana/loki/pull/6769)
+description: Loki instance for the netobserv operator
 
 app:
   $ref: /services/observability/app.yml
@@ -19,23 +19,15 @@ slack:
   channel: sd-app-sre-info
 
 managedResourceTypes:
-- ConfigMap
-- Deployment
+- ClusterRole.rbac.authorization.k8s.io
+- ClusterRoleBinding.rbac.authorization.k8s.io
+- LokiStack
 - Secret
-- Service
-- ServiceAccount
-- StatefulSet
 
-imagePatterns:
-  - quay.io/openshift-logging
+imagePatterns: []
 
 allowedSecretParameterPaths:
 - app-sre/integrations-output/terraform-resources/app-sre-stage-01/netobserv
-
-authentication:
-  image:
-    path: app-sre/quay/app-sre-pull
-    field: all
 
 resourceTemplates:
 - name: loki-for-netobserv
@@ -45,10 +37,7 @@ resourceTemplates:
   - name: app-sre-stage-netobserv
     namespace:
       $ref: /services/observability/namespaces/netobserv-stage.yml
-    ref: 5a4665152a4fd08b90d55069fd7353cff4e3f8bb
-    parameters:
-      S3_BUCKET_NAME: netobserv-app-sre-stage-01
-      LOKI_IMAGE: quay.io/openshift-logging/loki:v2.5.0
+    ref: 2ae3f0c09ec08c76d895525ee2473c3ad169ae2c
     secretParameters:
       - name: ACCESS_KEY_ID
         secret:
@@ -58,3 +47,15 @@ resourceTemplates:
         secret:
           path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/netobserv/netobserv-app-sre-stage-01-s3
           field: aws_secret_access_key
+      - name: S3_BUCKET_NAME
+        secret:
+          path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/netobserv/netobserv-app-sre-stage-01-s3
+          field: bucket
+      - name: S3_BUCKET_REGION
+        secret:
+          path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/netobserv/netobserv-app-sre-stage-01-s3
+          field: aws_region
+      - name: S3_BUCKET_ENDPOINT
+        secret:
+          path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/netobserv/netobserv-app-sre-stage-01-s3
+          field: endpoint
