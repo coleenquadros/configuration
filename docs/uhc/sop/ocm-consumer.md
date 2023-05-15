@@ -152,7 +152,7 @@ Abnormally high error rate.
 - Check `deployment/uhc-acct-mngr-consumer` logs to determine errors.
   - Nature of errors would determine next steps. Most likely suspects are:
     - Errors form UMB: Contact RHIT Platform Team
-    - Errors from OCM: Contact SDB Team
+    - Errors from OCM: Contact OCM Core Team
 - Contact Service Delivery B team, inform the greater service delivery team.
 
 ---
