@@ -6,13 +6,13 @@
     - [Access required](#access-required)
     - [Steps](#steps)
   - [Client secret rotation](#client-secret-rotation)
-    - [Summary](#summary)
-    - [Access required](#access-required)
-    - [Steps](#steps)
-  - [Personal token rotation](#personal-token-rotation)
     - [Summary](#summary-1)
     - [Access required](#access-required-1)
     - [Steps](#steps-1)
+  - [Personal token rotation](#personal-token-rotation)
+    - [Summary](#summary-2)
+    - [Access required](#access-required-2)
+    - [Steps](#steps-2)
 
 The following are generic SOPs for situations involving sso.redhat.com
 
@@ -95,6 +95,6 @@ It may be required to invalidate and/or rotate a personal access token as provid
 
 ### Steps
 
-- Go to https://sso.redhat.com/auth/realms/redhat-external/account/applications
+- Go to https://sso.redhat.com/auth/realms/redhat-external/account/#/applications
 - Section `Offline token` will list your currently active personal tokens
 - Click `Revoke Grant` on the token that need to be invalidated
