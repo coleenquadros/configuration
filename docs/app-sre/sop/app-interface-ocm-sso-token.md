@@ -35,7 +35,7 @@ Note that every service account gets the [ServiceAccount](https://gitlab.cee.red
 
 Some app-interface integrations require an organization scope. Service Accounts are not automatically associated to an Organization.
 
-To associate a Service Account to an Organization, create a ticket of the SDB board requesting this association.
+To associate a Service Account to an Organization, create a ticket of the OCM board requesting this association.
 
 The AppSRE Service Account was associated to the AppSRE Organization is [SDB-3232](https://issues.redhat.com/browse/SDB-3232).
 
