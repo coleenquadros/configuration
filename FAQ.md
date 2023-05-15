@@ -70,6 +70,41 @@ even after a while. Then [confirm](#my-mr-takes-a-long-time-to-get-merged) that 
 check what labels were added by the Bot, inspect the "Change coverage report" that the Bot posts, and ensure that none
 of the other issues can be the problem here.
 
+### My MR has been stuck unable to be rebased
+
+If your Merge Request has been stuck in a so-called "rebase loop" without your or the AppSRE Bot's ability to rebase it
+correctly, a known GitLab issue might prevent the rebase operations from succeeding:
+
+  - [Newly created MR: \`Merge blocked: the source branch must be rebased onto the target branch\`][gitlab-issue]
+
+**Note:** This issue has been fixed in GitLab Enterprise Edition version `15.11.3`, which is scheduled to be deployed to
+you GitLab deployment on the 20th of May, 2023.
+
+Thus, if you see one of the following symptoms:
+
+  - The change is not in conflict - there aren't any outstanding merge conflicts that would have to be resolved manually
+  - You are unable to rebase the changes via the GitLab web UI, where each attempt does not trigger a rebase
+  - The bot is sitting there seemingly doing nothing even though you provided all the necessary `/lgtm` commands
+    and attempted to issue a `/retest` several times
+
+Then your change is most likely affected by the bug. You can attempt to fix the problem with a few simple steps,
+assuming you have the relevant branch currently checked out:
+
+  - Amend the latest commit in place (you don't need to introduce any changes at this point): `git commit --amend`
+  - Force push current branch: `git push --force origin <BRANCH NAME>`
+
+The above should introduce no changes aside from providing a new SHA for the commit, which will be force pushed.
+Alternatively, you can rebase your branch against an up-to-date head branch (e.g., `main` or `master` in the Git
+parlance) and then force push changes (see above).
+
+As a last resort attempt to fix this problem, you can close the problematic Merge Request and re-open a new one.
+However, this should be avoided as there are no guarantees that the new MR won't be subjected to the same problem with
+a stuck rebase as the one that has just been closed.
+
+If you need help to solve this, then get in [touch](#contacting-appsre) with AppSRE.
+
+[gitlab-issue]: https://gitlab.com/gitlab-org/gitlab/-/issues/389074
+
 ### My MR has nobody assigned to it. Can you assign someone?
 
 An AppSRE team member, whether currently designated as the IC (Interrupt Catcher) on duty or not, will not assign Jira
