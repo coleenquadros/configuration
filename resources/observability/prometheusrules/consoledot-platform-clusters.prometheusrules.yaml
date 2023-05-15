@@ -161,11 +161,25 @@ spec:
     # RHCLOUD-23406
     - alert: Cluster node's TCP_mem is abnormally high
       annotations:
-        message: Cluster node's TCP_mem is above 
+        message: Cluster node's TCP_mem has a buffer size of over 60,000 
         dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
       expr: |
         node_sockstat_TCP_mem > 60000
       for: 5m
+      labels:
+        service: insights
+        severity: medium
+        env: {{{env}}}
+        app_team: devprod
+
+    # RHCLOUD-23406
+    - alert: Kubernetes API server latency is abnormally high
+      annotations:
+        message: kube-apiserver latency is over 300 milliseconds
+        dashboard: "https://grafana.stage.devshift.net/d/BYb3BpZVz/ephemeral-cluster-metrics?orgId=1&var-nodes=All"
+      expr: |
+        histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{apiserver="kube-apiserver", verb!="WATCH"}[5m])) by (verb, le)) > 0.3
+      for: 10m
       labels:
         service: insights
         severity: medium
