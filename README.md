@@ -3140,6 +3140,8 @@ repositories:
   `OWNERS`/`OWNERS_ALIASES` files in that repository to post comments to the
   Merge Requests reporting the required approvals, ultimately labeling the
   Merge Request, making it up for auto-merge.
+
+  Set `persistentLgtm: true` (default `false`) avoids re-approving MRs after adding new commits (e.g. after rebase), and all previous `/lgtm`'s are still considered.
 - `gitlabHousekeeping`:  Value `enabled: true` will enable the
   `gitlab-housekeeping` integration, that auto-merges Merge Requests that are
   labelled as such. It also rebases the Merge Requests that are not rebased
