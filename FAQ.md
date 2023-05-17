@@ -214,9 +214,8 @@ If you already have a user file
 
 The AppSRE Grafana instance is available at https://grafana.app-sre.devshift.net.
 
-Access is managed via app-interface. The role that grants access is [observability-access](data/services/observability/roles/observability-access.yml).
+Currently, every internal RedHat user can access this instance.
 
-If you are a member of the OpenShift GitHub organization, you can use https://grafana.openshift-app-sre.devshift.net instead (does not require a user file).
 
 ### My Grafana Dashboard is missing
 
