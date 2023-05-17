@@ -31,6 +31,7 @@ imagePatterns:
 - quay.io/app-sre/k8s-sidecar
 - quay.io/app-sre/ubi8-ubi-minimal
 - quay.io/oauth2-proxy/oauth2-proxy
+- quay.io/app-sre/nginx-redirector
 
 authentication:
   image:
@@ -69,3 +70,15 @@ resourceTemplates:
       REPLICAS: 3
       IMAGE_TAG: '9.3.11'
       GF_INSTALL_PLUGINS: "grafana-piechart-panel,yesoreyeram-infinity-datasource,grafana-gitlab-datasource,grafana-sentry-datasource"
+
+# After switch to RH SSO, we don't need the https://grafana.openshift-app-sre.devshift.net URL anymore; redirect it to https://grafana.app-sre.devshift.net
+- name: grafana-openshift-redirector
+  url: https://github.com/app-sre/nginx-redirector
+  path: /openshift-redirector.yml
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production-int.yml
+    ref: 16ab519afccb425322f317767341079f388c1d28
+    parameters:
+      REDIRECTOR_DESTINATION: https://grafana.app-sre.devshift.net
+
