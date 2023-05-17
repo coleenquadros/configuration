@@ -40,7 +40,7 @@ Each template test file should include the following fields:
 - `resourcePath`: path to resource template to be tested
 - `expectedResult`: path to a resource with the exected result of the templating to compare to
 
-Here is an [exmaple](test_data/services/deployment-validation-operator/test/templatetests.yaml) for a template test file for the DVO alerts mentioned in the previous section.
+Here is an [example](/test_data/services/deployment-validation-operator/test/default_service_account-templatetest.yml) for a template test file for the DVO alerts mentioned in the previous section.
 
 ## Skipping resources
 
