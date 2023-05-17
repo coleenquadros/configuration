@@ -14,7 +14,7 @@ DVO is installed on every OSD cluster as part of [SDE-1113](https://issues.redha
 
 This allows DVO to collect information for services running on each cluster and expose it as Prometheus metrics. These metrics can be viewed in Prometheus instances installed per cluster. Metrics have a prefix of `deployment_validation_operator_`.
 
-By using dynamically generated [per-resource alert rules](./docs/app-sre/sop/catch-all-alerts-routing.md#generate-per-resource-alerts) (implemented in [APPSRE-4765](https://issues.redhat.com/browse/APPSRE-4765)) and [Jiralert](https://github.com/prometheus-community/jiralert), these alerts are translated to Jira tickets on the board that corresponds to the violating workload.
+By using dynamically generated [per-resource alert rules](/docs/app-sre/sop/catch-all-alerts-routing.md#generate-per-resource-alerts) (implemented in [APPSRE-4765](https://issues.redhat.com/browse/APPSRE-4765)) and [Jiralert](https://github.com/prometheus-community/jiralert), these alerts are translated to Jira tickets on the board that corresponds to the violating workload.
 
 ## Tenant requirements
 
