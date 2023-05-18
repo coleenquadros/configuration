@@ -81,6 +81,18 @@ resourceTemplates:
             autoscale_max_replicas: 36
           network_type: OVNKubernetes
           private: false
+          additional_machine_pool_gangs:
+          - id_prefix: obo
+            machine_type: r5.4xlarge
+            autoscale: false
+            nodes: 3 # AFAIK this means 1 in each of the 3 available AZs
+            labels:
+              - key: node-role.kubernetes.io/obo
+                value: ""
+            taints:
+              - key: obo
+                value: true
+                effect: NoSchedule
     DEVELOPER_USERS:
     - fleet-manager-debug
     DISABLE_ENABLED_REGION_CHECK: true
@@ -191,6 +203,18 @@ resourceTemplates:
               autoscale_max_replicas: 36
             network_type: OVNKubernetes
             private: true
+            additional_machine_pool_gangs:
+            - id_prefix: obo
+              machine_type: r5.4xlarge
+              autoscale: false
+              nodes: 3 # AFAIK this means 1 in each of the 3 available AZs
+              labels:
+                - key: node-role.kubernetes.io/obo
+                  value: ""
+              taints:
+                - key: obo
+                  value: true
+                  effect: NoSchedule
   # Dynatrace-specific sector
   # See https://issues.redhat.com/browse/SDE-2837
   - name: osd-fleet-manager-integration-dynatrace
@@ -278,6 +302,18 @@ resourceTemplates:
           compute_autoscale_max_replicas: 36
           network_type: OVNKubernetes
           private: false
+          additional_machine_pool_gangs:
+          - id_prefix: obo
+            machine_type: r5.4xlarge
+            autoscale: false
+            nodes: 3 # AFAIK this means 1 in each of the 3 available AZs
+            labels:
+              - key: node-role.kubernetes.io/obo
+                value: ""
+            taints:
+              - key: obo
+                value: true
+                effect: NoSchedule
     ENABLE_SIMPLE_IDENTITY_PROVIDER: true
     ENVIRONMENT: stage
     ENABLE_SENTRY: true
@@ -486,6 +522,18 @@ resourceTemplates:
             compute_autoscale_max_replicas: 36
             network_type: OVNKubernetes
             private: false
+            additional_machine_pool_gangs:
+            - id_prefix: obo
+              machine_type: r5.4xlarge
+              autoscale: false
+              nodes: 3 # AFAIK this means 1 in each of the 3 available AZs
+              labels:
+                - key: node-role.kubernetes.io/obo
+                  value: ""
+              taints:
+                - key: obo
+                  value: true
+                  effect: NoSchedule
       DEPLOYMENT_NAME: perf3
       DATAPLANE_CLUSTER_SCALING_TYPE: manual
   - name: osd-fleet-manager-stage-chaos
@@ -536,6 +584,18 @@ resourceTemplates:
             compute_autoscale_max_replicas: 36
             network_type: OVNKubernetes
             private: false
+            additional_machine_pool_gangs:
+            - id_prefix: obo
+              machine_type: r5.4xlarge
+              autoscale: false
+              nodes: 3 # AFAIK this means 1 in each of the 3 available AZs
+              labels:
+                - key: node-role.kubernetes.io/obo
+                  value: ""
+              taints:
+                - key: obo
+                  value: true
+                  effect: NoSchedule
       DEPLOYMENT_NAME: chaos
       DATAPLANE_CLUSTER_SCALING_TYPE: manual
   - name: osd-fleet-manager-stage-main
@@ -551,35 +611,6 @@ resourceTemplates:
     parameters:
       CPA_LADDER_CONFIG: '{ "coresToReplicas": [ [ 48, 3 ], [ 192, 6 ], [ 432, 0 ]
         ] }'
-      CLUSTER_TEMPLATES: |2-
-          # HyperShift Service Cluster
-          hs-sc:
-            name_prefix: "hs-sc-"
-            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-            openshift_version: "openshift-v4.12.9"
-            multi_az: true
-            ccs: true
-            default_machine_pool:
-              machine_type: m5.4xlarge
-              autoscale: false
-              nodes: 3
-            network_type: OVNKubernetes
-            private: false
-
-          # HyperShift Management Cluster
-          hs-mc:
-            name_prefix: "hs-mc-"
-            # See /api/clusters_mgmt/v1/versions for list of supported version IDs
-            openshift_version: "openshift-v4.12.9"
-            multi_az: true
-            ccs: true
-            default_machine_pool:
-              machine_type: m5.4xlarge
-              autoscale: true
-              autoscale_min_replicas: 3
-              autoscale_max_replicas: 36
-            network_type: OVNKubernetes
-            private: false
       DEPLOYMENT_NAME: main
       ENABLE_GLOBAL_WORKERS: true
       # TODO enablement of the simple IDP (htpasswd) should be temporary
