@@ -16,8 +16,18 @@ environment:
   $ref: /products/app-sre/environments/stage.yml
 
 managedResourceTypes:
-- Subscription
+- CertManager.operator.openshift.io
+- ClusterIssuer.cert-manager.io
 - OperatorGroup
+- Subscription
+
+managedResourceNames:
+- resource: ClusterIssuer.cert-manager.io
+  resourceNames:
+  - letsencrypt-devshiftnet-dns
+- resource: CertManager.operator.openshift.io
+  resourceNames:
+  - cluster
 
 managedExternalResources: true
 
@@ -65,3 +75,14 @@ openshiftResources:
   path: /cert-manager/openshift-cert-manager-operator-stable-v1.subscription.yaml
 - provider: resource
   path: /cert-manager/cert-manager-operator-operatorgroup.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /cert-manager/letsencrypt-prod-devshiftnet-cluster-issuer.j2
+  variables:
+    secret: certmgr-appsres03ue1-devshift-net-sa
+    cluster: appsres03ue1
+    hosted_zone_id: Z05758033SZ8IESGUOY8E
+
+# This openshiftResource needs the aws-iam-service-account be created beforehand.
+- provider: resource
+  path: /cert-manager/certmanager-route53-config.yaml
