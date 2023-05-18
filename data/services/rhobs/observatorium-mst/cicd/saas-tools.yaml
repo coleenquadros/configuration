@@ -55,6 +55,9 @@ parameters:
   OAUTH_PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
   OAUTH_PROXY_IMAGE_TAG: 4.8.0 # Pinning version before 4.9.0 due to https://github.com/openshift/oauth-proxy/issues/229.
 
+allowedSecretParameterPaths:
+  - app-sre/integrations-output/terraform-resources/app-sre-stage-01/observatorium-tools
+
 resourceTemplates:
 - name: jaeger
   path: /resources/services/jaeger-template.yaml
@@ -86,8 +89,30 @@ resourceTemplates:
         LOKI_SIZE: 1x.extra-small
     - namespace:
         $ref: /services/rhobs/observatorium-mst/namespaces/app-sre-stage-01/observatorium-tools.yml
-      ref: c2abfef505fc5869e55ad73b0757655c4d78ec87
+      ref: 33e1a4c617b926bfc8f4ed14aff25459b77b7f28
       parameters:
-        LOKI_STORAGE_SECRET_NAME: observatorium-loki
+        LOKI_STORAGE_SECRET_NAME: observatorium-loki-s3
         LOKI_SIZE: 1x.extra-small
+      secretParameters:
+        - name: ACCESS_KEY_ID
+          secret:
+            path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/observatorium-tools/observatorium-loki
+            field: aws_access_key_id
+        - name: SECRET_ACCESS_KEY
+          secret:
+            path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/observatorium-tools/observatorium-loki
+            field: aws_secret_access_key
+        - name: S3_BUCKET_NAME
+          secret:
+            path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/observatorium-tools/observatorium-loki
+            field: bucket
+        - name: S3_BUCKET_REGION
+          secret:
+            path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/observatorium-tools/observatorium-loki
+            field: aws_region
+        - name: S3_BUCKET_ENDPOINT
+          secret:
+            path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/observatorium-tools/observatorium-loki
+            field: endpoint
+
 
