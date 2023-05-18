@@ -34,7 +34,6 @@ spec:
           app_team: ros
         annotations:
           message: "Metrics for ros-backend-inventory-events-processor in STAGE are absent"
-          dashboard: "https://GRAFANA_URL"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/ros-stage/deployments"
 
       - alert: App-insights-ros-backend-engine-result-processor-service-In-ros-stage-Absent
@@ -47,7 +46,6 @@ spec:
           app_team: ros
         annotations:
           message: "Metrics for ros-backend-engine-result-processor in STAGE are absent"
-          dashboard: "https://GRAFANA_URL"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/ros-stage/deployments"
 
       - alert: ROSHttp5xx
@@ -60,5 +58,16 @@ spec:
           app_team: ros
         annotations:
           message: '{{ $labels.namespace }} 5xx responses observed'
-          dashboard: "https://GRAFANA_URL"
           link_url: "https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:kuery,query:'@log_stream:%20%22ros-api%22%20AND%20@message:%20%22ERROR%22'),sort:!(!('@timestamp',desc)))"
+
+      - alert: ROSNoPodsFound
+        expr: sum(up{namespace="ros-stage"}) == 0
+        for: 5m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: ros
+        annotations:
+          message: "No pods found in the namespace"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/ros-prod/deployments"
