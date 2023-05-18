@@ -23,6 +23,7 @@ spec:
           message: "Metrics for ros-backend-api in PROD are absent"
           dashboard: "https://GRAFANA_URL"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ros-prod/deployments"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/ros/App-insights-ros-backend-api-service-Absent.md"
 
       - alert: App-insights-ros-backend-inventory-events-processor-service-In-ros-prod-Absent
         expr: absent(up{service="ros-backend-inventory-events-processor", namespace="ros-prod"}) or up{service="ros-backend-inventory-events-processor", namespace="ros-prod"} == 0
@@ -34,8 +35,8 @@ spec:
           app_team: ros
         annotations:
           message: "Metrics for ros-backend-inventory-events-processor in PROD are absent"
-          dashboard: "https://GRAFANA_URL"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ros-prod/deployments"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/ros/ROSPodDown.md"
 
       - alert: App-insights-ros-backend-engine-result-processor-service-In-ros-prod-Absent
         expr: absent(up{service="ros-backend-engine-result-processor", namespace="ros-prod"}) or up{service="ros-backend-engine-result-processor", namespace="ros-prod"} == 0
@@ -47,8 +48,8 @@ spec:
           app_team: ros
         annotations:
           message: "Metrics for ros-backend-engine-result-processor in PROD are absent"
-          dashboard: "https://GRAFANA_URL"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ros-prod/deployments"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/ros/ROSPodDown.md"
 
       - alert: ROSHttp5xx
         expr: sum(rate(ros_http_request_total{namespace="ros-prod", service="ros-backend-api", status=~"5[0-9]{2}"}[10m])) by (namespace) / sum(rate(ros_http_request_total{namespace="ros-prod", service="ros-backend-api"}[10m])) by (namespace) * 100 > 5
@@ -60,5 +61,31 @@ spec:
           app_team: ros
         annotations:
           message: '{{ $labels.namespace }} 5xx responses observed'
-          dashboard: "https://GRAFANA_URL"
           link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:kuery,query:'@log_stream:%20%22ros-api%22%20AND%20@message:%20%22ERROR%22'),sort:!(!('@timestamp',desc)))"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/ros/ROS5xx.md"
+
+      - alert: ROSNoPodsFound
+        expr: sum(up{namespace="ros-prod"}) == 0
+        for: 5m
+        labels:
+          severity: info
+          service: insights
+          env: prod
+          app_team: ros
+        annotations:
+          message: "No pods found in the namespace"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ros-prod/deployments"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/ros/ROSNoPodsFound.md"
+
+      - alert: ROSLatency
+        expr: avg_over_time(service:sli:latency_gt_2000:pctl10rate5m{exported_service="ros"}[5m]) < .60
+        for: 5m
+        labels:
+          severity: info
+          service: insights
+          env: prod
+          app_team: ros
+        annotations:
+          message: "{{ $value }} of comparison requests are completing within 2 seconds in the last 5 minutes."
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ros-prod/deployments/ros-backend-api"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/ros/ROSLatency.md"
