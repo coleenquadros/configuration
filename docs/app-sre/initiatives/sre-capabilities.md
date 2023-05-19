@@ -1,0 +1,58 @@
+# Initiative Document - SRE capabilities
+
+## Author / Date
+
+Gerd Oberlechner / April 2023
+
+## Context
+
+AppSRE has proven its ability to apply SRE best practices to Red Hat managed services. This experience has been codified in tools like qontract-reconcile which covers all kinds of service management aspects like cluster upgrades, secret management, observability, software building, rollouts etc.
+
+These tools are accessible in a self-service manner to all tenants that onboard their services with AppSRE following the ROMS process. But at the same time, features like Advanced Cluster Upgrades Service would generate value beyond that audience.
+
+From a desire to bring this expertise and know-how to a broader audience, the idea of `SRE capabilities` was born. An SRE capability is a building block to run a service in a reliable and sustainable way. Combining those capabilities enables engineering teams to run a service professionally and wholesome with low toil.
+
+## Problem Statement
+
+With SRE capabilities we are opening up new pathways for AppSRE tooling, making it usable for all Red Hat engineering teams. The current tenant interaction model, support model etc. are not built for that.
+
+In app-interface, the service acts as a centerpiece that gives context to all the infrastructure and process information that is woven around it. With SRE capabilities, where single automation aspects of app-interface might be used à la carte and a full onboarding is not desirable, this centerpiece is missing. Placing configuration data into app-interface without the context of the service is undesirable because it blurs the relationship to tenants/users, bloats the repository beyond its purpose and leaves AppSRE with an unclear support model.
+
+Even if certain AppSRE integrations and SRE capabilities will provide the same service, they will do it differently and will require specific processes, environments and boundary conditions while doing so.
+
+## Goals
+
+- define the consumption model and feedback model for capabilities that does not revolve around app-interface touchpoints
+- define a dedicated support model for capabilities that does not revolve around the AppSRE tenant relationship and the contact
+- provide a dedicated runtime environment and alerting model for capabilities that is aligned with the support model
+- but most importantly: start where we are with what we have, à la carte for a small set of capabilities
+
+## Milestones
+
+### Milestone 0 - offering capabilities as-is
+
+Offer the `Advanced Upgrade Service` capability as is. The [enablement document](https://service.pages.redhat.com/dev-guidelines/docs/sre-capabilities/advanced-upgrade-service/) defines how the consumption model and support model work for now.
+
+Optionally also offer the Red Hat Idp and Cluster access based on rover groups capabilities.
+
+### Milestone 1 - capabilities framework
+
+This milestone is all about shaping the general structure of capabilities, the interaction layer but also reusable patterns for offering existing integrations as capabilities:
+
+- define consumption models for capabilities - how are users going to interact with various kinds of capabilities?
+- define feedback models for capabilities - how are users getting feedback about their interaction with a capability, how can they get support?
+- define implementation patterns for capabilities -  how to reuse AppSRE integrations as capabilities without app-interface backing?
+
+### Milestone 2 - alerting scheme for integrations/capabilities
+
+This milestone is all about defining how AppSRE is managing capabilities. The current high level observability and alerting strategy for app-interface integrations is not flexible enough for capabilities. This is mostly due to the fact that capabilities will inherently act in environments that are not under full control of AppSRE. This problem can be observed already in app-interface with BYO infrastructure. Therefore, the efforts of this milestone must address these issues not only for capabilities but also for regular integrations:
+
+- fine-grained alerting for integrations/capabilities
+- fine-grained error budgets and alerting for data partitions (a.k.a. shards)
+- define what failing means
+
+### Milestone 3 - capabilities runtime
+
+While milestone 1 was the starting point for offering capabilities with as little changes as possible, this milestone is about reworking the runtime aspects for capabilities, differentiating them from regular AppSRE integrations. This ranges over various aspects like dedicated namespaces, dedicated configuration sources, dedicated cloud assets and dedicated workload management.
+
+This does not imply that the runtime environment for capabilities will be completely different from the app-interface one. Several aspects like integrations-manager and configuration data via GQL work quite well and enables us to reuse code across integrations and capabilities.
