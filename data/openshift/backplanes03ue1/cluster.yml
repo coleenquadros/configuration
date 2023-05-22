@@ -1,0 +1,82 @@
+---
+$schema: /openshift/cluster-1.yml
+labels:
+  service: backplane
+name: backplanes03ue1
+description: backplanes03ue1 cluster
+consoleUrl: https://console-openshift-console.apps.backplanes03ue1.be2s.p1.openshiftapps.com
+kibanaUrl: ''
+prometheusUrl: https://prometheus.backplanes03ue1.devshift.net
+alertmanagerUrl: https://alertmanager.backplanes03ue1.devshift.net
+serverUrl: https://api.backplanes03ue1.be2s.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.backplanes03ue1.be2s.p1.openshiftapps.com
+auth:
+- service: github-org-team
+  org: app-sre
+  team: backplanes03ue1-cluster
+ocm:
+  $ref: /dependencies/ocm/production.yml
+managedGroups:
+- dedicated-admins
+
+spec:
+  product: rosa
+  account:
+    $ref: /aws/app-sre-rosa/account.yml
+  id: ''
+  external_id: ''
+  provider: aws
+  region: us-east-1
+  channel: candidate
+  version: 4.13.0
+  initial_version: 4.13.0
+  multi_az: true
+  nodes: 9
+  instance_type: m5.xlarge
+  private: true
+  provision_shard_id: ''
+  disable_user_workload_monitoring: true
+  hypershift: false
+  subnet_ids:
+  - subnet-06fbd4582cce65dd3
+  - subnet-0828dcd977433fc56
+  - subnet-0faf227276213d98e
+  availability_zones:
+  - us-east-1a
+  - us-east-1b
+  - us-east-1c
+
+network:
+  type: OVNKubernetes
+  vpc: 10.170.28.0/22
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+internal: false
+peering:
+  connections:
+  - provider: account-vpc
+    name: backplanes03ue1_app-sre-ci-int
+    vpc:
+      $ref: /aws/app-sre/vpcs/ci-int.yml
+    manageRoutes: true
+    manageAccountRoutes: true
+    assumeRole: arn:aws:iam::366871242094:role/network-mgmt-backplanes03ue1
+    delete: true
+  - provider: account-tgw
+    name: backplanes03ue1
+    account:
+      $ref: /aws/osd-privatelink-stage/account.yml
+    tags:
+      osd: privatelink
+    manageRoutes: true
+    manageSecurityGroups: true
+    cidrBlock: 172.16.0.0/12
+    assumeRole: arn:aws:iam::366871242094:role/network-mgmt-backplanes03ue1
+    delete: true
+
+
+disable:
+  integrations:
+  - openshift-groups
+  - openshift-users
+  - slack-usergroups
