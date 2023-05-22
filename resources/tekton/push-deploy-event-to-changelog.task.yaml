@@ -3,6 +3,7 @@ kind: Task
 metadata:
   name: push-deploy-event-to-changelog
 spec:
+# need to mount serviceaccounttoken to be able to access the platform-changelog api
   params:
     - name: env_name
       type: string
@@ -25,4 +26,4 @@ spec:
         echo "Sending deploy event to platform changelog"
 
         # TODO: Send the commit ref as well
-        curl -X POST http://platform-changelog-api.platform-changelog-stage.svc.cluster.local:8000/api/v1/tekton '{"timestamp": now(), "status": $(params.task_status), "app": $(params.app_name), "env": $(params.env_name)}' -H "Content-Type: application/json"
+        curl -X POST http://changelog.stage.devshift.net/api/v1/tekton '{"timestamp": now(), "status": $(params.task_status), "app": $(params.app_name), "env": $(params.env_name)}' -H "Content-Type: application/json"
