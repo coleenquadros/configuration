@@ -89,3 +89,21 @@ spec:
       value: "$(params.tkn_cluster_console_url)"
     - name: tkn_namespace_name
       value: "$(params.tkn_namespace_name)"
+  - name: push-deploy-event-to-changelog
+    params:
+      - name: env_name
+        value: $(params.env_name)
+      - name: app_name
+        value: $(params.saas_file_name)
+      - name: task_status
+        value: $(tasks.openshift-saas-deploy.status)
+    taskRef:
+      kind: Task
+      name: push-deploy-event-to-changelog
+    when:
+      - input: $(params.env_name)
+        operator: in
+        values:
+          # Only curl deploy events to changelog for insights jobs for now
+          - insights-stage
+          - insights-production
