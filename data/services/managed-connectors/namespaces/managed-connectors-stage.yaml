@@ -5,6 +5,7 @@ labels: {}
 
 name: managed-connectors-stage
 description: staging namespace for managed-connectors
+delete: true
 
 cluster:
   $ref: /openshift/app-sre-stage-01/cluster.yml
@@ -25,58 +26,4 @@ managedResourceTypes:
 - ConfigMap
 - NetworkPolicy
 
-openshiftResources:
-- provider: vault-secret
-  path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull-docker
-  version: 1
-  type: kubernetes.io/dockerconfigjson
-- provider: vault-secret
-  name: cos-fleet-manager
-  path:  app-interface/managed-connectors-api/stage/service/credentials
-  version: 5
-  annotations:
-    qontract.recycle: "true"
-- provider: vault-secret
-  name: cos-fleet-manager-observatorium-configuration-red-hat-sso
-  path:  app-interface/managed-connectors-api/stage/service/observatorium
-  version: 1
-  annotations:
-    qontract.recycle: "true"
-- provider: resource-template
-  path: /services/managed-connectors/serviceaccount.yaml
-  variables:
-    name: cos-fleet-manager
-- provider: route
-  path: /services/managed-connectors/stage/cos-fleet-manager.route.yaml
-- provider: resource
-  path: /services/managed-connectors/stage/cos-fleet-manager-envoy.configmap.yaml
-- provider: resource
-  path: /services/managed-connectors/stage/observatorium-token-refresher.networkpolicy.yaml
-
-managedExternalResources: true
-
-externalResources:
-- provider: aws
-  provisioner:
-    $ref: /aws/app-sre-stage/account.yml
-  resources:
-  - provider: secrets-manager-service-account
-    identifier: managed-connectors-staging
-    secrets_prefix: managed-connectors
-    output_resource_name: managed-connectors-vault
-- provider: aws
-  provisioner:
-    $ref: /aws/app-sre/account.yml
-  resources:
-  - provider: rds
-    identifier: cos-fleet-manager-staging
-    defaults: /terraform/resources/managed-connectors/staging/rds-2-cloudwatch-enabled.yml
-    parameter_group: /terraform/resources/managed-connectors/staging/managed-connectors-stage-rds-parameter-group-pg12.yml
-    output_resource_name: cos-fleet-manager-rds
-    overrides:
-      engine_version: '12.13'
-      deletion_protection: false
-    ca_cert:
-      path: app-interface/global/rds-ca-cert
-      field: us-east-1
-      version: 2
+managedExternalResources: false
