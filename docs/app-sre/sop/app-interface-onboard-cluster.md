@@ -1,31 +1,11 @@
-<!-- TOC -->
-
-- [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
-  - [Step 1 - Cluster creation and initial access for dedicated-admins and automatic cluster file updates](#step-1---cluster-creation-and-initial-access-for-dedicated-admins-and-automatic-cluster-file-updates)
-  - [Step 2 - Bot access and App SRE project template](#step-2---bot-access-and-app-sre-project-template)
-  - [Step 3 - Observability](#step-3---observability)
-  - [Step 4 - Operator Lifecycle Manager](#step-4---operator-lifecycle-manager)
-  - [Step 5 - Container Security Operator](#step-5---container-security-operator)
-  - [Step 6 - Deployment Validation Operator (DVO)](#step-6---deployment-validation-operator-dvo)
-  - [Step 7 - Obtain cluster-admin](#step-7---obtain-cluster-admin)
-  - [Step 8 - Install Cert-manager operator](#step-8---install-cert-manager-operator)
-  - [Step 9 - Setup cluster logging](#step-9---setup-cluster-logging)
-- [Additional configurations](#additional-configurations)
-  - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
-  - [VPC peering with app-interface](#vpc-peering-with-app-interface)
-  - [Additional steps for clusters for specific services](#additional-steps-for-clusters-for-specific-services)
-  - [Adding Datasource to Grafana](#adding-datasource-to-grafana)
-- [Offboard an OSDv4 cluster from app-interface](#offboard-an-osdv4-cluster-from-app-interface)
-- [Legacy (v3)](#legacy-v3)
-  - [Onboard a new OSDv3 cluster to app-interface](#onboard-a-new-osdv3-cluster-to-app-interface)
-
-<!-- /TOC -->
-
 # Onboard a new OSDv4 cluster to app-interface
 
-To on-board a new OSDv4 cluster to app-interface, perform the following operations:
+[TOC]
+
 
 ## Step 1 - Cluster creation and initial access for dedicated-admins and automatic cluster file updates
+
+<b>HYPERSHIFT NOTE</b> Hypershift clusters need to be created manually using `rosa cli`, guide: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/runbook/openshift-rosa-clusters.md#create-a-new-cluster
 
 This step should be performed in a single merge request.
 
@@ -519,6 +499,12 @@ The value of the NETWORK.VPC must be unique (find an unused /24 network), howeve
 **DO NOT USE anything within 10.30.0.0/16** as this is used by Red Hat IT's internal resources on AWS (which will cause conflicts if the cluster is peered with ci-int)
 
 Note that the host prefix must be set to /23.
+
+## Creating a VPC for hypershift clusters
+
+You need to create a VPC in the `app-sre-rosa` account before creating a new cluster. 
+
+Example MR: https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/702 
 
 ## VPC peering with app-interface
 
