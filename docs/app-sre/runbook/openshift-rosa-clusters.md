@@ -32,18 +32,17 @@ Steps to provision a `ROSA`cluster:
   same account.
 
 - **[Hosted-cp Only] Create a VPC in the account:** Base ROSA clusters installation can create the VPC automatically
-  with the cluster's network spec. With hosted clusters, the VPC must be created before creating the cluster. There
-  is a [Terraform module](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/terraform/modules/rosa-hosted-cp-vpc)
-  in the infra repo to create the VPCs.
+  with the cluster's network spec. With hosted clusters, the VPC must be created before creating the cluster. 
+  Example MR: https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/702 
 
-- **Create the Cluster**: Launch the cluster installation with the `ROSA CLI` or by using the `OCM ClustersService API`.
-  Both ways register the cluster in the OCM organization and start the cluster installation. There are 2 steps required
+- **Create the Cluster**: Launch the cluster installation with the `ROSA CLI`. There are 2 steps required
   before OCM starts starts the installation process.
 
   - Create an OIDC provider for the STS/openshift authentication.
   - Create the cluster's RedHat operator IAM Roles. RedHat operator roles that will be used by RH to support the cluster.
 
-  These 2 steps are done automatically by the installation if the `auto-mode` flag is used. It's explained here just for
+  The first step needs to be run manually and is described below.
+  The second steps is done automatically by the installation if the `auto-mode` flag is used. It's explained here just for
   informative purposes.
 
   With App-interface, this step consists in defining the cluster manifest with the ROSA hosted-cp required attributes, just
@@ -210,7 +209,8 @@ Check the [`app-sre-rosa` account](/data/aws/app-sre-rosa) for an example.
 
 ## Cluster Creation and and Management
 
-### Create a new cluster
+### Create a new ROSA cluster
+
 
 To install a cluster in app-interface just follow the [cluster onboarding SOP](/docs/app-sre/sop/app-interface-onboard-cluster.md). To request a `ROSA` cluster these
 values must be used:
@@ -230,8 +230,6 @@ spec:
   # The linked account must have a valid rosa configuration.
   account:
     $ref: /aws/app-sre-rosa/account.yml
-  # If a hosted control plane cluster (hypersfhit) is required:
-  hypershift: true
   # Subnet Ids of the VPC (public and private)
   subnet_ids:
     - subnet-0c3b7d88a0e54f859
@@ -240,6 +238,45 @@ spec:
   availability_zones:
     - us-west-2a
 ```
+
+### Create a new Hypershift cluster
+
+#### Create the OIDC configuration/provider
+
+It's required to create an OIDC configuration in the AWS account to allow the cluster's authentication. 
+
+Run the following command
+`rosa create oidc-config -m auto -y`
+
+Last log message contains the OIDC provider created. This provider can be used during cluster creation.
+
+#### Create the cluster
+
+As of now hypershift cluster creation needs to happen via rosa cli. For example to create a single AZ cluster, run the following command:
+
+```
+rosa create cluster \
+--hosted-cp \
+--cluster-name hst02ue1 \
+--sts \
+--role-arn arn:aws:iam::366871242094:role/ManagedOpenShift-Installer-Role \
+--support-role-arn arn:aws:iam::366871242094:role/ManagedOpenShift-Support-Role \
+--controlplane-iam-role arn:aws:iam::366871242094:role/ManagedOpenShift-ControlPlane-Role \
+--worker-iam-role arn:aws:iam::366871242094:role/ManagedOpenShift-Worker-Role \
+--operator-roles-prefix hst02ue1-e7h1 \
+--oidc-config-id 23sgur2jboj5oidq4qrb72783mng8uog \
+--region us-east-1 \
+--version 4.12.16 \
+--replicas 2 \
+--compute-machine-type m5.xlarge \
+--machine-cidr 10.141.0.0/16 \
+--service-cidr 172.30.0.0/16 \
+--pod-cidr 10.128.0.0/14 \
+--host-prefix 23 \
+--subnet-ids subnet-009741e4f5c6de157,subnet-0da74176a1980d93b
+```
+
+After that follow the regular onboarding guide.
 
 ### Cluster configuration changes
 
