@@ -13,6 +13,12 @@ spec:
       type: string
   steps:
     - name: push-deploy-event-to-changelog
+      env:
+        - name: TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: tekton-oauth-token
+              key: serviceaccounttoken
       image: {{ ubi8_ubi_minimal_image }}:{{ ubi8_ubi_minimal_image_tag }}
       resources:
         limits:
@@ -26,4 +32,4 @@ spec:
         echo "Sending deploy event to platform changelog"
 
         # TODO: Send the commit ref as well
-        curl -X POST http://changelog.stage.devshift.net/api/v1/tekton '{"timestamp": now(), "status": $(params.task_status), "app": $(params.app_name), "env": $(params.env_name)}' -H "Content-Type: application/json"
+        curl -X POST http://changelog.stage.devshift.net/api/v1/tekton '{"timestamp": now(), "status": $(params.task_status), "app": $(params.app_name), "env": $(params.env_name)}' -H "Content-Type: application/json" --header "Authorization: ${TOKEN}"
