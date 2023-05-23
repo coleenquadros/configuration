@@ -41,7 +41,7 @@ workerFleets:
     $ref: /aws/app-sre/account.yml
   namespace:
     $ref: /services/app-sre/namespaces/app-sre-ci.yaml
-  labelString: app-sre app-interface-long-running managed-services osde2e qe quarkus service-registry
+  labelString: app-sre managed-services osde2e qe quarkus service-registry
   numExecutors: 3
 ```
 
