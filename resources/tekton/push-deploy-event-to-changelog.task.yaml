@@ -29,7 +29,10 @@ spec:
           memory: 30Mi
       script: |
         #!/usr/bin/env bash
-        echo "Sending deploy event to platform changelog"
+        timestamp = $(date -u --iso-8601=seconds)
+
+        echo "Sending deploy event to platform changelog\n"
+        echo "$timestamp; $(params.task_status); $(params.app_name); $(params.env_name)"
 
         # TODO: Send the commit ref as well
-        curl -X POST http://changelog.stage.devshift.net/api/v1/tekton '{"timestamp": now(), "status": $(params.task_status), "app": $(params.app_name), "env": $(params.env_name)}' -H "Content-Type: application/json" --header "Authorization: ${TOKEN}"
+        curl -X POST http://changelog.stage.devshift.net/api/v1/tekton --data '{"timestamp": $timestamp, "status": $(params.task_status), "app": $(params.app_name), "env": $(params.env_name)}' -H "Content-Type: application/json" -H "Authorization: Bearer ${TOKEN}"
