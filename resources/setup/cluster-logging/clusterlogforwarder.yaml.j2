@@ -5,6 +5,14 @@ metadata:
   name: instance
   namespace: openshift-logging
 spec:
+  {% if RHOBS_TOOLS_LOGGING | default(false) %}
+  inputs:
+    - application:
+        selector:
+          matchLabels:
+            app.kubernetes.io/part-of: observatorium
+      name: send-observatorium-app-logs
+  {% endif %}
   outputs:
   - cloudwatch:
       groupBy: namespaceName
@@ -19,6 +27,14 @@ spec:
     type: loki
     url: {{ RHOBS_URL | default("http://clo-token-refresher.openshift-logging.svc.cluster.local") }}
   {% endif %}
+  {% if RHOBS_TOOLS_LOGGING | default(false) %}
+  - name: loki-app
+    secret:
+      name: {{ RHOBS_TOOLS_LOKI_SECRET_NAME | default("lokistack-gateway-bearer-token") }}
+    type: loki
+    url: >-
+      {{ RHOBS_TOOLS_LOKI_URL | default("https://observatorium-lokistack-gateway-http.observatorium-tools.svc:8080/api/logs/v1/application") }}
+  {% endif %}
   pipelines:
   - name: app-logs
     inputRefs:
@@ -29,3 +45,10 @@ spec:
     - rhobs
     {% endif %}
     detectMultilineErrors: true
+  {% if RHOBS_TOOLS_LOGGING | default(false) %}
+  - name: observatorium-app-logs
+    inputRefs:
+    - send-observatorium-app-logs
+    outputRefs:
+    - loki-app
+  {% endif %}
