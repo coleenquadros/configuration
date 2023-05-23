@@ -90,8 +90,15 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * `openshift-template` - default, an OpenShift template that will be processed into resources and applied
         * `directory` - a directory containing raw manifests to be applied (not templated)
     * `targets` - a list of namespaces to deploy resources to
+        * `provider` - (optional) specify what kind of target this is. options:
+            * `static` - default; a static namespace with the `namespace` attribute
+            * `dynamic` - the namespace(s) is/are dynamically determined by the `namespaceSelector` attribute
         * `namespace` - a reference to a namespace to deploy to
           * **Note:** a namespace should never be defined more than once in `targets`. Some users may wish to do this to deploy the same resources, but with different `parameters`, to a particular namespace. The correct approach for this use case is to create a separate entry in `resourceTemplates`, which will have a separate `targets` list.
+        * `namespaceSelector` - select namespaces dynamically based on json path selectors:
+            * `jsonPathSelectors` - define json path selectors based on the `namespace` resource
+              * `include` - a list of json path selectors to include namespaces
+              * `exclude` - a list of json path selectors to exclude namespaces
         * `ref` - git ref to deploy (commit sha or branch name (usually `master`))
             * for deployments to a production namespace, always use a git commit hash
         * `promotion` - a section to indicate promotion behavior/validations
@@ -155,6 +162,71 @@ In addition to the supplied parameters, there are additional parameters which ar
 - `IMAGE_DIGEST` - The digest of a repository image, in `{algorithm}:{hash}` form.
   This parameter will be populated in case an image needs to be deployed according to a digest and not a tag.
     * Note: These parameters are mandatory for `REPO_DIGEST` to be generated: `REGISTRY_IMG`, `IMAGE_TAG` (according to previous section).
+
+## Targeting dynamic namespaces (`namespaceSelector`)
+In some cases, a saas file may need to target namespaces dynamically. For example, a saas file may need to target a specific namespace in all clusters or all namespaces with a particular label/use-case.
+
+Enable the dynamic selection of namespaces by using `provider: dynamic` and the `namespaceSelector` attribute in the saas file target.
+
+Example: Prometheus deployment per cluster
+
+```yaml
+$schema: /app-sre/saas-file-2.yml
+
+...
+
+resourceTemplates:
+- name: prometheus
+  path: /openshift/prometheus.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  parameters:
+    VERSION: v2.30.3
+    ...
+  targets:
+  # staging clusters
+  - provider: dynamic
+    namespaceSelector:
+      include:
+      - namespace[?(@.name=="openshift-customer-monitoring" & @.environment.labels.type=="stage")]
+    ref: master
+    parameters:
+      CLUSTER_LABEL: "{{{ resource.namespace.cluster.name }}}"
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://prometheus.{{{ resource.namespace.cluster.name }}}.devshift.net
+
+  # all non-staging clusters
+  - provider: dynamic
+    namespaceSelector:
+      include:
+      - namespace[?(@.name=="openshift-customer-monitoring")]
+      exclude:
+      - namespace[?(@.environment.labels.type=="stage")]
+    ref: e2c6ff56d8db618989accdc89c8d8b10e3debf54
+    parameters:
+      CLUSTER_LABEL: "{{{ resource.namespace.cluster.name }}}"
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://prometheus.{{{ resource.namespace.cluster.name }}}.devshift.net
+
+```
+
+Filter namespaces based on the following `/openshift/namespace-1.yml` attributes:
+
+* `name`
+* `labels`
+* `delete`
+* `environment`
+  * `name`
+  * `labels`
+* `app`
+  * `name`
+  * `labels`
+* `cluster`
+  * `name`
+  * `internal`
+
+For a complete list, refer to the [SaasTargetNamespace](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/gql_definitions/fragments/saas_target_namespace.gql).
+
+`parameters` and `secretParameters` can be templated. Use `{{{ resource.namespace.XXX }}}` to access the namespace attributes references above.
 
 ## How does it work?
 
