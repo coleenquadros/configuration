@@ -1,0 +1,40 @@
+- job-template:
+    id: 'insights-notifications-sonarqube-scan'
+    name: '{gh_org}-{gh_repo}-sonarqube-scan-{branch}'
+    status_context: 'SonarQube scan'
+    branch: 'master'
+    pr_check_script_path: './.rhcicd/sonarqube/sonarqube.bash'
+    wrappers:
+    - ansicolor
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_interface_creds
+        - *insights_ephemeral_oc_login
+        - *insights_notifications_rh_it_root_ca_cert_url
+        - *insights_notifications_sonarqube
+        - *insights_rh_registry_pull_secret
+        - *insightsdroid_github
+        - *quay_api_token
+        - *quay_secret_push
+    <<: *insights_gh_pr_check
+
+- job-template:
+    id: 'insights-notifications-sonarqube-scan-master'
+    name: '{gh_org}-{gh_repo}-sonarqube-scan-master'
+    build_deploy_script_path: './.rhcicd/sonarqube/sonarqube.bash'
+    wrappers:
+    - ansicolor
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_notifications_rh_it_root_ca_cert_url
+        - *insights_notifications_sonarqube
+        - *insights_rh_registry_pull_secret
+        - *quay_api_token
+        - *quay_secret_push
+    <<: *gh_build_master
