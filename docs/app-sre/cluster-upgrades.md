@@ -2,6 +2,9 @@
 
 [TOC]
 
+> If you are looking for the Advanced Upgrade Service (AUS) SRE capability, you will find the docs on [The Source](https://source.redhat.com/groups/public/sre/wiki/advanced_upgrade_service_aus).
+
+
 ## Motivation
 
 AppSRE manages a fleet of clusters with various workloads and various constraints on how these clusters continuously receive Openshift version updates.
