@@ -1,0 +1,29 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /observability/prometheusrules/consoledot-platform-clusters.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+group_eval_order:
+  - consoledot-platform-clusters.rules
+
+tests:
+  # Test for kube-apiserver latency
+  - interval: 5m
+    input_series:
+      - series: apiserver_request_duration_seconds_bucket{apiserver="kube-apiserver", verb!="WATCH"}
+        values: "400 450 500 550"
+    alert_rule_test:
+      - eval_time: 100m
+        alertname: Cluster kube-apiserver latency has exceeded 300ms
+        exp_alerts:
+          - exp_labels:
+              alertname: Cluster kube-apiserver latency has exceeded 300ms
+              environment: {{{ environment }}}
+              service: insights
+              severity: {{{ medium_severity }}}
+            exp_annotations:
+              message: "Cluster kube-apiserver latency has exceeded 300ms"
+              dashboard: "https://grafana.app-sre.devshift.net/d/BYb3BpZVz/consoledot-platform-clusters-dashboard?orgId=1&from=now-2d&to=now&var-datasource=c-rh-c-eph-cluster-prometheus&refresh=5s&viewPanel=31"
