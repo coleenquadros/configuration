@@ -10,18 +10,18 @@ metadata:
 
 spec:
   groups:
-  - name: provisioning-metrics-present
+  - name: provisioning-missing-pod
     rules:
-    - alert: ProvisioningMetricsAbsent
+    - alert: MissingPodServingProvisioningService
       expr: |
-        absent(up{service="provisioning",namespace="provisioning-stage"} == 1)
+        absent(up{namespace="provisioning-stage", service="provisioning-backend-api"} == 1) or absent(up{namespace="provisioning-stage", service="provisioning-backend-statuser"} == 1) or absent(up{namespace="provisioning-stage", service="provisioning-backend-worker"} == 1)
       labels:
         service: insights
         env: stage
         app_team: provisioning
         severity: medium
       annotations:
-        message: "There are no metrics present for provisioning"
+        message: "One of the provisioning service pods is down"
 
   - name: provisioning-reservation-success-rate
     rules:

@@ -7,14 +7,18 @@ evaluation_interval: 1m
 tests:
   - interval: 1m
     input_series:
-      - series: 'up{service="provisioning",namespace="provisioning-prod"}'
+      - series: 'up{namespace="provisioning-prod", service="provisioning-backend-api"}'
+        values: 1+0x9 0+0x10
+      - series: 'up{namespace="provisioning-prod", service="provisioning-backend-statuser"}'
+        values: 1+0x9 0+0x10
+      - series: 'up{namespace="provisioning-prod", service="provisioning-backend-worker"}'
         values: 1+0x9 0+0x10
     alert_rule_test:
       - eval_time: 5m
-        alertname: ProvisioningMetricsAbsent
+        alertname: MissingPodServingProvisioningService
         exp_alerts: []
       - eval_time: 10m
-        alertname: ProvisioningMetricsAbsent
+        alertname: MissingPodServingProvisioningService
         exp_alerts:
           - exp_labels:
               service: insights
@@ -22,9 +26,9 @@ tests:
               app_team: provisioning
               severity: medium
             exp_annotations:
-              message: There are no metrics present for provisioning
+              message: One of the provisioning service pods is down
       - eval_time: 15m
-        alertname: ProvisioningMetricsAbsent
+        alertname: MissingPodServingProvisioningService
         exp_alerts:
           - exp_labels:
               service: insights
@@ -32,7 +36,7 @@ tests:
               app_team: provisioning
               severity: medium
             exp_annotations:
-              message: There are no metrics present for provisioning
+              message: One of the provisioning service pods is down
 
   - interval: 1m
     input_series:
