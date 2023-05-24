@@ -8,9 +8,12 @@ spec:
   {% if RHOBS_TOOLS_LOGGING | default(false) %}
   inputs:
     - application:
-        selector:
-          matchLabels:
-            app.kubernetes.io/part-of: observatorium
+        {% if RHOBS_NAMESPACES | default(false) %}
+        namespaces:
+        {% for namespace in RHOBS_NAMESPACES %}
+        - {{namespace}}
+        {% endfor %}
+        {% endif %}
       name: send-observatorium-app-logs
   outputs:
     - name: loki-app
@@ -20,10 +23,11 @@ spec:
       url: >-
         {{ RHOBS_TOOLS_LOKI_URL | default("https://observatorium-lokistack-gateway-http.observatorium-tools.svc:8080/api/logs/v1/application") }}
   pipelines:
-    - inputRefs:
-        - send-observatorium-app-logs
-      outputRefs:
-        - loki-app
+  - name: observatorium-app-logs
+    inputRefs:
+    - send-observatorium-app-logs
+    outputRefs:
+    - loki-app
  {% else %}
   pipelines:
   - name: app-to-default
