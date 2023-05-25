@@ -52,31 +52,31 @@ Access keys to the issuer or by the Metadata Server using IRSA, kube2iam or simi
 
 ### External Cluster
 
-1. 1st MR: Install redhat-cert-manager operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/d5ab9056287086f7af407a52d75dfc26b014650c/data/openshift/app-sre-stage-01/namespaces/openshift-operators.yaml#L25-26).
-    - This will install `cert-manager` in the `openshift-cert-manager` namespace.
+1. 1st MR: Install openshift-cert-manager-operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/72726e4da2f494c8b525c2eab3e8375a752ffbab/data/openshift/app-sre-stage-01/namespaces/cert-manager-operator.yml#L23-26).
+    - This will install `cert-manager-operator` in the `cert-manager-operator` namespace.
 
 2. 2nd MR:
-    - Install `openshift-cert-routes` into `openshift-cert-manager` namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55)
+    - Install `openshift-cert-routes` into `cert-manager` namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/72726e4da2f494c8b525c2eab3e8375a752ffbab/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L57-59)
       - 1st MR needs to be merged to ensure the namespace is created.
       - `openshift-cert-routes` operator needs to be deployed into the same namespace as `cert-manager`
-      - the `openshift-cert-manager` namespace file manifest in app-interface must be created manually within this MR, the operator just creates the namespace.
-    - Install the `HTTP-01` ClusterIssuer [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/app-sre-stage-02/namespaces/openshift-cert-manager.yml)
+      - the `cert-manager` namespace file manifest in app-interface must be created manually within this MR, the operator just creates the namespace.
+    - Install the `HTTP-01` ClusterIssuer [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/72726e4da2f494c8b525c2eab3e8375a752ffbab/data/openshift/app-sre-stage-01/namespaces/cert-manager.yml#L26-28)
       - This is a Cluster resource. Bound to this namespace in A-I for coherence.
 
 ### Private Clusters (Not reachable from Internet)
 
-1. 1st MR: Install redhat-cert-manager operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/d5ab9056287086f7af407a52d75dfc26b014650c/data/openshift/hive-stage-01/namespaces/openshift-operators.yaml#L22-23).
-    - This will install `cert-manager` in the `openshift-cert-manager` namespace.
+1. 1st MR: Install openshift-cert-manager-operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/72726e4da2f494c8b525c2eab3e8375a752ffbab/data/openshift/appsres03ue1/namespaces/cert-manager-operator.yml#L23-26).
+    - This will install `cert-manager-operator` in the `cert-manager-operator` namespace.
 
-2. 2nd MR: Install `openshift-cert-routes` into `openshift-cert-manager` namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55)
+2. 2nd MR: Install `openshift-cert-routes` into `cert-manager` namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/72726e4da2f494c8b525c2eab3e8375a752ffbab/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L51-53)
     - 1st MR needs to be merged to ensure the namespace is created.
     - `openshift-cert-routes` operator needs to be deployed into the same namespace as `cert-manager`
 
-3. 3rd MR: Create a service account to interact with Route53 [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/appsres03ue1/namespaces/openshift-cert-manager.yml#L27-L63)
+3. 3rd MR: Create a service account to interact with Route53 [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/72726e4da2f494c8b525c2eab3e8375a752ffbab/data/openshift/appsres03ue1/namespaces/cert-manager.yml#L18-57)
     - Follow the same name structure of the example (identifier and output_resource_name)
     - This step can be made within the 2nd MR, but it's preferable to split these tasks.
 
-4. 4th MR: Create the `DNS-01` `ClusterIssuer` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/appsres03ue1/namespaces/openshift-cert-manager.yml#L65-L76)
+4. 4th MR: Create the `DNS-01` `ClusterIssuer` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/72726e4da2f494c8b525c2eab3e8375a752ffbab/data/openshift/appsres03ue1/namespaces/cert-manager.yml#L59-82)
     - the resource-template reads the Secrets from vault (Secrets populated by the previous MR)
     - the 2nd resource is a configuration required by Route53 to only use recursive name-servers. This validation is made by the operator. Before creating the ACME order
       it checks that the `host` exists in the DNS provider.
@@ -138,6 +138,36 @@ When multiple secured `Routes` use the same `host`, openshift router uses the sa
 - [More info](https://redhat-internal.slack.com/archives/CCH60A77E/p1658931732003599)
 - [Example](https://gitlab.cee.redhat.com/service/app-interface/-/tree/d005987304a30f981d76f5e042d12097b25d3d83/resources/app-sre-stage/telemeter-stage)
 
+## How to upgrade cert-manager from Technology Preview to Stable
+
+1. Remove subscription, cluster issuer, delete openshift-cert-manager-routes. [Example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/68902)
+2. Remove CSV, installplans, webhooks, CRDs, old cert-manager deployments/services, require `cluster-admin` to execute.
+   ```bash
+   # example on how to remove all challenges. If the webhook or the controller pod are not running, this command may fail and need manual action (delete webhook, remove finalizer on the resource)
+   oc get challenge -A | awk '{print $1" "$2}' | while read ns res; do oc delete -n $ns challenge $res; done
+
+   oc delete -n openshift-operators csv -l operators.coreos.com/openshift-cert-manager-operator.openshift-operators
+   oc delete -n openshift-operators installplan -l operators.coreos.com/openshift-cert-manager-operator.openshift-operators
+
+   oc delete mutatingwebhookconfiguration.admissionregistration.k8s.io/cert-manager-webhook
+   oc delete validatingwebhookconfiguration.admissionregistration.k8s.io/cert-manager-webhook
+
+   oc delete crd certificaterequests.cert-manager.io
+   oc delete crd certificates.cert-manager.io
+   oc delete crd certmanagers.config.openshift.io
+   oc delete --all certmanagers.operator.openshift.io
+   oc delete crd certmanagers.operator.openshift.io
+   oc delete crd challenges.acme.cert-manager.io
+   oc delete --all clusterissuers.cert-manager.io
+   oc delete crd clusterissuers.cert-manager.io
+   oc delete crd issuers.cert-manager.io
+   oc delete crd orders.acme.cert-manager.io
+
+   oc delete deployments,service -n openshift-cert-manager --all
+   ```
+3. Install new subscription in `cert-manger-operator`. [Example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/68907)
+4. Move `aws-iam-service-account` from `openshift-cert-manager` to `cert-manager` (if using dns). [Example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/68908)
+5. Install new cluster issuer and `openshift-cert-manager-routes` in `cert-manager`. [Example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/68909)
 
 ## Troubleshooting
 
