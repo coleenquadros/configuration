@@ -26,7 +26,7 @@ environment:
 $ref: /products/app-sre/environments/<environment>.yml
 
 managedResourceTypes:
-- Subscription
+- Subscription.operators.coreos.com
 
 openshiftResources:
 - provider: resource
