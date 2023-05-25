@@ -519,7 +519,7 @@ Example MR: https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/702
 
 ## Adding Datasource to Grafana
 
-1. create a new cloudwatch secret, add it to [app-sre-observability-production.yml](data/services/observability/namespaces/app-sre-observability-production.yml). Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/41114
+1. create a new cloudwatch secret, add it to [app-sre-observability-production.yml](/data/services/observability/namespaces/app-sre-observability-production.yml). Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/41114
 1. add grafana to `openshiftServiceAccountTokens` in `app-sre-observability-per-cluster.yml`, [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/458295334b65444dcbee5d9fc5e09e9a7b32a354/data/openshift/appsrep05ue1/namespaces/app-sre-observability-per-cluster.yml#L23-26)
 1. add the cluster to [grafana.yaml](/data/services/observability/shared-resources/grafana.yml). Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/41110
  
